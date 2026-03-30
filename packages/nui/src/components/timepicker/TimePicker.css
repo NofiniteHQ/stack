@@ -1,0 +1,134 @@
+/* src/components/timepicker/TimePicker.css */
+
+.nui-timepicker-root {
+  display: inline-block;
+  font-family: var(--nui-font-sans);
+}
+
+/* ---------------------------------------------------
+   TRIGGER INPUT
+--------------------------------------------------- */
+.nui-timepicker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 140px; /* Slimmer than a date picker */
+  padding: var(--nui-space-2) var(--nui-space-3);
+  
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: inherit;
+  font-size: var(--nui-text-sm);
+  
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-md);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nui-timepicker-trigger:hover:not(:disabled) {
+  border-color: var(--nui-border-hover);
+}
+
+.nui-timepicker-trigger:focus-visible {
+  outline: none;
+  border-color: var(--nui-color-primary);
+  box-shadow: 0 0 0 3px var(--nui-brand-100);
+}
+
+.nui-timepicker-trigger:disabled {
+  background-color: var(--nui-bg-muted);
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}
+
+.nui-timepicker-placeholder, .nui-timepicker-icon {
+  color: var(--nui-fg-subtle);
+}
+
+/* ---------------------------------------------------
+   POPOVER PANEL
+--------------------------------------------------- */
+.nui-timepicker-popover {
+  z-index: var(--nui-z-dropdown, 1000);
+}
+
+.nui-timepicker-panel {
+  /* Dynamic width based on content */
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Clips the columns nicely */
+  
+  /* Smooth Entrance */
+  animation: nui-timepicker-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes nui-timepicker-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------------------------------------------------
+   COLUMNS
+--------------------------------------------------- */
+.nui-timepicker-columns {
+  display: flex;
+  height: 220px; /* Fixed height for scrolling */
+}
+
+.nui-timepicker-col {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: var(--nui-space-2);
+  width: 64px;
+  border-right: 1px solid var(--nui-border-default);
+  
+  /* Invisible Scrollbars for clean UI */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  scroll-behavior: smooth;
+}
+
+.nui-timepicker-col::-webkit-scrollbar {
+  display: none; /* Safari/Chrome */
+}
+
+.nui-timepicker-col:last-child {
+  border-right: none;
+}
+
+/* ---------------------------------------------------
+   ITEMS
+--------------------------------------------------- */
+.nui-timepicker-item {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px; /* High enough for easy tapping */
+  width: 100%;
+  
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  color: var(--nui-fg-default);
+  font-size: var(--nui-text-sm);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.nui-timepicker-item:hover:not(.selected) {
+  background-color: var(--nui-bg-subtle);
+}
+
+.nui-timepicker-item.selected {
+  background-color: var(--nui-color-primary);
+  color: var(--nui-color-primary-fg);
+  font-weight: var(--nui-weight-bold);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}

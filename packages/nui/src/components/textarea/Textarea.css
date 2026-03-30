@@ -1,0 +1,90 @@
+/* src/components/textarea/Textarea.css */
+
+.nui-textarea-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: var(--nui-font-sans);
+}
+
+/* ---------------------------------------------------
+   CORE TEXTAREA
+--------------------------------------------------- */
+.nui-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--nui-space-2) var(--nui-space-3);
+  
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: inherit;
+  font-size: var(--nui-text-sm);
+  line-height: 1.5;
+  
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-md);
+  
+  /* User can still manually resize if autoGrow is false */
+  resize: vertical; 
+  min-height: calc(var(--nui-space-6) * 1.5);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Hide scrollbars ONLY when autoGrow is active */
+.nui-textarea--autogrow {
+  resize: none; /* Disable manual resize handle */
+  overflow: hidden; 
+}
+
+/* ---------------------------------------------------
+   STATES
+--------------------------------------------------- */
+.nui-textarea:hover:not(:disabled):not(:read-only) {
+  border-color: var(--nui-border-hover);
+}
+
+.nui-textarea:focus-visible {
+  outline: none;
+  border-color: var(--nui-color-primary);
+  box-shadow: 0 0 0 3px var(--nui-brand-100);
+}
+
+.nui-textarea:disabled {
+  background-color: var(--nui-bg-muted);
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+  resize: none;
+}
+
+.nui-textarea:read-only {
+  background-color: var(--nui-bg-subtle);
+  cursor: default;
+}
+
+.nui-textarea::placeholder {
+  color: var(--nui-fg-subtle);
+}
+
+/* ---------------------------------------------------
+   ERROR STATE
+--------------------------------------------------- */
+.nui-textarea--error {
+  border-color: var(--nui-color-danger);
+}
+
+.nui-textarea--error:focus-visible {
+  border-color: var(--nui-color-danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); /* Tailwind red-500 with opacity */
+}
+
+/* ---------------------------------------------------
+   CHARACTER COUNTER
+--------------------------------------------------- */
+.nui-textarea-counter {
+  margin-top: var(--nui-space-1);
+  font-size: 0.75rem; /* 12px */
+  font-weight: var(--nui-weight-medium);
+  color: var(--nui-fg-muted);
+  text-align: right;
+  user-select: none;
+}

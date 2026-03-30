@@ -1,0 +1,54 @@
+{
+  "name": "@nofinite/locale",
+  "private": false,
+  "version": "1.0.0",
+  "description": "Nofinite's standardized country data, flags, and international dial codes for global applications.",
+  "type": "module",
+  "author": "Nofinite",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nofinitehq/stack.git",
+    "directory": "packages/locale"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./style": "./dist/style.css",
+    "./dist/style.css": "./dist/style.css"
+  },
+  "sideEffects": [
+    "*.css",
+    "*.scss",
+    "dist/style.css"
+  ],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "nofinite",
+    "locale",
+    "internationalization",
+    "iso-3166",
+    "country-codes",
+    "dial-codes",
+    "flags",
+    "nui"
+  ],
+  "packageManager": "pnpm@10.26.2",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

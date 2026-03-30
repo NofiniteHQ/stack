@@ -1,0 +1,118 @@
+/* src/components/resizable/Resizable.css */
+
+/* ---------------------------------------------------
+   GROUP
+--------------------------------------------------- */
+.nui-resizable-group {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.nui-resizable-group[data-direction="horizontal"] {
+  flex-direction: row;
+}
+
+.nui-resizable-group[data-direction="vertical"] {
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------
+   PANEL
+--------------------------------------------------- */
+.nui-resizable-panel {
+  /* Critical for Flexbox: Prevents large inner content from refusing to shrink */
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ---------------------------------------------------
+   HANDLE (The 8px invisible hit area)
+--------------------------------------------------- */
+.nui-resizable-handle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 10;
+  background: transparent;
+  
+  /* Disables page scrolling when swiping the handle on mobile */
+  touch-action: none;
+  
+  /* Smooth transition for keyboard focus ring */
+  transition: background-color 0.2s;
+  outline: none;
+}
+
+.nui-resizable-group[data-direction="horizontal"] > .nui-resizable-handle {
+  flex-basis: 8px; /* Hitbox width */
+  cursor: col-resize;
+}
+
+.nui-resizable-group[data-direction="vertical"] > .nui-resizable-handle {
+  flex-basis: 8px; /* Hitbox height */
+  cursor: row-resize;
+}
+
+/* ---------------------------------------------------
+   HANDLE LINE (The visual 1px border)
+--------------------------------------------------- */
+.nui-resizable-handle::after {
+  content: '';
+  position: absolute;
+  background-color: var(--nui-border-default, #e2e8f0);
+  transition: background-color 0.15s ease;
+}
+
+.dark .nui-resizable-handle::after {
+  background-color: var(--nui-border-default, #1e293b);
+}
+
+.nui-resizable-group[data-direction="horizontal"] > .nui-resizable-handle::after {
+  width: 1px;
+  height: 100%;
+  left: 3.5px; /* Centers the 1px line inside the 8px hitbox */
+}
+
+.nui-resizable-group[data-direction="vertical"] > .nui-resizable-handle::after {
+  height: 1px;
+  width: 100%;
+  top: 3.5px; /* Centers the 1px line inside the 8px hitbox */
+}
+
+/* ---------------------------------------------------
+   HANDLE STATES (Hover, Focus, Dragging)
+--------------------------------------------------- */
+.nui-resizable-handle:hover::after,
+.nui-resizable-handle:focus-visible::after,
+.nui-resizable-handle[data-dragging="true"]::after {
+  background-color: var(--nui-color-primary, #3b82f6);
+}
+
+.nui-resizable-handle:focus-visible {
+  background-color: var(--nui-bg-subtle, rgba(59, 130, 246, 0.1));
+}
+
+/* Icon Grip */
+.nui-resizable-handle-icon {
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 24px;
+  background-color: var(--nui-bg-surface, #ffffff);
+  border: 1px solid var(--nui-border-default, #e2e8f0);
+  border-radius: 4px;
+  color: var(--nui-fg-muted, #94a3b8);
+}
+
+.dark .nui-resizable-handle-icon {
+  background-color: var(--nui-bg-surface, #0f172a);
+  border-color: var(--nui-border-default, #1e293b);
+}

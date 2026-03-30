@@ -1,0 +1,26 @@
+{
+  "name": "nuicss",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nuicss/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/nuicss/dist",
+        "configFile": "packages/nuicss/vite.config.ts"
+      }
+    },
+    "build-sass": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx sass packages/nuicss/src/index.scss packages/nuicss/dist/index.css --style=compressed",
+          "npx sass packages/nuicss/src/prefixed.scss packages/nuicss/dist/prefixed.css --style=compressed"
+        ],
+        "parallel": true
+      }
+    }
+  }
+}

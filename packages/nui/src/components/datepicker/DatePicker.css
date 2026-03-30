@@ -1,0 +1,247 @@
+/* src/components/datepicker/DatePicker.css */
+
+.nui-datepicker-root {
+  display: inline-block;
+  font-family: var(--nui-font-sans);
+}
+
+/* ---------------------------------------------------
+   TRIGGER INPUT
+--------------------------------------------------- */
+.nui-datepicker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 240px;
+  padding: var(--nui-space-2) var(--nui-space-3);
+  
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: inherit;
+  font-size: var(--nui-text-sm);
+  
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-md);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nui-datepicker-trigger:hover:not(:disabled) {
+  border-color: var(--nui-border-hover);
+}
+
+.nui-datepicker-trigger:focus-visible {
+  outline: none;
+  border-color: var(--nui-color-primary);
+  box-shadow: 0 0 0 3px var(--nui-brand-100);
+}
+
+.nui-datepicker-trigger:disabled {
+  background-color: var(--nui-bg-muted);
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}
+
+.nui-datepicker-placeholder {
+  color: var(--nui-fg-subtle);
+}
+
+.nui-datepicker-icon {
+  color: var(--nui-fg-subtle);
+}
+
+/* ---------------------------------------------------
+   POPOVER PANEL
+--------------------------------------------------- */
+.nui-datepicker-popover {
+  z-index: var(--nui-z-dropdown, 1000);
+}
+
+.nui-datepicker-panel {
+  width: 320px;
+  padding: var(--nui-space-4);
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  
+  /* Smooth Entrance */
+  animation: nui-datepicker-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes nui-datepicker-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------------------------------------------------
+   HEADER
+--------------------------------------------------- */
+.nui-datepicker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--nui-space-4);
+}
+
+.nui-datepicker-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  color: var(--nui-fg-subtle);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nui-datepicker-arrow:hover {
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-fg-default);
+}
+
+.nui-datepicker-ym-toggle {
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  padding: var(--nui-space-1) var(--nui-space-3);
+  font-size: var(--nui-text-sm);
+  font-weight: var(--nui-weight-bold);
+  color: var(--nui-fg-default);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nui-datepicker-ym-toggle:hover {
+  background-color: var(--nui-bg-subtle);
+}
+
+/* ---------------------------------------------------
+   YEAR + MONTH PANEL
+--------------------------------------------------- */
+.nui-datepicker-ym-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-3);
+}
+
+.nui-datepicker-year-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--nui-space-1);
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: var(--nui-space-1);
+  /* Scrollbar styling for webkit */
+  scrollbar-width: thin;
+}
+
+.nui-datepicker-year, .nui-datepicker-month {
+  padding: var(--nui-space-2) 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  color: var(--nui-fg-default);
+  font-size: var(--nui-text-sm);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nui-datepicker-year:hover:not(.selected),
+.nui-datepicker-month:hover:not(.selected):not(.disabled) {
+  background-color: var(--nui-bg-subtle);
+}
+
+.nui-datepicker-year.selected, .nui-datepicker-month.selected {
+  background-color: var(--nui-color-primary);
+  color: var(--nui-color-primary-fg);
+  font-weight: var(--nui-weight-bold);
+}
+
+.nui-datepicker-month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--nui-space-1);
+  padding-top: var(--nui-space-3);
+  border-top: 1px solid var(--nui-border-default);
+}
+
+.nui-datepicker-month.disabled {
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------
+   CALENDAR GRID
+--------------------------------------------------- */
+.nui-datepicker-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-2);
+}
+
+.nui-datepicker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+
+.nui-datepicker-weekday {
+  font-size: 0.7rem;
+  font-weight: var(--nui-weight-bold);
+  text-transform: uppercase;
+  color: var(--nui-fg-subtle);
+}
+
+.nui-datepicker-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.nui-datepicker-day,
+.nui-datepicker-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* * Architecture Note: 
+   * aspect-ratio: 1/1 forces the button to be a perfect square based on its width. 
+   * This ensures the calendar grid remains perfectly uniform even if font sizes change. */
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  font-size: var(--nui-text-sm);
+  color: var(--nui-fg-default);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nui-datepicker-day:hover:not(.selected):not(:disabled) {
+  background-color: var(--nui-bg-subtle);
+}
+
+.nui-datepicker-day.today {
+  color: var(--nui-color-primary);
+  font-weight: var(--nui-weight-bold);
+  background-color: var(--nui-brand-50);
+}
+
+.nui-datepicker-day.selected {
+  background-color: var(--nui-color-primary);
+  color: var(--nui-color-primary-fg);
+  font-weight: var(--nui-weight-bold);
+}
+
+.nui-datepicker-day:disabled {
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}

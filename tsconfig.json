@@ -4,16 +4,16 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/strings"
-    },
-    {
-      "path": "./packages/colors"
-    },
-    {
-      "path": "./packages/async"
-    },
-    {
       "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/locale"
+    },
+    {
+      "path": "./packages/nuicss"
+    },
+    {
+      "path": "./packages/nui"
     }
   ]
 }

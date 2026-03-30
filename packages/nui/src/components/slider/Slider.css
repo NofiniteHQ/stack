@@ -1,0 +1,94 @@
+/* src/components/slider/Slider.css */
+
+.nui-slider-root {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  /* Prevent touch scrolling while dragging slider on mobile */
+  touch-action: none; 
+  user-select: none;
+}
+
+/* This container provides a larger invisible hit area for mouse/touch */
+.nui-slider-track-container {
+  position: relative;
+  width: 100%;
+  height: 24px; /* Larger hit area */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.nui-slider-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background-color: var(--nui-bg-subtle, #e2e8f0);
+  border-radius: 9999px;
+}
+
+.nui-slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--nui-color-primary);
+  border-radius: 9999px;
+  /* Smooth transition for keyboard/clicks, but disabled during drag via JS if needed */
+  transition: width 0.1s ease-out; 
+}
+
+.nui-slider-thumb {
+  position: absolute;
+  top: 50%;
+  /* Center the thumb on the exact value */
+  transform: translate(-50%, -50%); 
+  width: 20px;
+  height: 20px;
+  background-color: var(--nui-bg-surface);
+  border: 2px solid var(--nui-color-primary);
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: left 0.1s ease-out, box-shadow 0.2s, transform 0.1s;
+}
+
+/* Interaction States */
+.nui-slider-track-container:active .nui-slider-thumb {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.1); /* Slight pop effect when dragging */
+}
+
+.nui-slider-thumb:hover {
+  box-shadow: 0 0 0 4px var(--nui-brand-50, rgba(59, 130, 246, 0.1));
+}
+
+.nui-slider-thumb:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--nui-brand-100, rgba(59, 130, 246, 0.2));
+  border-color: var(--nui-brand-600);
+}
+
+/* Disabled State */
+.nui-slider--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.nui-slider--disabled .nui-slider-fill {
+  background-color: var(--nui-fg-muted);
+}
+
+.nui-slider--disabled .nui-slider-thumb {
+  border-color: var(--nui-fg-muted);
+  background-color: var(--nui-bg-subtle);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .nui-slider-fill,
+  .nui-slider-thumb {
+    transition: none;
+  }
+}

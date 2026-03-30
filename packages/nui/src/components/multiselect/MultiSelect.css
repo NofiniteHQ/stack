@@ -1,0 +1,188 @@
+/* src/components/select/MultiSelect.css */
+
+.nui-multiselect-root {
+  position: relative;
+  display: block;
+  width: 100%;
+  font-family: var(--nui-font-sans);
+}
+
+/* ---------------------------------------------------
+   TRIGGER BUTTON & TAGS
+--------------------------------------------------- */
+.nui-multiselect-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px; /* Accounts for tags pushing height */
+  padding: var(--nui-space-1) var(--nui-space-3);
+  
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: inherit;
+  font-size: var(--nui-text-sm);
+  text-align: left;
+  
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-md);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nui-multiselect-trigger:hover:not(:disabled) {
+  border-color: var(--nui-border-hover);
+}
+
+.nui-multiselect-trigger:focus-visible {
+  outline: none;
+  border-color: var(--nui-color-primary);
+  box-shadow: 0 0 0 3px var(--nui-brand-100);
+}
+
+.nui-multiselect-trigger:disabled {
+  background-color: var(--nui-bg-muted);
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}
+
+.nui-multiselect-trigger.error {
+  border-color: var(--nui-color-danger);
+}
+
+.nui-multiselect-trigger.error:focus-visible {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.nui-multiselect-value-container {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  overflow: hidden;
+}
+
+.nui-multiselect-placeholder {
+  color: var(--nui-fg-subtle);
+  padding: var(--nui-space-1) 0;
+}
+
+.nui-multiselect-summary {
+  font-weight: var(--nui-weight-medium);
+  color: var(--nui-fg-default);
+}
+
+/* The Tag Pills */
+.nui-multiselect-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--nui-space-1);
+  padding: 2px 0;
+}
+
+.nui-multiselect-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-fg-default);
+  padding: 2px 8px;
+  border-radius: var(--nui-radius-sm);
+  font-size: 0.75rem;
+  font-weight: var(--nui-weight-medium);
+  border: 1px solid var(--nui-border-default);
+}
+
+.nui-multiselect-chevron {
+  flex-shrink: 0;
+  margin-left: var(--nui-space-2);
+  color: var(--nui-fg-subtle);
+  transition: transform 0.2s ease;
+}
+
+.nui-multiselect-trigger[aria-expanded="true"] .nui-multiselect-chevron {
+  transform: rotate(180deg);
+}
+
+/* ---------------------------------------------------
+   LISTBOX (PORTAL)
+--------------------------------------------------- */
+.nui-multiselect-listbox {
+  position: fixed; 
+  z-index: var(--nui-z-dropdown, 1000);
+  max-height: 240px; 
+  overflow-y: auto;
+  
+  background-color: var(--nui-bg-surface);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: var(--nui-space-1);
+  outline: none;
+  
+  animation: nui-multiselect-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes nui-multiselect-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------------------------------------------------
+   OPTIONS & CHECKBOXES
+--------------------------------------------------- */
+.nui-multiselect-option {
+  display: flex;
+  align-items: center;
+  gap: var(--nui-space-3);
+  padding: var(--nui-space-2) var(--nui-space-3);
+  
+  font-size: var(--nui-text-sm);
+  color: var(--nui-fg-default);
+  border-radius: var(--nui-radius-sm);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color 0.1s;
+}
+
+.nui-multiselect-option-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fake Checkbox UI */
+.nui-multiselect-checkbox {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--nui-border-hover);
+  border-radius: 4px;
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-color-primary-fg); /* White checkmark */
+  transition: all 0.15s;
+}
+
+.nui-multiselect-checkbox.checked {
+  background-color: var(--nui-color-primary);
+  border-color: var(--nui-color-primary);
+}
+
+/* Keyboard/Mouse Focus State */
+.nui-multiselect-option.active {
+  background-color: var(--nui-bg-subtle);
+}
+
+/* Disabled State */
+.nui-multiselect-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nui-multiselect-option.disabled.active {
+  background-color: transparent; 
+}

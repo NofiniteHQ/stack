@@ -1,76 +1,67 @@
-# @org/utils
+<div align="center">
 
-Shared utility functions used across all packages in the monorepo.
+# Nofinite Utils
 
-## 📦 Package Information
+**A secure, lightweight, and production-ready utility library for modern Node.js and web applications.**
 
-- **Version**: 0.0.1
-- **Publishable**: ❌ No (Private Package)
-- **Tag**: `scope:shared`
-- **Module Boundaries**: Base library - no external dependencies allowed
+[![npm](https://img.shields.io/npm/v/@nofinite/utils?style=flat-square&color=3b82f6)](https://www.npmjs.com/package/@nofinite/utils)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Yes-3b82f6?style=flat-square)](https://www.typescriptlang.org/)
 
-## 🔒 Private Package
+</div>
 
-This is an **internal library** that:
-- Will NOT be published to NPM
-- Provides shared utilities for other packages
-- Serves as the foundation layer for the monorepo
+---
 
-## 🚀 Features
+## Overview
 
-This package provides core utilities that are shared across all other packages:
+Nofinite Utils provides a collection of carefully designed, reusable utilities for real-world applications.  
+It focuses on **security, correctness, and developer experience**, so you don’t have to rewrite critical logic again and again.
 
-- Common helper functions
-- Shared types and interfaces
-- Base utilities used by `@org/strings`, `@org/async`, and `@org/colors`
+* **Secure by Default:** Modern cryptography (Argon2id, SHA-256, JWT best practices).
+* **Type-Safe:** Fully written in TypeScript with strict typings.
+* **Tree-Shakable:** Modular design for optimal bundle size.
+* **Framework-Agnostic:** Works with Node.js, serverless, and modern runtimes.
 
-## 📝 Usage
+---
 
-This package is automatically available to all other packages in the monorepo:
-
-```typescript
-// In any other package (strings, async, colors)
-import { someUtility } from '@org/utils';
-
-// Use the shared functionality
-const result = someUtility(input);
-```
-
-## 🏗️ Building
+## Installation
 
 ```bash
-# Build the package
-nx build utils
+# pnpm
+pnpm add @nofinite/utils
 
-# The build output will be in dist/packages/utils
-```
+# npm
+npm install @nofinite/utils
 
-## 📋 Available Commands
+# yarn
+yarn add @nofinite/utils
+````
 
-```bash
-nx build utils    # Build the package
-nx lint utils     # Lint the package
-```
+---
 
-## 🔒 Module Boundaries
+## What’s Included
 
-This package has the tag `scope:shared` which means:
-- **Can be imported by**: All packages (`scope:strings`, `scope:async`, `scope:colors`)
-- **Can import from**: Nothing (it's the base layer)
+* **OTP Utilities:** Secure OTP generation, verification, expiry, and attempt guards.
+* **Crypto Helpers:** Password hashing & verification using Argon2id.
+* **JWT Utilities:** Token signing and verification with safe defaults.
+* **UUID Utilities:** UUID v7 generation and binary conversions.
+* **Env Helpers:** Safe environment variable accessors.
+* **Email Utilities:** ZeptoMail helpers with typed, env-driven configuration.
 
-This ensures a clean dependency hierarchy where `utils` serves as the foundation without creating circular dependencies.
+All utilities are **independent and tree-shakable**, so you only ship what you use.
 
-## 🏛️ Architecture Role
+---
 
-As the shared foundation of the monorepo:
-1. Contains no business logic specific to strings, async, or colors
-2. Provides only generic, reusable utilities
-3. Has no external dependencies beyond TypeScript's standard library
-4. Ensures consistency across all packages
+## Documentation
 
-## ⚠️ Important Notes
+For full usage examples, API references, and best practices,
+[read documentation](https://opensource.nofinite.com/docs/utils).
 
-- This package is marked as `"private": true` in package.json
-- It will be excluded from NPM publishing when running `nx release`
-- Changes to this package may affect all other packages in the monorepo
-- Keep utilities generic and well-tested as they form the foundation
+---
+
+## License
+
+This project is licensed under the
+Apache License, Version 2.0.
+
+Feel free to use, modify, and share this project in your applications, products, and services.
+Attribution is welcome and appreciated, but never required.

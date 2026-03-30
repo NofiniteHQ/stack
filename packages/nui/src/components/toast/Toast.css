@@ -1,0 +1,148 @@
+/* src/components/toast/Toast.css */
+
+/* ------------------------------------------------------------
+   1. The Region (Container)
+   ------------------------------------------------------------ */
+.nui-toast-region {
+  position: fixed;
+  bottom: var(--nui-space-5);
+  right: var(--nui-space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Stack nicely from the right */
+  gap: var(--nui-space-3);
+  z-index: var(--nui-z-tooltip, 9999);
+  pointer-events: none; /* Let clicks pass through the invisible container */
+}
+
+/* ------------------------------------------------------------
+   2. The Toast Item
+   ------------------------------------------------------------ */
+.nui-toast {
+  pointer-events: auto; /* Re-enable clicks for the actual toast */
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 300px;
+  max-width: 380px;
+  padding: var(--nui-space-4);
+  
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: var(--nui-font-sans);
+  
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-lg);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  
+  /* Entrance Animation */
+  animation: nui-toast-slide-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* --- Content & Typography --- */
+.nui-toast__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-1);
+  padding-right: var(--nui-space-4); /* Leave room for close button */
+}
+
+.nui-toast__title {
+  font-size: var(--nui-text-sm);
+  font-weight: var(--nui-weight-bold);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.nui-toast__description {
+  font-size: var(--nui-text-sm);
+  color: var(--nui-fg-subtle);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- Close Button --- */
+.nui-toast__close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--nui-radius-sm);
+  color: var(--nui-fg-subtle);
+  transition: background-color 0.2s, color 0.2s;
+  /* Reset */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.nui-toast__close:hover {
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-fg-default);
+}
+
+.nui-toast__close:focus-visible {
+  outline: 2px solid var(--nui-color-primary);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------
+   3. Semantic Variants (Left Border Highlights)
+   ------------------------------------------------------------ */
+.nui-toast--default {
+  border-left: 4px solid var(--nui-color-primary);
+}
+.nui-toast--success {
+  border-left: 4px solid var(--nui-color-success);
+}
+.nui-toast--error {
+  border-left: 4px solid var(--nui-color-danger);
+}
+.nui-toast--warning {
+  border-left: 4px solid var(--nui-color-warning);
+}
+
+/* ------------------------------------------------------------
+   4. Animations
+   ------------------------------------------------------------ */
+@keyframes nui-toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes nui-toast-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+}
+
+/* Trigger the exit animation via a data attribute */
+.nui-toast[data-state="closed"] {
+  animation: nui-toast-slide-out 0.2s ease-in forwards;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .nui-toast, .nui-toast[data-state="closed"] {
+    animation: none;
+    transition: opacity 0.2s;
+  }
+  .nui-toast[data-state="closed"] {
+    opacity: 0;
+  }
+}

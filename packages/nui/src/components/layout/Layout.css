@@ -1,0 +1,74 @@
+/* src/components/layout/Layout.css */
+
+/* ============================================================
+ * FLEX
+ * ============================================================ */
+.nui-flex {
+  display: flex;
+  gap: var(--nui-flex-gap, 0);
+}
+
+/* Direction */
+.nui-flex[data-direction="row"] { flex-direction: row; }
+.nui-flex[data-direction="column"] { flex-direction: column; }
+.nui-flex[data-direction="row-reverse"] { flex-direction: row-reverse; }
+.nui-flex[data-direction="column-reverse"] { flex-direction: column-reverse; }
+
+/* Align Items */
+.nui-flex[data-align="start"] { align-items: flex-start; }
+.nui-flex[data-align="center"] { align-items: center; }
+.nui-flex[data-align="end"] { align-items: flex-end; }
+.nui-flex[data-align="stretch"] { align-items: stretch; }
+.nui-flex[data-align="baseline"] { align-items: baseline; }
+
+/* Justify Content */
+.nui-flex[data-justify="start"] { justify-content: flex-start; }
+.nui-flex[data-justify="center"] { justify-content: center; }
+.nui-flex[data-justify="end"] { justify-content: flex-end; }
+.nui-flex[data-justify="between"] { justify-content: space-between; }
+.nui-flex[data-justify="around"] { justify-content: space-around; }
+.nui-flex[data-justify="evenly"] { justify-content: space-evenly; }
+
+/* Wrap */
+.nui-flex[data-wrap="wrap"] { flex-wrap: wrap; }
+.nui-flex[data-wrap="nowrap"] { flex-wrap: nowrap; }
+.nui-flex[data-wrap="wrap-reverse"] { flex-wrap: wrap-reverse; }
+
+/* ============================================================
+ * GRID
+ * ============================================================ */
+.nui-grid {
+  display: grid;
+  gap: var(--nui-grid-gap, 16px);
+}
+
+/* Responsive Auto-Fit/Fill */
+.nui-grid[data-cols="auto-fit"] {
+  grid-template-columns: repeat(auto-fit, minmax(var(--nui-grid-min-width, 250px), 1fr));
+}
+
+.nui-grid[data-cols="auto-fill"] {
+  grid-template-columns: repeat(auto-fill, minmax(var(--nui-grid-min-width, 250px), 1fr));
+}
+
+/* Fixed Columns */
+.nui-grid[data-cols="fixed"] {
+  grid-template-columns: repeat(var(--nui-grid-cols-fixed, 1), 1fr);
+}
+
+/* ============================================================
+ * CONTAINER
+ * ============================================================ */
+.nui-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--nui-space-4, 16px);
+  padding-right: var(--nui-space-4, 16px);
+}
+
+.nui-container[data-size="sm"] { max-width: 640px; }
+.nui-container[data-size="md"] { max-width: 768px; }
+.nui-container[data-size="lg"] { max-width: 1024px; }
+.nui-container[data-size="xl"] { max-width: 1280px; }
+.nui-container[data-size="full"] { max-width: 100%; }

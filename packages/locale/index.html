@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Example</title>
+    <link rel="stylesheet" href="./dist/style.css" />
+    <script src="./dist/index.global.js"></script>
+  </head>
+  <body>
+    <button>
+      <span class="nf-flag nf-flag-in square"></span>
+      Select Language
+    </button>
+    <script>
+      const country = NofiniteLocale.getCountryByCode("IN");
+      console.log(country.name); // India
+      console.log(country.dialCode); // +91
+    </script>
+  </body>
+</html>

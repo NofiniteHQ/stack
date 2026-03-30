@@ -1,0 +1,54 @@
+/* ==========================================================================
+   @nofinite/nuicss : CLEAN ENTRY POINT (index.scss)
+   ==========================================================================
+   Generates utility classes without namespace prefixes (e.g., .p-4, .flex).
+   
+   ARCHITECTURE NOTE (Cascade Source-Order):
+   To strictly enforce CSS specificity, all base utility classes are 
+   generated first. Responsive variants are generated subsequently within 
+   a breakpoint loop, ensuring media queries appear at the end of the 
+   compiled stylesheet.
+   ========================================================================== */
+
+@use 'core/variables' as *;
+@use 'core/layout';
+@use 'core/spacing';
+@use 'core/typography';
+@use 'core/colors';
+@use 'core/borders';
+@use 'core/effects';
+
+$prefix: "";
+
+/* --------------------------------------------------------------------------
+   1. BASE CLASSES (Mobile First / Default)
+   -------------------------------------------------------------------------- */
+@include layout.build-layout($prefix, "");
+@include spacing.build-spacing($prefix, "");
+@include typography.build-typography($prefix, "");
+@include colors.build-colors($prefix, "");
+@include borders.build-borders($prefix, "");
+@include effects.build-effects($prefix, "");
+
+/* --------------------------------------------------------------------------
+   2. RESPONSIVE CLASSES (Appended to bottom of stylesheet)
+   -------------------------------------------------------------------------- */
+@each $bp-name, $bp-width in $breakpoints {
+  
+  // Construct the responsive prefix (e.g., "md\:")
+  $escaped-bp: $bp-name;
+  @if $bp-name == "2xl" {
+    $escaped-bp: "\\32 xl";
+  }
+  $bp-prefix: "#{$escaped-bp}\\:";
+
+  // Generate all utilities wrapped in the media query
+  @media (min-width: #{$bp-width}) {
+    @include layout.build-layout($prefix, $bp-prefix);
+    @include spacing.build-spacing($prefix, $bp-prefix);
+    @include typography.build-typography($prefix, $bp-prefix);
+    @include colors.build-colors($prefix, $bp-prefix);
+    @include borders.build-borders($prefix, $bp-prefix);
+    @include effects.build-effects($prefix, $bp-prefix);
+  }
+}

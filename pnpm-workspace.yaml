@@ -1,0 +1,11 @@
+packages:
+  - 'packages/*'
+  - 'packages/nui/*'
+  - 'packages/nuicss/*'
+  - 'packages/utils/*'
+  - 'packages/locale/*'
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - 'nx'
+  - 'sharp'

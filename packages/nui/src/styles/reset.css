@@ -1,0 +1,79 @@
+/* src/styles/reset.css */
+
+/* 1. Universal Box Sizing */
+.nui-reset,
+.nui-reset *,
+.nui-reset *::before,
+.nui-reset *::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove default margins */
+.nui-reset {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  font-family: var(--nui-font-sans);
+  /* GLOBAL APP BACKGROUND (CRITICAL FOR DARK MODE) */
+  background-color: var(--nui-bg-page); /* Listens to theme.css */
+  color: var(--nui-fg-default); /* Listens to theme.css */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 3. Button Reset */
+.nui-reset button {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* 4. Link Reset */
+.nui-reset a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 5. Media Reset */
+.nui-reset img,
+.nui-reset video {
+  max-width: 100%;
+  display: block;
+}
+
+/* ---------------------------------------------------
+   GLOBAL APP SCROLLBARS (globals.css)
+--------------------------------------------------- */
+/* Target the whole document and all scrollable containers */
+.nui-reset *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.nui-reset *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nui-reset *::-webkit-scrollbar-thumb {
+  background-color: var(--nui-border-hover, #cbd5e1);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box; /* Ensures the border acts as padding */
+}
+
+.nui-reset *::-webkit-scrollbar-thumb:hover {
+  background-color: var(--nui-fg-subtle, #94a3b8);
+}
+
+/* Ensure dark mode contrast if you have a dark theme class */
+.nui-reset[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background-color: var(--nui-border-hover, #334155);
+}
+
+.nui-reset[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background-color: var(--nui-fg-subtle, #64748b);
+}

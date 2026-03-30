@@ -1,0 +1,122 @@
+/* src/components/switch/Switch.css */
+
+.nui-switch-wrapper {
+  display: inline-flex;
+  align-items: flex-start; /* Aligns switch with top of multi-line text */
+  gap: var(--nui-space-3); /* 12px */
+  font-family: var(--nui-font-sans);
+}
+
+.nui-switch-wrapper--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- TEXT CONTAINER --- */
+.nui-switch__text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 1px; /* Optical alignment with the rounded switch */
+}
+
+.nui-switch__label {
+  font-size: var(--nui-text-sm);
+  color: var(--nui-fg-default);
+  font-weight: var(--nui-weight-medium);
+  line-height: 1.25;
+  cursor: pointer;
+  user-select: none;
+}
+
+.nui-switch-wrapper--disabled .nui-switch__label {
+  cursor: not-allowed;
+}
+
+.nui-switch__description {
+  font-size: var(--nui-text-xs);
+  color: var(--nui-fg-subtle);
+  line-height: 1.4;
+}
+
+/* --- THE SWITCH TRACK --- */
+.nui-switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  
+  /* Reset button styles */
+  margin: 0;
+  padding: 0;
+  border: 2px solid transparent; /* Acts as inner padding for the thumb */
+  border-radius: var(--nui-radius-full);
+  
+  background-color: var(--nui-border-default); /* "Off" color */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.nui-switch:disabled {
+  cursor: not-allowed;
+}
+
+/* Focus Ring */
+.nui-switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--nui-bg-page), 0 0 0 4px var(--nui-color-primary);
+}
+
+/* "On" State */
+.nui-switch--checked {
+  background-color: var(--nui-brand-600);
+}
+
+.nui-switch--checked:hover:not(:disabled) {
+  background-color: var(--nui-brand-700);
+}
+
+/* --- THE THUMB --- */
+.nui-switch__thumb {
+  display: block;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  
+  /* Hardware accelerated transform for buttery smooth sliding */
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+
+/* --- SIZES & ANIMATION MATH --- */
+
+/* Medium (Default) */
+.nui-switch--md {
+  width: 44px;
+  height: 24px;
+}
+.nui-switch__thumb--md {
+  width: 20px;
+  height: 20px;
+  transform: translateX(0); 
+}
+/* Travel Distance = Track Width (44) - Borders (4) - Thumb Width (20) = 20px */
+.nui-switch__thumb--md.nui-switch__thumb--checked {
+  transform: translateX(20px);
+}
+
+/* Small */
+.nui-switch--sm {
+  width: 36px;
+  height: 20px;
+}
+.nui-switch__thumb--sm {
+  width: 16px;
+  height: 16px;
+  transform: translateX(0);
+}
+/* Travel Distance = Track Width (36) - Borders (4) - Thumb Width (16) = 16px */
+.nui-switch__thumb--sm.nui-switch__thumb--checked {
+  transform: translateX(16px);
+}

@@ -1,0 +1,23 @@
+{
+  "name": "locale",
+  "projectType": "library",
+  "sourceRoot": "packages/locale/src",
+   "targets": {
+    "gen-styles": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm tsx scripts/generate-styles.ts",
+        "cwd": "packages/locale" 
+      }
+    },
+    "build": {
+      "executor": "@nx/vite:build",
+      "dependsOn": ["gen-styles"], 
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/locale/dist",
+        "configFile": "packages/locale/vite.config.ts"
+      }
+    }
+  }
+}

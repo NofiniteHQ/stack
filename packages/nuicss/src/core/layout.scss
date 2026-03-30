@@ -1,0 +1,74 @@
+/* ==========================================================================
+   @nofinite/nuicss : LAYOUT & SIZING
+   ==========================================================================
+   This module contains structural utilities including display properties, 
+   flexbox alignment, and specific sizing maps.
+   
+   It is wrapped in a master mixin (build-layout) to be executed by the 
+   root compiler, allowing for strict control over media query generation 
+   and CSS cascade order.
+   ========================================================================== */
+
+@use 'mixins' as *;
+@use 'variables' as *;
+
+/* --------------------------------------------------------------------------
+   build-layout
+   Generates all layout and sizing utility classes.
+   
+   @param {String} $prefix    - The namespace prefix (e.g., "nui-" or "")
+   @param {String} $bp-prefix - The responsive prefix (e.g., "md\:" or "")
+   -------------------------------------------------------------------------- */
+@mixin build-layout($prefix: "", $bp-prefix: "") {
+
+  /* ------------------------------------------------------------------------
+     DISPLAY UTILITIES
+     ------------------------------------------------------------------------ */
+  @include generate-utility($prefix, $bp-prefix, "block") { display: block; }
+  @include generate-utility($prefix, $bp-prefix, "inline-block") { display: inline-block; }
+  @include generate-utility($prefix, $bp-prefix, "inline") { display: inline; }
+  @include generate-utility($prefix, $bp-prefix, "flex") { display: flex; }
+  @include generate-utility($prefix, $bp-prefix, "inline-flex") { display: inline-flex; }
+  @include generate-utility($prefix, $bp-prefix, "grid") { display: grid; }
+  @include generate-utility($prefix, $bp-prefix, "hidden") { display: none !important; }
+
+  /* ------------------------------------------------------------------------
+     FLEXBOX & ALIGNMENT
+     ------------------------------------------------------------------------ */
+  @include generate-utility($prefix, $bp-prefix, "flex-row") { flex-direction: row; }
+  @include generate-utility($prefix, $bp-prefix, "flex-col") { flex-direction: column; }
+  @include generate-utility($prefix, $bp-prefix, "flex-wrap") { flex-wrap: wrap; }
+  @include generate-utility($prefix, $bp-prefix, "flex-nowrap") { flex-wrap: nowrap; }
+
+  @include generate-utility($prefix, $bp-prefix, "items-start") { align-items: flex-start; }
+  @include generate-utility($prefix, $bp-prefix, "items-center") { align-items: center; }
+  @include generate-utility($prefix, $bp-prefix, "items-end") { align-items: flex-end; }
+  @include generate-utility($prefix, $bp-prefix, "items-stretch") { align-items: stretch; }
+
+  @include generate-utility($prefix, $bp-prefix, "justify-start") { justify-content: flex-start; }
+  @include generate-utility($prefix, $bp-prefix, "justify-center") { justify-content: center; }
+  @include generate-utility($prefix, $bp-prefix, "justify-end") { justify-content: flex-end; }
+  @include generate-utility($prefix, $bp-prefix, "justify-between") { justify-content: space-between; }
+
+  /* ------------------------------------------------------------------------
+     SIZING (Width & Height)
+     Maps directly to spacing tokens + full/screen variants
+     ------------------------------------------------------------------------ */
+  @each $name, $value in $spacings {
+    
+    // Auto values bypass CSS variables to prevent invalid property values
+    $var-value: var(--nui-space-#{$name}, #{$value});
+    @if $name == "auto" {
+      $var-value: auto;
+    }
+    
+    @include generate-utility($prefix, $bp-prefix, "w-#{$name}") { width: #{$var-value}; }
+    @include generate-utility($prefix, $bp-prefix, "h-#{$name}") { height: #{$var-value}; }
+  }
+
+  @include generate-utility($prefix, $bp-prefix, "w-full") { width: 100%; }
+  @include generate-utility($prefix, $bp-prefix, "w-screen") { width: 100vw; }
+  @include generate-utility($prefix, $bp-prefix, "h-full") { height: 100%; }
+  @include generate-utility($prefix, $bp-prefix, "h-screen") { height: 100vh; }
+
+}

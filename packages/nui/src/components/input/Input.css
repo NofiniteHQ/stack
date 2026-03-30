@@ -1,0 +1,150 @@
+/* src/components/input/Input.css */
+
+.nui-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-1); /* 4px */
+  width: 100%;
+  font-family: var(--nui-font-sans);
+}
+
+/* --- LABEL --- */
+.nui-input__label {
+  font-size: var(--nui-text-sm);
+  font-weight: var(--nui-weight-medium);
+  color: var(--nui-fg-default);
+  line-height: 1.2;
+}
+
+.nui-input__label--disabled {
+  color: var(--nui-fg-disabled);
+}
+
+.nui-input__required {
+  color: var(--nui-color-danger);
+}
+
+
+/* --- CONTAINER --- */
+.nui-input__container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+
+/* --- INPUT FIELD --- */
+.nui-input {
+  width: 100%;
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-md);
+  
+  font-family: inherit;
+  font-size: var(--nui-text-sm);
+  
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  
+  /* Reset browser defaults */
+  appearance: none;
+  outline: none;
+}
+
+/* Placeholder */
+.nui-input::placeholder {
+  color: var(--nui-fg-subtle);
+  opacity: 0.8;
+}
+
+/* Hover & Focus */
+.nui-input:not(:disabled):hover {
+  border-color: var(--nui-border-hover);
+}
+
+.nui-input:focus-visible {
+  border-color: var(--nui-color-primary);
+  box-shadow: 0 0 0 3px var(--nui-brand-100);
+}
+
+@media (prefers-color-scheme: dark) {
+  .nui-input:focus-visible {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* Disabled */
+.nui-input:disabled {
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-fg-disabled);
+  border-color: var(--nui-border-default);
+  cursor: not-allowed;
+  opacity: 1; /* Override iOS opacity */
+}
+
+
+/* --- SIZE VARIANTS --- */
+.nui-input--sm {
+  height: 32px;
+  padding: 0 var(--nui-space-2);
+  font-size: var(--nui-text-xs);
+}
+
+.nui-input--md {
+  height: 40px;
+  padding: 0 var(--nui-space-3);
+  font-size: var(--nui-text-sm);
+}
+
+.nui-input--lg {
+  height: 48px;
+  padding: 0 var(--nui-space-4);
+  font-size: var(--nui-text-base);
+}
+
+
+/* --- ICONS --- */
+.nui-input__icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nui-fg-subtle);
+  pointer-events: none; /* Let clicks pass through to input */
+}
+
+.nui-input__icon.-left { left: var(--nui-space-3); }
+.nui-input__icon.-right { right: var(--nui-space-3); }
+
+/* Padding adjustments when icons are present */
+.nui-input--has-left { padding-left: calc(var(--nui-space-3) * 2 + 16px); }
+.nui-input--has-right { padding-right: calc(var(--nui-space-3) * 2 + 16px); }
+
+
+/* --- ERROR STATE --- */
+.nui-input--error {
+  border-color: var(--nui-color-danger);
+}
+
+.nui-input--error:focus-visible {
+  border-color: var(--nui-color-danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); /* Red tinted ring */
+}
+
+
+/* --- TEXT BLOCKS (Description & Error) --- */
+.nui-input__description {
+  font-size: var(--nui-text-xs);
+  color: var(--nui-fg-subtle);
+  margin-top: 2px;
+}
+
+.nui-input__error {
+  font-size: var(--nui-text-xs);
+  color: var(--nui-color-danger);
+  font-weight: var(--nui-weight-medium);
+  margin-top: 2px;
+}

@@ -1,0 +1,81 @@
+/* src/components/radio-group/RadioGroup.css */
+
+.nui-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-3);
+  font-family: var(--nui-font-sans);
+}
+
+.nui-radio-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--nui-space-6);
+}
+
+/* ---------------------------------------------------
+   NATIVE INPUT STYLING
+--------------------------------------------------- */
+.nui-radio-input {
+  /* Strips standard browser styling */
+  appearance: none;
+  -webkit-appearance: none;
+  
+  /* Creates our custom circle */
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 2px solid var(--nui-border-default, #cbd5e1);
+  border-radius: 50%;
+  position: relative;
+  background-color: var(--nui-bg-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Hover state */
+.nui-radio-input:hover:not(:disabled) {
+  border-color: var(--nui-border-hover, #94a3b8);
+  background-color: var(--nui-bg-subtle);
+}
+
+/* Focus state (Keyboard navigation) */
+.nui-radio-input:focus-visible {
+  outline: 2px solid var(--nui-color-primary);
+  outline-offset: 2px;
+}
+
+/* Checked state */
+.nui-radio-input:checked {
+  border-color: var(--nui-color-primary);
+}
+
+/* The inner solid dot */
+.nui-radio-input:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background-color: var(--nui-color-primary);
+  border-radius: 50%;
+  
+  /* Adds a tiny pop-in animation when selected */
+  animation: nui-radio-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nui-radio-pop {
+  from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Disabled state */
+.nui-radio-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--nui-bg-muted);
+}

@@ -1,0 +1,76 @@
+/* src/components/skeleton/Skeleton.css */
+
+.nui-skeleton {
+  display: block;
+  position: relative;
+  overflow: hidden; /* Contains the sweeping animation */
+  background-color: var(--nui-bg-subtle, #e2e8f0);
+  border-radius: var(--nui-radius-sm);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Dark mode subtle background */
+.dark .nui-skeleton {
+  background-color: var(--nui-bg-subtle, #1e293b);
+}
+
+/* ---------------------------------------------------
+   SIZES (Controls Default Height)
+--------------------------------------------------- */
+.nui-skeleton--xs { height: 8px; }
+.nui-skeleton--sm { height: 12px; }
+.nui-skeleton--md { height: 16px; }
+.nui-skeleton--lg { height: 24px; }
+.nui-skeleton--xl { height: 32px; }
+
+/* ---------------------------------------------------
+   SHAPES
+--------------------------------------------------- */
+.nui-skeleton--circle {
+  border-radius: 9999px;
+  /* Guarantees a perfect circle even if only width is provided */
+  aspect-ratio: 1 / 1; 
+  height: auto; /* Overrides the size height */
+}
+
+/* ---------------------------------------------------
+   GPU-ACCELERATED SHIMMER ANIMATION
+--------------------------------------------------- */
+.nui-skeleton--animated::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  /* Creates a soft, light sweeping gradient */
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: nui-skeleton-shimmer 1.5s infinite linear;
+}
+
+/* Dark mode requires a much fainter shimmer to look professional */
+.dark .nui-skeleton--animated::after {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes nui-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Respect user OS settings */
+@media (prefers-reduced-motion: reduce) {
+  .nui-skeleton--animated::after {
+    animation: none;
+  }
+}

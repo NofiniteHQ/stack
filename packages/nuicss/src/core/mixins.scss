@@ -1,0 +1,34 @@
+/* ==========================================================================
+   @nofinite/nuicss : UTILITY MIXIN ENGINE
+   ==========================================================================
+   This engine is the lowest-level generator for the entire framework.
+   
+   ARCHITECTURE NOTE (Cascade Source-Order): 
+   Media queries are intentionally omitted from this mixin. To ensure strict 
+   CSS specificity and correct cascade source-order, responsive variants 
+   (e.g., .md\:flex) must be generated at the end of the compiled stylesheet.
+   
+   This mixin constructs the exact CSS selector for a single class. The 
+   Master Compiler modules (index.scss / prefixed.scss) execute this mixin 
+   within a global loop to guarantee all media queries are safely appended 
+   to the bottom of the compiled CSS file.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   generate-utility
+   Constructs a single utility class with optional breakpoint and namespace prefixes.
+   
+   @param {String} $prefix     - The namespace prefix (e.g., "nui-" or "")
+   @param {String} $bp-prefix  - The responsive prefix (e.g., "md\:" or "")
+   @param {String} $class-name - The base name of the class (e.g., "p-4")
+   
+   Outputs examples:
+   - .nui-p-4        ($prefix: "nui-", $bp-prefix: "")
+   - .md\:nui-p-4    ($prefix: "nui-", $bp-prefix: "md\:")
+   - .flex-col       ($prefix: "",     $bp-prefix: "")
+   -------------------------------------------------------------------------- */
+@mixin generate-utility($prefix, $bp-prefix, $class-name) {
+  .#{$bp-prefix}#{$prefix}#{$class-name} {
+    @content;
+  }
+}

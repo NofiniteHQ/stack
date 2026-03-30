@@ -1,0 +1,79 @@
+/* src/components/rating/Rating.css */
+
+.nui-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nui-space-1);
+  color: var(--nui-fg-muted);
+  font-family: var(--nui-font-sans);
+  
+  /* Prevent text selection when dragging/clicking rapidly */
+  user-select: none;
+  touch-action: none; 
+}
+
+/* ---------------------------------------------------
+   FOCUS
+--------------------------------------------------- */
+.nui-rating:focus-visible {
+  outline: 2px solid var(--nui-color-primary);
+  outline-offset: 4px;
+  border-radius: var(--nui-radius-sm);
+}
+
+/* ---------------------------------------------------
+   SIZES
+--------------------------------------------------- */
+.nui-rating--sm { font-size: 16px; }
+.nui-rating--md { font-size: 24px; }
+.nui-rating--lg { font-size: 32px; }
+
+/* ---------------------------------------------------
+   STATES
+--------------------------------------------------- */
+.nui-rating--readonly {
+  cursor: default;
+}
+
+.nui-rating--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Interactive hover scales */
+.nui-rating:not(.nui-rating--readonly):not(.nui-rating--disabled) .nui-rating-item {
+  cursor: pointer;
+}
+.nui-rating:not(.nui-rating--readonly):not(.nui-rating--disabled) .nui-rating-item:hover {
+  transform: scale(1.15);
+}
+
+/* ---------------------------------------------------
+   ITEM WRAPPER & ICONS
+--------------------------------------------------- */
+.nui-rating-item {
+  position: relative;
+  display: inline-flex;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nui-rating-icon-empty {
+  display: flex;
+  color: var(--nui-border-default, #cbd5e1);
+}
+
+/* The fractional clipping magic */
+.nui-rating-icon-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  
+  /* Typically ratings use gold/yellow. Adjust token as needed! */
+  color: var(--nui-color-warning, #f59e0b); 
+  
+  /* Smoothly animate the fill width when hovering */
+  transition: width 0.1s ease;
+}

@@ -1,0 +1,70 @@
+/* src/components/hovercard/HoverCard.css */
+
+/* ---------------------------------------------------
+   HOVER CARD CONTENT
+--------------------------------------------------- */
+.nui-hovercard-content {
+  position: absolute;
+  z-index: var(--nui-z-dropdown, 1000);
+  box-sizing: border-box; /* Strict sizing to prevent layout shifts */
+  
+  /* Sizing Limits: Ensures card is readable but never massive */
+  min-width: 240px;
+  max-width: 360px;
+  padding: var(--nui-space-4);
+  
+  /* Appearance mapped to strict NUI tokens */
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: var(--nui-font-sans);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-lg);
+  
+  /* Deep, soft shadow to distinguish overlay from page content */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  
+  /* Entrance Animation Configuration */
+  opacity: 0;
+  animation: nui-hovercard-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ---------------------------------------------------
+   DYNAMIC TRANSFORM ORIGINS
+   These rules ensure the animation scales outward 
+   from the trigger button, feeling organic.
+--------------------------------------------------- */
+.nui-hovercard-content[data-placement="bottom"] {
+  transform-origin: top center;
+  --tw-translate-y: -6px; /* Slides down into place */
+}
+
+.nui-hovercard-content[data-placement="top"] {
+  transform-origin: bottom center;
+  --tw-translate-y: 6px; /* Slides up into place */
+}
+
+/* ---------------------------------------------------
+   KEYFRAMES
+--------------------------------------------------- */
+@keyframes nui-hovercard-in {
+  from {
+    opacity: 0;
+    /* Uses CSS variables to alter direction based on placement */
+    transform: translateY(var(--tw-translate-y, 0)) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------------------------------------------------
+   ACCESSIBILITY
+   Disables animations for users with vestibular motion disorders.
+--------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .nui-hovercard-content {
+    animation: none;
+    opacity: 1; /* Ensure visibility if animation is skipped */
+  }
+}

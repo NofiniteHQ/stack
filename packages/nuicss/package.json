@@ -1,0 +1,41 @@
+{
+  "name": "@nofinite/nuicss",
+  "version": "1.0.0",
+  "private": false,
+  "main": "./dist/index.css",
+  "style": "./dist/index.css",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": "./dist/index.css",
+    "./styles.css": "./dist/index.css",
+    "./prefixed": "./dist/prefixed.css",
+    "./prefixed.css": "./dist/prefixed.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nofinitehq/stack.git",
+    "directory": "packages/nuicss"
+  },
+  "keywords": [
+    "nofinite",
+    "nuicss",
+    "css",
+    "utility-css",
+    "design-system",
+    "styling"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,335 @@
+/* src/components/datepicker/DateRangePicker.css */
+
+.nui-daterange-root {
+  display: inline-block;
+  font-family: var(--nui-font-sans);
+}
+
+/* ---------------------------------------------------
+   TRIGGER INPUT
+--------------------------------------------------- */
+.nui-daterange-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 280px; 
+  padding: var(--nui-space-2) var(--nui-space-3);
+  
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: inherit;
+  font-size: var(--nui-text-sm);
+  
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-md);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nui-daterange-trigger:hover:not(:disabled) {
+  border-color: var(--nui-border-hover);
+}
+
+.nui-daterange-trigger:focus-visible {
+  outline: none;
+  border-color: var(--nui-color-primary);
+  box-shadow: 0 0 0 3px var(--nui-brand-100);
+}
+
+.nui-daterange-trigger:disabled {
+  background-color: var(--nui-bg-muted);
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}
+
+.nui-daterange-placeholder, .nui-daterange-icon {
+  color: var(--nui-fg-subtle);
+}
+
+/* ---------------------------------------------------
+   POPOVER PANEL
+--------------------------------------------------- */
+.nui-daterange-popover {
+  z-index: var(--nui-z-dropdown, 1000);
+}
+
+.nui-daterange-panel {
+  width: 320px;
+  padding: var(--nui-space-4);
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  
+  animation: nui-daterange-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes nui-daterange-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------------------------------------------------
+   INTERNAL ACTIONS (From / To Toggle)
+--------------------------------------------------- */
+.nui-daterange-actions {
+  display: flex;
+  gap: var(--nui-space-2);
+  margin-bottom: var(--nui-space-4);
+  padding: var(--nui-space-1);
+  background: var(--nui-bg-subtle);
+  border-radius: var(--nui-radius-md);
+}
+
+.nui-daterange-part {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: var(--nui-space-1) 0;
+  border-radius: var(--nui-radius-sm);
+  font-size: var(--nui-text-sm);
+  color: var(--nui-fg-subtle);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nui-daterange-part.active {
+  background: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-weight: var(--nui-weight-bold);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* ---------------------------------------------------
+   HEADER
+--------------------------------------------------- */
+.nui-daterange-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--nui-space-4);
+}
+
+.nui-daterange-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  color: var(--nui-fg-subtle);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nui-daterange-arrow:hover {
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-fg-default);
+}
+
+.nui-daterange-ym-toggle {
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  padding: var(--nui-space-1) var(--nui-space-3);
+  font-size: var(--nui-text-sm);
+  font-weight: var(--nui-weight-bold);
+  color: var(--nui-fg-default);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nui-daterange-ym-toggle:hover {
+  background-color: var(--nui-bg-subtle);
+}
+
+/* ---------------------------------------------------
+   YEAR + MONTH PANEL
+--------------------------------------------------- */
+.nui-daterange-ym-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-3);
+}
+
+.nui-daterange-year-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--nui-space-1);
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: var(--nui-space-1);
+  scrollbar-width: thin;
+}
+
+.nui-daterange-year, .nui-daterange-month {
+  padding: var(--nui-space-2) 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--nui-radius-sm);
+  color: var(--nui-fg-default);
+  font-size: var(--nui-text-sm);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nui-daterange-year:hover:not(.selected),
+.nui-daterange-month:hover:not(.selected):not(.disabled) {
+  background-color: var(--nui-bg-subtle);
+}
+
+.nui-daterange-year.selected, .nui-daterange-month.selected {
+  background-color: var(--nui-color-primary);
+  color: var(--nui-color-primary-fg);
+  font-weight: var(--nui-weight-bold);
+}
+
+.nui-daterange-month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--nui-space-1);
+  padding-top: var(--nui-space-3);
+  border-top: 1px solid var(--nui-border-default);
+}
+
+.nui-daterange-month.disabled {
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------
+   CALENDAR GRID
+--------------------------------------------------- */
+.nui-daterange-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-2);
+}
+
+.nui-daterange-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+
+.nui-daterange-weekday {
+  font-size: 0.7rem;
+  font-weight: var(--nui-weight-bold);
+  text-transform: uppercase;
+  color: var(--nui-fg-subtle);
+}
+
+.nui-daterange-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  /* * Architecture Note: We use 0 gap on the X-axis so the .between state 
+   * spans across multiple days seamlessly without visual breaks. */
+  gap: 2px 0; 
+}
+
+.nui-daterange-day,
+.nui-daterange-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  
+  background: transparent;
+  border: none;
+  font-size: var(--nui-text-sm);
+  color: var(--nui-fg-default);
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+/* Base Hover */
+.nui-daterange-day:hover:not(.disabled):not(.start):not(.end) {
+  background-color: var(--nui-border-default);
+  border-radius: var(--nui-radius-sm);
+}
+
+/* Start and End nodes */
+.nui-daterange-day.start,
+.nui-daterange-day.end {
+  background-color: var(--nui-color-primary);
+  color: var(--nui-color-primary-fg);
+  font-weight: var(--nui-weight-bold);
+  border-radius: var(--nui-radius-sm);
+}
+
+/* * Visual trick: when a range is selected, we flatten the inner borders 
+ * to connect the start node, middle nodes, and end node into one visual shape. */
+.nui-daterange-day.start.between {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.nui-daterange-day.end.between {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* The middle of the range */
+.nui-daterange-day.between {
+  background-color: var(--nui-bg-subtle);
+  border-radius: 0; 
+}
+
+/* Drag Selection Highlight */
+.nui-daterange-day.dragging {
+  background-color: var(--nui-bg-subtle);
+}
+.nui-daterange-day.dragging:not(.start):not(.end) {
+  box-shadow: inset 0 0 0 1px var(--nui-color-primary);
+}
+
+.nui-daterange-day.disabled {
+  color: var(--nui-fg-disabled);
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------
+   FOOTER
+--------------------------------------------------- */
+.nui-daterange-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--nui-space-2);
+  margin-top: var(--nui-space-4);
+  padding-top: var(--nui-space-4);
+  border-top: 1px solid var(--nui-border-default);
+}
+
+.nui-daterange-footer button {
+  border: none;
+  padding: var(--nui-space-1) var(--nui-space-3);
+  border-radius: var(--nui-radius-sm);
+  font-size: var(--nui-text-sm);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nui-daterange-clear {
+  background: transparent;
+  color: var(--nui-fg-subtle);
+}
+
+.nui-daterange-clear:hover {
+  background: var(--nui-bg-subtle);
+  color: var(--nui-fg-default);
+}
+
+.nui-daterange-close {
+  background: var(--nui-bg-subtle);
+  color: var(--nui-fg-default);
+  font-weight: var(--nui-weight-bold);
+}
+
+.nui-daterange-close:hover {
+  background: var(--nui-border-default);
+}

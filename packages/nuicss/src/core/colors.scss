@@ -1,0 +1,72 @@
+/* ==========================================================================
+   @nofinite/nuicss : SEMANTIC COLORS
+   ==========================================================================
+   This module handles the generation of all color-based utility classes 
+   (backgrounds, text, and borders). It strictly maps to the semantic 
+   design tokens defined in the system architecture.
+   
+   It is wrapped in a master mixin (build-colors) to be executed by the 
+   root compiler, allowing for strict control over media query generation 
+   and CSS cascade order.
+   ========================================================================== */
+
+@use 'mixins' as *;
+@use 'variables' as *;
+
+/* --------------------------------------------------------------------------
+   build-colors
+   Generates all semantic color utility classes and their hover states.
+   
+   @param {String} $prefix    - The namespace prefix (e.g., "nui-" or "")
+   @param {String} $bp-prefix - The responsive prefix (e.g., "md\:" or "")
+   -------------------------------------------------------------------------- */
+@mixin build-colors($prefix: "", $bp-prefix: "") {
+
+  /* ------------------------------------------------------------------------
+     BACKGROUND COLORS
+     Maps to --nui-bg-* tokens
+     ------------------------------------------------------------------------ */
+  @each $name, $value in $colors-bg {
+    @include generate-utility($prefix, $bp-prefix, "bg-#{$name}") { 
+      background-color: var(--nui-bg-#{$name}, #{$value}); 
+    }
+
+    // Generate basic hover states for interactive backgrounds
+    .#{$bp-prefix}#{$prefix}hover\:bg-#{$name}:hover {
+      background-color: var(--nui-bg-#{$name}, #{$value});
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     TEXT COLORS
+     Maps to --nui-fg-* or --nui-color-* tokens based on the name
+     ------------------------------------------------------------------------ */
+  @each $name, $value in $colors-text {
+    
+    // Smart mapping: some text colors are foregrounds (fg), some are brand (color)
+    $token-type: "color";
+    @if $name == "default" or $name == "subtle" or $name == "muted" or $name == "inverse" {
+      $token-type: "fg";
+    }
+    
+    @include generate-utility($prefix, $bp-prefix, "text-#{$name}") { 
+      color: var(--nui-#{$token-type}-#{$name}, #{$value}); 
+    }
+    
+    // Generate basic hover states for interactive text
+    .#{$bp-prefix}#{$prefix}hover\:text-#{$name}:hover {
+      color: var(--nui-#{$token-type}-#{$name}, #{$value});
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     BORDER COLORS
+     Maps to --nui-border-* tokens
+     ------------------------------------------------------------------------ */
+  @each $name, $value in $colors-border {
+    @include generate-utility($prefix, $bp-prefix, "border-#{$name}") { 
+      border-color: var(--nui-border-#{$name}, #{$value}); 
+    }
+  }
+
+}

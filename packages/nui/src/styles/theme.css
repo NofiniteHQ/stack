@@ -1,0 +1,325 @@
+:root {
+  /* ------------------------------------------------------------
+  1. PRIMITIVE TOKENS (RAW VALUES)
+  ------------------------------------------------------------ */
+
+  /* Base Colors */
+  --nui-white: #ffffff;
+  --nui-black: #000000;
+  --nui-transparent: transparent;
+
+  /* Neutral Scale (Slate) */
+  --nui-slate-50: #f8fafc;
+  --nui-slate-100: #f1f5f9;
+  --nui-slate-200: #e2e8f0;
+  --nui-slate-300: #cbd5e1;
+  --nui-slate-400: #94a3b8;
+  --nui-slate-500: #64748b;
+  --nui-slate-600: #475569;
+  --nui-slate-700: #334155;
+  --nui-slate-800: #1e293b;
+  --nui-slate-900: #0f172a;
+  --nui-slate-950: #020617;
+
+  /* Brand Primitive (Completed Blue Scale) */
+  --nui-brand-50: #eff6ff;
+  --nui-brand-100: #dbeafe;
+  --nui-brand-200: #bfdbfe;
+  --nui-brand-300: #93c5fd;
+  --nui-brand-400: #60a5fa;
+  --nui-brand-500: #3b82f6;
+  --nui-brand-600: #2563eb;
+  --nui-brand-700: #1d4ed8;
+  --nui-brand-800: #1e40af;
+  --nui-brand-900: #1e3a8a;
+  --nui-brand-950: #172554;
+
+  /* State Colors */
+  --nui-red-500: #ef4444;
+  --nui-red-600: #dc2626;
+  --nui-green-500: #10b981;
+  --nui-green-600: #059669;
+  --nui-amber-500: #f59e0b;
+  --nui-amber-600: #d97706;
+  --nui-blue-500: #0ea5e9; /* For Info states */
+
+  /* ------------------------------------------------------------
+  2. BRAND TOKENS
+  ------------------------------------------------------------ */
+
+  --nui-brand-primary: var(--nui-brand-600);
+  --nui-brand-primary-hover: var(--nui-brand-700);
+  --nui-brand-primary-active: var(--nui-brand-800);
+  --nui-brand-primary-fg: var(--nui-white);
+
+  /* ------------------------------------------------------------
+  3. SEMANTIC TOKENS
+  ------------------------------------------------------------ */
+
+  /* Backgrounds */
+  --nui-bg-page: var(--nui-white);
+  --nui-bg-surface: var(--nui-white);
+  --nui-bg-surface-raised: var(--nui-slate-50);
+  --nui-bg-surface-overlay: var(--nui-white);
+  --nui-bg-subtle: var(--nui-slate-50);
+  --nui-bg-muted: var(--nui-slate-100);
+  --nui-bg-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Selected */
+  --nui-bg-selected: color-mix(
+    in srgb,
+    var(--nui-brand-primary) 8%,
+    transparent
+  );
+  --nui-bg-selected-hover: color-mix(
+    in srgb,
+    var(--nui-brand-primary) 12%,
+    transparent
+  );
+
+  /* Foreground */
+  --nui-fg-default: var(--nui-slate-900);
+  --nui-fg-subtle: var(--nui-slate-500);
+  --nui-fg-muted: var(--nui-slate-400);
+  --nui-fg-inverse: var(--nui-white);
+  --nui-fg-disabled: var(--nui-slate-400);
+
+  /* Borders */
+  --nui-border-default: var(--nui-slate-200);
+  --nui-border-hover: var(--nui-slate-300);
+  --nui-border-focus: var(--nui-brand-primary);
+  --nui-border-disabled: var(--nui-slate-200);
+
+  /* Primary Action */
+  --nui-color-primary: var(--nui-brand-primary);
+  --nui-color-primary-hover: var(--nui-brand-primary-hover);
+  --nui-color-primary-active: var(--nui-brand-primary-active);
+  --nui-color-primary-fg: var(--nui-brand-primary-fg);
+
+  /* Feedback */
+  --nui-color-danger: var(--nui-red-500);
+  --nui-color-danger-fg: var(--nui-white);
+  --nui-color-success: var(--nui-green-500);
+  --nui-color-success-fg: var(--nui-white);
+  --nui-color-warning: var(--nui-amber-500);
+  --nui-color-warning-fg: var(--nui-white);
+  --nui-color-info: var(--nui-blue-500);
+  --nui-color-info-fg: var(--nui-white);
+
+  /* Focus */
+  --nui-focus-ring: var(--nui-color-primary);
+  --nui-focus-ring-offset: var(--nui-bg-page);
+
+  /* ------------------------------------------------------------
+  4. SPACING SCALE (4px BASE)
+  ------------------------------------------------------------ */
+
+  --nui-space-0: 0px;
+  --nui-space-0-5: 0.125rem; /* 2px */
+  --nui-space-1: 0.25rem; /* 4px */
+  --nui-space-1-5: 0.375rem; /* 6px */
+  --nui-space-2: 0.5rem; /* 8px */
+  --nui-space-2-5: 0.625rem; /* 10px */
+  --nui-space-3: 0.75rem; /* 12px */
+  --nui-space-4: 1rem; /* 16px */
+  --nui-space-5: 1.25rem; /* 20px */
+  --nui-space-6: 1.5rem; /* 24px */
+  --nui-space-8: 2rem; /* 32px */
+  --nui-space-10: 2.5rem; /* 40px */
+  --nui-space-12: 3rem; /* 48px */
+  --nui-space-14: 3.5rem; /* 56px */
+  --nui-space-16: 4rem; /* 64px */
+  --nui-space-20: 5rem; /* 80px */
+  --nui-space-24: 6rem; /* 96px */
+  --nui-space-32: 8rem; /* 128px */
+  --nui-space-40: 10rem; /* 160px */
+  --nui-space-48: 12rem; /* 192px */
+  --nui-space-64: 16rem; /* 256px */
+  --nui-space-auto: auto;
+
+  /* ------------------------------------------------------------
+  5. RADII
+  ------------------------------------------------------------ */
+
+  --nui-radius-none: 0px;
+  --nui-radius-sm: 0.25rem; /* 4px */
+  --nui-radius-md: 0.375rem; /* 6px */
+  --nui-radius-lg: 0.5rem; /* 8px */
+  --nui-radius-xl: 0.75rem; /* 12px */
+  --nui-radius-2xl: 1rem; /* 16px */
+  --nui-radius-3xl: 1.5rem; /* 24px */
+  --nui-radius-full: 9999px;
+
+  /* ------------------------------------------------------------
+  6. TYPOGRAPHY
+  ------------------------------------------------------------ */
+
+  /* Fonts */
+  --nui-font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --nui-font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --nui-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+
+  /* Font Sizes */
+  --nui-text-xs: 0.75rem; /* 12px */
+  --nui-text-sm: 0.875rem; /* 14px */
+  --nui-text-base: 1rem; /* 16px */
+  --nui-text-lg: 1.125rem; /* 18px */
+  --nui-text-xl: 1.25rem; /* 20px */
+  --nui-text-2xl: 1.5rem; /* 24px */
+  --nui-text-3xl: 1.875rem; /* 30px */
+  --nui-text-4xl: 2.25rem; /* 36px */
+  --nui-text-5xl: 3rem; /* 48px */
+  --nui-text-6xl: 3.75rem; /* 60px */
+  --nui-text-7xl: 4.5rem; /* 72px */
+  --nui-text-8xl: 6rem; /* 96px */
+  --nui-text-9xl: 8rem; /* 128px */
+
+  /* Font Weight */
+  --nui-weight-light: 300;
+  --nui-weight-regular: 400;
+  --nui-weight-medium: 500;
+  --nui-weight-semibold: 600;
+  --nui-weight-bold: 700;
+  --nui-weight-extrabold: 800;
+
+  /* Letter Spacing */
+  --nui-tracking-tighter: -0.05em;
+  --nui-tracking-tight: -0.025em;
+  --nui-tracking-normal: 0;
+  --nui-tracking-wide: 0.025em;
+  --nui-tracking-wider: 0.05em;
+  --nui-tracking-widest: 0.1em;
+
+  /* Line Height (Leading) */
+  --nui-leading-none: 1;
+  --nui-leading-tight: 1.25;
+  --nui-leading-snug: 1.375;
+  --nui-leading-normal: 1.5;
+  --nui-leading-relaxed: 1.625;
+  --nui-leading-loose: 2;
+
+  /* ------------------------------------------------------------
+  7. SHADOWS
+  ------------------------------------------------------------ */
+
+  --nui-shadow-none: 0 0 #0000;
+  --nui-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --nui-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --nui-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --nui-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --nui-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --nui-shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+
+  /* ------------------------------------------------------------
+  8. TRANSITIONS & ANIMATIONS
+  ------------------------------------------------------------ */
+
+  /* Durations */
+  --nui-transition-fast: 150ms;
+  --nui-transition-normal: 200ms;
+  --nui-transition-slow: 300ms;
+  --nui-transition-slower: 500ms;
+
+  /* Easing */
+  --nui-ease-linear: linear;
+  --nui-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --nui-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --nui-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ------------------------------------------------------------
+  9. CONTAINERS
+  ------------------------------------------------------------ */
+
+  --nui-container-sm: 640px;
+  --nui-container-md: 768px;
+  --nui-container-lg: 1024px;
+  --nui-container-xl: 1280px;
+  --nui-container-2xl: 1536px;
+
+  /* ------------------------------------------------------------
+  10. ICON SIZES
+  ------------------------------------------------------------ */
+
+  --nui-icon-xs: 12px;
+  --nui-icon-sm: 16px;
+  --nui-icon-md: 20px;
+  --nui-icon-lg: 24px;
+  --nui-icon-xl: 32px;
+  --nui-icon-2xl: 40px;
+
+  /* ------------------------------------------------------------
+  11. Z-INDEX
+  ------------------------------------------------------------ */
+
+  --nui-z-hide: -1;
+  --nui-z-auto: auto;
+  --nui-z-base: 0;
+  --nui-z-docked: 10;
+  --nui-z-dropdown: 1000;
+  --nui-z-sticky: 1100;
+  --nui-z-modal: 1300;
+  --nui-z-tooltip: 1500;
+  --nui-z-max: 9999;
+
+  /* ------------------------------------------------------------
+  12. OPACITY
+  ------------------------------------------------------------ */
+
+  --nui-opacity-0: 0;
+  --nui-opacity-5: 0.05;
+  --nui-opacity-10: 0.1;
+  --nui-opacity-25: 0.25;
+  --nui-opacity-50: 0.5;
+  --nui-opacity-75: 0.75;
+  --nui-opacity-90: 0.9;
+  --nui-opacity-95: 0.95;
+  --nui-opacity-100: 1;
+}
+
+/* ------------------------------------------------------------
+13. DARK MODE
+------------------------------------------------------------ */
+
+[data-theme='dark'] {
+  /* Backgrounds */
+  --nui-bg-page: var(--nui-slate-950);
+  --nui-bg-surface: var(--nui-slate-900);
+  --nui-bg-surface-raised: var(--nui-slate-800);
+  --nui-bg-surface-overlay: var(--nui-slate-900);
+  --nui-bg-subtle: var(--nui-slate-800);
+  --nui-bg-muted: var(--nui-slate-800);
+  --nui-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Selected */
+  --nui-bg-selected: color-mix(
+    in srgb,
+    var(--nui-brand-primary) 20%,
+    transparent
+  );
+  --nui-bg-selected-hover: color-mix(
+    in srgb,
+    var(--nui-brand-primary) 30%,
+    transparent
+  );
+
+  /* Foreground */
+  --nui-fg-default: var(--nui-slate-50);
+  --nui-fg-subtle: var(--nui-slate-400);
+  --nui-fg-muted: var(--nui-slate-500);
+  --nui-fg-inverse: var(--nui-slate-900);
+  --nui-fg-disabled: var(--nui-slate-600);
+
+  /* Borders */
+  --nui-border-default: var(--nui-slate-800);
+  --nui-border-hover: var(--nui-slate-700);
+  --nui-border-disabled: var(--nui-slate-800);
+
+  /* Brand Adjustments for Dark Mode */
+  --nui-brand-primary: var(--nui-brand-500);
+  --nui-brand-primary-hover: var(--nui-brand-400);
+  --nui-brand-primary-active: var(--nui-brand-600);
+}

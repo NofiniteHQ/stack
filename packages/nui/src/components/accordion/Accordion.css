@@ -1,0 +1,110 @@
+/* src/components/accordion/Accordion.css */
+
+/* * Base Accordion Container 
+ * Uses standard CSS variables for easy theming and dark mode support.
+ */
+.nui-accordion {
+  width: 100%;
+  border-top: 1px solid var(--nui-border-default);
+}
+
+.nui-accordion__item {
+  border-bottom: 1px solid var(--nui-border-default);
+}
+
+/* --- HEADER --- */
+/* * The header is natively a <button>. We reset its default browser 
+ * appearance to make it look like a structural layout element.
+ */
+.nui-accordion__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: var(--nui-space-4) 0; /* 16px */
+  
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--nui-fg-default);
+  
+  /* * We remove the default browser outline here because we provide 
+   * a superior, custom accessibility focus ring below.
+   */
+  outline: none; 
+}
+
+.nui-accordion__header:hover {
+  color: var(--nui-fg-subtle);
+}
+
+/* * Accessibility: We strictly use :focus-visible instead of :focus.
+ * This ensures the focus ring only appears when a user is navigating 
+ * via keyboard (Tab), preventing ugly rings when a mouse user clicks the button.
+ */
+.nui-accordion__header:focus-visible {
+  border-radius: var(--nui-radius-sm);
+  outline: 2px solid var(--nui-color-primary);
+  outline-offset: 4px;
+}
+
+.nui-accordion__title {
+  font-family: var(--nui-font-sans);
+  font-size: var(--nui-text-base);
+  font-weight: var(--nui-weight-medium);
+}
+
+/* --- ICON --- */
+.nui-accordion__icon {
+  color: var(--nui-fg-subtle);
+  transition: transform 0.2s ease;
+  width: 16px;
+  height: 16px;
+}
+
+/* * State Management: We use the `data-state` attribute directly from the DOM
+ * instead of toggling utility classes like `.is-open`. This creates a cleaner 
+ * separation of concerns between React logic and CSS.
+ */
+.nui-accordion__item[data-state='open'] .nui-accordion__icon {
+  transform: rotate(180deg);
+  color: var(--nui-fg-default);
+}
+
+/* --- PANEL ANIMATION (Grid Trick) --- */
+/* * Animation Architecture: Animating `height: auto` is historically impossible in CSS.
+ * Instead of relying on JavaScript calculations or hacky `max-height` transitions, 
+ * we use the modern CSS Grid trick. 
+ * Transitioning grid-template-rows from 0fr to 1fr allows the browser to natively 
+ * interpolate the height of the content smoothly.
+ */
+.nui-accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease-out;
+}
+
+.nui-accordion__item[data-state='open'] .nui-accordion__panel {
+  grid-template-rows: 1fr;
+}
+
+/* * The inner content wrapper MUST hide overflow. Otherwise, the text will 
+ * remain visible and spill out of the grid container while it is collapsed.
+ */
+.nui-accordion__content {
+  overflow: hidden;
+  color: var(--nui-fg-subtle);
+  font-family: var(--nui-font-sans);
+  font-size: var(--nui-text-base);
+  line-height: 1.6;
+}
+
+/* * Spacing Strategy: We apply padding to the inner child rather than the wrapper.
+ * If padding is applied to the `.nui-accordion__panel` itself, the browser will 
+ * immediately render that padding even when `grid-template-rows` is 0fr, 
+ * causing visual jumps or a few pixels of height to remain visible when closed.
+ */
+.nui-accordion__content > *:last-child {
+  padding-bottom: var(--nui-space-4);
+}

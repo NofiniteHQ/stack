@@ -1,0 +1,212 @@
+/* src/components/command-palette/CommandPalette.css */
+
+/* ---------------------------------------------------
+   OVERLAY
+--------------------------------------------------- */
+.nui-cmd-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4); 
+  /* * Premium blur effect often seen in tools like Raycast or Vercel */
+  backdrop-filter: blur(4px); 
+  z-index: var(--nui-z-modal, 99998);
+  animation: nui-cmd-fade-in 0.15s ease-out;
+}
+
+/* ---------------------------------------------------
+   PALETTE CONTAINER
+--------------------------------------------------- */
+.nui-cmd {
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px; 
+  
+  background-color: var(--nui-bg-surface);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-xl);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  z-index: var(--nui-z-modal, 99999);
+  
+  font-family: var(--nui-font-sans);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: nui-cmd-slide-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .nui-cmd {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes nui-cmd-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nui-cmd-slide-in {
+  from { opacity: 0; transform: translate(-50%, -4%); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ---------------------------------------------------
+   SEARCH BAR
+--------------------------------------------------- */
+.nui-cmd-header {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--nui-space-4);
+  border-bottom: 1px solid var(--nui-border-default);
+}
+
+.nui-cmd-search-icon {
+  color: var(--nui-fg-subtle);
+  flex-shrink: 0;
+}
+
+.nui-cmd-input {
+  flex-grow: 1;
+  padding: var(--nui-space-4) var(--nui-space-3);
+  background: transparent;
+  border: none;
+  color: var(--nui-fg-default);
+  font-size: var(--nui-text-lg);
+  outline: none;
+}
+
+.nui-cmd-input::placeholder {
+  color: var(--nui-fg-muted);
+}
+
+.nui-cmd-clear {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-fg-subtle);
+  border: 1px solid var(--nui-border-default);
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------
+   LIST & SECTIONS
+--------------------------------------------------- */
+.nui-cmd-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--nui-space-2);
+  /* * Smooth scrolling prevents jarring visual jumps when keyboard navigating long lists */
+  scroll-behavior: smooth;
+}
+
+.nui-cmd-section {
+  margin-bottom: var(--nui-space-2);
+}
+
+.nui-cmd-section-title {
+  padding: var(--nui-space-2) var(--nui-space-3);
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--nui-fg-muted);
+}
+
+/* ---------------------------------------------------
+   ITEMS
+--------------------------------------------------- */
+.nui-cmd-item {
+  display: flex;
+  align-items: center;
+  gap: var(--nui-space-3);
+  padding: var(--nui-space-3);
+  border-radius: var(--nui-radius-md);
+  cursor: pointer;
+  color: var(--nui-fg-default);
+  transition: background-color 0.1s, color 0.1s;
+}
+
+/* * The active state is managed via JS state (.active) rather than :hover, 
+ * to ensure visual consistency between mouse and keyboard navigation. */
+.nui-cmd-item.active {
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-color-primary);
+}
+
+.nui-cmd-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--nui-fg-subtle);
+}
+
+.nui-cmd-item.active .nui-cmd-item-icon {
+  color: var(--nui-color-primary);
+}
+
+.nui-cmd-item-meta {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nui-cmd-item-label {
+  font-size: var(--nui-text-sm);
+  font-weight: 500;
+}
+
+.nui-cmd-item-description {
+  font-size: 0.75rem; /* 12px */
+  color: var(--nui-fg-subtle);
+  margin-top: 2px;
+}
+
+/* ---------------------------------------------------
+   SHORTCUTS
+--------------------------------------------------- */
+.nui-cmd-item-shortcut {
+  display: flex;
+  gap: 4px;
+}
+
+/* * Mimics a physical keyboard key */
+.nui-cmd-item-shortcut kbd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--nui-fg-subtle);
+  background-color: var(--nui-bg-surface);
+  border: 1px solid var(--nui-border-default);
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+/* ---------------------------------------------------
+   EMPTY STATE
+--------------------------------------------------- */
+.nui-cmd-empty {
+  padding: var(--nui-space-12) var(--nui-space-4);
+  text-align: center;
+}
+
+.nui-cmd-empty-text {
+  font-size: var(--nui-text-sm);
+  color: var(--nui-fg-subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nui-cmd, .nui-cmd-overlay {
+    animation: none;
+  }
+}

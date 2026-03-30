@@ -1,0 +1,65 @@
+/* src/components/link/Link.css */
+
+.nui-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nui-space-1);
+  font-family: var(--nui-font-sans);
+  font-size: inherit;
+  font-weight: var(--nui-weight-medium);
+  outline-offset: 2px;
+  border-radius: var(--nui-radius-sm);
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Base Underline Logic */
+.nui-link {
+  text-decoration-line: underline;
+  /* Make the underline slightly transparent by default for a cleaner look */
+  text-decoration-color: transparent; 
+  text-underline-offset: 4px;
+}
+
+/* ---------------------------------------------------
+   UNDERLINE VARIANTS
+--------------------------------------------------- */
+.nui-link--underline-always {
+  text-decoration-color: currentColor;
+}
+
+.nui-link--underline-hover:hover {
+  text-decoration-color: currentColor;
+}
+
+.nui-link--underline-none {
+  text-decoration-line: none;
+}
+
+/* ---------------------------------------------------
+   COLOR VARIANTS
+--------------------------------------------------- */
+.nui-link--default {
+  color: var(--nui-fg-default);
+}
+
+.nui-link--primary {
+  color: var(--nui-color-primary);
+}
+
+.nui-link--muted {
+  color: var(--nui-fg-subtle);
+}
+.nui-link--muted:hover {
+  color: var(--nui-fg-default);
+}
+
+.nui-link--danger {
+  color: var(--nui-color-danger);
+}
+
+/* Focus State for Accessibility */
+.nui-link:focus-visible {
+  outline: 2px solid var(--nui-color-primary);
+  text-decoration-color: currentColor;
+}

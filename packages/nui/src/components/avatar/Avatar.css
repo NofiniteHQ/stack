@@ -1,0 +1,130 @@
+/* src/components/avatar/Avatar.css */
+
+/* --- ROOT CONTAINER --- */
+/* * Architecture: inline-flex prevents the Avatar from collapsing or expanding 
+ * unexpectedly when placed inside flexbox layouts (like navbars). */
+.nui-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  background-color: var(--nui-bg-subtle);
+  color: var(--nui-fg-subtle);
+  border: 1px solid transparent; 
+  /* * overflow: visible is required here so the status indicator can visually 
+   * "break out" of the main circular bounds. */
+  overflow: visible; 
+  user-select: none;
+}
+
+/* --- IMAGE --- */
+.nui-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* --- FALLBACK (Initials/Icon) --- */
+.nui-avatar__fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  font-family: var(--nui-font-sans);
+  font-weight: var(--nui-weight-medium);
+  text-transform: uppercase;
+  border-radius: inherit;
+}
+
+/* --- STATUS INDICATOR --- */
+.nui-avatar__status {
+  position: absolute;
+  bottom: -2px; 
+  right: -2px;
+  
+  width: 25%; 
+  height: 25%;
+  min-width: 8px; 
+  min-height: 8px;
+  
+  border-radius: 50%;
+  /* * The thick border identical to the background color creates an optical illusion 
+   * of a "cutout" into the Avatar, heavily used in modern UI design. */
+  border: 2px solid var(--nui-bg-page); 
+}
+
+/* Status Colors */
+.nui-avatar__status[data-status="online"]  { background-color: var(--nui-green-500); }
+.nui-avatar__status[data-status="busy"]    { background-color: var(--nui-red-500); }
+.nui-avatar__status[data-status="away"]    { background-color: var(--nui-amber-500); }
+.nui-avatar__status[data-status="offline"] { background-color: var(--nui-slate-400); }
+
+
+/* --- SIZES --- */
+.nui-avatar[data-size="sm"] { width: 32px; height: 32px; font-size: 12px; }
+.nui-avatar[data-size="md"] { width: 40px; height: 40px; font-size: 14px; }
+.nui-avatar[data-size="lg"] { width: 56px; height: 56px; font-size: 18px; }
+.nui-avatar[data-size="xl"] { width: 72px; height: 72px; font-size: 24px; }
+
+/* --- SHAPES --- */
+.nui-avatar[data-shape="circle"]  { border-radius: var(--nui-radius-full); }
+.nui-avatar[data-shape="rounded"] { border-radius: var(--nui-radius-md); }
+.nui-avatar[data-shape="square"]  { border-radius: var(--nui-radius-sm); }
+
+
+/* --- AVATAR GROUP --- */
+.nui-avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+/* Overlap Logic */
+.nui-avatar-group .nui-avatar {
+  border: 2px solid var(--nui-bg-page); 
+  /* * Negative margin forces the elements to overlap slightly */
+  margin-left: -12px; 
+  transition: transform 0.2s ease;
+}
+
+/* * Stacking Context: Reverses the default z-index stacking order so the FIRST 
+ * avatar appears on top, reading left-to-right naturally. */
+.nui-avatar-group .nui-avatar:first-child { margin-left: 0; z-index: 5; }
+.nui-avatar-group .nui-avatar:nth-child(2) { z-index: 4; }
+.nui-avatar-group .nui-avatar:nth-child(3) { z-index: 3; }
+.nui-avatar-group .nui-avatar:nth-child(4) { z-index: 2; }
+.nui-avatar-group .nui-avatar:nth-child(5) { z-index: 1; }
+
+.nui-avatar-group .nui-avatar:hover {
+  transform: translateY(-4px);
+  z-index: 10; 
+}
+
+/* Excess Counter (+3) */
+.nui-avatar--excess {
+  background-color: var(--nui-slate-100);
+  color: var(--nui-fg-default);
+  font-size: 0.8em; 
+}
+
+/* Loading Animation (Pulse) */
+.nui-avatar--loading {
+  background-color: var(--nui-bg-muted); 
+  animation: nui-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  cursor: wait;
+}
+
+@keyframes nui-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+/* Hide content when loading */
+.nui-avatar--loading .nui-avatar__fallback svg,
+.nui-avatar--loading .nui-avatar__fallback span {
+  display: none;
+}

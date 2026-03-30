@@ -1,0 +1,134 @@
+/* src/components/chip/Chip.css */
+
+.nui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nui-space-1); /* 4px */
+  
+  /* Standard pill shape */
+  border-radius: var(--nui-radius-full);
+  border: 1px solid var(--nui-border-default);
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  
+  font-family: var(--nui-font-sans);
+  font-weight: var(--nui-weight-medium);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  
+  /* Remove highlight on mobile tap for a cleaner native feel */
+  -webkit-tap-highlight-color: transparent; 
+}
+
+/* --- SIZES --- */
+.nui-chip--sm {
+  height: 24px;
+  padding: 0 var(--nui-space-2);
+  font-size: var(--nui-text-xs); /* 12px */
+}
+
+.nui-chip--md {
+  height: 32px;
+  padding: 0 var(--nui-space-3);
+  font-size: var(--nui-text-sm); /* 14px */
+}
+
+/* * Modern CSS Architecture:
+ * We use the :has() pseudo-class to dynamically adjust the internal padding of the chip 
+ * ONLY when an icon or close button is present. This prevents icons from hugging the edges
+ * without requiring JavaScript to conditionally apply CSS classes. */
+.nui-chip:has(.nui-chip__icon.-left) { padding-left: var(--nui-space-2); }
+.nui-chip:has(.nui-chip__icon.-right) { padding-right: var(--nui-space-2); }
+.nui-chip:has(.nui-chip__remove) { padding-right: var(--nui-space-1); }
+
+
+/* --- INTERACTIVE STATE --- */
+.nui-chip--interactive {
+  cursor: pointer;
+  user-select: none;
+}
+
+.nui-chip--interactive:hover {
+  background-color: var(--nui-bg-subtle);
+  border-color: var(--nui-border-hover);
+}
+
+.nui-chip--interactive:active {
+  transform: scale(0.97);
+}
+
+/* Focus Ring */
+.nui-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--nui-bg-page), 0 0 0 4px var(--nui-color-primary);
+}
+
+
+/* --- SELECTED STATE --- */
+.nui-chip--selected {
+  background-color: var(--nui-brand-600);
+  border-color: var(--nui-brand-600);
+  color: #ffffff;
+}
+
+.nui-chip--selected.nui-chip--interactive:hover {
+  background-color: var(--nui-brand-700);
+  border-color: var(--nui-brand-700);
+}
+
+
+/* --- SUB-ELEMENTS --- */
+
+.nui-chip__label {
+  display: inline-block;
+  line-height: 1;
+}
+
+.nui-chip__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+/* Adjust margin to tighten the gap slightly between text and icon */
+.nui-chip__icon.-left { margin-right: -2px; }
+.nui-chip__icon.-right { margin-left: -2px; }
+
+/* --- REMOVE BUTTON --- */
+.nui-chip__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Sizing to form a perfect circular hit area independent of SVG size */
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  border-radius: 50%;
+  
+  background: transparent;
+  border: none;
+  /* Inherits white if chip is selected, dark gray if not */
+  color: inherit; 
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.2s, background-color 0.2s;
+  padding: 0;
+}
+
+.nui-chip__remove:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* In dark mode or on dark selected backgrounds, make hover highlight lighter */
+.nui-chip--selected .nui-chip__remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Focus Ring for the inner remove button */
+.nui-chip__remove:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px; 
+}

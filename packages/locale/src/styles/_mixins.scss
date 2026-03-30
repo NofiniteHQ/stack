@@ -1,0 +1,51 @@
+/**
+ * @license
+ * Copyright (C) 2025 Nofinite
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use "config" as *;
+
+// Base styles for the flag element
+@mixin nf-base {
+  .#{$nf-prefix} {
+    display: inline-block;
+    width: $nf-size * $nf-ratio; // 4x3 width
+    height: $nf-size;
+    line-height: $nf-size;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+    position: relative;
+
+    // Square modifier (.nf-flag.square)
+    &.square {
+      width: $nf-size; // 1x1 width
+    }
+  }
+}
+
+// Generates the background image for a specific country
+@mixin nf-generate($country) {
+  .#{$nf-prefix}-#{$country} {
+    // Default to 4x3
+    background-image: url("#{$nf-path}/4x3/#{$country}.svg");
+
+    // Switch to 1x1 if the .square class is added
+    &.square {
+      background-image: url("#{$nf-path}/1x1/#{$country}.svg");
+    }
+  }
+}

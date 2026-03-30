@@ -1,0 +1,104 @@
+/* src/components/popover/Popover.css */
+
+.nui-popover-content {
+  position: absolute;
+  z-index: 9999;
+  min-width: 220px;
+  max-width: 360px;
+  padding: var(--nui-space-4);
+  
+  /* Appearance */
+  background-color: var(--nui-bg-surface);
+  color: var(--nui-fg-default);
+  font-family: var(--nui-font-sans);
+  border: 1px solid var(--nui-border-default);
+  border-radius: var(--nui-radius-lg);
+  
+  /* Modern Shadow: Use filter drop-shadow so the pseudo-element arrow gets the shadow too! */
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
+  
+  /* Base animation state */
+  opacity: 0;
+  animation: nui-popover-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* =========================================
+   DYNAMIC ARROW (Pseudo-Element)
+   ========================================= */
+.nui-popover-content::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  
+  background-color: inherit;
+  border: 1px solid var(--nui-border-default);
+  border-radius: 2px;
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+/* PLACEMENT SPECIFIC ARROW ADJUSTMENTS */
+
+.nui-popover-content[data-placement="bottom"]::before {
+  top: -6px;
+  left: var(--nui-popover-arrow-x, 50%);
+  margin-left: -6px; /* Offset half width to perfectly center */
+  border-bottom-color: transparent;
+  border-right-color: transparent;
+  transform-origin: top left;
+}
+
+.nui-popover-content[data-placement="top"]::before {
+  bottom: -6px;
+  left: var(--nui-popover-arrow-x, 50%);
+  margin-left: -6px;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  transform-origin: bottom right;
+}
+
+.nui-popover-content[data-placement="left"]::before {
+  right: -6px;
+  top: var(--nui-popover-arrow-y, 50%);
+  margin-top: -6px;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  transform-origin: top right;
+}
+
+.nui-popover-content[data-placement="right"]::before {
+  left: -6px;
+  top: var(--nui-popover-arrow-y, 50%);
+  margin-top: -6px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  transform-origin: bottom left;
+}
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+@keyframes nui-popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+/* Set initial transform variables based on placement so they "slide" out of the trigger */
+.nui-popover-content[data-placement="bottom"] { --tw-translate-y: -8px; }
+.nui-popover-content[data-placement="top"] { --tw-translate-y: 8px; }
+.nui-popover-content[data-placement="left"] { --tw-translate-x: 8px; }
+.nui-popover-content[data-placement="right"] { --tw-translate-x: -8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nui-popover-content {
+    animation: none;
+    opacity: 1;
+  }
+}

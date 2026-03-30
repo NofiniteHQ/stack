@@ -1,0 +1,104 @@
+/* src/components/alert/Alert.css */
+
+.nui-alert {
+  /* 1. Layout */
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--nui-space-4);
+  gap: var(--nui-space-3);
+  
+  /* 2. Base Styling */
+  border-radius: var(--nui-radius-md);
+  /* * We apply a transparent border here to prevent layout shift 
+   * when variants apply their colored borders. */
+  border: 1px solid transparent; 
+  font-family: var(--nui-font-sans);
+  font-size: var(--nui-text-sm);
+  line-height: 1.5;
+}
+
+/* --- CONTENT --- */
+.nui-alert__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--nui-space-1);
+}
+
+.nui-alert__title {
+  font-weight: var(--nui-weight-bold);
+  line-height: 1.25;
+}
+
+.nui-alert__description {
+  /* * Slightly reducing opacity for the description creates immediate 
+   * visual hierarchy against the title without needing a separate font color. */
+  opacity: 0.9;
+}
+
+/* --- CLOSE BUTTON --- */
+.nui-alert__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: var(--nui-space-2);
+  
+  /* * The negative top margin visually aligns the center of the 16px icon 
+   * with the baseline of the first line of text. */
+  margin-top: -2px; 
+  
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  /* * Inherit allows the X icon to perfectly match the color of whatever 
+   * alert variant it sits inside automatically. */
+  color: inherit; 
+  opacity: 0.7;
+  
+  transition: opacity 0.2s;
+  padding: 0;
+}
+
+.nui-alert__close:hover {
+  opacity: 1;
+}
+
+.nui-alert__close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: var(--nui-radius-sm);
+}
+
+/* --- VARIANTS (Theming) --- */
+/* * Data attributes are used for state/variant targeting to avoid class collisions 
+ * and keep the API directly tied to the React props. */
+
+/* INFO (Default) */
+.nui-alert[data-variant="info"] {
+  background-color: var(--nui-brand-50);
+  border-color: var(--nui-brand-100);
+  color: var(--nui-brand-700);
+}
+
+/* SUCCESS */
+.nui-alert[data-variant="success"] {
+  background-color: #f0fdf4;
+  border-color: #dcfce7;
+  color: var(--nui-color-success);
+}
+
+/* WARNING */
+.nui-alert[data-variant="warning"] {
+  background-color: #fffbeb;
+  border-color: #fef3c7;
+  color: #b45309; 
+}
+
+/* ERROR */
+.nui-alert[data-variant="error"] {
+  background-color: #fef2f2;
+  border-color: #fee2e2;
+  color: var(--nui-color-danger);
+}
