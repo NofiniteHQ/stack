@@ -10,12 +10,11 @@ import {
   Card,
   Checkbox,
   Input,
-  Popover,
-  Select,
+
   Stepper,
   Table,
   Tabs,
-  Tooltip,
+
   RadioGroup,
   DatePicker,
   Breadcrumbs,
@@ -26,7 +25,7 @@ import {
 } from '@nofinite/nui';
 
 function ThemeExample() {
-  const { theme, resolved, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <Card>
@@ -35,7 +34,7 @@ function ThemeExample() {
       </Card.Header>
       <Card.Body>
         <p style={{ marginTop: 0 }}>
-          Selected: <strong>{theme}</strong> · Active: <strong>{resolved}</strong>
+          Selected: <strong>{theme}</strong> · 
         </p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <Button onClick={() => setTheme('light')}>Light</Button>
@@ -46,7 +45,6 @@ function ThemeExample() {
     </Card>
   );
 }
-
 function DialogExample() {
   const handleDelete = async () => {
     const isConfirmed = await nui.confirm(
@@ -83,7 +81,6 @@ function DialogExample() {
     </Card>
   );
 }
-
 function FormExample() {
   const [role, setRole] = React.useState('designer');
 
@@ -212,7 +209,6 @@ function StepperExample() {
     </Card>
   );
 }
-
 function AccordionExample() {
   return (
     <Card>
@@ -246,7 +242,6 @@ function AccordionExample() {
     </Card>
   );
 }
-
 function TableExample() {
   const data = [
     { id: 1, name: 'Aarav', plan: 'Pro', status: 'Active' },
@@ -289,7 +284,6 @@ function TableExample() {
     </Card>
   );
 }
-
 function ButtonExample() {
   return (
     <Card>
@@ -309,7 +303,6 @@ function ButtonExample() {
     </Card>
   );
 }
-
 function Section() {
   return (
     <Card>
@@ -322,7 +315,6 @@ function Section() {
     </Card>
   );
 }
-
 function ChoiceExample() {
   const [billing, setBilling] = React.useState('monthly');
   const [analytics, setAnalytics] = React.useState(true);
@@ -374,9 +366,8 @@ function ChoiceExample() {
     </Card>
   );
 }
-
 function TabsExample() {
-  const [tab, setTab] = useState('account');
+  const [, setTab] = useState('account');
 
   return (
     <Card>
@@ -411,7 +402,6 @@ function TabsExample() {
 
   );
 }
-
 function DatePickerExample() {
   return (
     <Card>
@@ -430,7 +420,6 @@ function DatePickerExample() {
 
   );
 }
-
 function BreadcrumbsExample() {
   return (
     <Card>
@@ -588,7 +577,7 @@ function DrawerExample() {
   );
 }
 function CommandPaletteExample() {
-  const [open, setOpen] = useState(true)
+  const [, setOpen] = useState(true);
   return (
     <Card>
       <Card.Header>
@@ -639,7 +628,6 @@ function CommandPaletteExample() {
     </Card>
   );
 }
-
 function ContextMenuExample() {
   return (
     <Card>

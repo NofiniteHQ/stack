@@ -123,7 +123,7 @@ function HeroSection() {
 
 // ============ FEATURES BENTO GRID ============
 function FeaturesSection() {
-  const { theme, resolved, setTheme } = useTheme();
+  const { theme, resolved, setTheme } = useTheme() as any
   const [step, setStep] = React.useState(1);
 
   return (
