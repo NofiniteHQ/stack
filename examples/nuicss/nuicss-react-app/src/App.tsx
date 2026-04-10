@@ -33,7 +33,7 @@ function Navbar() {
         <div className="nui-container nui-mx-auto nui-px-6 nui-py-4">
           <div className="nui-flex nui-items-center nui-justify-between nui-gap-8">
             {/* Logo */}
-            <a href="#" className="nui-flex nui-items-center nui-gap-3">
+            <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-flex nui-items-center nui-gap-3">
               <div className="nui-w-10 nui-h-10 nui-flex nui-items-center nui-justify-center nui-bg-primary nui-rounded-xl nui-text-white">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -73,10 +73,10 @@ function Navbar() {
                   </svg>
                 )}
               </button>
-              <a href="#" className="nui-px-4 nui-py-2 nui-text-sm nui-font-medium nui-text-subtle nui-transition">
+              <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-px-4 nui-py-2 nui-text-sm nui-font-medium nui-text-subtle nui-transition">
                 Sign in
               </a>
-              <a href="#" className="nui-btn nui-btn-primary nui-btn-sm">
+              <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-btn nui-btn-primary nui-btn-sm">
                 Start Free Trial
               </a>
             </div>
@@ -131,10 +131,10 @@ function Navbar() {
               ))}
             </nav>
             <div className="nui-absolute nui-bottom-0 nui-left-0 nui-right-0 nui-p-6 nui-border-t nui-border-default nui-flex nui-flex-col nui-gap-3 nui-bg-surface">
-              <a href="#" className="nui-btn nui-btn-outline nui-w-full">
+              <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-btn nui-btn-outline nui-w-full">
                 Sign in
               </a>
-              <a href="#" className="nui-btn nui-btn-primary nui-w-full">
+              <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-btn nui-btn-primary nui-w-full">
                 Start Free Trial
               </a>
             </div>
@@ -179,13 +179,13 @@ function HeroSection() {
 
             {/* CTAs */}
             <div className="nui-mt-10 nui-flex nui-flex-col sm:nui-flex-row nui-items-center nui-gap-4 nui-justify-center border ">
-              <a href="#" className="nui-btn nui-btn-primary nui-btn-lg nui-w-full sm:nui-w-auto">
+              <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-btn nui-btn-primary nui-btn-lg nui-w-full sm:nui-w-auto">
                 Start building free
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>
-              <a href="#" className="nui-btn nui-btn-outline nui-btn-lg nui-w-full sm:nui-w-auto">
+              <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-btn nui-btn-outline nui-btn-lg nui-w-full sm:nui-w-auto">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
@@ -471,7 +471,7 @@ function FeaturesSection() {
 
               {/* CTA */}
               <a
-                href="#"
+                href="https://opensource.nofinite.com/docs/nuicss" target='_blank'
                 className="nui-inline-flex nui-items-center nui-gap-2 nui-text-sm nui-font-semibold nui-text-primary"
               >
                 Learn more
@@ -570,7 +570,7 @@ function HowItWorksSection() {
               ))}
             </ul>
 
-            <a href="#" className="nui-btn nui-btn-primary nui-my-8">
+            <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-btn nui-btn-primary nui-my-8">
               Get started
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -928,7 +928,7 @@ function FAQSection() {
           </h2>
           <p className="nui-mt-4 nui-text-lg nui-text-subtle">
             Can't find what you're looking for?{' '}
-            <a href="#" className="nui-text-primary nui-font-medium">
+            <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-text-primary nui-font-medium">
               Contact our team
             </a>
           </p>
@@ -994,7 +994,7 @@ function CTASection() {
 
             <div className="nui-mt-10 nui-flex nui-flex-col sm:nui-flex-row nui-items-center nui-justify-center nui-gap-4">
               <a
-                href="#"
+                href="https://opensource.nofinite.com/docs/nuicss" target='_blank'
                 className="nui-inline-flex nui-items-center nui-gap-2 nui-px-8 nui-py-4 nui-font-semibold nui-rounded-xl nui-shadow-xl nui-text-default  nui-transition"
               >
                 Start building free
@@ -1003,7 +1003,7 @@ function CTASection() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://opensource.nofinite.com/docs/nuicss" target='_blank'
                 className="nui-inline-flex nui-items-center nui-gap-2 nui-px-8 nui-py-4 nui-font-semibold nui-rounded-xl nui-shadow-xl nui-text-default nui-no-underline nui-transition"
               >
                 Schedule a demo
@@ -1035,7 +1035,7 @@ function Footer() {
         <div className="nui-flex nui-flex-wrap nui-gap-8 lg:nui-gap-12">
           {/* Brand */}
           <div className="nui-col-span-2">
-            <a href="#" className="nui-flex nui-items-center nui-gap-3 nui-mb-6">
+            <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-flex nui-items-center nui-gap-3 nui-mb-6">
               <div className="nui-w-11 nui-h-11 nui-flex nui-items-center nui-justify-center nui-bg-primary nui-rounded-xl nui-text-white">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -1050,7 +1050,7 @@ function Footer() {
               {['X', '◆', '◈', '▶'].map((icon, i) => (
                 <a
                   key={i}
-                  href="#"
+                  href="https://opensource.nofinite.com/docs/nuicss" target='_blank'
                   className="nui-w-10 nui-h-10 nui-flex nui-items-center nui-justify-center nui-rounded-lg nui-text-white nui-opacity-60 nui-transition"
                 
                 >
@@ -1069,7 +1069,7 @@ function Footer() {
               <ul className=" list-none">
                 {links.map((link) => (
                   <li key={link} >
-                    <a href="#" className="nui-text-sm nui-text-white nui-opacity-50 nui-transition nui-text-default ">
+                    <a href="https://opensource.nofinite.com/docs/nuicss" target='_blank' className="nui-text-sm nui-text-white nui-opacity-50 nui-transition nui-text-default ">
                       {link}
                     </a>
                   </li>
@@ -1108,7 +1108,7 @@ function Footer() {
         {/* Bottom */}
         <div className="nui-flex nui-flex-col sm:nui-flex-row nui-items-center nui-justify-between nui-gap-4 nui-mt-12 nui-pt-8 nui-border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <p className="nui-text-sm nui-text-white nui-opacity-40">
-            © {new Date().getFullYear()} NUI CSS Inc. All rights reserved.
+            Created with Nuicss
           </p>
           <div className="nui-flex nui-items-center nui-gap-2 nui-text-sm nui-text-white nui-opacity-40">
             <span className="nui-w-2 nui-h-2 nui-bg-success nui-rounded-full" />

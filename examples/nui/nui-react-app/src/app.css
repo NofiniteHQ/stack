@@ -721,11 +721,12 @@
 }
 
 .footer-bottom {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 24px;
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
   border-top: 1px solid var(--nui-border-default);
 }
 
@@ -735,10 +736,3 @@
   color: var(--nui-fg-subtle);
 }
 
-@media (max-width: 480px) {
-  .footer-bottom {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
-  }
-}
