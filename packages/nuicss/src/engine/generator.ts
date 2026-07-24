@@ -266,9 +266,10 @@ export function generateCSS(classes: string[], options: GeneratorOptions = {}): 
     
     // Support peer and group selectors
     if (pseudoClass.includes(':peer-')) {
-      const match = pseudoClass.match(/:peer-([a-z-]+)/);
+      const match = pseudoClass.match(/:peer-([a-z-]+)(?:\/([a-zA-Z0-9_-]+))?/);
       if (match) {
-        baseSelector = `.peer:${match[1]} ~ .${baseSelector}`;
+        const peerName = match[2] ? `\\/${match[2]}` : '';
+        baseSelector = `.peer${peerName}:${match[1]} ~ .${baseSelector}`;
         pseudoClass = pseudoClass.replace(match[0], '');
       }
     } else if (peerHasSelector) {
@@ -276,9 +277,10 @@ export function generateCSS(classes: string[], options: GeneratorOptions = {}): 
     }
 
     if (pseudoClass.includes(':group-')) {
-      const match = pseudoClass.match(/:group-([a-z-]+)/);
+      const match = pseudoClass.match(/:group-([a-z-]+)(?:\/([a-zA-Z0-9_-]+))?/);
       if (match) {
-        baseSelector = `.group:${match[1]} .${baseSelector}`;
+        const groupName = match[2] ? `\\/${match[2]}` : '';
+        baseSelector = `.group${groupName}:${match[1]} .${baseSelector}`;
         pseudoClass = pseudoClass.replace(match[0], '');
       }
     } else if (groupHasSelector) {
