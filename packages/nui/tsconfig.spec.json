@@ -11,7 +11,12 @@
       "@testing-library/jest-dom"
     ],
     "module": "esnext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ]
   },
   "include": [
     "vite.config.ts",

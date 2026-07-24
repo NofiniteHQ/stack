@@ -9,7 +9,8 @@
     "moduleResolution": "bundler",
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "lib": ["es2022", "dom", "dom.iterable"]
   },
   "exclude": [
     "out-tsc",
