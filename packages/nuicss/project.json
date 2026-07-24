@@ -7,6 +7,7 @@
     "build": {
       "executor": "@nx/vite:build",
       "outputs": ["{options.outputPath}"],
+      "dependsOn": ["build-cdn"],
       "options": {
         "outputPath": "packages/nuicss/dist",
         "configFile": "packages/nuicss/vite.config.ts"
