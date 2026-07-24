@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -49,7 +49,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Tests
-        run: pnpm nx run-many -t test
+        run: pnpm nx run-many -t test --parallel=1
 
       - name: Build Packages
         run: pnpm nx run-many -t build
@@ -73,7 +73,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           
       - name: Install pnpm
         uses: pnpm/action-setup@v3
