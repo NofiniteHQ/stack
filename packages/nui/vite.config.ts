@@ -65,6 +65,7 @@ export default defineConfig({
   },
 
   test: {
+    watch: false,
     globals: true,
     environment: 'happy-dom',
     setupFiles: './vitest.setup.ts',
