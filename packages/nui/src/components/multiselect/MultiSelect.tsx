@@ -198,6 +198,9 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
     if (['ArrowDown', 'ArrowUp', ' ', 'Enter'].includes(e.key)) {
       e.preventDefault();
       setOpen(true);
+    } else if (e.key === 'Escape' && open) {
+      e.preventDefault();
+      closeList();
     }
   };
 
