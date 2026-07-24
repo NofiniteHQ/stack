@@ -4,6 +4,7 @@ packages:
   - 'packages/nuicss/*'
   - 'packages/utils/*'
   - 'packages/locale/*'
+  - 'examples/nuicss/*'
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'

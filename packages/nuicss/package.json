@@ -1,21 +1,37 @@
 {
   "name": "@nofinite/nuicss",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
-  "main": "./dist/index.css",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/plugin/index.d.ts",
   "style": "./dist/index.css",
   "sideEffects": [
     "**/*.css"
   ],
   "exports": {
-    ".": "./dist/index.css",
+    ".": {
+      "types": "./dist/plugin/index.d.ts",
+      "import": {
+        "types": "./dist/plugin/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "default": "./dist/index.js"
+    },
+    "./browser": "./dist/browser.js",
     "./styles.css": "./dist/index.css",
     "./prefixed": "./dist/prefixed.css",
     "./prefixed.css": "./dist/prefixed.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./postcss": "./postcss.js"
   },
   "files": [
     "dist",
+    "postcss.js",
     "README.md",
     "LICENSE"
   ],
@@ -37,5 +53,16 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "glob": "^13.0.6"
+  },
+  "devDependencies": {
+    "jiti": "^2.7.0",
+    "postcss": "^8.5.15",
+    "esbuild": "^0.19.11"
+  },
+  "scripts": {
+    "build": "nx run nuicss:build && nx run nuicss:build-cdn"
   }
 }

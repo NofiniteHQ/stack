@@ -1,22 +1,16 @@
 <div align="center">
 
-# NUI CSS
+# NUI CSS v2
 
-**A zero-config, semantic utility CSS framework designed for modern web applications and effortless runtime theming.**
+**The next-generation JIT utility CSS engine. Blazing fast, zero-configuration out of the box, and perfectly compliant with modern web standards.**
 
 <p align="center">
-  <a href="https://sass-lang.com/">
-    <img alt="Sass Compiled" src="https://img.shields.io/badge/CSS-Zero_Config-CC6699?style=for-the-badge&logo=sass&logoColor=white">
-  </a>
-
   <a href="https://opensource.nofinite.com/docs/nuicss">
     <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
-
   <a href="./LICENSE">
     <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
-
   <a href="https://www.npmjs.com/package/@nofinite/nuicss">
     <img alt="NPM Version" src="https://img.shields.io/npm/v/%40nofinite%2Fnuicss?style=for-the-badge&logo=npm&logoColor=white&labelColor=slategray&color=%23000133">
   </a>
@@ -28,11 +22,14 @@
 
 ## Overview
 
-NUI CSS provides a highly optimized, ahead-of-time (AOT) compiled utility class engine. It completely eliminates build-step complexities and solves the "dark mode class soup" by leveraging semantic CSS variables. Build beautiful, responsive layouts without ever touching a configuration file.
+NUI CSS v2 introduces a completely custom **Just-In-Time (JIT) TypeScript Engine**. By reading your source files at development time (via Vite or PostCSS) or directly in the browser via CDN, NUI CSS compiles exactly the CSS you need—and absolutely nothing more—in milliseconds.
 
-* **Zero-Config:** Pure CSS. No PostCSS, no configuration files, and no JavaScript build steps required. Just link and build.
-* **Semantic Theming:** Effortless dark mode and runtime customizability powered by native CSS variables (e.g., `bg-surface`, `text-primary`). 
-* **Enterprise-Ready:** Ships with both a standard version for rapid application development and a collision-proof `nui-` prefixed version to protect distributed UI components.
+* **Framework Agnostic:** Pure CSS components with no JS dependencies. Build native HTML `<dialog>` modals and CSS `scroll-snap` carousels out-of-the-box.
+* **Zero-Config by Default:** Drop it into Vite, PostCSS, or a `<script>` tag and instantly start using utilities like `.flex`, `.text-primary`, and `.p-4`.
+* **Arbitrary Values:** Instantly compile custom layouts using brackets: `w-[343px]`, `grid-cols-[200px_1fr]`, or `bg-[#ff0055]`.
+* **Logic-Driven Variants:** Fully supports modern pseudo-classes and state logic (`has-[:checked]`, `peer-focus`, `group-has-[.active]`).
+* **Micro-interactions:** Comprehensive `scale-*` (50 to 150) and `delay-*` stagger classes.
+* **Built-in Keyframes:** Ships with modern animations: `animate-zoom-in`, `animate-zoom-out`, `animate-slide-up`, `animate-slide-down`.
 
 ---
 
@@ -40,107 +37,142 @@ NUI CSS provides a highly optimized, ahead-of-time (AOT) compiled utility class 
 
 ```bash
 # pnpm
-pnpm add @nofinite/nuicss
+pnpm add -D @nofinite/nuicss
 
 # npm
-npm install @nofinite/nuicss
-
-# yarn
-yarn add @nofinite/nuicss
-```
-
-### CDN (No build step)
-
-You can use NUICSS directly in your HTML without any package manager or build tools.
-
-**Clean version (Standard utilities like `.flex` and `.p-4`):**
-
-```html
-<link
-  rel="stylesheet"
-  href="[https://cdn.jsdelivr.net/npm/@nofinite/nuicss@latest/dist/index.css](https://cdn.jsdelivr.net/npm/@nofinite/nuicss@latest/dist/index.css)"
-/>
-
-```
-
-**Prefixed version (Collision-proof utilities like `.nui-flex` and `.nui-p-4`):**
-
-```html
-<link
-  rel="stylesheet"
-  href="[https://cdn.jsdelivr.net/npm/@nofinite/nuicss@latest/dist/prefixed.css](https://cdn.jsdelivr.net/npm/@nofinite/nuicss@latest/dist/prefixed.css)"
-/>
-
+npm install -D @nofinite/nuicss
 ```
 
 ---
 
-## Quick Start
+## Setup
 
-### 1. HTML Prototype
+### 1. CDN (Easiest)
 
-Simply link the CSS file from the CDN and start using the utility classes directly in your markup.
+For prototyping or standard HTML/HTMX/Templ stacks, just include the script in your `<head>`. It automatically observes DOM mutations and injects compiled CSS in real-time.
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NUI CSS App</title>
-  <link rel="stylesheet" href="[https://cdn.jsdelivr.net/npm/@nofinite/nuicss@latest/dist/index.css](https://cdn.jsdelivr.net/npm/@nofinite/nuicss@latest/dist/index.css)" />
-</head>
-<body class="bg-surface text-primary p-8">
-  
-  <div class="max-w-md mx-auto shadow-md rounded-lg p-6 border border-subtle">
-    <h1 class="text-2xl font-bold mb-4">Hello NUI CSS</h1>
-    <p class="text-muted">Building fast, semantic UIs without the configuration.</p>
-  </div>
-
-</body>
-</html>
-
+<script src="https://unpkg.com/@nofinite/nuicss/dist/browser.js"></script>
 ```
 
-### 2. React / Modern Bundlers (Next.js, Vite, etc.)
+### 2. Vite (Recommended for SPAs)
 
-If you installed via a package manager, import the utilities directly into your application's root layer (e.g., `layout.tsx`, `main.tsx`, or `App.jsx`):
+NUI CSS integrates perfectly into Vite for HMR and instant class generation.
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { nuicssVitePlugin } from '@nofinite/nuicss';
+
+export default defineConfig({
+  plugins: [
+    nuicssVitePlugin()
+  ],
+});
+```
+
+Import the virtual module into your application's root entry file (e.g., `main.tsx` or `App.tsx`):
 
 ```tsx
-// 1. Import the styling engine
-import '@nofinite/nuicss'; // Standard clean utilities (.flex, .p-4)
-// import '@nofinite/nuicss/prefixed'; // Collision-proof utilities (.nui-flex, .nui-p-4)
+// main.tsx
+import '@nofinite/nuicss/virtual.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 
-// 2. Build your component
-export default function App() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4">
-      <div className="p-8 shadow-lg rounded-xl border border-default w-full max-w-lg">
-        <h1 className="text-3xl font-sans font-bold text-primary mb-2">
-          Welcome to NUI CSS
-        </h1>
-        <p className="text-muted mb-6">
-          Building fast, semantic UIs without the configuration.
-        </p>
-        <button className="bg-primary text-inverse px-4 py-2 rounded-md hover:opacity-80 transition-all" onClick={() => window.open("https://opensource.nofinite.com/docs/nuicss", "_blank", "noreferrer")>
-          Get Started
-        </button>
-      </div>
-    </div>
-  );
-}
+ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
+```
 
+### 3. PostCSS
+
+If you aren't using Vite, NUI CSS operates as a standard PostCSS plugin.
+
+```js
+// postcss.config.js
+export default {
+  plugins: {
+    '@nofinite/nuicss/postcss': {}
+  }
+};
+```
+
+Include the `@nuicss` directives in your main CSS file:
+
+```css
+/* index.css */
+@nuicss base;
+@nuicss utilities;
 ```
 
 ---
 
-## Documentation
+## Configuration & Extensibility
 
-For full setup guides, the complete utility class reference, and theming instructions, [read documentation](https://opensource.nofinite.com/docs/nuicss).
+NUI CSS works instantly out of the box, but you can heavily customize the engine by creating a `nuicss.config.ts` (or `.js`) file in your project root.
+
+```ts
+import type { NuicssConfig } from '@nofinite/nuicss';
+
+export default {
+  // 1. Scan specific files
+  content: ['./src/**/*.{tsx,jsx,html}'],
+  
+  // 2. Override default theme tokens
+  theme: {
+    colorsBg: {
+      surface: '#111111'
+    }
+  },
+
+  // 3. Inject Custom RegEx Engine Rules
+  rules: [
+    {
+      pattern: /^super-bold$/,
+      generator: () => 'font-weight: 1000; letter-spacing: -2px;'
+    }
+  ]
+} satisfies NuicssConfig;
+```
+
+---
+
+## Developer DX Features
+
+NUI CSS v2 comes with helper utilities designed for modern web apps.
+
+### Native Framework Agnostic Components
+Because NUI CSS generates standard CSS, you can build complex components relying on browser standards rather than framework logic:
+- **Modals:** Use the HTML `<dialog>` tag + `animate-zoom-in`.
+- **Carousels:** Use `overflow-x-auto snap-x snap-mandatory` wrappers.
+
+### JS/TS Theme Resolver
+When you need to draw on a `<canvas>` or use charting libraries, you often need the exact hex value of a CSS variable.
+
+```ts
+import { getThemeValue } from '@nofinite/nuicss';
+
+// Safely extracts the computed value (e.g., "#2563eb")
+const primaryColor = getThemeValue('color', 'primary'); 
+```
+
+### Anti-FOUC Dark Mode Sync
+When implementing dark mode via the `.dark` class, users might see a Flash of Unstyled Content (FOUC) while React boots up. Inject our provided script into your HTML `<head>` to fix this perfectly.
+
+```tsx
+import { DARK_MODE_SCRIPT } from '@nofinite/nuicss';
+
+export function Head() {
+  return (
+    <head>
+      {/* Synchronizes localStorage and system preference synchronously */}
+      <script dangerouslySetInnerHTML={{ __html: DARK_MODE_SCRIPT }} />
+    </head>
+  );
+}
+```
+
+---
 
 ## License
 
-This project is licensed under the
-[Apache License, Version 2.0](./LICENSE).
-
-Feel free to use, modify, and share this project in your applications, products, and services. Attribution is welcome and appreciated, but never required.
+This project is licensed under the [Apache License, Version 2.0](./LICENSE).

@@ -12,21 +12,19 @@ export default defineConfig(() => ({
 
   build: {
     outDir: './dist',
-    emptyOutDir: true,
+    emptyOutDir: false,
     reportCompressedSize: true,
-
-    // Instead of a single JS library entry, we tell Rollup (Vite's bundler)
-    // to specifically compile our two master SCSS files.
+    lib: {
+      entry: path.resolve(__dirname, 'src/plugin/index.ts'),
+      name: 'Nuicss',
+      fileName: 'index',
+      formats: ['es', 'cjs'] as any,
+    },
     rollupOptions: {
-      input: {
-        index: path.resolve(__dirname, 'src/index.scss'),
-        prefixed: path.resolve(__dirname, 'src/prefixed.scss'),
-      },
-      output: {
-        // This ensures the final output is literally 'index.css' and 'prefixed.css'
-        // without any weird Vite hashes or nested folders.
-        assetFileNames: '[name][extname]',
-      },
+      external: [
+        'fs', 'path', 'vite', 'postcss', 'glob', 'jiti', 
+        /^node:/, 'os', 'crypto', 'util', 'assert', 'url', 'process', 'tty', 'vm', 'perf_hooks'
+      ],
     },
   },
 

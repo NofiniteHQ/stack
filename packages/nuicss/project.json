@@ -12,14 +12,10 @@
         "configFile": "packages/nuicss/vite.config.ts"
       }
     },
-    "build-sass": {
+    "build-cdn": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "npx sass packages/nuicss/src/index.scss packages/nuicss/dist/index.css --style=compressed",
-          "npx sass packages/nuicss/src/prefixed.scss packages/nuicss/dist/prefixed.css --style=compressed"
-        ],
-        "parallel": true
+        "command": "npx esbuild packages/nuicss/src/cdn.ts --bundle --minify --outfile=packages/nuicss/dist/browser.js"
       }
     }
   }

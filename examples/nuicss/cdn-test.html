@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUI CSS JIT CDN Test</title>
+    <!-- Configure NUI CSS before loading the script -->
+    <script>
+      window.nuicssConfig = {
+        theme: {
+          colorsBg: { brand: '#ff0055' }
+        },
+        components: {
+          'btn-brand': ['bg-brand', 'text-white', 'px-6', 'py-3', 'rounded-full', 'shadow-lg', 'transition-transform', 'hover:scale-105']
+        }
+      };
+    </script>
+    <script src="../../packages/nuicss/dist/cdn.js"></script>
+</head>
+<body class="nui-bg-page dark:nui-bg-zinc-950 nui-text-default dark:nui-text-white nui-font-sans">
+    
+    <div class="nui-container nui-mx-auto nui-px-6 nui-py-20 nui-text-center">
+        <h1 class="nui-text-5xl nui-font-extrabold nui-text-transparent nui-bg-clip-text nui-bg-gradient-to-r nui-from-primary nui-to-info nui-mb-6">
+            Browser JIT CDN Test
+        </h1>
+        <p class="nui-text-lg nui-text-zinc-500 dark:nui-text-zinc-400 nui-mb-10">
+            If you see this rendered with proper typography, padding, gradients, and custom brand buttons, then the MutationObserver JIT compiler is working perfectly!
+        </p>
+        
+        <div class="nui-flex nui-justify-center nui-gap-4">
+            <button class="nui-btn-primary">Standard Button</button>
+            <button class="nui-btn-brand">Custom Brand Button</button>
+        </div>
+
+        <div id="dynamic-content" class="nui-mt-12 nui-p-8 nui-bg-surface dark:nui-bg-zinc-900 nui-rounded-3xl nui-border nui-border-default/50 dark:nui-border-zinc-800/50 nui-shadow-2xl">
+            <h3 class="nui-text-xl nui-font-bold nui-mb-4">Dynamic Content Injection</h3>
+            <button onclick="inject()" class="nui-btn nui-bg-surface-raised dark:nui-bg-zinc-800">Inject new element</button>
+        </div>
+    </div>
+
+    <script>
+        function inject() {
+            const div = document.createElement('div');
+            div.className = 'nui-mt-6 nui-p-4 nui-bg-success/20 nui-text-success nui-border nui-border-success/50 nui-rounded-lg nui-animate-bounce';
+            div.innerText = 'I was dynamically injected! My styles were generated on the fly!';
+            document.getElementById('dynamic-content').appendChild(div);
+        }
+    </script>
+</body>
+</html>
