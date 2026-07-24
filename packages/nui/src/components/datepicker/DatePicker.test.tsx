@@ -69,7 +69,7 @@ describe('DatePicker Component', () => {
 
       // Ensure focus lands specifically on the Day BUTTON, not just the grid wrapper
       await waitFor(() => {
-        expect(document.activeElement).toHaveTextContent('15');
+        expect(document.activeElement).toHaveTextContent(/^15$/);
         expect(document.activeElement?.tagName).toBe('BUTTON');
       });
 
