@@ -1,4 +1,4 @@
-# @nofinite/utils
+# @nofinite/locale
 
 ## 2.0.0
 
@@ -10,9 +10,3 @@
   - Full Vite integration plugin (`nuicssVitePlugin`) for seamless developer experience.
   - Resolved dependency topology cycles and deadlocks in the Nx build graph.
   - Overhauled and optimized modifier generation (e.g., `group-hover/name` and `peer-focus`).
-
-## 1.0.0
-
-### Minor Changes
-
-- Initial public release of the Nofinite Utils

@@ -1,7 +1,7 @@
 {
   "name": "@nofinite/locale",
   "private": false,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Nofinite's standardized country data, flags, and international dial codes for global applications.",
   "type": "module",
   "author": "Nofinite",
