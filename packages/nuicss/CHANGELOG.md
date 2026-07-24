@@ -1,5 +1,12 @@
 # @nofinite/nuicss
 
+## 2.0.1
+
+### Patch Changes
+
+- 89e6f95: fix(nuicss): run esbuild without npx for ci/cd compatibility
+- d365a79: fix(nuicss): include `browser.js` CDN bundle in automated releases
+
 ## 2.0.0
 
 ### Major Changes
