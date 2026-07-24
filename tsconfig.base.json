@@ -16,6 +16,12 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@org/source"]
+    "customConditions": ["@org/source"],
+    "paths": {
+      "@nofinite/nuicss": ["./packages/nuicss/src/plugin/index.ts"],
+      "@nofinite/nui": ["./packages/nui/src/index.ts"],
+      "@nofinite/utils": ["./packages/utils/src/index.ts"],
+      "@nofinite/locale": ["./packages/locale/src/index.ts"]
+    }
   }
 }

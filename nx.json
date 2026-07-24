@@ -39,7 +39,8 @@
         "typecheckTargetName": "typecheck",
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
-      }
+      },
+      "exclude": ["examples/**/*"]
     },
     {
       "plugin": "@nx/eslint/plugin",
@@ -51,7 +52,8 @@
       "plugin": "@nx/vitest",
       "options": {
         "testTargetName": "test"
-      }
+      },
+      "exclude": ["examples/**/*"]
     }
   ],
   "release": {
