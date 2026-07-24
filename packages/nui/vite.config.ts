@@ -69,5 +69,6 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: './vitest.setup.ts',
+    pool: 'forks',
   },
 });

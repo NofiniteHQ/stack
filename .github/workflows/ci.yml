@@ -49,7 +49,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Tests
-        run: pnpm nx run-many -t test --parallel=1
+        run: pnpm nx run-many -t test
 
       - name: Build Packages
         run: pnpm nx run-many -t build
