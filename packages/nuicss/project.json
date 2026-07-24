@@ -16,7 +16,7 @@
     "build-cdn": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "esbuild packages/nuicss/src/cdn.ts --bundle --minify --outfile=packages/nuicss/dist/browser.js"
+        "command": "pnpm exec esbuild packages/nuicss/src/cdn.ts --bundle --minify --outfile=packages/nuicss/dist/browser.js"
       }
     }
   }
