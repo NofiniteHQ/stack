@@ -40,7 +40,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nofinitehq/stack.git",
+    "url": "git+https://github.com/NofiniteHQ/stack.git",
     "directory": "packages/nuicss"
   },
   "keywords": [

@@ -6,7 +6,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nofinitehq/stack.git",
+    "url": "git+https://github.com/NofiniteHQ/stack.git",
     "directory": "packages/utils"
   },
   "main": "./dist/index.js",
@@ -60,6 +60,10 @@
     "LICENSE",
     "package.json"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "dependencies": {
     "argon2": "^0.44.0",
     "jose": "^6.1.3",
