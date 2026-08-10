@@ -1,22 +1,21 @@
 import React, { forwardRef } from 'react';
 import { cn } from '../../utils';
-import './Chip.css';
 
 export type ChipSize = 'sm' | 'md';
 
 export interface ChipProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
-  children: React.ReactNode;
-  /** If true, renders a trailing 'X' button that triggers onRemove */
-  removable?: boolean;
-  /** Controls the visual and ARIA active state of the chip */
-  selected?: boolean;
-  iconLeft?: React.ReactNode;
-  iconRight?: React.ReactNode;
-  size?: ChipSize;
-  /** Callback fired when the 'X' button is clicked */
-  onRemove?: () => void;
-  /** Callback fired when the main body of the chip is clicked or activated via keyboard */
-  onSelect?: () => void;
+ children: React.ReactNode;
+ /** If true, renders a trailing 'X' button that triggers onRemove */
+ removable?: boolean;
+ /** Controls the visual and ARIA active state of the chip */
+ selected?: boolean;
+ iconLeft?: React.ReactNode;
+ iconRight?: React.ReactNode;
+ size?: ChipSize;
+ /** Callback fired when the 'X' button is clicked */
+ onRemove?: () => void;
+ /** Callback fired when the main body of the chip is clicked or activated via keyboard */
+ onSelect?: () => void;
 }
 
 /**
@@ -26,93 +25,98 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'o
  * interactive button role depending on the presence of `onSelect` or `onClick`.
  */
 export const Chip = forwardRef<HTMLDivElement, ChipProps>(
-  (
-    {
-      children,
-      removable = false,
-      selected = false,
-      iconLeft,
-      iconRight,
-      size = 'md',
-      onRemove,
-      onSelect,
-      className,
-      onClick,
-      onKeyDown,
-      ...props
-    },
-    ref
-  ) => {
-    
-    // * Interaction Handling: 
-    // We unify both the custom onSelect and the standard HTML onClick 
-    // so consumers can use either without breaking the component's internal logic.
-    const handleSelect = (e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
-      onSelect?.();
-      if (e.type === 'click' && onClick) {
-        onClick(e as React.MouseEvent<HTMLDivElement>);
-      }
-    };
+ (
+ {
+ children,
+ removable = false,
+ selected = false,
+ iconLeft,
+ iconRight,
+ size = 'md',
+ onRemove,
+ onSelect,
+ className,
+ onClick,
+ onKeyDown,
+ ...props
+ },
+ ref
+ ) => {
+ 
+ // * Interaction Handling: 
+ // We unify both the custom onSelect and the standard HTML onClick 
+ // so consumers can use either without breaking the component's internal logic.
+ const handleSelect = (e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
+ onSelect?.();
+ if (e.type === 'click' && onClick) {
+ onClick(e as React.MouseEvent<HTMLDivElement>);
+ }
+ };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (onKeyDown) onKeyDown(e);
-      
-      // Trigger select on Enter or Space for keyboard accessibility
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault(); // Prevent page scroll on Space
-        handleSelect(e);
-      }
-    };
+ const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+ if (onKeyDown) onKeyDown(e);
+ 
+ // Trigger select on Enter or Space for keyboard accessibility
+ if (e.key === 'Enter' || e.key === ' ') {
+ e.preventDefault(); // Prevent page scroll on Space
+ handleSelect(e);
+ }
+ };
 
-    const isInteractive = Boolean(onSelect || onClick);
+ const isInteractive = Boolean(onSelect || onClick);
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'nui-chip',
-          `nui-chip--${size}`,
-          selected && 'nui-chip--selected',
-          isInteractive && 'nui-chip--interactive',
-          className
-        )}
-        // Assign button role only if it actually does something
-        role={isInteractive ? 'button' : 'generic'}
-        tabIndex={isInteractive ? 0 : undefined}
-        aria-pressed={isInteractive ? selected : undefined}
-        onClick={isInteractive ? handleSelect : undefined}
-        onKeyDown={isInteractive ? handleKeyDown : undefined}
-        {...props}
-      >
-        {iconLeft && <span className="nui-chip__icon -left">{iconLeft}</span>}
+ const sizeStyles = {
+ sm: 'h-6 text-xs px-2',
+ md: 'h-8 text-sm px-3',
+ };
 
-        <span className="nui-chip__label">{children}</span>
+ return (
+ <div
+ ref={ref}
+ className={cn(
+ 'inline-flex items-center justify-center rounded-full border font-medium transition-colors duration-200',
+ selected ? 'border-primary bg-primary text-inverse' : 'border-default bg-subtle text-default hover:bg-muted',
+ sizeStyles[size],
+ isInteractive && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+ className
+ )}
+ // Assign button role only if it actually does something
+ role={isInteractive ? 'button' : undefined}
+ tabIndex={isInteractive ? 0 : undefined}
+ aria-pressed={isInteractive ? selected : undefined}
+ onClick={isInteractive ? handleSelect : undefined}
+ onKeyDown={isInteractive ? handleKeyDown : undefined}
+ {...props}
+ >
+ {iconLeft && <span className="mr-1.5 flex items-center justify-center">{iconLeft}</span>}
 
-        {iconRight && <span className="nui-chip__icon -right">{iconRight}</span>}
+ <span className="truncate">{children}</span>
 
-        {removable && (
-          <button
-            type="button"
-            className="nui-chip__remove"
-            aria-label="Remove"
-            onClick={(e) => {
-              // * Event Propagation: 
-              // Stop click from bubbling up to the parent <div> and triggering `onSelect`
-              e.stopPropagation(); 
-              onRemove?.();
-            }}
-            onKeyDown={(e) => e.stopPropagation()} 
-          >
-            {/* Crisp X SVG */}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        )}
-      </div>
-    );
-  }
+ {iconRight && <span className="ml-1.5 flex items-center justify-center">{iconRight}</span>}
+
+ {removable && (
+ <button
+ type="button"
+ className="ml-1.5 inline-flex items-center justify-center rounded-full appearance-none border-none bg-transparent p-0.5 text-muted hover:bg-black/10 dark:hover:bg-white/10 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-background transition-all duration-200"
+ aria-label="Remove"
+ onClick={(e) => {
+ // * Event Propagation: 
+ // Stop click from bubbling up to the parent <div> and triggering `onSelect`
+ e.stopPropagation(); 
+ onRemove?.();
+ }}
+ onKeyDown={(e) => e.stopPropagation()} 
+ >
+ {/* Crisp X SVG */}
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+ <line x1="18" y1="6" x2="6" y2="18"></line>
+ <line x1="6" y1="6" x2="18" y2="18"></line>
+ </svg>
+ </button>
+ )}
+ </div>
+ );
+ }
 );
 
 Chip.displayName = 'Chip';

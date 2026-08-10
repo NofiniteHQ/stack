@@ -22,10 +22,6 @@
       },
       "default": "./dist/index.js"
     },
-    "./browser": "./dist/browser.js",
-    "./styles.css": "./dist/index.css",
-    "./prefixed": "./dist/prefixed.css",
-    "./prefixed.css": "./dist/prefixed.css",
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"
   },
@@ -55,14 +51,18 @@
     "access": "public"
   },
   "dependencies": {
-    "glob": "^13.0.6"
+    "@unocss/postcss": "^66.7.5",
+    "@unocss/vite": "^66.7.5",
+    "glob": "^13.0.6",
+    "unocss": "^66.7.5",
+    "valibot": "^1.4.2"
   },
   "devDependencies": {
+    "esbuild": "^0.19.11",
     "jiti": "^2.7.0",
-    "postcss": "^8.5.15",
-    "esbuild": "^0.19.11"
+    "postcss": "^8.5.15"
   },
   "scripts": {
-    "build": "nx run nuicss:build && nx run nuicss:build-cdn"
+    "build": "nx run nuicss:build"
   }
 }

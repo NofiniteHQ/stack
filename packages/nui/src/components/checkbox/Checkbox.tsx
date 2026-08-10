@@ -1,121 +1,123 @@
 "use client";
 
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
-import './Checkbox.css';
 
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
-  /** If provided, makes the checkbox a controlled component. */
-  checked?: boolean; 
-  /** If provided, sets the initial state of an uncontrolled checkbox. */
-  defaultChecked?: boolean;
-  /** Sets the visual state to mixed/indeterminate. This is visually distinct from checked/unchecked. */
-  indeterminate?: boolean;
-  /** Callback fired when the state changes. */
-  onChange?: (checked: boolean) => void;
-  label?: React.ReactNode;
+ checked?: boolean; 
+ defaultChecked?: boolean;
+ indeterminate?: boolean;
+ onChange?: (checked: boolean) => void;
+ label?: React.ReactNode;
 }
 
-/**
- * Checkbox Component
- * * A control that allows the user to toggle between checked and not checked.
- * Architecture Note: This component seamlessly handles both controlled and uncontrolled 
- * paradigms, and directly manipulates the DOM node to support the HTML5 'indeterminate' property.
- */
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  (
-    {
-      checked,
-      defaultChecked,
-      indeterminate = false,
-      onChange,
-      label,
-      disabled = false,
-      className,
-      ...props
-    },
-    ref
-  ) => {
-    // 1. Internal Ref to handle the indeterminate DOM property
-    // The 'indeterminate' state does not exist as an HTML attribute, it only exists
-    // as a property on the DOM node itself, so we must access it via ref.
-    const internalRef = useRef<HTMLInputElement>(null);
+ (
+ {
+ checked,
+ defaultChecked,
+ indeterminate = false,
+ onChange,
+ label,
+ disabled = false,
+ className,
+ ...props
+ },
+ ref
+ ) => {
+ const internalRef = useRef<HTMLInputElement>(null);
 
-    // Merge external ref with internal ref
-    useEffect(() => {
-      if (typeof ref === 'function') {
-        ref(internalRef.current);
-      } else if (ref) {
-        (ref as React.MutableRefObject<HTMLInputElement | null>).current = internalRef.current;
-      }
-    }, [ref]);
+ useEffect(() => {
+ if (typeof ref === 'function') {
+ ref(internalRef.current);
+ } else if (ref) {
+ (ref as React.MutableRefObject<HTMLInputElement | null>).current = internalRef.current;
+ }
+ }, [ref]);
 
-    // 2. Controlled vs Uncontrolled Logic
-    const isControlled = checked !== undefined;
-    const [internalChecked, setInternalChecked] = useState(defaultChecked ?? false);
-    const currentChecked = isControlled ? checked : internalChecked;
+ const isControlled = checked !== undefined;
+ const [internalChecked, setInternalChecked] = useState(defaultChecked ?? false);
+ const currentChecked = isControlled ? checked : internalChecked;
 
-    // 3. Sync Indeterminate state to the actual DOM element
-    useEffect(() => {
-      if (internalRef.current) {
-        internalRef.current.indeterminate = indeterminate;
-      }
-    }, [indeterminate]);
+ useEffect(() => {
+ if (internalRef.current) {
+ internalRef.current.indeterminate = indeterminate;
+ }
+ }, [indeterminate]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (disabled) return;
-      const newVal = e.target.checked;
-      
-      // Only update internal state if the component is uncontrolled
-      if (!isControlled) setInternalChecked(newVal);
-      
-      onChange?.(newVal);
-    };
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ if (disabled) return;
+ const newVal = e.target.checked;
+ if (!isControlled) setInternalChecked(newVal);
+ onChange?.(newVal);
+ };
 
-    return (
-      <label 
-        className={cn(
-          "nui-checkbox", 
-          disabled && "nui-checkbox--disabled", 
-          className
-        )}
-      >
-        <div className="nui-checkbox__wrapper">
-          {/* Hidden but accessible input */}
-          <input
-            ref={internalRef}
-            type="checkbox"
-            className="nui-checkbox__input"
-            disabled={disabled}
-            checked={currentChecked}
-            onChange={handleChange}
-            // aria-checked explicitly supports the 'mixed' state for screen readers
-            aria-checked={indeterminate ? 'mixed' : currentChecked}
-            data-state={
-              indeterminate ? 'indeterminate' : currentChecked ? 'checked' : 'unchecked'
-            }
-            {...props}
-          />
-          
-          {/* Visual Indicator (Overlays the input) */}
-          <span className="nui-checkbox__indicator" aria-hidden="true">
-            {indeterminate ? (
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            ) : currentChecked ? (
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            ) : null}
-          </span>
-        </div>
+ return (
+ <label 
+ className={cn(
+ "inline-flex items-start gap-2 cursor-pointer select-none", 
+ disabled && "cursor-not-allowed opacity-50", 
+ className
+ )}
+ >
+ <div className="relative flex items-center justify-center w-4 h-4 mt-[2px]">
+ <input
+ ref={internalRef}
+ type="checkbox"
+ className="peer appearance-none w-full h-full m-0 bg-surface border border-solid border-strong rounded-[4px] shadow-sm transition-all duration-200 cursor-inherit hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus checked:bg-primary checked:border-primary checked:text-inverse data-[state=indeterminate]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:text-inverse disabled:bg-subtle disabled:opacity-50"
+ disabled={disabled}
+ checked={currentChecked}
+ onChange={handleChange}
+ aria-checked={indeterminate ? 'mixed' : currentChecked ? "true" : "false"}
+ data-state={
+ indeterminate ? 'indeterminate' : currentChecked ? 'checked' : 'unchecked'
+ }
+ {...props}
+ />
+ 
+ <AnimatePresence>
+ {(currentChecked || indeterminate) && (
+ <motion.span 
+ initial={{ opacity: 0, scale: 0.5 }}
+ animate={{ opacity: 1, scale: 1 }}
+ exit={{ opacity: 0, scale: 0.5 }}
+ transition={{ duration: 0.15 }}
+ className="absolute inset-0 flex items-center justify-center pointer-events-none text-inverse" 
+ aria-hidden="true"
+ >
+ {indeterminate ? (
+ <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+ <line x1="5" y1="12" x2="19" y2="12"></line>
+ </svg>
+ ) : (
+ <motion.svg 
+ width="10" 
+ height="10" 
+ viewBox="0 0 24 24" 
+ fill="none" 
+ stroke="currentColor" 
+ strokeWidth="4" 
+ strokeLinecap="round" 
+ strokeLinejoin="round"
+ >
+ <motion.polyline 
+ initial={{ pathLength: 0 }} 
+ animate={{ pathLength: 1 }} 
+ transition={{ duration: 0.2, delay: 0.05 }}
+ points="20 6 9 17 4 12"
+ />
+ </motion.svg>
+ )}
+ </motion.span>
+ )}
+ </AnimatePresence>
+ </div>
 
-        {/* Label */}
-        {label && <span className="nui-checkbox__label">{label}</span>}
-      </label>
-    );
-  }
+ {label && <span className="font-sans text-sm text-default leading-normal">{label}</span>}
+ </label>
+ );
+ }
 );
 
 Checkbox.displayName = 'Checkbox';

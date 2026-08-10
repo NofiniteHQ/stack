@@ -1,96 +1,102 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
+import { axe } from 'vitest-axe';
 import { Avatar } from './Avatar';
 
 describe('Avatar Component', () => {
-  describe('Rendering', () => {
-    it('renders image when src is provided', () => {
-      render(<Avatar src="https://example.com/pic.jpg" alt="User Pic" />);
+ describe('Rendering', () => {
+ it('renders image when src is provided', () => {
+ render(<Avatar src="https://example.com/pic.jpg" alt="User Pic" />);
 
-      const nativeImg = screen.getByAltText('User Pic');
-      expect(nativeImg).toBeInTheDocument();
-      expect(nativeImg).toHaveAttribute('src', 'https://example.com/pic.jpg');
-    });
+ const nativeImg = screen.getByAltText('User Pic');
+ expect(nativeImg).toBeInTheDocument();
+ expect(nativeImg).toHaveAttribute('src', 'https://example.com/pic.jpg');
+ });
 
-    it('renders initials when no src is provided', () => {
-      render(<Avatar name="John Doe" />);
-      expect(screen.getByText('JD')).toBeInTheDocument();
-    });
+ it('renders initials when no src is provided', () => {
+ render(<Avatar name="John Doe" />);
+ expect(screen.getByText('JD')).toBeInTheDocument();
+ });
 
-    it('renders fallback icon when no name and no src', () => {
-      render(<Avatar fallbackIcon={<span data-testid="icon">ICON</span>} />);
-      expect(screen.getByTestId('icon')).toBeInTheDocument();
-    });
+ it('renders fallback icon when no name and no src', () => {
+ render(<Avatar fallbackIcon={<span data-testid="icon">ICON</span>} />);
+ expect(screen.getByTestId('icon')).toBeInTheDocument();
+ });
 
-    it('renders default icon when nothing is provided', () => {
-      render(<Avatar />);
-      const avatar = screen.getByRole('img', { name: 'Avatar' });
-      expect(avatar).toBeInTheDocument();
-    });
-  });
+ it('renders default icon when nothing is provided', () => {
+ render(<Avatar />);
+ const avatar = screen.getByRole('img', { name: 'Avatar' });
+ expect(avatar).toBeInTheDocument();
+ });
+ });
 
-  describe('Accessibility', () => {
-    it('uses name as accessible label when alt not provided', () => {
-      render(<Avatar name="Jane Doe" />);
-      expect(screen.getByRole('img', { name: 'Jane Doe' })).toBeInTheDocument();
-    });
+ describe('Accessibility', () => {
+ it('should have no accessibility violations', async () => {
+ const { container } = render(<Avatar name="Jane Doe" />);
+ expect(await axe(container)).toHaveNoViolations();
+ });
 
-    it('prefers alt text over name for aria-label', () => {
-      render(<Avatar name="Jane Doe" alt="Profile Picture" />);
-      expect(
-        screen.getByRole('img', { name: 'Profile Picture' })
-      ).toBeInTheDocument();
-    });
+ it('uses name as accessible label when alt not provided', () => {
+ render(<Avatar name="Jane Doe" />);
+ expect(screen.getByRole('img', { name: 'Jane Doe' })).toBeInTheDocument();
+ });
 
-    it('renders status indicator with aria-label', () => {
-      render(<Avatar name="User" status="online" />);
-      expect(screen.getByLabelText('online')).toBeInTheDocument();
-    });
-  });
+ it('prefers alt text over name for aria-label', () => {
+ render(<Avatar name="Jane Doe" alt="Profile Picture" />);
+ expect(
+ screen.getByRole('img', { name: 'Profile Picture' })
+ ).toBeInTheDocument();
+ });
 
-  describe('Behavior', () => {
-    it('falls back to initials when image fails to load', () => {
-      render(<Avatar src="bad-url.jpg" name="Jane Doe" />);
-      
-      const nativeImg = screen.getByAltText('Jane Doe');
-      fireEvent.error(nativeImg);
+ it('renders status indicator with aria-label', () => {
+ render(<Avatar name="User" status="online" />);
+ expect(screen.getByLabelText('online')).toBeInTheDocument();
+ });
+ });
 
-      expect(screen.getByText('JD')).toBeInTheDocument();
-    });
+ describe('Behavior', () => {
+ it('falls back to initials when image fails to load', () => {
+ render(<Avatar src="bad-url.jpg" name="Jane Doe" />);
+ 
+ const nativeImg = screen.getByAltText('Jane Doe');
+ fireEvent.error(nativeImg);
 
-    it('does not render image when loading is true', () => {
-      render(<Avatar src="https://example.com/pic.jpg" name="Loading User" loading />);
-      
-      expect(screen.queryByAltText('Loading User')).not.toBeInTheDocument();
-    });
-  });
+ expect(screen.getByText('JD')).toBeInTheDocument();
+ });
 
-  describe('Data Attributes & Props', () => {
-    it('applies correct size and shape attributes', () => {
-      render(<Avatar size="xl" shape="square" />);
-      const avatar = screen.getByRole('img');
+ it('does not render image when loading is true', () => {
+ render(<Avatar src="https://example.com/pic.jpg" name="Loading User" loading />);
+ 
+ expect(screen.queryByAltText('Loading User')).not.toBeInTheDocument();
+ });
+ });
 
-      expect(avatar).toHaveAttribute('data-size', 'xl');
-      expect(avatar).toHaveAttribute('data-shape', 'square');
-    });
+ describe('Data Attributes & Props', () => {
+ it('applies correct size and shape attributes', () => {
+ render(<Avatar size="xl" shape="square" />);
+ const avatar = screen.getByRole('img');
 
-    it('accepts custom className', () => {
-      render(<Avatar className="custom-class" />);
-      const avatar = screen.getByRole('img');
+ expect(avatar).toHaveClass('w-18', 'h-18', 'text-2xl');
+ expect(avatar).toHaveClass('rounded-sm');
+ });
 
-      expect(avatar).toHaveClass('custom-class');
-    });
-  });
+ it('accepts custom className', () => {
+ render(<Avatar className="custom-class" />);
+ const avatar = screen.getByRole('img');
 
-  describe('Edge Cases', () => {
-    it('handles extra whitespace in name', () => {
-      render(<Avatar name="   John    Doe   " />);
-      expect(screen.getByText('JD')).toBeInTheDocument();
-    });
+ expect(avatar).toHaveClass('custom-class');
+ });
+ });
 
-    it('handles single word names correctly', () => {
-      render(<Avatar name="Prince" />);
-      expect(screen.getByText('PR')).toBeInTheDocument();
-    });
-  });
+ describe('Edge Cases', () => {
+ it('handles extra whitespace in name', () => {
+ render(<Avatar name=" John Doe " />);
+ expect(screen.getByText('JD')).toBeInTheDocument();
+ });
+
+ it('handles single word names correctly', () => {
+ render(<Avatar name="Prince" />);
+ expect(screen.getByText('PR')).toBeInTheDocument();
+ });
+ });
 });

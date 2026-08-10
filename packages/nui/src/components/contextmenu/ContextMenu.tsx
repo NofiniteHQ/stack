@@ -1,38 +1,39 @@
 "use client";
 
 import React, {
-  useEffect,
-  useRef,
-  useState,
-  useLayoutEffect,
-  ReactNode,
-  KeyboardEvent as ReactKeyboardEvent,
+ useEffect,
+ useRef,
+ useState,
+ useLayoutEffect,
+ ReactNode,
+ KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
+import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn, Portal, onClickOutside } from '../../utils';
-import './ContextMenu.css';
 
 /* ============================================================
  * Types
  * ============================================================ */
 
 export interface ContextMenuItem {
-  label?: string;
-  icon?: ReactNode;
-  onSelect?: () => void;
-  danger?: boolean;
-  disabled?: boolean;
-  type?: 'item' | 'separator';
+ label?: string;
+ icon?: ReactNode;
+ onSelect?: () => void;
+ danger?: boolean;
+ disabled?: boolean;
+ type?: 'item' | 'separator';
 }
 
 export interface ContextMenuProps {
-  children: ReactNode;
-  items: ContextMenuItem[];
-  className?: string;
-  /** * If true, the ContextMenu will not wrap children in a <div>.
-   * Instead, it clones the child and directly attaches the onContextMenu event.
-   * Child MUST be a valid single React Element. 
-   */
-  asChild?: boolean; 
+ children: ReactNode;
+ items: ContextMenuItem[];
+ className?: string;
+ /** * If true, the ContextMenu will not wrap children in a <div>.
+ * Instead, it clones the child and directly attaches the onContextMenu event.
+ * Child MUST be a valid single React Element. 
+ */
+ asChild?: boolean; 
 }
 
 /* ============================================================
@@ -44,229 +45,224 @@ export interface ContextMenuProps {
  * * A custom right-click menu that replaces the browser's native context menu.
  */
 export function ContextMenu({
-  children,
-  items,
-  className,
-  asChild = false,
+ children,
+ items,
+ className,
+ asChild = false,
 }: ContextMenuProps) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+ const [open, setOpen] = useState(false);
+ const [activeIndex, setActiveIndex] = useState<number>(0);
+ const [coords, setCoords] = useState({ x: 0, y: 0 });
 
-  const menuRef = useRef<HTMLDivElement | null>(null);
+ const { refs, x, y, placement: floatingPlacement } = useFloating<HTMLElement>({
+ open,
+ placement: 'bottom-start',
+ middleware: [
+ offset(4),
+ flip({ padding: 16, fallbackPlacements: ['top-start', 'bottom-start', 'bottom-end'] }),
+ shift({ padding: 16 }),
+ ],
+ });
 
-  /* ----------------------------------------------------
-     Opening & Collision Detection
-  ---------------------------------------------------- */
-  const handleContext = (e: React.MouseEvent) => {
-    e.preventDefault();
-    
-    // 1. Set initial position to exact mouse coordinates
-    setPos({ top: e.clientY, left: e.clientX });
-    setOpen(true);
-    setActiveIndex(getFirstEnabledIndex());
-  };
+ /* ----------------------------------------------------
+ Opening & Collision Detection
+ ---------------------------------------------------- */
+ const handleContext = (e: React.MouseEvent) => {
+ e.preventDefault();
+ setCoords({ x: e.clientX, y: e.clientY });
+ 
+ refs.setReference({
+ getBoundingClientRect: () => ({
+ x: e.clientX,
+ y: e.clientY,
+ top: e.clientY,
+ left: e.clientX,
+ right: e.clientX,
+ bottom: e.clientY,
+ width: 0,
+ height: 0,
+ }),
+ });
 
-  // * Architecture Note: We use useLayoutEffect instead of useEffect here.
-  // This runs synchronously immediately after React updates the DOM but BEFORE the browser
-  // paints it to the screen. This ensures the collision-detection coordinate shift 
-  // happens instantly without a visual "jump".
-  useLayoutEffect(() => {
-    if (!open || !menuRef.current) return;
+ setOpen(true);
+ setActiveIndex(getFirstEnabledIndex());
+ };
 
-    // 2. Adjust position if it collides with viewport edges
-    const menuRect = menuRef.current.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+ useLayoutEffect(() => {
+ if (open && refs.floating.current) {
+ refs.floating.current.focus();
+ }
+ }, [open, refs.floating]);
 
-    let { top, left } = pos;
-    const padding = 8; // Keep it slightly away from the exact edge
+ /* ----------------------------------------------------
+ Keyboard Navigation Helpers
+ ---------------------------------------------------- */
+ const getFirstEnabledIndex = () => {
+ return items.findIndex((i) => i.type !== 'separator' && !i.disabled);
+ };
 
-    // Collision Right
-    if (left + menuRect.width > viewportWidth - padding) {
-      left = left - menuRect.width;
-    }
-    // Collision Bottom
-    if (top + menuRect.height > viewportHeight - padding) {
-      top = top - menuRect.height;
-    }
+ const getLastEnabledIndex = () => {
+ for (let i = items.length - 1; i >= 0; i--) {
+ const it = items[i];
+ if (it.type !== 'separator' && !it.disabled) return i;
+ }
+ return 0;
+ };
 
-    // Apply adjustments directly to the DOM to avoid triggering another React render cycle
-    menuRef.current.style.top = `${top}px`;
-    menuRef.current.style.left = `${left}px`;
-    
-    // 3. Force focus onto the menu so keyboard events (ArrowDown, etc) work immediately
-    menuRef.current.focus();
+ const move = (direction: 1 | -1) => {
+ let idx = activeIndex;
+ const len = items.length;
 
-  }, [open, pos]);
+ if (len === 0) return;
 
-  /* ----------------------------------------------------
-     Keyboard Navigation Helpers
-  ---------------------------------------------------- */
-  const getFirstEnabledIndex = () => {
-    return items.findIndex((i) => i.type !== 'separator' && !i.disabled);
-  };
+ // Loop until we find a valid item, preventing infinite loops
+ for (let i = 0; i < len; i++) {
+ idx = (idx + direction + len) % len;
+ const it = items[idx];
+ if (it.type !== 'separator' && !it.disabled) {
+ setActiveIndex(idx);
+ break;
+ }
+ }
+ };
 
-  const getLastEnabledIndex = () => {
-    for (let i = items.length - 1; i >= 0; i--) {
-      const it = items[i];
-      if (it.type !== 'separator' && !it.disabled) return i;
-    }
-    return 0;
-  };
+ /* ----------------------------------------------------
+ Event Listeners
+ ---------------------------------------------------- */
+ const handleKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+ const { key } = e;
 
-  const move = (direction: 1 | -1) => {
-    let idx = activeIndex;
-    const len = items.length;
+ if (key === 'ArrowDown') {
+ e.preventDefault();
+ move(1);
+ } else if (key === 'ArrowUp') {
+ e.preventDefault();
+ move(-1);
+ } else if (key === 'Home') {
+ e.preventDefault();
+ setActiveIndex(getFirstEnabledIndex());
+ } else if (key === 'End') {
+ e.preventDefault();
+ setActiveIndex(getLastEnabledIndex());
+ } else if (key === 'Enter' || key === ' ') {
+ e.preventDefault();
+ const it = items[activeIndex];
+ if (it && !it.disabled && it.onSelect) {
+ it.onSelect();
+ setOpen(false);
+ }
+ }
+ };
 
-    if (len === 0) return;
+ useEffect(() => {
+ if (!open) return;
+ const handler = (e: KeyboardEvent) => {
+ if (e.key === 'Escape') setOpen(false);
+ };
+ document.addEventListener('keydown', handler);
+ return () => document.removeEventListener('keydown', handler);
+ }, [open]);
 
-    // Loop until we find a valid item, preventing infinite loops
-    for (let i = 0; i < len; i++) {
-      idx = (idx + direction + len) % len;
-      const it = items[idx];
-      if (it.type !== 'separator' && !it.disabled) {
-        setActiveIndex(idx);
-        break;
-      }
-    }
-  };
+ useEffect(() => {
+ if (!open) return;
+ return onClickOutside({ current: refs.floating.current as HTMLElement | null }, () => setOpen(false));
+ }, [open, refs.floating]);
 
-  /* ----------------------------------------------------
-     Event Listeners
-  ---------------------------------------------------- */
-  const handleKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
-    const { key } = e;
+ /* ----------------------------------------------------
+ Render
+ ---------------------------------------------------- */
+ 
+ const renderTrigger = () => {
+ // * Polymorphic Architecture:
+ // When asChild is true, we clone the user's React element and attach the onContextMenu 
+ // event directly to it. This avoids creating unnecessary <div> wrappers in the DOM.
+ if (asChild && React.isValidElement(children)) {
+ return React.cloneElement(children, {
+ onContextMenu: (e: React.MouseEvent<Element>) => {
+ handleContext(e);
+ 
+ const childProps = children.props as React.DOMAttributes<Element>;
+ if (childProps.onContextMenu) {
+ childProps.onContextMenu(e);
+ }
+ }
+ } as React.DOMAttributes<Element>);
+ }
 
-    if (key === 'ArrowDown') {
-      e.preventDefault();
-      move(1);
-    } else if (key === 'ArrowUp') {
-      e.preventDefault();
-      move(-1);
-    } else if (key === 'Home') {
-      e.preventDefault();
-      setActiveIndex(getFirstEnabledIndex());
-    } else if (key === 'End') {
-      e.preventDefault();
-      setActiveIndex(getLastEnabledIndex());
-    } else if (key === 'Enter' || key === ' ') {
-      e.preventDefault();
-      const it = items[activeIndex];
-      if (it && !it.disabled && it.onSelect) {
-        it.onSelect();
-        setOpen(false);
-      }
-    }
-  };
+ return (
+ <div onContextMenu={handleContext} className="contents">
+ {children}
+ </div>
+ );
+ };
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open]);
+ return (
+ <>
+ {renderTrigger()}
 
-  useEffect(() => {
-    if (!open) return;
-    return onClickOutside(menuRef, () => setOpen(false));
-  }, [open]);
+ <AnimatePresence>
+ {open && (
+ <Portal>
+ <motion.div
+ ref={refs.setFloating}
+ initial={{ opacity: 0, scale: 0.95 }}
+ animate={{ opacity: 1, scale: 1 }}
+ exit={{ opacity: 0, scale: 0.95 }}
+ transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+ className={cn(
+ "z-[1000] min-w-[220px] rounded-lg border border-glassBorder bg-surface backdrop-blur-md p-1 font-sans shadow-2xl outline-none",
+ className
+ )}
+ role="menu"
+ tabIndex={-1} 
+ style={{
+ position: 'absolute',
+ top: y ?? 0,
+ left: x ?? 0,
+ transformOrigin: floatingPlacement.startsWith('top') ? 'bottom left' : 'top left'
+ }}
+ onKeyDown={handleKeyDown}
+ >
+ {items.map((item, idx) => {
+ if (item.type === 'separator') {
+ return <div key={`sep-${idx}`} className="my-1 h-px bg-default" role="separator" />;
+ }
 
-  // Hide context menu on scroll or window resize
-  useEffect(() => {
-    if (!open) return;
-    const handleScrollOrResize = () => setOpen(false);
-    window.addEventListener('resize', handleScrollOrResize);
-    window.addEventListener('scroll', handleScrollOrResize, true);
-    return () => {
-      window.removeEventListener('resize', handleScrollOrResize);
-      window.removeEventListener('scroll', handleScrollOrResize, true);
-    };
-  }, [open]);
+ const isActive = idx === activeIndex;
 
-  /* ----------------------------------------------------
-     Render
-  ---------------------------------------------------- */
-  
-  const renderTrigger = () => {
-    // * Polymorphic Architecture:
-    // When asChild is true, we clone the user's React element and attach the onContextMenu 
-    // event directly to it. This avoids creating unnecessary <div> wrappers in the DOM.
-    if (asChild && React.isValidElement(children)) {
-      return React.cloneElement(children, {
-        onContextMenu: (e: React.MouseEvent<Element>) => {
-          handleContext(e);
-          
-          const childProps = children.props as React.DOMAttributes<Element>;
-          if (childProps.onContextMenu) {
-            childProps.onContextMenu(e);
-          }
-        }
-      } as React.DOMAttributes<Element>);
-    }
-
-    return (
-      <div onContextMenu={handleContext} className="nui-contextmenu-wrapper">
-        {children}
-      </div>
-    );
-  };
-
-  return (
-    <>
-      {renderTrigger()}
-
-      {open && (
-        <Portal>
-          <div
-            ref={menuRef}
-            className={cn("nui-contextmenu", className)}
-            role="menu"
-            tabIndex={-1} 
-            style={{ position: 'fixed', top: pos.top, left: pos.left }}
-            onKeyDown={handleKeyDown}
-          >
-            {items.map((item, idx) => {
-              if (item.type === 'separator') {
-                return <div key={`sep-${idx}`} className="nui-contextmenu-separator" role="separator" />;
-              }
-
-              const isActive = idx === activeIndex;
-
-              return (
-                <div
-                  key={`item-${idx}`}
-                  className={cn(
-                    "nui-contextmenu-item",
-                    item.disabled && "disabled",
-                    item.danger && "danger",
-                    isActive && "active"
-                  )}
-                  role="menuitem"
-                  tabIndex={-1}
-                  aria-disabled={item.disabled || undefined}
-                  onMouseEnter={() => !item.disabled && setActiveIndex(idx)}
-                  onClick={() => {
-                    if (!item.disabled) {
-                      item.onSelect?.();
-                      setOpen(false);
-                    }
-                  }}
-                >
-                  {item.icon && (
-                    <span className="nui-contextmenu-icon">{item.icon}</span>
-                  )}
-                  <span className="nui-contextmenu-label">{item.label}</span>
-                  
-                  {!item.icon && <span className="nui-contextmenu-icon-placeholder" />}
-                </div>
-              );
-            })}
-          </div>
-        </Portal>
-      )}
-    </>
-  );
+ return (
+ <div
+ key={`item-${idx}`}
+ className={cn(
+ "mx-1 flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1 text-sm text-default transition-all duration-200",
+ isActive && !item.danger && "bg-muted text-default",
+ item.danger && isActive && "bg-danger-subtle text-danger",
+ item.disabled && "cursor-not-allowed opacity-50 text-muted"
+ )}
+ role="menuitem"
+ tabIndex={-1}
+ aria-disabled={item.disabled || undefined}
+ onMouseEnter={() => !item.disabled && setActiveIndex(idx)}
+ onClick={() => {
+ if (!item.disabled) {
+ item.onSelect?.();
+ setOpen(false);
+ }
+ }}
+ >
+ {item.icon && (
+ <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center", isActive && !item.danger ? "text-inherit" : "text-muted")}>{item.icon}</span>
+ )}
+ <span className="grow whitespace-nowrap font-medium">{item.label}</span>
+ 
+ {!item.icon && <span className="w-4" />}
+ </div>
+ );
+ })}
+ </motion.div>
+ </Portal>
+ )}
+ </AnimatePresence>
+ </>
+ );
 }

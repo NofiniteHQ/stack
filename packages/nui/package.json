@@ -23,6 +23,12 @@
       "require": "./dist/components/*.cjs",
       "default": "./dist/components/*.js"
     },
+    "./preset": {
+      "types": "./dist/types/preset.d.ts",
+      "import": "./dist/preset.js",
+      "require": "./dist/preset.cjs",
+      "default": "./dist/preset.js"
+    },
     "./utils/*": {
       "types": "./dist/types/utils/*.d.ts",
       "import": "./dist/utils/*.js",
@@ -59,5 +65,67 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "test-storybook": "test-storybook",
+    "generate": "node scripts/generate.js"
+  },
+  "dependencies": {
+    "@floating-ui/react-dom": "^2.1.9",
+    "@hello-pangea/dnd": "^18.0.1",
+    "@hookform/resolvers": "^5.7.1",
+    "@tiptap/core": "^3.29.2",
+    "@tiptap/extension-blockquote": "^3.29.2",
+    "@tiptap/extension-character-count": "^3.29.2",
+    "@tiptap/extension-code-block": "^3.29.2",
+    "@tiptap/extension-code-block-lowlight": "^3.29.2",
+    "@tiptap/extension-color": "^3.29.2",
+    "@tiptap/extension-focus": "^3.29.2",
+    "@tiptap/extension-font-family": "^3.29.2",
+    "@tiptap/extension-highlight": "^3.29.2",
+    "@tiptap/extension-image": "^3.29.2",
+    "@tiptap/extension-link": "^3.29.2",
+    "@tiptap/extension-placeholder": "^3.29.2",
+    "@tiptap/extension-subscript": "^3.29.2",
+    "@tiptap/extension-superscript": "^3.29.2",
+    "@tiptap/extension-table": "^3.29.2",
+    "@tiptap/extension-table-cell": "^3.29.2",
+    "@tiptap/extension-table-header": "^3.29.2",
+    "@tiptap/extension-table-row": "^3.29.2",
+    "@tiptap/extension-task-item": "^3.29.2",
+    "@tiptap/extension-task-list": "^3.29.2",
+    "@tiptap/extension-text-align": "^3.29.2",
+    "@tiptap/extension-text-style": "^3.29.2",
+    "@tiptap/extension-underline": "^3.29.2",
+    "@tiptap/pm": "^3.29.2",
+    "@tiptap/react": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
+    "@visx/axis": "^4.0.0",
+    "@visx/curve": "^4.0.0",
+    "@visx/event": "^4.0.0",
+    "@visx/gradient": "^4.0.0",
+    "@visx/grid": "^4.0.0",
+    "@visx/group": "^4.0.0",
+    "@visx/responsive": "^4.0.0",
+    "@visx/scale": "^4.0.0",
+    "@visx/shape": "^4.0.0",
+    "@visx/tooltip": "^4.0.0",
+    "@visx/vendor": "^4.0.0",
+    "@visx/visx": "^4.0.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.43.0",
+    "lowlight": "^3.3.0",
+    "lucide-react": "^0.553.0",
+    "react-hook-form": "^7.84.0",
+    "tailwind-merge": "^3.6.0",
+    "tiptap-extension-resize-image": "^1.4.6",
+    "valibot": "^1.4.2"
+  },
+  "devDependencies": {
+    "@nofinite/nuicss": "workspace:*",
+    "@storybook/test-runner": "^0.24.4",
+    "jest-image-snapshot": "^6.5.2",
+    "playwright": "^1.62.0",
+    "vitest-axe": "^0.1.0"
   }
 }

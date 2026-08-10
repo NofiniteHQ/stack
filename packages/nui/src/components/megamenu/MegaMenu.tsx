@@ -1,25 +1,43 @@
 "use client";
 
-import React, { createContext, useContext, useState, useRef, useEffect, forwardRef } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, forwardRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
-import './MegaMenu.css';
 
 /* ============================================================
- * Context
+ * Contexts
  * ============================================================ */
 
 interface MegaMenuContextValue {
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  triggerRef: React.RefObject<HTMLButtonElement | null>;
-  contentId: string;
+  activeValue: string | null;
+  setActiveValue: (val: string | null) => void;
+  viewportNode: HTMLDivElement | null;
+  setViewportNode: (node: HTMLDivElement | null) => void;
+  activeTriggerNode: HTMLButtonElement | null;
+  setActiveTriggerNode: (node: HTMLButtonElement | null) => void;
+  ignoreFocusRef: React.MutableRefObject<boolean>;
+  isHoveringViewport: boolean;
+  setIsHoveringViewport: (val: boolean) => void;
 }
 
 const MegaMenuContext = createContext<MegaMenuContextValue | null>(null);
 
 function useMegaMenu() {
   const ctx = useContext(MegaMenuContext);
-  if (!ctx) throw new Error('MegaMenu components must be used within <MegaMenu>');
+  if (!ctx) throw new Error('Must be used within <MegaMenu>');
+  return ctx;
+}
+
+interface MegaMenuItemContextValue {
+  value: string;
+}
+
+const MegaMenuItemContext = createContext<MegaMenuItemContextValue | null>(null);
+
+function useMegaMenuItem() {
+  const ctx = useContext(MegaMenuItemContext);
+  if (!ctx) throw new Error('Must be used within <MegaMenu.Item>');
   return ctx;
 }
 
@@ -29,64 +47,70 @@ function useMegaMenu() {
 
 export type MegaMenuProps = React.HTMLAttributes<HTMLDivElement>;
 
-/**
- * MegaMenu Component
- * * A structural navigation wrapper designed to hold complex layouts (like multi-column grids).
- * * Uses Compound Component Architecture.
- */
 const MegaMenuRoot = forwardRef<HTMLDivElement, MegaMenuProps>(({
   className,
   children,
   ...props
 }, ref) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-  
-  // Unique ID for WAI-ARIA linkage between trigger and content
-  const reactId = React.useId();
-  const contentId = `nui-megamenu-content-${reactId}`;
+  const [activeValue, setActiveValue] = useState<string | null>(null);
+  const [isHoveringViewport, setIsHoveringViewport] = useState(false);
+  const [viewportNode, setViewportNode] = useState<HTMLDivElement | null>(null);
+  const [activeTriggerNode, setActiveTriggerNode] = useState<HTMLButtonElement | null>(null);
+  const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ignoreFocusRef = useRef(false);
 
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleOutsideClick = (e: MouseEvent) => {
-      // Check that the click occurred outside BOTH the menu content and the trigger button
-      if (
-        menuRef.current && 
-        !menuRef.current.contains(e.target as Node) &&
-        triggerRef.current && 
-        !triggerRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
+  const handleMouseLeave = useCallback(() => {
+    leaveTimeoutRef.current = setTimeout(() => {
+      if (!isHoveringViewport) {
+        setActiveValue(null);
       }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [isOpen]);
+    }, 150); // Debounce duration to prevent jitter
+  }, [isHoveringViewport]);
 
-  // Close on Escape key and restore WAI-ARIA focus to the trigger
+  const handleMouseEnter = useCallback(() => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+    }
+  }, []);
+
+  // Close on Escape key
   useEffect(() => {
-    if (!isOpen) return;
+    if (!activeValue) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsOpen(false);
-        triggerRef.current?.focus(); 
+        ignoreFocusRef.current = true;
+        setActiveValue(null);
+        activeTriggerNode?.focus();
+        setTimeout(() => { ignoreFocusRef.current = false; }, 100);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [activeValue, activeTriggerNode]);
 
   return (
-    <MegaMenuContext.Provider value={{ isOpen, setIsOpen, triggerRef, contentId }}>
+    <MegaMenuContext.Provider value={{ 
+      activeValue, 
+      setActiveValue, 
+      viewportNode,
+      setViewportNode,
+      activeTriggerNode,
+      setActiveTriggerNode,
+      ignoreFocusRef,
+      isHoveringViewport,
+      setIsHoveringViewport 
+    }}>
       <div 
-        ref={(node) => {
-          menuRef.current = node;
-          if (typeof ref === 'function') ref(node);
-          else if (ref) ref.current = node;
-        }} 
-        className={cn("nui-megamenu", className)} 
+        ref={ref} 
+        className={cn("relative inline-block font-sans", className)}
+        onMouseLeave={handleMouseLeave}
+        onMouseEnter={handleMouseEnter}
+        onBlur={(e) => {
+          // If focus moves completely outside the MegaMenu, close it
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            setActiveValue(null);
+          }
+        }}
         {...props}
       >
         {children}
@@ -97,51 +121,92 @@ const MegaMenuRoot = forwardRef<HTMLDivElement, MegaMenuProps>(({
 MegaMenuRoot.displayName = 'MegaMenu';
 
 /* ============================================================
- * 2. MegaMenu Trigger
+ * 2. MegaMenu Item
+ * ============================================================ */
+
+export interface MegaMenuItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  value: string;
+}
+
+const MegaMenuItem = forwardRef<HTMLDivElement, MegaMenuItemProps>(({
+  className,
+  value,
+  children,
+  ...props
+}, ref) => {
+  return (
+    <MegaMenuItemContext.Provider value={{ value }}>
+      <div ref={ref} className={cn("inline-block", className)} {...props}>
+        {children}
+      </div>
+    </MegaMenuItemContext.Provider>
+  );
+});
+MegaMenuItem.displayName = 'MegaMenu.Item';
+
+/* ============================================================
+ * 3. MegaMenu Trigger
  * ============================================================ */
 
 export type MegaMenuTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-/**
- * MegaMenu Trigger
- * * The interactive button that toggles the visibility of the MegaMenu Content.
- * * Automatically handles ARIA states (expanded, controls).
- */
 const MegaMenuTrigger = forwardRef<HTMLButtonElement, MegaMenuTriggerProps>(({
   className,
   children,
   onClick,
   ...props
 }, ref) => {
-  const { isOpen, setIsOpen, triggerRef, contentId } = useMegaMenu();
+  const { activeValue, setActiveValue, viewportNode, setActiveTriggerNode, ignoreFocusRef } = useMegaMenu();
+  const { value } = useMegaMenuItem();
+  
+  const isActive = activeValue === value;
+  
+  const handleMouseEnter = (e: React.MouseEvent | React.FocusEvent) => {
+    if (e.type === 'focus' && ignoreFocusRef.current) return;
+    setActiveValue(value);
+    setActiveTriggerNode(e.currentTarget as HTMLButtonElement);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown' && isActive) {
+      e.preventDefault();
+      if (viewportNode) {
+        const focusable = viewportNode.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])');
+        if (focusable.length > 0) {
+          (focusable[0] as HTMLElement).focus();
+        }
+      }
+    }
+  };
 
   return (
     <button
-      ref={(node) => {
-        // Assign to internal context ref
-        if (triggerRef) {
-          (triggerRef as React.MutableRefObject<HTMLButtonElement | null>).current = node;
-        }
-        // Assign to forwarded ref
-        if (typeof ref === 'function') ref(node);
-        else if (ref) ref.current = node;
-      }}
+      ref={ref}
       type="button"
-      className={cn("nui-megamenu__trigger", isOpen && "active", className)}
-      aria-expanded={isOpen}
-      aria-controls={contentId}
+      className={cn(
+        "inline-flex items-center gap-1 px-3 py-2 bg-transparent border-none rounded-sm font-inherit text-sm font-medium text-default cursor-pointer transition-colors hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:bg-subtle",
+        isActive && "bg-subtle text-default",
+        className
+      )}
+      aria-expanded={isActive}
+      onMouseEnter={handleMouseEnter}
+      onFocus={handleMouseEnter}
+      onKeyDown={(e) => {
+        handleKeyDown(e);
+        props.onKeyDown?.(e);
+      }}
       onClick={(e) => {
-        setIsOpen((prev) => !prev);
+        setActiveValue(isActive ? null : value);
+        setActiveTriggerNode(e.currentTarget);
         onClick?.(e);
       }}
       {...props}
     >
       {children}
       <svg 
-        className="nui-megamenu__chevron" 
-        width="16" height="16" viewBox="0 0 24 24" 
+        className={cn("opacity-60 transition-transform duration-300", isActive && "rotate-180 opacity-100")} 
+        width="14" height="14" viewBox="0 0 24 24" 
         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        aria-hidden="true"
       >
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
@@ -151,44 +216,125 @@ const MegaMenuTrigger = forwardRef<HTMLButtonElement, MegaMenuTriggerProps>(({
 MegaMenuTrigger.displayName = 'MegaMenu.Trigger';
 
 /* ============================================================
- * 3. MegaMenu Content
+ * 4. MegaMenu Content
  * ============================================================ */
 
 export type MegaMenuContentProps = React.HTMLAttributes<HTMLDivElement>;
 
-/**
- * MegaMenu Content
- * * The dropdown panel containing the complex layout grid.
- * * Unmounts from the DOM when closed to improve performance.
- */
 const MegaMenuContent = forwardRef<HTMLDivElement, MegaMenuContentProps>(({
   className,
   children,
   ...props
 }, ref) => {
-  const { isOpen, contentId } = useMegaMenu();
+  const { activeValue, viewportNode } = useMegaMenu();
+  const { value } = useMegaMenuItem();
 
-  if (!isOpen) return null;
+  const isActive = activeValue === value;
 
-  return (
-    <div
+  if (!isActive || !viewportNode) return null;
+
+  // Render into the shared Viewport using Portals. 
+  // We use absolute positioning on exit so the layout shrinks smoothly to fit the new content.
+  return createPortal(
+    <motion.div
       ref={ref}
-      id={contentId}
-      role="menu"
-      className={cn("nui-megamenu__content", className)}
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0, position: 'relative' }}
+      exit={{ opacity: 0, x: 10, position: 'absolute' }}
+      transition={{ duration: 0.2 }}
+      className={cn("w-max top-0 left-0", className)}
       {...props}
     >
       {children}
-    </div>
+    </motion.div>,
+    viewportNode
   );
 });
 MegaMenuContent.displayName = 'MegaMenu.Content';
+
+/* ============================================================
+ * 5. MegaMenu Viewport
+ * ============================================================ */
+
+export type MegaMenuViewportProps = React.HTMLAttributes<HTMLDivElement>;
+
+const MegaMenuViewport = forwardRef<HTMLDivElement, MegaMenuViewportProps>(({
+  className,
+  ...props
+}, ref) => {
+  const { activeValue, setViewportNode, setIsHoveringViewport } = useMegaMenu();
+
+  return (
+    <div 
+      className="absolute top-full left-0 pt-2 flex justify-start z-50"
+      onMouseEnter={() => setIsHoveringViewport(true)}
+      onMouseLeave={() => setIsHoveringViewport(false)}
+    >
+      <AnimatePresence>
+        {activeValue && (
+          <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95, y: -5 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -5 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className={cn(
+              "relative bg-surface backdrop-blur-md ring-1 ring-[var(--border-default)] rounded-lg shadow-2xl overflow-hidden transform-gpu",
+              className
+            )}
+            {...props}
+          >
+            {/* The Portal target node */}
+            <div 
+              ref={(node) => {
+                setViewportNode(node);
+                if (typeof ref === 'function') ref(node);
+                else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              }}
+              className="relative"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+MegaMenuViewport.displayName = 'MegaMenu.Viewport';
+
+/* ============================================================
+ * 6. MegaMenu Link (Standardized Item)
+ * ============================================================ */
+
+export type MegaMenuLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
+const MegaMenuLink = forwardRef<HTMLAnchorElement, MegaMenuLinkProps>(({
+  className,
+  children,
+  ...props
+}, ref) => {
+  return (
+    <a
+      ref={ref}
+      className={cn(
+        "block w-full cursor-pointer select-none rounded-md px-3 py-2 text-sm font-medium text-default no-underline transition-colors hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:bg-subtle",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </a>
+  );
+});
+MegaMenuLink.displayName = 'MegaMenu.Link';
 
 /* ============================================================
  * Export
  * ============================================================ */
 
 export const MegaMenu = Object.assign(MegaMenuRoot, {
+  Item: MegaMenuItem,
   Trigger: MegaMenuTrigger,
   Content: MegaMenuContent,
+  Viewport: MegaMenuViewport,
+  Link: MegaMenuLink,
 });

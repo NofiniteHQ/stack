@@ -1,199 +1,196 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback, useState, useId } from 'react';
+import React, { useEffect, useRef, useCallback, useId } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
 import { 
-  trapFocus, 
-  onClickOutside, 
-  restoreFocus, 
-  scrollLock, 
-  Portal, 
-  applyInertToSiblings, 
-  removeInertFromSiblings 
+ trapFocus, 
+ onClickOutside, 
+ restoreFocus, 
+ scrollLock, 
+ Portal, 
+ applyInertToSiblings, 
+ removeInertFromSiblings 
 } from '../../utils';
-import './Modal.css';
 
 /* -------------------------------------------------------------------------- */
-/* Props                                                                      */
+/* Props */
 /* -------------------------------------------------------------------------- */
 
 export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
-  open: boolean;
-  onClose: () => void;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  
-  labelledById?: string;
-  describedById?: string;
-  
-  disableClickOutside?: boolean;
-  disableEsc?: boolean;
-  initialFocusRef?: React.RefObject<HTMLElement | null>;
-  
-  overlayClassName?: string;
+ open: boolean;
+ onClose: () => void;
+ title?: React.ReactNode;
+ description?: React.ReactNode;
+ 
+ labelledById?: string;
+ describedById?: string;
+ 
+ disableClickOutside?: boolean;
+ disableEsc?: boolean;
+ initialFocusRef?: React.RefObject<HTMLElement | null>;
+ 
+ overlayClassName?: string;
 
-  /** Hides the 'X' close button in the top right corner. */
-  hideCloseButton?: boolean;
+ /** Hides the 'X' close button in the top right corner. */
+ hideCloseButton?: boolean;
 }
 
 /* -------------------------------------------------------------------------- */
-/* Component                                                                  */
+/* Component */
 /* -------------------------------------------------------------------------- */
 
 export function Modal({
-  open,
-  onClose,
-  title,
-  description,
-  labelledById,
-  describedById,
-  disableClickOutside = false,
-  disableEsc = false,
-  hideCloseButton = false,
-  initialFocusRef,
-  className,
-  overlayClassName,
-  children,
-  ...props
+ open,
+ onClose,
+ title,
+ description,
+ labelledById,
+ describedById,
+ disableClickOutside = false,
+ disableEsc = false,
+ hideCloseButton = false,
+ initialFocusRef,
+ className,
+ overlayClassName,
+ children,
+ ...props
 }: ModalProps) {
-  const [isMounted, setIsMounted] = useState(open);
-  const [isVisible, setIsVisible] = useState(false);
+ const overlayRef = useRef<HTMLDivElement | null>(null);
+ const dialogRef = useRef<HTMLDivElement | null>(null);
+ const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+ const baseId = useId();
+ const titleId = labelledById || `${baseId}-title`;
+ const descId = describedById || `${baseId}-desc`;
 
-  const baseId = useId();
-  const titleId = labelledById || `${baseId}-title`;
-  const descId = describedById || `${baseId}-desc`;
+ const handleClose = useCallback(() => {
+ onClose();
+ }, [onClose]);
 
-  const handleClose = useCallback(() => {
-    onClose();
-  }, [onClose]);
+ // Framer motion handles animations, no need for manual timers
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+ useEffect(() => {
+ if (!open || disableEsc) return;
 
-    if (open) {
-      setIsMounted(true);
-      timer = setTimeout(() => setIsVisible(true), 10);
-    } else {
-      setIsVisible(false);
-      timer = setTimeout(() => setIsMounted(false), 300);
-    }
+ const onKey = (e: KeyboardEvent) => {
+ if (e.key === 'Escape') {
+ e.preventDefault();
+ handleClose();
+ }
+ };
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [open]);
+ document.addEventListener('keydown', onKey);
+ return () => document.removeEventListener('keydown', onKey);
+ }, [open, disableEsc, handleClose]);
 
-  useEffect(() => {
-    if (!isVisible || disableEsc) return;
+ useEffect(() => {
+ if (!open) return;
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        handleClose();
-      }
-    };
+ previouslyFocusedElementRef.current = document.activeElement as HTMLElement;
 
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [isVisible, disableEsc, handleClose]);
+ scrollLock.lock();
 
-  useEffect(() => {
-    if (!isVisible) return;
+ const inertTargets = overlayRef.current
+ ? applyInertToSiblings(overlayRef.current)
+ : [];
 
-    previouslyFocusedElementRef.current = document.activeElement as HTMLElement;
+ if (
+ initialFocusRef?.current &&
+ dialogRef.current?.contains(initialFocusRef.current)
+ ) {
+ initialFocusRef.current.focus();
+ }
 
-    scrollLock.lock();
+ const trapCleanup = dialogRef.current
+ ? trapFocus(dialogRef.current)
+ : undefined;
 
-    const inertTargets = overlayRef.current
-      ? applyInertToSiblings(overlayRef.current)
-      : [];
+ let clickOutsideCleanup: (() => void) | undefined;
+ if (!disableClickOutside && dialogRef.current) {
+ clickOutsideCleanup = onClickOutside(dialogRef, handleClose);
+ }
 
-    if (
-      initialFocusRef?.current &&
-      dialogRef.current?.contains(initialFocusRef.current)
-    ) {
-      initialFocusRef.current.focus();
-    }
+ return () => {
+ clickOutsideCleanup?.();
+ trapCleanup?.();
+ scrollLock.unlock();
+ removeInertFromSiblings(inertTargets);
+ restoreFocus(previouslyFocusedElementRef.current);
+ };
+ }, [open, disableClickOutside, handleClose, initialFocusRef]);
 
-    const trapCleanup = dialogRef.current
-      ? trapFocus(dialogRef.current)
-      : undefined;
+ return (
+ <Portal>
+ <AnimatePresence>
+ {open && (
+ <motion.div 
+ ref={overlayRef} 
+ className={cn(
+ "fixed inset-0 flex items-center justify-center z-[9998] bg-overlay",
+ overlayClassName
+ )} 
+ initial={{ opacity: 0 }}
+ animate={{ opacity: 1 }}
+ exit={{ opacity: 0 }}
+ transition={{ duration: 0.2 }}
+ aria-hidden="true"
+ >
+ <motion.div
+ ref={dialogRef}
+ className={cn(
+ "relative z-[9999] w-[calc(100%-2rem)] max-w-[500px] max-h-[90vh] m-4 flex flex-col bg-surface backdrop-blur-md text-default font-sans border border-glassBorder rounded-lg shadow-2xl outline-none will-change-[transform,opacity]",
+ className
+ )}
+ initial={{ opacity: 0, scale: 0.95 }}
+ animate={{ opacity: 1, scale: 1 }}
+ exit={{ opacity: 0, scale: 0.95 }}
+ transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+ role="dialog"
+ aria-modal="true"
+ aria-labelledby={title ? titleId : undefined}
+ aria-describedby={description ? descId : undefined}
+ tabIndex={-1} 
+ onClick={(e) => e.stopPropagation()}
+ {...props}
+ >
+ {(title || description) && (
+ <div className={cn("p-5 pb-3 pr-10")}>
+ {title && (
+ <h2 id={titleId} className={cn("text-lg font-semibold tracking-tight leading-tight m-0")}>
+ {title}
+ </h2>
+ )}
+ {description && (
+ <p id={descId} className={cn("mt-2 text-muted text-sm leading-relaxed mb-0")}>
+ {description}
+ </p>
+ )}
+ </div>
+ )}
 
-    let clickOutsideCleanup: (() => void) | undefined;
-    if (!disableClickOutside && dialogRef.current) {
-      clickOutsideCleanup = onClickOutside(dialogRef, handleClose);
-    }
+ <div className={cn("px-5 pb-5 overflow-y-auto", !(title || description) && "pt-5")}>
+ {children}
+ </div>
 
-    return () => {
-      clickOutsideCleanup?.();
-      trapCleanup?.();
-      scrollLock.unlock();
-      removeInertFromSiblings(inertTargets);
-      restoreFocus(previouslyFocusedElementRef.current);
-    };
-  }, [isVisible, disableClickOutside, handleClose, initialFocusRef]);
-
-  if (!isMounted) return null;
-
-  return (
-    <Portal>
-      <div 
-        ref={overlayRef} 
-        className={cn("nui-modal-overlay", overlayClassName)} 
-        data-state={isVisible ? 'open' : 'closed'}
-        aria-hidden="true"
-      >
-        <div
-          ref={dialogRef}
-          className={cn("nui-modal-container", className)}
-          data-state={isVisible ? 'open' : 'closed'}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={title ? titleId : undefined}
-          aria-describedby={description ? descId : undefined}
-          tabIndex={-1} 
-          onClick={(e) => e.stopPropagation()}
-          {...props}
-        >
-          {(title || description) && (
-            <div className="nui-modal__header">
-              {title && (
-                <h2 id={titleId} className="nui-modal__title">
-                  {title}
-                </h2>
-              )}
-              {description && (
-                <p id={descId} className="nui-modal__description">
-                  {description}
-                </p>
-              )}
-            </div>
-          )}
-
-          <div className="nui-modal__content">
-            {children}
-          </div>
-
-          {/* Conditionally render the close button */}
-          {!hideCloseButton && (
-          <button
-            type="button"
-            aria-label="Close dialog"
-            className="nui-modal__close"
-            onClick={handleClose}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-          )}
-        </div>
-      </div>
-    </Portal>
-  );
+ {/* Conditionally render the close button */}
+ {!hideCloseButton && (
+ <button
+ type="button"
+ aria-label="Close dialog"
+ className={cn("absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-transparent border-none rounded text-muted cursor-pointer transition-all duration-200 hover:bg-muted hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus p-0")}
+ onClick={handleClose}
+ >
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+ <line x1="18" y1="6" x2="6" y2="18"></line>
+ <line x1="6" y1="6" x2="18" y2="18"></line>
+ </svg>
+ </button>
+ )}
+ </motion.div>
+ </motion.div>
+ )}
+ </AnimatePresence>
+ </Portal>
+ );
 }

@@ -1,20 +1,32 @@
 import React from 'react';
 import { cn, Slot } from '../../utils';
-import './Link.css';
 
 export type LinkVariant = 'default' | 'primary' | 'muted' | 'danger';
 export type LinkUnderline = 'none' | 'hover' | 'always';
 
 export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  variant?: LinkVariant;
-  underline?: LinkUnderline;
-  /** Automatically applies `target="_blank"` and `rel="noopener noreferrer"` for external routing security. */
-  isExternal?: boolean;
-  /** * Polymorphic Prop: When true, delegates rendering to its child.
-   * Crucial for integrating with framework routers like Next.js `<Link>` or React Router.
-   */
-  asChild?: boolean;
+ variant?: LinkVariant;
+ underline?: LinkUnderline;
+ /** Automatically applies `target="_blank"` and `rel="noopener noreferrer"` for external routing security. */
+ isExternal?: boolean;
+ /** * Polymorphic Prop: When true, delegates rendering to its child.
+ * Crucial for integrating with framework routers like Next.js `<Link>` or React Router.
+ */
+ asChild?: boolean;
 }
+
+const variantClasses = {
+ default: "text-default",
+ primary: "text-primary",
+ muted: "text-muted hover:text-default",
+ danger: "text-danger"
+};
+
+const underlineClasses = {
+ none: "no-underline",
+ hover: "decoration-transparent hover:decoration-current",
+ always: "underline decoration-current"
+};
 
 /**
  * Link Component
@@ -24,41 +36,41 @@ export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement>
  * use the `<Button asChild>` component instead.
  */
 export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
-  ({ 
-    className, 
-    variant = 'default', 
-    underline = 'hover',
-    isExternal = false,
-    asChild = false,
-    children, 
-    ...props 
-  }, ref) => {
-    
-    // Auto-apply security attributes for external navigation to prevent tabnabbing attacks
-    const externalProps = isExternal ? {
-      target: "_blank",
-      rel: "noopener noreferrer"
-    } : {};
+ ({ 
+ className, 
+ variant = 'default', 
+ underline = 'hover',
+ isExternal = false,
+ asChild = false,
+ children, 
+ ...props 
+ }, ref) => {
+ 
+ // Auto-apply security attributes for external navigation to prevent tabnabbing attacks
+ const externalProps = isExternal ? {
+ target: "_blank",
+ rel: "noopener noreferrer"
+ } : {};
 
-    // Determine the root node. If asChild is true, use our zero-dependency Slot to merge props onto the child.
-    const Comp = asChild ? Slot : "a";
+ // Determine the root node. If asChild is true, use our zero-dependency Slot to merge props onto the child.
+ const Comp = asChild ? Slot : "a";
 
-    return (
-      <Comp
-        ref={ref}
-        className={cn(
-          "nui-link",
-          `nui-link--${variant}`,
-          `nui-link--underline-${underline}`,
-          className
-        )}
-        {...externalProps}
-        {...props}
-      >
-        {children}
-      </Comp>
-    );
-  }
+ return (
+ <Comp
+ ref={ref}
+ className={cn(
+ "inline-flex items-center gap-1 font-sans text-inherit font-medium outline-offset-2 rounded-sm transition-colors cursor-pointer underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:decoration-current",
+ variantClasses[variant],
+ underlineClasses[underline],
+ className
+ )}
+ {...externalProps}
+ {...props}
+ >
+ {children}
+ </Comp>
+ );
+ }
 );
 
 Link.displayName = "Link";

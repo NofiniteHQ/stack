@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
+import { axe } from 'vitest-axe';
 import { createRef } from 'react';
 import { Container } from './Container';
 import { Grid } from './Grid';
@@ -7,102 +8,106 @@ import { Flex, Stack, HStack } from './Flex';
 
 describe('Layout Primitives', () => {
 
-  describe('Container', () => {
-    it('renders children safely', () => {
-      render(<Container>content</Container>);
-      expect(screen.getByText('content')).toBeInTheDocument();
-    });
+ describe('Container', () => {
+ it('should have no accessibility violations', async () => {
+ const { container } = render(<Container>content</Container>);
+ expect(await axe(container)).toHaveNoViolations();
+ });
 
-    it('applies the correct default size data attribute', () => {
-      render(<Container>x</Container>);
-      expect(screen.getByText('x')).toHaveAttribute('data-size', 'lg');
-    });
+ it('renders children safely', () => {
+ render(<Container>content</Container>);
+ expect(screen.getByText('content')).toBeInTheDocument();
+ });
 
-    it('applies the overridden size data attribute', () => {
-      render(<Container size="xl">x</Container>);
-      expect(screen.getByText('x')).toHaveAttribute('data-size', 'xl');
-    });
+ it('applies the correct default size class', () => {
+ render(<Container>x</Container>);
+ expect(screen.getByText('x')).toHaveClass('max-w-screen-lg');
+ });
 
-    it('forwards the React ref', () => {
-      const ref = createRef<HTMLDivElement>();
-      render(<Container ref={ref}>x</Container>);
-      expect(ref.current).toBeInstanceOf(HTMLDivElement);
-    });
-  });
+ it('applies the overridden size class', () => {
+ render(<Container size="xl">x</Container>);
+ expect(screen.getByText('x')).toHaveClass('max-w-screen-xl');
+ });
 
-  describe('Flex', () => {
-    it('applies default flex data attributes', () => {
-      render(<Flex>x</Flex>);
-      const el = screen.getByText('x');
-      expect(el).toHaveAttribute('data-direction', 'row');
-      expect(el).toHaveAttribute('data-align', 'stretch');
-      expect(el).toHaveAttribute('data-justify', 'start');
-      expect(el).toHaveAttribute('data-wrap', 'nowrap');
-    });
+ it('forwards the React ref', () => {
+ const ref = createRef<HTMLDivElement>();
+ render(<Container ref={ref}>x</Container>);
+ expect(ref.current).toBeInstanceOf(HTMLDivElement);
+ });
+ });
 
-    it('applies overridden direction/align/justify/wrap attributes', () => {
-      render(
-        <Flex direction="column" align="center" justify="between" wrap="wrap">
-          x
-        </Flex>
-      );
-      const el = screen.getByText('x');
-      expect(el).toHaveAttribute('data-direction', 'column');
-      expect(el).toHaveAttribute('data-align', 'center');
-      expect(el).toHaveAttribute('data-justify', 'between');
-      expect(el).toHaveAttribute('data-wrap', 'wrap');
-    });
+ describe('Flex', () => {
+ it('applies default flex classes', () => {
+ render(<Flex>x</Flex>);
+ const el = screen.getByText('x');
+ expect(el).toHaveClass('flex-row');
+ expect(el).toHaveClass('items-stretch');
+ expect(el).toHaveClass('justify-start');
+ expect(el).toHaveClass('flex-nowrap');
+ });
 
-    it('sets numeric gap as a px css variable', () => {
-      render(<Flex gap={8}>x</Flex>);
-      const el = screen.getByText('x');
-      expect(el.style.getPropertyValue('--nui-flex-gap')).toBe('8px');
-    });
+ it('applies overridden direction/align/justify/wrap classes', () => {
+ render(
+ <Flex direction="column" align="center" justify="between" wrap="wrap">
+ x
+ </Flex>
+ );
+ const el = screen.getByText('x');
+ expect(el).toHaveClass('flex-col');
+ expect(el).toHaveClass('items-center');
+ expect(el).toHaveClass('justify-between');
+ expect(el).toHaveClass('flex-wrap');
+ });
 
-    it('sets string gap as a raw css variable', () => {
-      render(<Flex gap="2rem">x</Flex>);
-      const el = screen.getByText('x');
-      expect(el.style.getPropertyValue('--nui-flex-gap')).toBe('2rem');
-    });
-  });
+ it('sets numeric gap as a px style', () => {
+ render(<Flex gap={8}>x</Flex>);
+ const el = screen.getByText('x');
+ expect(el.style.gap).toBe('8px');
+ });
 
-  describe('Syntactic Sugar: Stack & HStack', () => {
-    it('Stack component forces a column direction', () => {
-      render(<Stack>stack</Stack>);
-      expect(screen.getByText('stack')).toHaveAttribute('data-direction', 'column');
-    });
+ it('sets string gap as a raw style', () => {
+ render(<Flex gap="2rem">x</Flex>);
+ const el = screen.getByText('x');
+ expect(el.style.gap).toBe('2rem');
+ });
+ });
 
-    it('HStack component forces a row direction and center alignment', () => {
-      render(<HStack>hstack</HStack>);
-      const el = screen.getByText('hstack');
-      expect(el).toHaveAttribute('data-direction', 'row');
-      expect(el).toHaveAttribute('data-align', 'center');
-    });
-  });
+ describe('Syntactic Sugar: Stack & HStack', () => {
+ it('Stack component forces a column direction class', () => {
+ render(<Stack>stack</Stack>);
+ expect(screen.getByText('stack')).toHaveClass('flex-col');
+ });
 
-  describe('Grid', () => {
-    it('sets the auto-fit attribute by default', () => {
-      render(<Grid>g</Grid>);
-      expect(screen.getByText('g')).toHaveAttribute('data-cols', 'auto-fit');
-    });
+ it('HStack component forces a row direction and center alignment classes', () => {
+ render(<HStack>hstack</HStack>);
+ const el = screen.getByText('hstack');
+ expect(el).toHaveClass('flex-row');
+ expect(el).toHaveClass('items-center');
+ });
+ });
 
-    it('sets fixed column CSS variables when passed a numeric value', () => {
-      render(<Grid columns={3}>g</Grid>);
-      const el = screen.getByText('g');
-      expect(el).toHaveAttribute('data-cols', 'fixed');
-      expect(el.style.getPropertyValue('--nui-grid-cols-fixed')).toBe('3');
-    });
+ describe('Grid', () => {
+ it('sets the auto-fit grid template by default', () => {
+ render(<Grid>g</Grid>);
+ expect(screen.getByText('g').style.gridTemplateColumns).toBe('repeat(auto-fit, minmax(250px, 1fr))');
+ });
 
-    it('injects the gap CSS variable', () => {
-      render(<Grid gap={12}>g</Grid>);
-      const el = screen.getByText('g');
-      expect(el.style.getPropertyValue('--nui-grid-gap')).toBe('12px');
-    });
+ it('sets fixed column grid template when passed a numeric value', () => {
+ render(<Grid columns={3}>g</Grid>);
+ const el = screen.getByText('g');
+ expect(el.style.gridTemplateColumns).toBe('repeat(3, 1fr)');
+ });
 
-    it('injects the minColWidth CSS variable', () => {
-      render(<Grid minColWidth="180px">g</Grid>);
-      const el = screen.getByText('g');
-      expect(el.style.getPropertyValue('--nui-grid-min-width')).toBe('180px');
-    });
-  });
+ it('injects the gap style', () => {
+ render(<Grid gap={12}>g</Grid>);
+ const el = screen.getByText('g');
+ expect(el.style.gap).toBe('12px');
+ });
+
+ it('injects the minColWidth in grid template', () => {
+ render(<Grid minColWidth="180px">g</Grid>);
+ const el = screen.getByText('g');
+ expect(el.style.gridTemplateColumns).toBe('repeat(auto-fit, minmax(180px, 1fr))');
+ });
+ });
 });

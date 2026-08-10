@@ -29,7 +29,11 @@
     "src/**/*.stories.tsx",
     "src/**/*.stories.ts",
     "src/**/*.stories.jsx",
-    "src/**/*.stories.js"
+    "src/**/*.stories.js",
+    "**/*.stories.ts",
+    "**/*.stories.js",
+    "**/*.stories.jsx",
+    "**/*.stories.tsx"
   ],
   "include": ["src"]
 }

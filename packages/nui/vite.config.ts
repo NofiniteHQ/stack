@@ -2,6 +2,9 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
+import { nuicssVitePlugin } from '../nuicss/src/plugin/vite';
+
+import path from 'node:path';
 
 export default defineConfig({
   root: __dirname,
@@ -13,6 +16,7 @@ export default defineConfig({
 
   plugins: [
     react(),
+    nuicssVitePlugin({ configFile: path.resolve(__dirname, 'nuicss.config.ts') }),
     nxViteTsPaths(), // Essential for resolving workspace paths
 
     dts({
@@ -20,6 +24,20 @@ export default defineConfig({
       outDir: './dist/types',
       insertTypesEntry: true,
     }),
+    {
+      name: 'add-use-client',
+      renderChunk(code, chunk) {
+        if (chunk.fileName.includes('.js') || chunk.fileName.includes('.cjs')) {
+          // If it's a component or the main index file, inject the directive
+          if (chunk.fileName.includes('components/') || chunk.fileName === 'index.js' || chunk.fileName === 'index.cjs') {
+            if (!code.startsWith('"use client";') && !code.startsWith("'use client';")) {
+              return { code: '"use client";\n' + code, map: null };
+            }
+          }
+        }
+        return null;
+      }
+    }
   ],
 
   build: {
@@ -36,25 +54,26 @@ export default defineConfig({
       // regardless of what the actual file is called.
       entry: {
         index: 'src/index.build.ts',
+        preset: 'src/preset.ts',
       },
       cssFileName: 'index',
     },
 
     rollupOptions: {
       // Externalize deps that shouldn't be bundled into your library
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'unocss', '@nofinite/nuicss'],
       treeshake: true,
       output: [
         {
           format: 'es',
-          dir: './packages/nui/dist',
+          dir: './dist',
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].js',
         },
         {
           format: 'cjs',
-          dir: './packages/nui/dist',
+          dir: './dist',
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].cjs',

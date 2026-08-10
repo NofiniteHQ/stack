@@ -77,3 +77,15 @@
 .nui-reset[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
   background-color: var(--nui-fg-subtle, #64748b);
 }
+
+.nui-reset[data-theme="dark"] *::-webkit-scrollbar-thumb:active {
+  background-color: var(--nui-color-gray-600);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

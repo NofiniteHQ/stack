@@ -1,119 +1,125 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { axe } from 'vitest-axe';
 import { FileUploader } from './FileUploader';
 
 function createFile(name: string, size: number, type = 'text/plain') {
-  const file = new File(['a'.repeat(size)], name, { type });
-  Object.defineProperty(file, 'size', { value: size });
-  return file;
+ const file = new File(['a'.repeat(size)], name, { type });
+ Object.defineProperty(file, 'size', { value: size });
+ return file;
 }
 
 describe('FileUploader Component', () => {
-  it('renders placeholder', () => {
-    render(<FileUploader />);
-    expect(screen.getByText(/drag & drop files/i)).toBeInTheDocument();
-  });
+ it('should have no accessibility violations', async () => {
+ const { container } = render(<FileUploader />);
+ expect(await axe(container)).toHaveNoViolations();
+ });
 
-  it('uploads file via hidden input interaction', async () => {
-    const user = userEvent.setup();
-    const file = createFile('test.txt', 1000);
+ it('renders placeholder', () => {
+ render(<FileUploader />);
+ expect(screen.getByText(/drag & drop files/i)).toBeInTheDocument();
+ });
 
-    render(<FileUploader />);
-    const input = screen.getByTestId('nui-file-input');
+ it('uploads file via hidden input interaction', async () => {
+ const user = userEvent.setup();
+ const file = createFile('test.txt', 1000);
 
-    await user.upload(input, file);
+ render(<FileUploader />);
+ const input = screen.getByTestId('nui-file-input');
 
-    expect(await screen.findByText('test.txt')).toBeInTheDocument();
-  });
+ await user.upload(input, file);
 
-  it('calls onChange when file selected', async () => {
-    const user = userEvent.setup();
-    const onChangeSpy = vi.fn();
-    const file = createFile('test.txt', 1000);
+ expect(await screen.findByText('test.txt')).toBeInTheDocument();
+ });
 
-    render(<FileUploader onChange={onChangeSpy} />);
-    const input = screen.getByTestId('nui-file-input');
+ it('calls onChange when file selected', async () => {
+ const user = userEvent.setup();
+ const onChangeSpy = vi.fn();
+ const file = createFile('test.txt', 1000);
 
-    await user.upload(input, file);
+ render(<FileUploader onChange={onChangeSpy} />);
+ const input = screen.getByTestId('nui-file-input');
 
-    expect(onChangeSpy).toHaveBeenCalledTimes(1);
-    // Verifies the payload contains an array of File objects
-    expect(onChangeSpy).toHaveBeenCalledWith(
-        expect.arrayContaining([
-            expect.objectContaining({ name: 'test.txt' })
-        ])
-    );
-  });
+ await user.upload(input, file);
 
-  it('removes file using the remove button', async () => {
-    const user = userEvent.setup();
-    const file = createFile('test.txt', 1000);
+ expect(onChangeSpy).toHaveBeenCalledTimes(1);
+ // Verifies the payload contains an array of File objects
+ expect(onChangeSpy).toHaveBeenCalledWith(
+ expect.arrayContaining([
+ expect.objectContaining({ name: 'test.txt' })
+ ])
+ );
+ });
 
-    render(<FileUploader defaultValue={[file]} />);
-    expect(screen.getByText('test.txt')).toBeInTheDocument();
+ it('removes file using the remove button', async () => {
+ const user = userEvent.setup();
+ const file = createFile('test.txt', 1000);
 
-    const removeBtn = screen.getByRole('button', { name: /remove test\.txt/i });
-    await user.click(removeBtn);
+ render(<FileUploader defaultValue={[file]} />);
+ expect(screen.getByText('test.txt')).toBeInTheDocument();
 
-    expect(screen.queryByText('test.txt')).not.toBeInTheDocument();
-  });
+ const removeBtn = screen.getByRole('button', { name: /remove test\.txt/i });
+ await user.click(removeBtn);
 
-  it('respects maxSize filtering', async () => {
-    const user = userEvent.setup();
-    const file = createFile('big.txt', 5000);
+ expect(screen.queryByText('test.txt')).not.toBeInTheDocument();
+ });
 
-    render(<FileUploader maxSize={1000} />);
-    const input = screen.getByTestId('nui-file-input');
+ it('respects maxSize filtering', async () => {
+ const user = userEvent.setup();
+ const file = createFile('big.txt', 5000);
 
-    await user.upload(input, file);
+ render(<FileUploader maxSize={1000} />);
+ const input = screen.getByTestId('nui-file-input');
 
-    expect(screen.queryByText('big.txt')).not.toBeInTheDocument();
-  });
+ await user.upload(input, file);
 
-  it('disabled state prevents upload and removal', async () => {
-    const user = userEvent.setup();
-    const file = createFile('test.txt', 1000);
+ expect(screen.queryByText('big.txt')).not.toBeInTheDocument();
+ });
 
-    render(<FileUploader disabled defaultValue={[file]} />);
-    
-    // Verify dropzone is inaccessible
-    const dropzone = screen.getByRole('button', { name: /upload files/i });
-    expect(dropzone).toHaveAttribute('aria-disabled', 'true');
-    expect(dropzone).toHaveAttribute('tabIndex', '-1');
+ it('disabled state prevents upload and removal', async () => {
+ const user = userEvent.setup();
+ const file = createFile('test.txt', 1000);
 
-    // Verify input is disabled
-    const input = screen.getByTestId('nui-file-input');
-    expect(input).toBeDisabled();
+ render(<FileUploader disabled defaultValue={[file]} />);
+ 
+ // Verify dropzone is inaccessible
+ const dropzone = screen.getByRole('button', { name: /upload files/i });
+ expect(dropzone).toHaveAttribute('aria-disabled', 'true');
+ expect(dropzone).toHaveAttribute('tabIndex', '-1');
 
-    // Verify removal is disabled
-    const removeBtn = screen.getByRole('button', { name: /remove test\.txt/i });
-    expect(removeBtn).toBeDisabled();
-    await user.click(removeBtn);
-    expect(screen.getByText('test.txt')).toBeInTheDocument(); // Still there
-  });
+ // Verify input is disabled
+ const input = screen.getByTestId('nui-file-input');
+ expect(input).toBeDisabled();
 
-  it('supports fully controlled mode', () => {
-    const file = createFile('controlled.txt', 1000);
-    render(<FileUploader value={[file]} />);
+ // Verify removal is disabled
+ const removeBtn = screen.getByRole('button', { name: /remove test\.txt/i });
+ expect(removeBtn).toBeDisabled();
+ await user.click(removeBtn);
+ expect(screen.getByText('test.txt')).toBeInTheDocument(); // Still there
+ });
 
-    expect(screen.getByText('controlled.txt')).toBeInTheDocument();
-  });
+ it('supports fully controlled mode', () => {
+ const file = createFile('controlled.txt', 1000);
+ render(<FileUploader value={[file]} />);
 
-  it('handles simulated drag and drop upload', () => {
-    const file = createFile('drag.txt', 1000);
+ expect(screen.getByText('controlled.txt')).toBeInTheDocument();
+ });
 
-    render(<FileUploader />);
-    const dropzone = screen.getByRole('button', { name: /upload files/i });
+ it('handles simulated drag and drop upload', () => {
+ const file = createFile('drag.txt', 1000);
 
-    // Note: JSDOM does not fully support DataTransfer objects natively, 
-    // so we must mock the drop event structure using fireEvent
-    fireEvent.drop(dropzone, {
-      dataTransfer: {
-        files: [file],
-      },
-    });
+ render(<FileUploader />);
+ const dropzone = screen.getByRole('button', { name: /upload files/i });
 
-    expect(screen.getByText('drag.txt')).toBeInTheDocument();
-  });
+ // Note: JSDOM does not fully support DataTransfer objects natively, 
+ // so we must mock the drop event structure using fireEvent
+ fireEvent.drop(dropzone, {
+ dataTransfer: {
+ files: [file],
+ },
+ });
+
+ expect(screen.getByText('drag.txt')).toBeInTheDocument();
+ });
 });
