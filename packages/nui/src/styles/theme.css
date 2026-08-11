@@ -369,3 +369,199 @@
 .tiptap-wrapper .tiptap ul[data-type="taskList"] li > div > p {
   margin: 0 !important;
 }
+
+/* ------------------------------------------------------------
+15. TIPTAP TYPOGRAPHY & STRUCTURAL RESETS
+------------------------------------------------------------ */
+
+/* Base Typography */
+.tiptap-wrapper .tiptap p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  line-height: var(--leading-normal);
+}
+
+.tiptap-wrapper .tiptap h1,
+.tiptap-wrapper .tiptap h2,
+.tiptap-wrapper .tiptap h3,
+.tiptap-wrapper .tiptap h4 {
+  font-weight: var(--weight-bold);
+  color: var(--fg-default);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: var(--leading-tight);
+}
+
+.tiptap-wrapper .tiptap h1 { font-size: var(--text-3xl); }
+.tiptap-wrapper .tiptap h2 { font-size: var(--text-2xl); }
+.tiptap-wrapper .tiptap h3 { font-size: var(--text-xl); }
+
+/* Links */
+.tiptap-wrapper .tiptap a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  text-underline-offset: 2px;
+}
+
+/* Lists */
+.tiptap-wrapper .tiptap ul,
+.tiptap-wrapper .tiptap ol {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap-wrapper .tiptap ul { list-style-type: disc; }
+.tiptap-wrapper .tiptap ol { list-style-type: decimal; }
+
+.tiptap-wrapper .tiptap li p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Blockquotes */
+.tiptap-wrapper .tiptap blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+/* Code & Preformatted */
+.tiptap-wrapper .tiptap pre {
+  background-color: var(--slate-900);
+  color: var(--slate-50);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tiptap-wrapper .tiptap code {
+  background-color: var(--bg-subtle);
+  color: var(--color-primary);
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+.tiptap-wrapper .tiptap pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+/* ------------------------------------------------------------
+16. TIPTAP TABLES & PLACEHOLDERS
+------------------------------------------------------------ */
+
+/* Invisible Placeholder Fix */
+.tiptap-wrapper .tiptap p.is-editor-empty:first-child::before {
+  color: var(--fg-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  font-style: italic;
+}
+
+/* Table Structural Fix */
+.tiptap-wrapper .tiptap table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.tiptap-wrapper .tiptap table td,
+.tiptap-wrapper .tiptap table th {
+  min-width: 1em;
+  border: 1px solid var(--border-default);
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.tiptap-wrapper .tiptap table th {
+  font-weight: var(--weight-bold);
+  text-align: left;
+  background-color: var(--bg-subtle);
+}
+
+.tiptap-wrapper .tiptap table .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: var(--bg-selected);
+  pointer-events: none;
+}
+
+.tiptap-wrapper .tiptap table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: var(--color-primary);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------
+17. SCROLLBARS & BROWSER OVERRIDES
+------------------------------------------------------------ */
+
+/* Modern Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: var(--radius-full);
+}
+
+.dark ::-webkit-scrollbar-thumb,
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: var(--slate-700);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-400);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-600);
+}
+
+/* Hide Number Input Spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}

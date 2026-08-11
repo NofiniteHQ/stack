@@ -1,7 +1,8 @@
 import { StarterKit } from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { Link } from '@tiptap/extension-link'
-import ImageResize from 'tiptap-extension-resize-image'
+import { ResizableImage } from './extensions/ResizableImage'
+import { FontSize } from './extensions/FontSize'
 import { Underline } from '@tiptap/extension-underline'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Color } from '@tiptap/extension-color'
@@ -36,10 +37,11 @@ export const getEditorExtensions = (placeholder?: string) => [
   Link.configure({
     openOnClick: false,
   }),
-  ImageResize,
+  ResizableImage,
   Underline,
   Color,
   TextStyle,
+  FontSize,
   Highlight.configure({ multicolor: true }),
   TextAlign.configure({
     types: ['heading', 'paragraph'],

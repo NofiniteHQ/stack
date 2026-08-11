@@ -2,13 +2,88 @@ import React from 'react'
 import { BubbleMenu } from '@tiptap/react/menus'
 import { Editor as TiptapEditor } from '@tiptap/react'
 import {
-  Bold, Italic, Underline as UnderlineIcon, Strikethrough,
+  Bold, Italic, Underline as UnderlineIcon,
   AlignHorizontalDistributeCenter,
   AlignHorizontalDistributeStart,
   AlignHorizontalDistributeEnd,
-  Maximize, Minus, SplitSquareHorizontal
+  Maximize, Minus, SplitSquareHorizontal,
+  Type, Heading1, Heading2, Heading3, ChevronDown
 } from 'lucide-react'
-import { ToolbarButton, LinkButton } from './EditorToolbar'
+import { LinkButton, Separator, ToolbarButton } from './EditorToolbar'
+import { Dropdown } from '../dropdown/Dropdown'
+import { Popover } from '../popover/Popover'
+import { Input } from '../input/Input'
+import { Button } from '../button/Button'
+import { cn } from '../../utils'
+
+const BubbleButton = ({ 
+  isActive, 
+  onClick, 
+  icon: Icon, 
+  label 
+}: { 
+  isActive?: boolean; 
+  onClick: () => void; 
+  icon: React.ElementType; 
+  label: string; 
+}) => (
+  <button
+    type="button"
+    className={cn(
+      "flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200",
+      "focus-visible:outline-none focus-visible:bg-subtle",
+      isActive ? "bg-subtle text-primary" : "text-muted hover:bg-subtle hover:text-default"
+    )}
+    onClick={onClick}
+    aria-label={label}
+    title={label}
+  >
+    <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+  </button>
+)
+
+
+
+const BubbleTextTypeDropdown = ({ editor }: { editor: TiptapEditor }) => {
+  const types = [
+    { label: 'Paragraph', value: 'paragraph', icon: Type, onClick: () => editor.chain().focus().setParagraph().run(), isActive: () => editor.isActive('paragraph') },
+    { label: 'Heading 1', value: 'h1', icon: Heading1, onClick: () => editor.chain().focus().toggleHeading({ level: 1 }).run(), isActive: () => editor.isActive('heading', { level: 1 }) },
+    { label: 'Heading 2', value: 'h2', icon: Heading2, onClick: () => editor.chain().focus().toggleHeading({ level: 2 }).run(), isActive: () => editor.isActive('heading', { level: 2 }) },
+    { label: 'Heading 3', value: 'h3', icon: Heading3, onClick: () => editor.chain().focus().toggleHeading({ level: 3 }).run(), isActive: () => editor.isActive('heading', { level: 3 }) },
+  ];
+
+  const activeType = types.find(t => t.isActive()) || types[0];
+
+  return (
+    <Dropdown>
+      <Dropdown.Trigger>
+        <button 
+          type="button" 
+          className="flex items-center gap-1 h-8 px-2 rounded-md hover:bg-subtle text-muted hover:text-default transition-colors text-sm font-medium border-none bg-transparent outline-none focus-visible:outline-none"
+        >
+          <span className="text-left truncate">{activeType.label}</span>
+          <ChevronDown size={14} className="opacity-50" />
+        </button>
+      </Dropdown.Trigger>
+      <Dropdown.Menu className="min-w-[120px]">
+        {types.map((type) => (
+          <Dropdown.Item
+            key={type.value}
+            onClick={type.onClick}
+            className={cn(
+              type.isActive() ? "bg-subtle text-primary font-bold" : "text-default"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <type.icon size={14} />
+              {type.label}
+            </div>
+          </Dropdown.Item>
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
 
 export interface EditorBubbleMenuProps {
   editor: TiptapEditor | null;
@@ -24,36 +99,103 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({ editor }) =>
     editor.chain().focus().updateAttributes('image', { class: cls }).run()
   }
 
+  const ImageOptionsPopover = ({ editor }: { editor: TiptapEditor }) => {
+    const [alt, setAlt] = React.useState('')
+    const [caption, setCaption] = React.useState('')
+
+    React.useEffect(() => {
+      if (editor.isActive('image')) {
+        const attrs = editor.getAttributes('image');
+        setAlt(attrs.alt || '');
+        setCaption(attrs.caption || '');
+      }
+    }, [editor.state.selection, editor])
+
+    const applyChanges = () => {
+      editor.chain().focus().updateAttributes('image', { alt, caption }).run()
+    }
+
+    return (
+      <Popover>
+        <Popover.Trigger>
+          <button 
+            type="button" 
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-transparent border-none hover:bg-subtle text-default transition-colors focus-visible:outline-none cursor-pointer text-sm font-medium"
+          >
+            Image Options <ChevronDown size={14} className="opacity-50" />
+          </button>
+        </Popover.Trigger>
+        <Popover.Content placement="bottom" className="flex flex-col gap-2 w-64 p-3 bg-surface border border-default rounded-lg shadow-xl">
+          <div className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">Image Options</div>
+          <Input 
+            type="text" 
+            value={alt} 
+            onChange={(e) => setAlt(e.target.value)} 
+            placeholder="Alt Text (accessibility)" 
+            inputSize="sm"
+          />
+          <Input 
+            type="text" 
+            value={caption} 
+            onChange={(e) => setCaption(e.target.value)} 
+            placeholder="Image Caption" 
+            inputSize="sm"
+          />
+          <div className="flex gap-2 mt-1">
+            <Popover.Close>
+              <Button 
+                type="button" 
+                variant="primary"
+                size="sm"
+                className="w-full"
+                onClick={applyChanges}
+              >
+                Apply
+              </Button>
+            </Popover.Close>
+          </div>
+        </Popover.Content>
+      </Popover>
+    )
+  }
+
   return (
     <>
       <BubbleMenu 
         editor={editor} 
-        tippyOptions={{ duration: 150 }}
+        tippyOptions={{ 
+          duration: 150, 
+          zIndex: 50,
+          placement: 'bottom-start',
+          popperOptions: { modifiers: [{ name: 'flip', enabled: false }] }
+        }}
         shouldShow={({ editor }) => editor.isActive('image')}
       >
-        <div className="flex items-center gap-1 bg-surface/90 backdrop-blur-md border border-default shadow-2xl rounded-lg p-1.5">
-          <ToolbarButton 
+        <div className="flex flex-wrap items-center gap-1 bg-surface/90 text-default backdrop-blur-md shadow-2xl rounded-lg p-1.5 border border-default max-w-[260px] sm:max-w-[320px] md:max-w-max">
+          <ImageOptionsPopover editor={editor} />
+          <div className="w-px h-5 bg-default mx-1 opacity-50" />
+          <BubbleButton 
             icon={Minus} label="Small (25%)" 
             onClick={() => setImgClass(`${baseImgClass} w-1/4`)} 
           />
-          <ToolbarButton 
+          <BubbleButton 
             icon={SplitSquareHorizontal} label="Medium (50%)" 
             onClick={() => setImgClass(`${baseImgClass} w-1/2`)} 
           />
-          <ToolbarButton 
+          <BubbleButton 
             icon={Maximize} label="Full Width (100%)" 
             onClick={() => setImgClass(`${baseImgClass} w-full`)} 
           />
           <div className="w-px h-5 bg-default mx-1 opacity-50" />
-          <ToolbarButton 
+          <BubbleButton 
             icon={AlignHorizontalDistributeStart} label="Float Left" 
             onClick={() => setImgClass(`${baseImgClass} w-1/2 float-left mr-6`)} 
           />
-          <ToolbarButton 
+          <BubbleButton 
             icon={AlignHorizontalDistributeCenter} label="Center" 
             onClick={() => setImgClass(`${baseImgClass} w-1/2 mx-auto block`)} 
           />
-          <ToolbarButton 
+          <BubbleButton 
             icon={AlignHorizontalDistributeEnd} label="Float Right" 
             onClick={() => setImgClass(`${baseImgClass} w-1/2 float-right ml-6`)} 
           />
@@ -62,7 +204,13 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({ editor }) =>
 
       <BubbleMenu 
         editor={editor} 
-        tippyOptions={{ duration: 150 }}
+        tippyOptions={{ 
+          duration: 150, 
+          zIndex: 50, 
+          offset: [0, 8],
+          placement: 'bottom-start',
+          popperOptions: { modifiers: [{ name: 'flip', enabled: false }] }
+        }}
         shouldShow={({ editor, state }) => {
           const { selection } = state
           const { empty } = selection
@@ -70,47 +218,65 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({ editor }) =>
           return true
         }}
       >
-        <div className="flex items-center gap-1 bg-surface/90 backdrop-blur-md border border-default shadow-2xl rounded-lg p-1.5">
-          <ToolbarButton 
+        <div className="flex flex-wrap items-center gap-0.5 bg-surface/90 text-default backdrop-blur-md shadow-2xl rounded-lg p-1.5 border border-default max-w-[260px] sm:max-w-[320px] md:max-w-max">
+          <BubbleTextTypeDropdown editor={editor} />
+          <div className="w-px h-5 bg-default mx-1 opacity-50" />
+          
+          <BubbleButton 
             icon={Bold} label="Bold" 
             isActive={editor.isActive('bold')}
             onClick={() => editor.chain().focus().toggleBold().run()} 
           />
-          <ToolbarButton 
+          <BubbleButton 
             icon={Italic} label="Italic" 
             isActive={editor.isActive('italic')}
             onClick={() => editor.chain().focus().toggleItalic().run()} 
           />
-          <ToolbarButton 
+          <BubbleButton 
             icon={UnderlineIcon} label="Underline" 
             isActive={editor.isActive('underline')}
             onClick={() => editor.chain().focus().toggleUnderline().run()} 
           />
-          <ToolbarButton 
-            icon={Strikethrough} label="Strikethrough" 
-            isActive={editor.isActive('strike')}
-            onClick={() => editor.chain().focus().toggleStrike().run()} 
-          />
+          
           <div className="w-px h-5 bg-default mx-1 opacity-50" />
-          <LinkButton editor={editor} />
+          
+          <div>
+            <LinkButton editor={editor} />
+          </div>
         </div>
       </BubbleMenu>
 
       <BubbleMenu 
         editor={editor} 
-        tippyOptions={{ duration: 150 }}
+        tippyOptions={{ duration: 150, zIndex: 50 }}
         shouldShow={({ editor }) => editor.isActive('table')}
       >
-        <div className="flex items-center gap-0.5 bg-surface/90 backdrop-blur-md border border-default shadow-2xl rounded-lg p-1.5 text-xs font-medium text-muted">
-          <button type="button" className="px-2 py-1 rounded-md hover:bg-subtle hover:text-default transition-colors" onClick={() => editor.chain().focus().addColumnBefore().run()}>+ Col Left</button>
-          <button type="button" className="px-2 py-1 rounded-md hover:bg-subtle hover:text-default transition-colors" onClick={() => editor.chain().focus().addColumnAfter().run()}>+ Col Right</button>
-          <button type="button" className="px-2 py-1 rounded-md hover:bg-subtle hover:text-default transition-colors" onClick={() => editor.chain().focus().deleteColumn().run()}>- Col</button>
-          <div className="w-px h-4 bg-default mx-1 opacity-50" />
-          <button type="button" className="px-2 py-1 rounded-md hover:bg-subtle hover:text-default transition-colors" onClick={() => editor.chain().focus().addRowBefore().run()}>+ Row Above</button>
-          <button type="button" className="px-2 py-1 rounded-md hover:bg-subtle hover:text-default transition-colors" onClick={() => editor.chain().focus().addRowAfter().run()}>+ Row Below</button>
-          <button type="button" className="px-2 py-1 rounded-md hover:bg-subtle hover:text-default transition-colors" onClick={() => editor.chain().focus().deleteRow().run()}>- Row</button>
-          <div className="w-px h-4 bg-default mx-1 opacity-50" />
-          <button type="button" className="px-2 py-1 rounded-md hover:bg-subtle text-red-500 transition-colors" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</button>
+        <div className="flex items-center gap-0.5 bg-surface/90 backdrop-blur-md border border-default shadow-2xl rounded-lg p-1 text-sm font-medium">
+          <Dropdown>
+            <Dropdown.Trigger>
+              <button 
+                type="button" 
+                className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-transparent border-none hover:bg-subtle text-default transition-colors focus-visible:outline-none cursor-pointer"
+              >
+                Table Options <ChevronDown size={14} className="opacity-50" />
+              </button>
+            </Dropdown.Trigger>
+            <Dropdown.Menu className="min-w-[160px]">
+              <Dropdown.Item onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Column Left</Dropdown.Item>
+              <Dropdown.Item onClick={() => editor.chain().focus().addColumnAfter().run()}>Add Column Right</Dropdown.Item>
+              <Dropdown.Item onClick={() => editor.chain().focus().deleteColumn().run()}>Delete Column</Dropdown.Item>
+              
+              <div className="w-full h-px bg-default my-1" />
+              
+              <Dropdown.Item onClick={() => editor.chain().focus().addRowBefore().run()}>Add Row Above</Dropdown.Item>
+              <Dropdown.Item onClick={() => editor.chain().focus().addRowAfter().run()}>Add Row Below</Dropdown.Item>
+              <Dropdown.Item onClick={() => editor.chain().focus().deleteRow().run()}>Delete Row</Dropdown.Item>
+              
+              <div className="w-full h-px bg-default my-1" />
+              
+              <Dropdown.Item onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
       </BubbleMenu>
     </>

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Editor as TiptapEditor } from '@tiptap/react'
 import { Popover } from '../popover/Popover'
+import { Dropdown } from '../dropdown/Dropdown'
 import { Button } from '../button/Button'
 import { Input } from '../input/Input'
 import { cn } from '../../utils'
@@ -33,7 +34,7 @@ export const ToolbarButton = ({
   <button
     type="button"
     className={cn(
-      "flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200",
+      "flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200",
       "focus-visible:outline-none focus-visible:bg-subtle",
       isActive ? "bg-subtle text-primary" : "text-muted hover:bg-subtle hover:text-default",
       disabled && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-muted"
@@ -61,7 +62,7 @@ export const LinkButton = ({ editor }: { editor: TiptapEditor }) => {
         <button 
           type="button" 
           className={cn(
-            "flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200",
+            "flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200",
             "focus-visible:outline-none focus-visible:bg-subtle",
             isActive ? "bg-subtle text-primary" : "text-muted hover:bg-subtle hover:text-default"
           )} 
@@ -130,7 +131,7 @@ const ImageButton = ({ editor }: { editor: TiptapEditor }) => {
           <button 
           type="button" 
           className={cn(
-            "flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:bg-subtle",
+            "flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:bg-subtle",
             editor.isActive('image') ? "bg-subtle text-primary" : "text-muted hover:bg-subtle hover:text-default"
           )}
           aria-label="Image"
@@ -208,15 +209,15 @@ const ColorPickerPopover = ({ editor, type }: { editor: TiptapEditor; type: 'col
   const TAILWIND_COLORS = [
     '#000000', '#52525b', '#a1a1aa', '#ffffff',
     '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#d946ef', '#f43f5e',
-    '#7f1d1d', '#7c2d12', '#78350f', '#3f6212', '#14532d', '#134e4a', '#164e63', '#1e3a8a', '#312e81', '#581c87', '#701a75', '#881337'
-  ];
+    '#7f1d1d', '#7c2d12', '#78350f', '#3f6212', '#14532d', '#134e4a', '#164e63', '#1e3a8a', '#312e81', '#581c87', '#701a75'
+  ]; // 27 colors + 1 custom = 28 items (perfect 7x4 grid)
 
   return (
     <Popover>
       <Popover.Trigger>
         <button 
           type="button"
-          className="relative flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none outline-none cursor-pointer hover:bg-subtle transition-colors focus-visible:outline-none"
+          className="flex-shrink-0 relative flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none outline-none cursor-pointer hover:bg-subtle transition-colors focus-visible:outline-none"
           title={type === 'color' ? 'Text Color' : 'Highlight Color'}
         >
           {type === 'color' ? <Palette size={16} className="text-muted hover:text-default" /> : <Highlighter size={16} className="text-muted hover:text-default" />}
@@ -241,13 +242,15 @@ const ColorPickerPopover = ({ editor, type }: { editor: TiptapEditor; type: 'col
               />
             </Popover.Close>
           ))}
-          <div className="relative w-6 h-6 rounded-full border border-default shadow-sm focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-primary hover:scale-110 transition-transform overflow-hidden cursor-pointer" title="Custom Color">
-            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-muted pointer-events-none">+</div>
+          <div 
+            className="relative w-6 h-6 rounded-full border border-default shadow-sm focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-primary hover:scale-110 transition-transform overflow-hidden cursor-pointer flex items-center justify-center" 
+            style={{ background: 'conic-gradient(from 180deg at 50% 50%, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}
+            title="Custom Color"
+          >
             <input 
               type="color" 
               className="absolute inset-[-10px] w-12 h-12 cursor-pointer opacity-0"
               onChange={(e) => setFormatColor(e.target.value)}
-              title="Custom Color"
             />
           </div>
         </div>
@@ -267,37 +270,32 @@ const TextTypeDropdown = ({ editor }: { editor: TiptapEditor }) => {
   const activeType = types.find(t => t.isActive()) || types[0];
 
   return (
-    <Popover>
-      <Popover.Trigger>
+    <Dropdown>
+      <Dropdown.Trigger>
         <button 
           type="button" 
-          className="flex items-center gap-1.5 h-8 px-2 rounded-md hover:bg-subtle text-muted hover:text-default transition-colors text-sm font-medium border-none bg-transparent outline-none focus-visible:outline-none"
+          className="flex-shrink-0 flex items-center gap-1.5 h-8 px-2 rounded-md hover:bg-subtle text-muted hover:text-default transition-colors text-sm font-medium border-none bg-transparent outline-none focus-visible:outline-none"
         >
           <activeType.icon size={16} />
           <span className="w-20 text-left truncate">{activeType.label}</span>
           <ChevronDown size={14} className="opacity-50" />
         </button>
-      </Popover.Trigger>
-      <Popover.Content placement="bottom-start" className="p-1 w-40 bg-surface border border-default rounded-lg shadow-xl">
-        <div className="flex flex-col gap-0.5">
-          {types.map((type) => (
-            <Popover.Close key={type.value}>
-              <button
-                type="button"
-                onClick={type.onClick}
-                className={cn(
-                  "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-md hover:bg-subtle transition-colors text-left focus-visible:outline-none",
-                  type.isActive() ? "bg-subtle text-primary font-medium" : "text-default hover:text-primary"
-                )}
-              >
-                <type.icon size={16} className={type.isActive() ? "text-primary" : "text-muted"} />
-                {type.label}
-              </button>
-            </Popover.Close>
-          ))}
-        </div>
-      </Popover.Content>
-    </Popover>
+      </Dropdown.Trigger>
+      <Dropdown.Menu className="min-w-[180px]">
+        {types.map((type) => (
+          <Dropdown.Item
+            key={type.value}
+            onClick={type.onClick}
+            className={type.isActive() ? "bg-subtle font-bold" : ""}
+          >
+            <div className="flex items-center gap-2">
+              <type.icon size={16} className="text-muted" />
+              {type.label}
+            </div>
+          </Dropdown.Item>
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
   );
 }
 
@@ -316,8 +314,8 @@ const FontSizeDropdown = ({ editor }: { editor: TiptapEditor }) => {
   const currentSize = editor.getAttributes('textStyle').fontSize || 'Size';
 
   return (
-    <Popover>
-      <Popover.Trigger>
+    <Dropdown>
+      <Dropdown.Trigger>
         <button 
           type="button" 
           className="flex items-center gap-1 h-8 px-2 rounded-md hover:bg-subtle text-muted hover:text-default transition-colors text-sm font-medium border-none bg-transparent outline-none focus-visible:outline-none"
@@ -325,28 +323,20 @@ const FontSizeDropdown = ({ editor }: { editor: TiptapEditor }) => {
           <span className="w-10 text-left truncate">{currentSize}</span>
           <ChevronDown size={14} className="opacity-50" />
         </button>
-      </Popover.Trigger>
-      <Popover.Content placement="bottom-start" className="p-1 w-24 bg-surface border border-default rounded-lg shadow-xl max-h-64 overflow-y-auto">
-        <div className="flex flex-col gap-0.5">
-          {sizes.map((size) => (
-            <Popover.Close key={size.label}>
-              <button
-                type="button"
-                onClick={() => {
-                  (editor.chain().focus() as any).setFontSize(size.value).run();
-                }}
-                className={cn(
-                  "flex items-center w-full px-2 py-1.5 text-sm rounded-md hover:bg-subtle transition-colors text-left focus-visible:outline-none text-default hover:text-primary"
-                )}
-              >
-                {size.label}
-              </button>
-            </Popover.Close>
-          ))}
-        </div>
-      </Popover.Content>
-    </Popover>
-  )
+      </Dropdown.Trigger>
+      <Dropdown.Menu className="max-h-60 overflow-y-auto min-w-[120px]">
+        {sizes.map((size) => (
+          <Dropdown.Item
+            key={size.value}
+            onClick={() => editor.chain().focus().setFontSize(size.value).run()}
+            className={currentSize === size.value ? "bg-subtle font-bold" : ""}
+          >
+            {size.label}
+          </Dropdown.Item>
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
 }
 
 const FontFamilyDropdown = ({ editor }: { editor: TiptapEditor }) => {
@@ -362,8 +352,8 @@ const FontFamilyDropdown = ({ editor }: { editor: TiptapEditor }) => {
   const activeFont = fonts.find(f => currentFontFamily === f.value)?.label || 'Font';
 
   return (
-    <Popover>
-      <Popover.Trigger>
+    <Dropdown>
+      <Dropdown.Trigger>
         <button 
           type="button" 
           className="flex items-center gap-1 h-8 px-2 rounded-md hover:bg-subtle text-muted hover:text-default transition-colors text-sm font-medium border-none bg-transparent outline-none focus-visible:outline-none"
@@ -371,64 +361,64 @@ const FontFamilyDropdown = ({ editor }: { editor: TiptapEditor }) => {
           <span className="w-16 text-left truncate">{activeFont}</span>
           <ChevronDown size={14} className="opacity-50" />
         </button>
-      </Popover.Trigger>
-      <Popover.Content placement="bottom-start" className="p-1 w-40 bg-surface border border-default rounded-lg shadow-xl">
-        <div className="flex flex-col gap-0.5">
-          {fonts.map((font) => (
-            <Popover.Close key={font.label}>
-              <button
-                type="button"
-                onClick={() => {
-                  editor.chain().focus().setFontFamily(font.value).run();
-                }}
-                className={cn(
-                  "flex items-center w-full px-2 py-1.5 text-sm rounded-md hover:bg-subtle transition-colors text-left focus-visible:outline-none text-default hover:text-primary"
-                )}
-                style={{ fontFamily: font.value }}
-              >
-                {font.label}
-              </button>
-            </Popover.Close>
-          ))}
-        </div>
-      </Popover.Content>
-    </Popover>
-  )
+      </Dropdown.Trigger>
+      <Dropdown.Menu className="min-w-[150px]">
+        {fonts.map((font) => (
+          <Dropdown.Item
+            key={font.label}
+            onClick={() => editor.chain().focus().setFontFamily(font.value).run()}
+            className={activeFont === font.label ? "bg-subtle font-bold" : ""}
+          >
+            {font.label}
+          </Dropdown.Item>
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
 }
 
 const TableCreator = ({ editor }: { editor: TiptapEditor }) => {
-  const [rows, setRows] = useState(3)
-  const [cols, setCols] = useState(3)
+  const [hovered, setHovered] = useState({ r: 0, c: 0 })
 
   return (
     <Popover>
       <Popover.Trigger>
         <button 
           type="button"
-          className="flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200 text-muted hover:bg-subtle hover:text-default focus-visible:outline-none"
+          className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200 text-muted hover:bg-subtle hover:text-default focus-visible:outline-none"
           title="Insert Table"
         >
           <TableIcon size={16} strokeWidth={2} />
         </button>
       </Popover.Trigger>
-      <Popover.Content placement="bottom" className="p-3 w-48 bg-surface border border-default rounded-lg shadow-xl flex flex-col gap-2">
-        <div className="text-sm font-medium mb-1">Insert Table</div>
-        <div className="flex items-center gap-2">
-          <Input type="number" value={rows} onChange={(e) => setRows(Number(e.target.value))} min={1} max={20} inputSize="sm" placeholder="Rows" />
-          <span className="text-muted text-xs">x</span>
-          <Input type="number" value={cols} onChange={(e) => setCols(Number(e.target.value))} min={1} max={20} inputSize="sm" placeholder="Cols" />
+      <Popover.Content placement="bottom" className="p-3 bg-surface border border-default rounded-lg shadow-xl flex flex-col gap-2">
+        <div className="text-xs font-semibold text-muted text-center tracking-wide uppercase mb-1">
+          {hovered.r > 0 ? `${hovered.c} x ${hovered.r} Table` : "Insert Table"}
         </div>
-        <Popover.Close>
-          <Button 
-            type="button" 
-            variant="primary" 
-            size="sm" 
-            className="w-full mt-1"
-            onClick={() => editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run()}
-          >
-            Create Table
-          </Button>
-        </Popover.Close>
+        <div className="flex flex-col gap-0.5" onMouseLeave={() => setHovered({ r: 0, c: 0 })}>
+          {Array.from({ length: 8 }).map((_, r) => (
+            <div key={r} className="flex gap-0.5">
+              {Array.from({ length: 8 }).map((_, c) => (
+                <Popover.Close key={c}>
+                  <button
+                    type="button"
+                    className={cn(
+                      "w-4 h-4 rounded-sm border transition-all duration-75 cursor-pointer outline-none focus:outline-none",
+                      r < hovered.r && c < hovered.c 
+                        ? "bg-primary/20 border-primary" 
+                        : "border-default bg-transparent hover:border-primary"
+                    )}
+                    onMouseEnter={() => setHovered({ r: r + 1, c: c + 1 })}
+                    onClick={() => {
+                      editor.chain().focus().insertTable({ rows: r + 1, cols: c + 1, withHeaderRow: false }).run()
+                      setHovered({ r: 0, c: 0 })
+                    }}
+                  />
+                </Popover.Close>
+              ))}
+            </div>
+          ))}
+        </div>
       </Popover.Content>
     </Popover>
   )
@@ -438,7 +428,7 @@ export const EditorToolbar = ({ editor }: { editor: TiptapEditor | null }) => {
   if (!editor) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 border-b border-default bg-surface p-1.5 rounded-t-md sticky top-0 z-10">
+    <div className="flex flex-wrap items-center gap-0.5 border-b border-default shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] bg-surface p-1.5 rounded-t-md sticky top-0 z-10 w-full min-w-0">
       <ToolbarButton
         icon={Undo2} label="Undo"
         onClick={() => editor.chain().focus().undo().run()}

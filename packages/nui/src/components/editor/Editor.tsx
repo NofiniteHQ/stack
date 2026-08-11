@@ -23,7 +23,7 @@ export const Editor: React.FC<EditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm prose-p:my-2 prose-headings:mb-3 prose-headings:mt-4 max-w-none p-5 focus:outline-none min-h-[250px] font-sans text-default',
+        class: 'nui-editor p-5 focus:outline-none min-h-[250px] font-sans text-default',
       },
     },
   })
@@ -35,26 +35,7 @@ export const Editor: React.FC<EditorProps> = ({
   }, [value, editor])
 
   return (
-    <div className="flex flex-col border border-default rounded-md shadow-sm focus-within:border-primary focus-within:ring-1 focus-within:ring-primary bg-surface transition-all duration-200 overflow-hidden tiptap-wrapper">
-      <style dangerouslySetInnerHTML={{__html: `
-        .tiptap-wrapper .tiptap ul[data-type="taskList"] {
-          list-style: none;
-          padding: 0;
-        }
-        .tiptap-wrapper .tiptap ul[data-type="taskList"] li {
-          display: flex;
-          align-items: flex-start;
-          margin-bottom: 0.25rem;
-        }
-        .tiptap-wrapper .tiptap ul[data-type="taskList"] li > label {
-          margin-right: 0.5rem;
-          user-select: none;
-          margin-top: 0.25rem;
-        }
-        .tiptap-wrapper .tiptap ul[data-type="taskList"] li > div {
-          flex: 1;
-        }
-      `}} />
+    <div className="flex flex-col border border-default rounded-md shadow-sm focus-within:ring-2 focus-within:ring-primary focus-within:border-primary bg-surface transition-all duration-200 overflow-hidden tiptap-wrapper">
       <EditorToolbar editor={editor} />
       
       <EditorBubbleMenu editor={editor} />
