@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from '@storybook/test';
+import { within, userEvent, expect, waitForElementToBeRemoved } from '@storybook/test';
 import { Tooltip } from './Tooltip';
 import { Button } from '../button/Button';
 
@@ -61,6 +61,6 @@ export const InteractiveTest: StoryObj<typeof Tooltip> = {
 
  // Unhover
  await userEvent.unhover(trigger);
- await expect(body.queryByRole('tooltip')).not.toBeInTheDocument();
+ await waitForElementToBeRemoved(() => body.queryByRole('tooltip'), { timeout: 2000 });
  }
 };

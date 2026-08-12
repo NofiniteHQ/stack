@@ -12,17 +12,21 @@ export interface StepItem {
  description?: React.ReactNode;
  /** Marks the step with an "(Optional)" tag */
  optional?: boolean;
+ /** Content to render below the stepper when this step is active */
+ content?: React.ReactNode;
 }
 
 export interface StepperProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> {
  /** Array of steps. Can be simple strings or rich objects. */
- steps: (string | StepItem)[];
+ data: (string | StepItem)[];
  /** The 0-based index of the currently active step. */
  active: number;
  /** Callback fired when a step is clicked. */
  onChange?: (index: number) => void;
  /** Prevents the user from clicking on steps that come after the currently active one. */
- disableFuture?: boolean; 
+ disableFuture?: boolean;
+ /** The orientation of the stepper */
+ orientation?: 'horizontal' | 'vertical';
 }
 
 /* ============================================================
@@ -34,12 +38,13 @@ export interface StepperProps extends Omit<React.HTMLAttributes<HTMLElement>, 'o
  * * A visual indicator for multi-step workflows.
  * * Uses standard `<nav>` and `<ol>` HTML elements for strict WAI-ARIA compliance.
  */
-export const Stepper = forwardRef<HTMLElement, StepperProps>(({
- steps,
+export const Stepper = forwardRef<HTMLDivElement, StepperProps>(({
+ data,
  active,
  onChange,
  className,
  disableFuture = false,
+ orientation = 'horizontal',
  ...props
 }, ref) => {
  
@@ -50,14 +55,15 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(({
  };
 
  return (
+ <div className={cn(`flex w-full ${orientation === 'vertical' ? 'flex-row' : 'flex-col'} gap-6`, className)}>
  <nav 
  ref={ref}
- className={cn("w-full font-sans overflow-x-auto scrollbar-hide", className)} 
+ className={cn("w-full font-sans overflow-x-auto scrollbar-hide")} 
  aria-label="Progress Steps"
  {...props}
  >
  <ol className="flex justify-between items-start m-0 p-0 list-none min-w-[450px]">
- {steps.map((rawStep, index) => {
+ {data.map((rawStep, index) => {
  const step = getStepData(rawStep);
  const isActive = index === active;
  const isCompleted = index < active;
@@ -68,7 +74,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(({
  key={index}
  className={cn(
  "relative flex-1 flex flex-col items-center",
- index !== steps.length - 1 && [
+ index !== data.length - 1 && [
  "after:content-[''] after:absolute after:top-[14px] after:left-[calc(50%_+_20px)] after:w-[calc(100%_-_40px)] after:h-[2px] after:z-[1] after:transition-colors after:duration-300",
  isCompleted ? "after:bg-primary" : "after:bg-subtle"
  ]
@@ -128,6 +134,13 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(({
  })}
  </ol>
  </nav>
+
+ {data[active] && typeof data[active] !== 'string' && (data[active] as StepItem).content && (
+ <div className="w-full">
+ {(data[active] as StepItem).content}
+ </div>
+ )}
+ </div>
  );
 });
 

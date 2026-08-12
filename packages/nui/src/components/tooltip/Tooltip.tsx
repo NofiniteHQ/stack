@@ -8,7 +8,7 @@ import React, {
  useCallback,
  useId,
 } from 'react';
-import { useFloating, autoUpdate, offset as floatingOffset, flip, shift, size } from '@floating-ui/react-dom';
+import { useFloating, autoUpdate, offset as floatingOffset, flip, shift, size, arrow } from '@floating-ui/react-dom';
 import { cn } from '../../utils';
 import { Portal } from '../../utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -55,7 +55,9 @@ export function Tooltip({
  const reactId = useId();
  const tooltipId = `tooltip-${reactId}`;
 
- const { refs, x, y, placement: floatingPlacement } = useFloating<HTMLElement>({
+ const arrowRef = useRef<HTMLDivElement>(null);
+
+ const { refs, x, y, placement: floatingPlacement, middlewareData } = useFloating<HTMLElement>({
  open: isOpen,
  placement: 'top',
  whileElementsMounted: autoUpdate,
@@ -63,6 +65,7 @@ export function Tooltip({
  floatingOffset(offset),
  flip({ padding: 16, fallbackPlacements: ['top-start', 'bottom'] }),
  shift({ padding: 16 }),
+ arrow({ element: arrowRef }),
  ],
  });
 
@@ -168,11 +171,6 @@ export function Tooltip({
  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
  className={cn(
  'absolute z-[10000] max-w-[280px] px-3 py-1.5 bg-surface backdrop-blur-md text-default border border-glassBorder font-sans text-xs font-medium leading-[1.4] rounded-md text-center pointer-events-none shadow-2xl',
- // Arrow Base
- 'after:absolute after:w-2.5 after:h-2.5 after:bg-surface after:border-default after:left-[var(--nui-tooltip-arrow-x,50%)] after:-translate-x-1/2 after:rotate-45 after:rounded-[1px] after:z-[-1]',
- // Arrow Placement
- 'data-[placement=top]:after:-bottom-[5px] data-[placement=top]:after:border-b data-[placement=top]:after:border-r',
- 'data-[placement=bottom]:after:-top-[5px] data-[placement=bottom]:after:border-t data-[placement=bottom]:after:border-l',
  className
  )}
  style={{
@@ -183,6 +181,19 @@ export function Tooltip({
  }}
  >
  {label}
+ 
+ <div 
+  ref={arrowRef}
+  className="absolute w-2.5 h-2.5 bg-surface border-glassBorder z-[-1] rotate-45 rounded-[1px]"
+  style={{
+  left: middlewareData.arrow?.x != null ? `${middlewareData.arrow.x}px` : '',
+  top: middlewareData.arrow?.y != null ? `${middlewareData.arrow.y}px` : '',
+  ...(floatingPlacement.startsWith('top') ? { bottom: '-5px', borderBottomWidth: '1px', borderRightWidth: '1px' } : {}),
+  ...(floatingPlacement.startsWith('bottom') ? { top: '-5px', borderTopWidth: '1px', borderLeftWidth: '1px' } : {}),
+  ...(floatingPlacement.startsWith('left') ? { right: '-5px', borderTopWidth: '1px', borderRightWidth: '1px' } : {}),
+  ...(floatingPlacement.startsWith('right') ? { left: '-5px', borderBottomWidth: '1px', borderLeftWidth: '1px' } : {}),
+  }}
+  />
  </motion.div>
  </Portal>
  )}

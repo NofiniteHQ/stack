@@ -12,6 +12,7 @@ import React, {
 import { Portal, onClickOutside, restoreFocus, cn } from '../../utils';
 import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { VirtualList } from '../virtuallist/VirtualList';
 
 /* ============================================================
  * Types
@@ -25,7 +26,7 @@ export type SelectOption = {
 
 export interface SelectProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue' | 'onChange'> {
  /** Array of available options */
- options: SelectOption[];
+ data: SelectOption[];
  /** Controlled state value */
  value?: string; 
  /** Uncontrolled initial value */
@@ -61,7 +62,7 @@ function findNextEnabled(options: SelectOption[], start: number, direction: 1 | 
  * * Automatically manages focus, keyboard typeahead navigation, and viewport collision detection.
  */
 export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
- options,
+ data,
  value,
  defaultValue,
  onChange,
@@ -76,15 +77,15 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  const isControlled = value !== undefined;
  const [internalValue, setInternalValue] = useState<string | undefined>(defaultValue);
  const selectedValue = isControlled ? value : internalValue;
- const selectedOption = options.find((o) => o.value === selectedValue) ?? null;
+ const selectedOption = data.find((o) => o.value === selectedValue) ?? null;
 
  const [open, setOpen] = useState(false);
- const [activeIndex, setActiveIndex] = useState<number>(() => options.findIndex((o) => !o.disabled));
+ const [activeIndex, setActiveIndex] = useState<number>(() => data.findIndex((o) => !o.disabled));
 
  // Used for WAI-ARIA keyboard typeahead navigation
  const typeaheadRef = useRef({ buffer: '', lastTime: 0 });
  const triggerRef = useRef<HTMLButtonElement | null>(null);
- const activeOptionRef = useRef<HTMLDivElement | null>(null);
+ const listRef = useRef<HTMLDivElement | null>(null);
 
  const reactId = React.useId();
  const baseId = id ?? reactId;
@@ -134,8 +135,8 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  useEffect(() => {
  if (!open) return;
  // Set active index to the currently selected item, or the first available option
- const selIndex = options.findIndex((o) => o.value === selectedValue && !o.disabled);
- const idx = selIndex >= 0 ? selIndex : options.findIndex((o) => !o.disabled);
+ const selIndex = data.findIndex((o) => o.value === selectedValue && !o.disabled);
+ const idx = selIndex >= 0 ? selIndex : data.findIndex((o) => !o.disabled);
  setActiveIndex(idx >= 0 ? idx : -1);
 
  // Defer focus to ensure Portal is rendered
@@ -143,12 +144,23 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  if (refs.floating.current) (refs.floating.current as HTMLElement).focus();
  }, 10);
  return () => clearTimeout(timeoutId);
- }, [open, options, selectedValue, refs.floating]);
+ }, [open, data, selectedValue, refs.floating]);
 
  // Auto-scroll to active item when navigating via keyboard
  useEffect(() => {
- if (open && activeOptionRef.current) {
- activeOptionRef.current.scrollIntoView({ block: 'nearest' });
+ if (open && listRef.current && activeIndex >= 0) {
+ const list = listRef.current;
+ const itemHeight = 36; 
+ const scrollTop = list.scrollTop;
+ const viewportHeight = list.clientHeight || 240;
+ const itemTop = activeIndex * itemHeight;
+ const itemBottom = itemTop + itemHeight;
+
+ if (itemTop < scrollTop) {
+ list.scrollTop = itemTop;
+ } else if (itemBottom > scrollTop + viewportHeight) {
+ list.scrollTop = itemBottom - viewportHeight;
+ }
  }
  }, [activeIndex, open]);
 
@@ -156,14 +168,14 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  Event Handlers
  ---------------------------------------------------- */
  const selectIndex = useCallback((i: number) => {
- if (i < 0 || i >= options.length) return;
- const opt = options[i];
+ if (i < 0 || i >= data.length) return;
+ const opt = data[i];
  if (opt.disabled) return;
  if (!isControlled) setInternalValue(opt.value);
  onChange?.(opt.value);
  setOpen(false);
  triggerRef.current?.focus();
- }, [isControlled, options, onChange]);
+ }, [isControlled, data, onChange]);
 
  const onTriggerKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
  if (disabled) return;
@@ -177,19 +189,19 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  const key = e.key;
  if (key === 'ArrowDown') {
  e.preventDefault();
- const next = findNextEnabled(options, activeIndex, 1);
+ const next = findNextEnabled(data, activeIndex, 1);
  if (next >= 0) setActiveIndex(next);
  } else if (key === 'ArrowUp') {
  e.preventDefault();
- const prev = findNextEnabled(options, activeIndex, -1);
+ const prev = findNextEnabled(data, activeIndex, -1);
  if (prev >= 0) setActiveIndex(prev);
  } else if (key === 'Home') {
  e.preventDefault();
- const first = options.findIndex((o) => !o.disabled);
+ const first = data.findIndex((o) => !o.disabled);
  if (first >= 0) setActiveIndex(first);
  } else if (key === 'End') {
  e.preventDefault();
- const last = options.length - 1 - [...options].reverse().findIndex((o) => !o.disabled);
+ const last = data.length - 1 - [...data].reverse().findIndex((o) => !o.disabled);
  if (last >= 0) setActiveIndex(last);
  } else if (key === 'Enter' || key === ' ') {
  e.preventDefault();
@@ -206,11 +218,11 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
 
  const buf = typeaheadRef.current.buffer;
  const start = activeIndex >= 0 ? activeIndex + 1 : 0;
- const len = options.length;
+ const len = data.length;
  for (let i = 0; i < len; i++) {
  const idx = (start + i) % len;
- const lab = String(options[idx].label).toLowerCase();
- if (!options[idx].disabled && lab.startsWith(buf)) {
+ const lab = String(data[idx].label).toLowerCase();
+ if (!data[idx].disabled && lab.startsWith(buf)) {
  setActiveIndex(idx);
  break;
  }
@@ -221,6 +233,10 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  /* ----------------------------------------------------
  Render
  ---------------------------------------------------- */
+ const ITEM_HEIGHT = 36;
+ const MAX_LIST_HEIGHT = 240;
+ const listHeight = Math.min(data.length * ITEM_HEIGHT, MAX_LIST_HEIGHT);
+
  return (
  <div className={cn("relative block w-full font-sans", className)}>
  {/* Hidden input for native form submission */}
@@ -262,8 +278,8 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  transition={{ duration: 0.15, ease: "easeOut" }}
  id={listboxId}
  ref={refs.setFloating}
- className="z-50 max-h-60 overflow-y-auto rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-md outline-none"
- role="listbox"
+ className="z-50 rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-md outline-none overflow-hidden"
+ role="presentation"
  aria-labelledby={labelId}
  tabIndex={0}
  style={{
@@ -274,19 +290,25 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  }}
  onKeyDown={onListKeyDown}
  >
- {options.map((opt, i) => {
+ <VirtualList
+ ref={listRef}
+ items={data}
+ height={listHeight}
+ itemHeight={ITEM_HEIGHT}
+ keyExtractor={(opt) => opt.value}
+ className="w-full h-auto bg-transparent border-none rounded-none outline-none focus-visible:ring-0 !p-0 m-0"
+ role="listbox"
+ renderItem={(opt, i) => {
  const isSelected = selectedValue === opt.value;
  const isActive = activeIndex === i;
  return (
  <div
- key={opt.value}
- ref={isActive ? activeOptionRef : null}
  id={`${listboxId}-option-${i}`}
  role="option"
  aria-selected={isSelected}
  aria-disabled={opt.disabled || undefined}
  className={cn(
- "flex cursor-pointer select-none items-center justify-between rounded-md px-3 py-2 text-sm text-default outline-none transition-colors duration-200",
+ "flex w-full h-full cursor-pointer select-none items-center justify-between rounded-md px-3 text-sm text-default outline-none transition-colors duration-200",
  isActive && !opt.disabled && "bg-subtle text-default",
  isSelected && "font-bold text-default",
  isSelected && isActive && !opt.disabled && "bg-subtle",
@@ -305,7 +327,8 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  )}
  </div>
  );
- })}
+ }}
+ />
  </motion.div>
  </Portal>
  )}

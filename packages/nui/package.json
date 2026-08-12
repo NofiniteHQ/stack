@@ -97,9 +97,12 @@
     "@tiptap/extension-text-align": "^3.29.2",
     "@tiptap/extension-text-style": "^3.29.2",
     "@tiptap/extension-underline": "^3.29.2",
+    "@tiptap/extension-youtube": "^3.29.2",
     "@tiptap/pm": "^3.29.2",
     "@tiptap/react": "^3.29.2",
     "@tiptap/starter-kit": "^3.29.2",
+    "@tiptap/suggestion": "^3.29.2",
+    "@vidstack/react": "^1.15.6",
     "@visx/axis": "^4.0.0",
     "@visx/curve": "^4.0.0",
     "@visx/event": "^4.0.0",
@@ -114,15 +117,19 @@
     "@visx/visx": "^4.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
+    "katex": "^0.18.4",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.553.0",
     "react-hook-form": "^7.84.0",
     "tailwind-merge": "^3.6.0",
-    "valibot": "^1.4.2"
+    "tippy.js": "^6.3.7",
+    "valibot": "^1.4.2",
+    "vidstack": "^1.15.6"
   },
   "devDependencies": {
     "@nofinite/nuicss": "workspace:*",
     "@storybook/test-runner": "^0.24.4",
+    "@types/katex": "^0.16.8",
     "jest-image-snapshot": "^6.5.2",
     "playwright": "^1.62.0",
     "vitest-axe": "^0.1.0"

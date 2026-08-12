@@ -37,7 +37,7 @@ export interface TreeViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>
  * TreeView Primitive
  * ============================================================ */
 
-export const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(({
+export const TreeViewRoot = forwardRef<HTMLDivElement, TreeViewProps>(({
  data,
  selectedId,
  defaultExpandedIds = [],
@@ -129,18 +129,22 @@ export const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(({
  );
 
  const renderNodes = (nodes: TreeNode[], level: number = 1): React.ReactNode => {
- return nodes.map(node => (
- <TreeItem
- key={node.id}
- id={node.id}
- label={node.label}
- icon={node.icon}
- disabled={node.disabled}
- level={level}
- >
- {node.children && node.children.length > 0 && renderNodes(node.children, level + 1)}
- </TreeItem>
- ));
+ return nodes.map((node, index) => {
+  const isFirst = level === 1 && index === 0;
+  return (
+  <TreeItem
+  key={node.id}
+  id={node.id}
+  label={node.label}
+  icon={node.icon}
+  disabled={node.disabled}
+  level={level}
+  tabIndex={isFirst ? 0 : -1}
+  >
+  {node.children && node.children.length > 0 && renderNodes(node.children, level + 1)}
+  </TreeItem>
+  );
+ });
  };
 
  return (
@@ -154,7 +158,7 @@ export const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(({
  );
 });
 
-TreeView.displayName = 'TreeView';
+TreeViewRoot.displayName = 'TreeView';
 
 /* ============================================================
  * TreeItem Primitive
@@ -250,4 +254,12 @@ export const TreeItem = forwardRef<HTMLLIElement, TreeItemProps>(({
  );
 });
 
-TreeItem.displayName = 'TreeItem';
+TreeItem.displayName = 'TreeView.Item';
+
+/* ============================================================
+ * Export
+ * ============================================================ */
+
+export const TreeView = Object.assign(TreeViewRoot, {
+  Item: TreeItem,
+});

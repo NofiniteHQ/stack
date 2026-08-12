@@ -11,6 +11,7 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
+import { VirtualList } from '../virtuallist/VirtualList';
 
 export interface ComboboxOption {
  label: string;
@@ -19,7 +20,7 @@ export interface ComboboxOption {
 }
 
 export interface ComboboxProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
- options: ComboboxOption[];
+ data: ComboboxOption[];
  /** Controlled value of the combobox */
  value?: string;
  /** Initial uncontrolled value */
@@ -49,7 +50,7 @@ export interface ComboboxProps extends Omit<React.HTMLAttributes<HTMLDivElement>
 export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  (
  {
- options,
+ data,
  value,
  defaultValue,
  onChange,
@@ -73,14 +74,15 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  // * State Management
  // displayLabel tracks what the user is currently typing OR the label of the selected option.
  const [displayLabel, setDisplayLabel] = useState<string>(() => {
- if (isControlled && value) return options.find((o) => o.value === value)?.label ?? '';
- if (defaultValue) return options.find((o) => o.value === defaultValue)?.label ?? '';
+ if (isControlled && value) return data.find((o) => o.value === value)?.label ?? '';
+ if (defaultValue) return data.find((o) => o.value === defaultValue)?.label ?? '';
  return '';
  });
  
  const [open, setOpen] = useState(false);
  const [activeIndex, setActiveIndex] = useState<number>(-1);
  const wrapperRef = useRef<HTMLDivElement | null>(null);
+ const listRef = useRef<HTMLDivElement | null>(null);
 
  // Merge forwarded ref with our internal wrapper ref
  const setRefs = useCallback(
@@ -93,7 +95,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  );
 
  // Filter Options based on current input
- const filtered = options.filter((opt) =>
+ const filtered = data.filter((opt) =>
  filter
  ? filter(displayLabel, opt)
  : opt.label.toLowerCase().includes(displayLabel.toLowerCase())
@@ -114,9 +116,9 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  // rather than leaving "App" dangling in the input.
  const revertLabel = useCallback(() => {
  const currentValue = isControlled ? value : defaultValue;
- const match = options.find((o) => o.value === currentValue);
+ const match = data.find((o) => o.value === currentValue);
  setDisplayLabel(match?.label || '');
- }, [isControlled, value, defaultValue, options]);
+ }, [isControlled, value, defaultValue, data]);
 
  // Click outside to close
  useEffect(() => {
@@ -138,10 +140,28 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  // Sync controlled value changes from parent
  useEffect(() => {
  if (isControlled && value !== undefined) {
- const found = options.find((o) => o.value === value);
+ const found = data.find((o) => o.value === value);
  setDisplayLabel(found?.label || '');
  }
- }, [isControlled, value, options]);
+ }, [isControlled, value, data]);
+
+ // Auto-scroll for VirtualList
+ useEffect(() => {
+ if (open && listRef.current && activeIndex >= 0) {
+ const list = listRef.current;
+ const itemHeight = 36;
+ const scrollTop = list.scrollTop;
+ const viewportHeight = list.clientHeight || 240;
+ const itemTop = activeIndex * itemHeight;
+ const itemBottom = itemTop + itemHeight;
+
+ if (itemTop < scrollTop) {
+ list.scrollTop = itemTop;
+ } else if (itemBottom > scrollTop + viewportHeight) {
+ list.scrollTop = itemBottom - viewportHeight;
+ }
+ }
+ }, [activeIndex, open]);
 
  // Keyboard Navigation
  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -228,24 +248,31 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  exit={{ opacity: 0, y: -10 }}
  transition={{ duration: 0.15 }}
  id={listboxId}
- role="listbox"
- className="absolute left-0 top-full mt-1 z-50 max-h-60 w-full overflow-y-auto rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-md"
+ role="presentation"
+ className="absolute left-0 top-full mt-1 z-50 w-full rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-md overflow-hidden"
  >
  {filtered.length === 0 ? (
  <div className="p-3 text-center text-sm italic text-muted">{emptyMessage}</div>
  ) : (
- filtered.map((opt, index) => {
+ <VirtualList
+ ref={listRef}
+ items={filtered}
+ height={Math.min(filtered.length * 36, 240)}
+ itemHeight={36}
+ keyExtractor={(opt) => opt.value}
+ className="w-full h-auto bg-transparent border-none rounded-none outline-none focus-visible:ring-0 !p-0 m-0"
+ role="listbox"
+ renderItem={(opt, index) => {
  const isActive = index === activeIndex;
  const isSelected = opt.label === displayLabel; 
 
  return (
  <div
- key={opt.value}
  id={`${listboxId}-option-${index}`}
  role="option"
  aria-selected={isSelected}
  className={cn(
- 'm-1 flex cursor-pointer items-center rounded-sm px-3 py-2 text-sm text-default transition-colors duration-200',
+ 'flex w-full h-full cursor-pointer items-center rounded-sm px-3 text-sm text-default transition-colors duration-200',
  isActive && 'bg-muted',
  isSelected && 'bg-subtle font-medium text-default'
  )}
@@ -262,7 +289,8 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  {renderOption ? renderOption(opt, isActive) : opt.label}
  </div>
  );
- })
+ }}
+ />
  )}
  </motion.div>
  )}

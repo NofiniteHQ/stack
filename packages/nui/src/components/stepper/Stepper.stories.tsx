@@ -24,21 +24,21 @@ const detailedSteps = [
 
 export const Default: Story = {
  args: {
- steps: ['Personal Info', 'Account Details', 'Review'],
+ data: ['Personal Info', 'Account Details', 'Review'],
  active: 0,
  },
 };
 
 export const Detailed: Story = {
  args: {
- steps: detailedSteps,
+ data: detailedSteps,
  active: 2,
  },
 };
 
 export const DisabledFuture: Story = {
  args: {
- steps: detailedSteps,
+ data: detailedSteps,
  active: 1,
  disableFuture: true,
  },
@@ -50,7 +50,7 @@ export const SmallContainer: Story = {
  <p style={{ fontSize: '12px', marginBottom: '16px', color: '#666', fontFamily: 'sans-serif' }}>
  Scrollable on small width:
  </p>
- <Stepper steps={detailedSteps} active={1} />
+ <Stepper data={detailedSteps} active={1} />
  </div>
  ),
 };
@@ -65,7 +65,7 @@ export const InteractiveWizard: Story = {
  return (
  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: 'sans-serif' }}>
  <Stepper 
- steps={detailedSteps} 
+ data={detailedSteps} 
  active={active} 
  onChange={setActive} 
  />
@@ -98,7 +98,7 @@ export const InteractiveWizard: Story = {
  */
 export const AutomatedTest: Story = {
  args: {
- steps: detailedSteps,
+ data: detailedSteps,
  active: 0,
  },
  play: async ({ canvasElement, args }) => {
@@ -117,4 +117,31 @@ export const AutomatedTest: Story = {
  // In the InteractiveWizard story above, this would physically change the UI.
  await expect(args.onChange).toHaveBeenCalledWith(2);
  },
+};
+
+export const DataDrivenContent: Story = {
+ render: function Wizard() {
+ const [active, setActive] = useState(0);
+
+ const smartSteps = [
+  { label: 'Shipping', description: 'Address details', content: <div className="p-8 border rounded-lg bg-surface mt-4 text-center">Shipping Form Fields Go Here</div> },
+  { label: 'Billing', description: 'Payment methods', content: <div className="p-8 border rounded-lg bg-surface mt-4 text-center">Credit Card Form Goes Here</div> },
+  { label: 'Review', optional: true, description: 'Order summary', content: <div className="p-8 border rounded-lg bg-surface mt-4 text-center">Review your order before submitting</div> },
+  { label: 'Complete', description: 'Confirmation', content: <div className="p-8 border rounded-lg bg-surface mt-4 text-center text-primary font-bold">Thank you for your order!</div> },
+ ];
+
+ return (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: 'sans-serif' }}>
+  <Stepper 
+   data={smartSteps} 
+   active={active} 
+   onChange={setActive} 
+  />
+  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+   <Button variant="outline" onClick={() => setActive(Math.max(active - 1, 0))} disabled={active === 0}>Previous</Button>
+   <Button variant="primary" onClick={() => setActive(Math.min(active + 1, smartSteps.length - 1))} disabled={active === smartSteps.length - 1}>Next</Button>
+  </div>
+  </div>
+ );
+ }
 };

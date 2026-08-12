@@ -46,14 +46,71 @@ const mockItems: TimelineItem[] = [
 
 export const Vertical: Story = {
  args: {
- items: mockItems,
+ data: mockItems,
  orientation: 'vertical',
  },
 };
 
+export const PrimitiveMode: Story = {
+ render: () => (
+  <Timeline orientation="vertical">
+   <Timeline.Item>
+    <Timeline.Node status="success" />
+    <Timeline.Content time="10:00 AM" title="Primitive Node 1" description="This node was manually composed using the underlying primitives." />
+   </Timeline.Item>
+   <Timeline.Item>
+    <Timeline.Node status="primary" />
+    <Timeline.Content time="11:30 AM" title="Primitive Node 2" description="No data prop required." />
+   </Timeline.Item>
+  </Timeline>
+ )
+};
+
 export const Horizontal: Story = {
  args: {
- items: mockItems,
+ data: mockItems,
  orientation: 'horizontal',
  },
+};
+
+import { CheckCircle2, Rocket, Code2, PackageCheck } from 'lucide-react';
+
+export const WithIcons: Story = {
+ args: {
+ data: [
+  {
+  id: '1',
+  time: 'Phase 1',
+  title: 'Project Kickoff',
+  description: 'Initial planning and requirement gathering.',
+  status: 'success',
+  icon: <CheckCircle2 size={16} />
+  },
+  {
+  id: '2',
+  time: 'Phase 2',
+  title: 'Design System',
+  description: 'Establishing typography, colors, and layout foundations.',
+  status: 'primary',
+  icon: <Rocket size={16} />
+  },
+  {
+  id: '3',
+  time: 'Phase 3',
+  title: 'Component Development',
+  description: 'Building out the UI library.',
+  status: 'warning',
+  icon: <Code2 size={16} />
+  },
+  {
+  id: '4',
+  time: 'Phase 4',
+  title: 'Production Release',
+  description: 'Shipping to the end users.',
+  status: 'default',
+  icon: <PackageCheck size={16} />
+  }
+ ],
+ orientation: 'vertical',
+ }
 };

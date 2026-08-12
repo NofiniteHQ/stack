@@ -26,9 +26,9 @@ const fruitOptions = [
  { value: 'elderberry', label: 'Elderberry' },
 ];
 
-export const Default: StoryObj<typeof Select> = {
+export const DataDriven: StoryObj<typeof Select> = {
  args: { 
- options: fruitOptions,
+ data: fruitOptions,
  placeholder: 'Select a fruit...',
  style: { width: '300px' , onChange: fn() }
  },
@@ -36,7 +36,7 @@ export const Default: StoryObj<typeof Select> = {
 
 export const Disabled: StoryObj<typeof Select> = {
  args: {
- options: fruitOptions,
+ data: fruitOptions,
  disabled: true,
  defaultValue: 'banana',
  style: { width: '300px' }
@@ -45,7 +45,7 @@ export const Disabled: StoryObj<typeof Select> = {
 
 export const ErrorState: StoryObj<typeof Select> = {
  args: {
- options: fruitOptions,
+ data: fruitOptions,
  error: true,
  placeholder: 'Selection required',
  style: { width: '300px' }
@@ -54,7 +54,7 @@ export const ErrorState: StoryObj<typeof Select> = {
 
 export const LongList: StoryObj<typeof Select> = {
  args: {
- options: Array.from({ length: 50 }, (_, i) => ({
+ data: Array.from({ length: 50 }, (_, i) => ({
  value: `option-${i}`,
  label: `Option ${i + 1}`,
  })),
@@ -67,7 +67,7 @@ export const BottomCollision: StoryObj<typeof Select> = {
  render: () => (
  <div style={{ marginTop: '400px', width: '300px' }}>
  <p style={{ marginBottom: '10px', fontFamily: 'sans-serif' }}>This select will flip upwards:</p>
- <Select options={fruitOptions} placeholder="Collision check" />
+ <Select data={fruitOptions} placeholder="Collision check" />
  </div>
  ),
 };
@@ -78,7 +78,7 @@ export const BottomCollision: StoryObj<typeof Select> = {
  */
 export const InteractiveTest: StoryObj<typeof Select> = {
  args: {
- options: fruitOptions,
+ data: fruitOptions,
  placeholder: 'Select a fruit...',
  style: { width: '300px' , onChange: fn()}
  },

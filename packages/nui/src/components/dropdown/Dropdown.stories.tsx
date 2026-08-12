@@ -120,3 +120,20 @@ export const InteractiveTest: Story = {
  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
  },
 };
+
+export const DataDriven: Story = {
+  render: () => {
+    const dropdownData = [
+      { label: 'Profile', onClick: () => alert('Profile clicked') },
+      { label: 'Settings', onClick: () => alert('Settings clicked') },
+      { type: 'separator' as const },
+      { label: 'Logout', onClick: () => alert('Logout clicked'), disabled: true },
+    ];
+    
+    return (
+      <Dropdown data={dropdownData}>
+        <Button variant="outline">Smart Dropdown</Button>
+      </Dropdown>
+    );
+  }
+};

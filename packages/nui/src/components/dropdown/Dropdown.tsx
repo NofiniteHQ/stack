@@ -34,35 +34,21 @@ function useDropdown() {
 }
 
 /* ============================================================
- * 1. Dropdown Root
+ * 1. Types & Data Mode
  * ============================================================ */
 
+export type DropdownDataItem = {
+  label?: React.ReactNode;
+  onClick?: (e?: React.MouseEvent) => void;
+  type?: 'item' | 'separator';
+  disabled?: boolean;
+};
+
 export interface DropdownRootProps extends React.HTMLAttributes<HTMLDivElement> {
- children: React.ReactNode;
+  children: React.ReactNode;
+  data?: DropdownDataItem[];
+  align?: 'start' | 'end';
 }
-
-const DropdownRoot = forwardRef<HTMLDivElement, DropdownRootProps>(
- ({ children, className, ...props }, ref) => {
- const [open, setOpen] = useState(false);
- const triggerRef = useRef<HTMLButtonElement>(null);
- const id = useId();
-
- useEffect(() => {
- if (!open && triggerRef.current) {
- restoreFocus(triggerRef.current);
- }
- }, [open]);
-
- return (
- <DropdownContext.Provider value={{ open, setOpen, triggerRef, id }}>
- <div ref={ref} className={cn("relative inline-block font-sans", className)} {...props}>
- {children}
- </div>
- </DropdownContext.Provider>
- );
- }
-);
-DropdownRoot.displayName = 'Dropdown';
 
 /* ============================================================
  * 2. Dropdown Trigger
@@ -299,6 +285,69 @@ const DropdownItem = forwardRef<HTMLDivElement, DropdownItemProps>(
  }
 );
 DropdownItem.displayName = 'Dropdown.Item';
+
+/* ============================================================
+ * 5. Dropdown Root (Smart / Primitive)
+ * ============================================================ */
+
+const DropdownRoot = forwardRef<HTMLDivElement, DropdownRootProps>(
+  ({ children, className, data, align = 'start', ...props }, ref) => {
+    const [open, setOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const id = useId();
+
+    useEffect(() => {
+      if (!open && triggerRef.current) {
+        restoreFocus(triggerRef.current);
+      }
+    }, [open]);
+
+    return (
+      <DropdownContext.Provider value={{ open, setOpen, triggerRef, id }}>
+        <div ref={ref} className={cn("relative inline-block font-sans", className)} {...props}>
+          {data ? (
+            <>
+              <DropdownTrigger>{children}</DropdownTrigger>
+              <DropdownMenu align={align}>
+                {data.map((item, index) => {
+                  if (item.type === 'separator') {
+                    return (
+                      <div 
+                        key={`separator-${index}`} 
+                        className="h-px bg-muted my-1" 
+                        role="separator" 
+                      />
+                    );
+                  }
+
+                  return (
+                    <DropdownItem
+                      key={`item-${index}`}
+                      onClick={(e) => {
+                        if (item.disabled) {
+                          e.preventDefault();
+                          return;
+                        }
+                        item.onClick?.(e);
+                      }}
+                      aria-disabled={item.disabled}
+                      className={item.disabled ? "opacity-50 cursor-not-allowed" : ""}
+                    >
+                      {item.label}
+                    </DropdownItem>
+                  );
+                })}
+              </DropdownMenu>
+            </>
+          ) : (
+            children
+          )}
+        </div>
+      </DropdownContext.Provider>
+    );
+  }
+);
+DropdownRoot.displayName = 'Dropdown';
 
 /* ============================================================
  * Export

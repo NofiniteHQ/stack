@@ -41,20 +41,28 @@ const ResizableImageNode = (props: NodeViewProps) => {
   
   return (
     <NodeViewWrapper className={`relative inline-block my-4 max-w-full ${node.attrs.class || ''}`}>
-      <img
-        ref={imageRef}
-        src={node.attrs.src}
-        alt={node.attrs.alt}
-        title={node.attrs.title}
-        className={`max-w-full rounded-md shadow-sm transition-all duration-100 ${
-          selected ? 'ring-2 ring-primary ring-offset-2' : ''
-        }`}
-        style={{ width: node.attrs.width || 'auto', height: node.attrs.height || 'auto' }}
-      />
-      {node.attrs.caption && (
-        <div className="text-xs text-muted text-center mt-2 font-medium italic">
-          {node.attrs.caption}
+      {node.attrs.uploading ? (
+        <div className="flex flex-col items-center justify-center w-full max-w-md h-48 bg-subtle rounded-md border-2 border-dashed border-default animate-pulse">
+           <span className="text-muted text-sm font-medium">Uploading image...</span>
         </div>
+      ) : (
+        <>
+          <img
+            ref={imageRef}
+            src={node.attrs.src}
+            alt={node.attrs.alt}
+            title={node.attrs.title}
+            className={`max-w-full rounded-md shadow-sm transition-all duration-100 ${
+              selected ? 'ring-2 ring-primary ring-offset-2' : ''
+            }`}
+            style={{ width: node.attrs.width || 'auto', height: node.attrs.height || 'auto' }}
+          />
+          {node.attrs.caption && (
+            <div className="text-xs text-muted text-center mt-2 font-medium italic">
+              {node.attrs.caption}
+            </div>
+          )}
+        </>
       )}
       {selected && (
         <div
@@ -82,6 +90,9 @@ export const ResizableImage = BaseImage.extend({
       },
       caption: {
         default: null,
+      },
+      uploading: {
+        default: false,
       },
     }
   },

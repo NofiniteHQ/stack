@@ -23,17 +23,15 @@ export interface TableColumn<T> {
  sortFn?: (a: T, b: T) => number;
 }
 
-export interface TableProps<T> {
+export interface TableProps<T> extends Omit<React.HTMLAttributes<HTMLTableElement>, 'data'> {
  /** Array of column configuration objects */
- columns: TableColumn<T>[];
+ columns?: TableColumn<T>[];
  /** Array of data objects to render */
- data: T[];
+ data?: T[];
  /** A unique identifier for each row (string/number key, or a function that returns a string) */
- rowKey: keyof T | ((row: T) => string);
+ rowKey?: keyof T | ((row: T) => string);
  /** Text or React Node to display when the data array is empty */
  emptyText?: React.ReactNode;
- /** Custom class applied to the <table> element */
- className?: string;
 }
 
 type SortState<T> = {
@@ -50,12 +48,13 @@ type SortState<T> = {
  * * A highly generic data table that supports automatic sorting and custom cell rendering.
  * * Uses strict TypeScript generics (`<T>`) so it can perfectly map to any data shape passed into it.
  */
-export function Table<T>({
- columns,
- data,
- rowKey,
+function SmartTable<T>({
+ columns = [],
+ data = [],
+ rowKey = 'id' as keyof T,
  emptyText = 'No data available',
  className,
+ ...props
 }: TableProps<T>) {
  const [sort, setSort] = useState<SortState<T>>(null);
 
@@ -217,3 +216,78 @@ export function Table<T>({
  </div>
  );
 }
+
+/* ============================================================
+ * Primitives
+ * ============================================================ */
+
+const TableRoot = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
+  ({ className, ...props }, ref) => (
+  <div className="w-full overflow-auto border border-default rounded-lg bg-surface">
+    <table role="table" ref={ref} className={cn("w-full caption-bottom border-collapse font-sans text-sm text-default", className)} {...props} />
+  </div>
+  )
+);
+TableRoot.displayName = "Table.Root";
+
+export const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
+  ({ className, ...props }, ref) => (
+    <thead role="rowgroup" ref={ref} className={cn("", className)} {...props} />
+  )
+);
+TableHeader.displayName = "Table.Header";
+
+export const TableBody = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
+  ({ className, ...props }, ref) => (
+    <tbody role="rowgroup" ref={ref} className={cn("", className)} {...props} />
+  )
+);
+TableBody.displayName = "Table.Body";
+
+export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
+  ({ className, ...props }, ref) => (
+    <tr role="row" ref={ref} className={cn("border-b border-default transition-colors hover:bg-subtle data-[state=selected]:bg-muted", className)} {...props} />
+  )
+);
+TableRow.displayName = "Table.Row";
+
+export const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
+  ({ className, ...props }, ref) => (
+    <th role="columnheader" ref={ref} className={cn("h-10 px-4 py-3 bg-subtle text-left align-middle font-bold text-muted whitespace-nowrap", className)} {...props} />
+  )
+);
+TableHead.displayName = "Table.Head";
+
+export const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement>>(
+  ({ className, ...props }, ref) => (
+    <td role="cell" ref={ref} className={cn("px-4 py-3 align-middle", className)} {...props} />
+  )
+);
+TableCell.displayName = "Table.Cell";
+
+/* ============================================================
+ * Polymorphic Export
+ * ============================================================ */
+
+type TableComponent = (<T>(props: TableProps<T> & { ref?: React.Ref<HTMLTableElement> }) => React.ReactElement) & {
+  Header: typeof TableHeader;
+  Body: typeof TableBody;
+  Row: typeof TableRow;
+  Head: typeof TableHead;
+  Cell: typeof TableCell;
+};
+
+const PolymorphicTable = React.forwardRef<HTMLTableElement, TableProps<any>>((props, ref) => {
+  if (props.data) {
+    return <SmartTable {...props} />;
+  }
+  return <TableRoot ref={ref} {...props} />;
+}) as unknown as TableComponent;
+
+PolymorphicTable.Header = TableHeader;
+PolymorphicTable.Body = TableBody;
+PolymorphicTable.Row = TableRow;
+PolymorphicTable.Head = TableHead;
+PolymorphicTable.Cell = TableCell;
+
+export const Table = PolymorphicTable;

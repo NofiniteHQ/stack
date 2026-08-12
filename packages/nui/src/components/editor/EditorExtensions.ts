@@ -21,8 +21,13 @@ import { FontFamily } from '@tiptap/extension-font-family'
 import { Subscript } from '@tiptap/extension-subscript'
 import { Superscript } from '@tiptap/extension-superscript'
 import { all, createLowlight } from 'lowlight'
-
-const lowlight = createLowlight(all)
+import { SlashCommand } from './extensions/SlashCommand'
+import { CustomVideo } from './extensions/CustomVideo'
+import { FileAttachment } from './extensions/FileAttachment'
+import { LinkPreview } from './extensions/LinkPreview'
+import { CollapsibleBlock } from './extensions/CollapsibleBlock'
+import { CustomCodeBlock } from './extensions/CustomCodeBlock'
+import { BlockMath } from './extensions/BlockMath'
 
 
 
@@ -61,10 +66,14 @@ export const getEditorExtensions = (placeholder?: string) => [
     className: 'has-focus',
     mode: 'all',
   }),
-  CodeBlockLowlight.configure({
-    lowlight,
-  }),
+  CustomCodeBlock,
   FontFamily,
   Subscript,
   Superscript,
+  CustomVideo,
+  SlashCommand,
+  FileAttachment,
+  LinkPreview,
+  CollapsibleBlock,
+  BlockMath,
 ]

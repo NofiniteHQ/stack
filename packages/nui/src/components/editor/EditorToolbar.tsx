@@ -4,7 +4,9 @@ import { Popover } from '../popover/Popover'
 import { Dropdown } from '../dropdown/Dropdown'
 import { Button } from '../button/Button'
 import { Input } from '../input/Input'
+import { ColorPicker } from '../colorpicker'
 import { cn } from '../../utils'
+import { motion } from 'framer-motion'
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3,
@@ -13,7 +15,7 @@ import {
   Link as LinkIcon, Image as ImageIcon,
   Undo2, Redo2, Palette, Highlighter, ChevronDown, CheckSquare, Table as TableIcon,
   Subscript as SubscriptIcon, Superscript as SuperscriptIcon, RemoveFormatting,
-  Type
+  Type, Minus, Youtube
 } from 'lucide-react'
 
 export const Separator = () => <div className="w-px h-5 bg-default mx-1 opacity-50" />
@@ -31,7 +33,8 @@ export const ToolbarButton = ({
   icon: React.ElementType; 
   label: string; 
 }) => (
-  <button
+  <motion.button
+    whileTap={{ scale: disabled ? 1 : 0.9 }}
     type="button"
     className={cn(
       "flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200",
@@ -45,7 +48,7 @@ export const ToolbarButton = ({
     title={label}
   >
     <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
-  </button>
+  </motion.button>
 )
 
 export const LinkButton = ({ editor }: { editor: TiptapEditor }) => {
@@ -206,56 +209,13 @@ const ColorPickerPopover = ({ editor, type }: { editor: TiptapEditor; type: 'col
     }
   }
 
-  const TAILWIND_COLORS = [
-    '#000000', '#52525b', '#a1a1aa', '#ffffff',
-    '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#d946ef', '#f43f5e',
-    '#7f1d1d', '#7c2d12', '#78350f', '#3f6212', '#14532d', '#134e4a', '#164e63', '#1e3a8a', '#312e81', '#581c87', '#701a75'
-  ]; // 27 colors + 1 custom = 28 items (perfect 7x4 grid)
-
   return (
-    <Popover>
-      <Popover.Trigger>
-        <button 
-          type="button"
-          className="flex-shrink-0 relative flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none outline-none cursor-pointer hover:bg-subtle transition-colors focus-visible:outline-none"
-          title={type === 'color' ? 'Text Color' : 'Highlight Color'}
-        >
-          {type === 'color' ? <Palette size={16} className="text-muted hover:text-default" /> : <Highlighter size={16} className="text-muted hover:text-default" />}
-          <div 
-            className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full border border-default shadow-sm" 
-            style={{ backgroundColor: currentColor === 'currentColor' ? '#000' : (currentColor === 'transparent' ? '#fff' : currentColor) }} 
-          />
-        </button>
-      </Popover.Trigger>
-      <Popover.Content placement="bottom" className="p-3 w-64 bg-surface border border-default rounded-lg shadow-xl">
-        <div className="grid grid-cols-7 gap-2">
-          {TAILWIND_COLORS.map(c => (
-            <Popover.Close key={c}>
-              <button
-                className={cn(
-                  "w-6 h-6 rounded-full border border-black/10 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary transition-transform hover:scale-110",
-                  currentColor === c && "ring-2 ring-offset-1 ring-primary"
-                )}
-                style={{ backgroundColor: c }}
-                onClick={() => setFormatColor(c)}
-                title={c}
-              />
-            </Popover.Close>
-          ))}
-          <div 
-            className="relative w-6 h-6 rounded-full border border-default shadow-sm focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-primary hover:scale-110 transition-transform overflow-hidden cursor-pointer flex items-center justify-center" 
-            style={{ background: 'conic-gradient(from 180deg at 50% 50%, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}
-            title="Custom Color"
-          >
-            <input 
-              type="color" 
-              className="absolute inset-[-10px] w-12 h-12 cursor-pointer opacity-0"
-              onChange={(e) => setFormatColor(e.target.value)}
-            />
-          </div>
-        </div>
-      </Popover.Content>
-    </Popover>
+    <ColorPicker 
+      value={currentColor} 
+      onChange={setFormatColor} 
+      icon={type === 'color' ? Palette : Highlighter} 
+      title={type === 'color' ? 'Text Color' : 'Highlight Color'} 
+    />
   )
 }
 
@@ -424,6 +384,54 @@ const TableCreator = ({ editor }: { editor: TiptapEditor }) => {
   )
 }
 
+const YouTubeButton = ({ editor }: { editor: TiptapEditor }) => {
+  const [url, setUrl] = useState('')
+
+  return (
+    <Popover>
+      <Popover.Trigger>
+        <button 
+          type="button" 
+          className={cn(
+            "flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-transparent border-none cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:bg-subtle",
+            editor.isActive('customVideo') ? "bg-subtle text-primary" : "text-muted hover:bg-subtle hover:text-default"
+          )}
+          aria-label="YouTube"
+          title="YouTube Video"
+        >
+          <Youtube size={16} />
+        </button>
+      </Popover.Trigger>
+      <Popover.Content placement="bottom" className="flex flex-col gap-2 w-64 p-3 bg-surface border border-default rounded-lg shadow-xl">
+        <div className="flex gap-2">
+          <Input 
+            type="url" 
+            value={url} 
+            onChange={(e) => setUrl(e.target.value)} 
+            placeholder="YouTube URL..." 
+            inputSize="sm"
+          />
+          <Popover.Close>
+            <Button 
+              type="button" 
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                if (url) {
+                  editor.chain().focus().setVideo({ src: url }).run()
+                  setUrl('')
+                }
+              }}
+            >
+              Add
+            </Button>
+          </Popover.Close>
+        </div>
+      </Popover.Content>
+    </Popover>
+  )
+}
+
 export const EditorToolbar = ({ editor }: { editor: TiptapEditor | null }) => {
   if (!editor) return null
 
@@ -539,6 +547,10 @@ export const EditorToolbar = ({ editor }: { editor: TiptapEditor | null }) => {
 
       <TableCreator editor={editor} />
       <ToolbarButton
+        icon={Minus} label="Divider"
+        onClick={() => editor.chain().focus().setHorizontalRule().run()}
+      />
+      <ToolbarButton
         icon={Quote} label="Quote"
         isActive={editor.isActive('blockquote')}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
@@ -551,6 +563,7 @@ export const EditorToolbar = ({ editor }: { editor: TiptapEditor | null }) => {
       
       <LinkButton editor={editor} />
       <ImageButton editor={editor} />
+      <YouTubeButton editor={editor} />
     </div>
   )
 }

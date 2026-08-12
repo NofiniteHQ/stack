@@ -91,3 +91,15 @@ export const InteractiveTest: Story = {
  await expect(canvas.getByText('Panel 2')).toBeInTheDocument();
  }
 };
+
+export const DataDriven: Story = {
+ render: () => {
+  const tabsData = [
+   { value: 'account', label: 'Account', content: <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>Manage your account settings.</div> },
+   { value: 'billing', label: 'Billing', content: <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>View billing history and payment methods.</div> },
+   { value: 'integrations', label: 'Integrations', content: <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>Connect third-party services.</div> },
+  ];
+
+  return <Tabs defaultValue="account" data={tabsData} />;
+ }
+};

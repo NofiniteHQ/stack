@@ -315,25 +315,38 @@ const ResizableHandle = forwardRef<HTMLDivElement, ResizableHandleProps>(({
  onPointerDown={(e) => ctx.startDrag(e.currentTarget, e)}
  onKeyDown={handleKeyDown}
  className={cn(
- "relative flex items-center justify-center shrink-0 z-10 bg-transparent touch-none outline-none group",
- "after:absolute after:bg-default hover:after:bg-primary data-[dragging=true]:after:bg-primary after:transition-all",
- ctx.direction === 'horizontal' 
- ? "w-3 cursor-col-resize after:w-[1px] hover:after:w-0.5 data-[dragging=true]:after:w-0.5 after:h-full" 
- : "h-3 cursor-row-resize after:h-[1px] hover:after:h-0.5 data-[dragging=true]:after:h-0.5 after:w-full",
+ "relative flex items-center justify-center shrink-0 z-10 touch-none outline-none group",
+ ctx.direction === 'horizontal' ? "w-[1px]" : "h-[1px]",
  className
  )}
  {...props}
  >
- {withIcon && (
- <div className="z-20 flex items-center justify-center w-3 h-4 bg-surface border border-default rounded-[2px] text-muted shadow-sm transition-colors group-hover:border-primary group-hover:text-primary data-[dragging=true]:border-primary data-[dragging=true]:text-primary" aria-hidden="true">
- <svg width="10" height="10" viewBox="0 0 15 15" fill="none" stroke="currentColor">
- {ctx.direction === 'horizontal' ? (
- <path d="M5.5 4V11.5M9.5 4V11.5" strokeLinecap="round" />
- ) : (
- <path d="M4 5.5H11.5M4 9.5H11.5" strokeLinecap="round" />
+ {/* The invisible 12px hitbox for easy dragging */}
+ <div 
+ className={cn(
+ "absolute z-[1] inset-0 m-auto",
+ ctx.direction === 'horizontal' ? "w-3 h-full cursor-col-resize" : "h-3 w-full cursor-row-resize"
  )}
- </svg>
- </div>
+ />
+
+ {/* The visual separator line */}
+ <div 
+ className={cn(
+ "absolute z-[2] inset-0 m-auto bg-slate-200 dark:bg-slate-800 transition-all group-hover:bg-primary data-[dragging=true]:bg-primary",
+ ctx.direction === 'horizontal' ? "w-[1px] h-full" : "h-[1px] w-full"
+ )}
+ aria-hidden="true"
+ />
+
+ {/* The pill icon */}
+ {withIcon && (
+ <div 
+ className={cn(
+ "absolute z-[3] inset-0 m-auto rounded-full bg-slate-300 dark:bg-slate-600 transition-all group-hover:bg-primary group-hover:scale-110 data-[dragging=true]:bg-primary data-[dragging=true]:scale-110",
+ ctx.direction === 'horizontal' ? "w-[3px] h-8" : "h-[3px] w-8"
+ )} 
+ aria-hidden="true" 
+ />
  )}
  </div>
  );

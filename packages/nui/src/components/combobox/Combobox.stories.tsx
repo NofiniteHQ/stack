@@ -30,16 +30,16 @@ const FRUITS = [
  { label: 'Dragonfruit', value: 'dragon' },
 ];
 
-export const Default: Story = {
+export const DataDriven: Story = {
  args: {
- options: FRUITS,
+ data: FRUITS,
  placeholder: 'Pick a fruit...',
  },
 };
 
 export const WithIcons: Story = {
  args: {
- options: [
+ data: [
  { label: 'New York', value: 'ny' },
  { label: 'London', value: 'ldn' },
  { label: 'Tokyo', value: 'tky' },
@@ -51,7 +51,7 @@ export const WithIcons: Story = {
 
 export const CustomOptionRendering: Story = {
  args: {
- options: FRUITS,
+ data: FRUITS,
  renderOption: (option, active) => (
  <div className="flex justify-between w-full" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
  <span>{option.label}</span>
@@ -69,7 +69,7 @@ export const CustomOptionRendering: Story = {
  */
 export const InteractiveKeyboardTest: Story = {
  args: {
- options: FRUITS,
+ data: FRUITS,
  placeholder: 'Test keyboard...',
  },
  play: async ({ canvasElement, args }) => {
@@ -94,7 +94,7 @@ export const InteractiveKeyboardTest: Story = {
  */
 export const InteractiveMouseTest: Story = {
  args: {
- options: FRUITS,
+ data: FRUITS,
  placeholder: 'Test mouse...',
  },
  play: async ({ canvasElement, args }) => {

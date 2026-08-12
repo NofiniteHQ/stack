@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from '@storybook/test';
+import { within, userEvent, expect, waitForElementToBeRemoved } from '@storybook/test';
 import { Popover } from './Popover';
 import { Button } from '../button/Button';
 
@@ -15,23 +15,31 @@ const meta: Meta<typeof Popover> = {
 
 export default meta;
 
-export const Default: StoryObj = {
- render: () => (
- <Popover>
- <Popover.Trigger>
- <Button>Click Me</Button>
- </Popover.Trigger>
- <Popover.Content>
- <div style={{ padding: '8px' }}>
- <h4 style={{ margin: '0 0 8px 0' }}>Popover Title</h4>
- <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
- This is a headless-style popover component with built-in
- positioning and focus trapping.
- </p>
- </div>
- </Popover.Content>
- </Popover>
- ),
+export const Default: StoryObj<any> = {
+  args: {
+  showArrow: false,
+  hover: false,
+  },
+  argTypes: {
+  showArrow: { control: 'boolean' },
+  hover: { control: 'boolean' },
+  },
+  render: (args) => (
+  <Popover hover={args.hover}>
+  <Popover.Trigger>
+  <Button>Click Me</Button>
+  </Popover.Trigger>
+  <Popover.Content showArrow={args.showArrow}>
+  <div style={{ padding: '8px' }}>
+  <h4 style={{ margin: '0 0 8px 0' }}>Popover Title</h4>
+  <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
+  This is a headless-style popover component with built-in
+  positioning and focus trapping.
+  </p>
+  </div>
+  </Popover.Content>
+  </Popover>
+  ),
 };
 
 export const Placements: StoryObj = {
@@ -134,8 +142,8 @@ export const InteractiveTest: StoryObj = {
  const closeBtn = body.getByRole('button', { name: /Close Dialog/i });
  await userEvent.click(closeBtn);
 
- // 5. Verify it unmounted
- await expect(dialog).not.toBeInTheDocument();
- await expect(trigger).toHaveAttribute('aria-expanded', 'false');
- },
+  // 5. Wait for it to unmount (handles Framer Motion exit delay)
+  await waitForElementToBeRemoved(() => body.queryByRole('dialog'), { timeout: 2000 });
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  },
 };

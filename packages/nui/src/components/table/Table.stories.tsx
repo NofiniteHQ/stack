@@ -69,6 +69,29 @@ export const EmptyState: StoryObj<typeof Table<Product>> = {
  },
 };
 
+export const PrimitiveTable: StoryObj = {
+ render: () => (
+  <Table>
+   <Table.Header>
+    <Table.Row>
+     <Table.Head>Name</Table.Head>
+     <Table.Head>Role</Table.Head>
+    </Table.Row>
+   </Table.Header>
+   <Table.Body>
+    <Table.Row>
+     <Table.Cell>Alice</Table.Cell>
+     <Table.Cell>Admin</Table.Cell>
+    </Table.Row>
+    <Table.Row>
+     <Table.Cell>Bob</Table.Cell>
+     <Table.Cell>User</Table.Cell>
+    </Table.Row>
+   </Table.Body>
+  </Table>
+ )
+};
+
 /**
  * Automated Interaction Test
  * Verifies that the table header sorts rows accurately.

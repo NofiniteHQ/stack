@@ -55,3 +55,5 @@ export * from './components/resizable/Resizable';
 export * from './components/link/Link';
 export * from './components/dialog/dialogStore';
 export * from './components/dialog/DialogProvider';
+export * from './components/colorpicker';
+export * from './components/kbd';

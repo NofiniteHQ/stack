@@ -47,34 +47,51 @@ const demoItems = [
  },
 ];
 
-export const Default: Story = {
+export const DataDriven: Story = {
  render: (args) => (
  <div className="w-full max-w-2xl mx-auto mt-10">
- <Accordion {...args} />
+  <Accordion {...args} />
  </div>
  ),
  args: {
- items: demoItems,
+ data: demoItems,
  },
+};
+
+export const PrimitiveMode: Story = {
+ render: () => (
+ <div className="w-full max-w-2xl mx-auto mt-10">
+  <Accordion>
+   <Accordion.Item value="item-1">
+    <Accordion.Trigger>Custom Header 1</Accordion.Trigger>
+    <Accordion.Content>Custom content with complex internal layouts.</Accordion.Content>
+   </Accordion.Item>
+   <Accordion.Item value="item-2">
+    <Accordion.Trigger>Custom Header 2</Accordion.Trigger>
+    <Accordion.Content>More manually composed content.</Accordion.Content>
+   </Accordion.Item>
+  </Accordion>
+ </div>
+ ),
 };
 
 export const DefaultOpen: Story = {
  args: {
- items: demoItems,
+ data: demoItems,
  defaultOpenId: 'item-2',
  },
 };
 
 export const MultipleOpen: Story = {
  args: {
- items: demoItems,
+ data: demoItems,
  multiple: true,
  },
 };
 
 export const LongContent: Story = {
  args: {
- items: [
+ data: [
  {
  id: 'long',
  title: 'Long Content Example',
@@ -101,7 +118,7 @@ export const LongContent: Story = {
 
 export const CustomStyled: Story = {
  args: {
- items: demoItems,
+ data: demoItems,
  className: 'custom-accordion',
  },
 };
@@ -112,7 +129,7 @@ export const CustomStyled: Story = {
  */
 export const InteractiveTest: Story = {
  args: {
- items: demoItems,
+ data: demoItems,
  },
  play: async ({ canvasElement }) => {
  const canvas = within(canvasElement);

@@ -10,106 +10,192 @@ export interface AccordionItem {
  content: React.ReactNode;
 }
 
-interface AccordionProps {
- items: AccordionItem[];
+export interface AccordionProps extends React.HTMLAttributes<HTMLDivElement> {
+ /** Array of items for Smart Default mode */
+ data?: AccordionItem[];
  /** ID of the item that should be open by default */
  defaultOpenId?: string;
  /** If true, allows multiple accordion panels to remain open simultaneously */
  multiple?: boolean;
- className?: string;
+ children?: React.ReactNode;
 }
 
-/**
- * Accordion Component
- * * A progressively disclosed content container.
- * Implements the WAI-ARIA Accordion pattern for screen reader and keyboard accessibility.
- */
-export function Accordion({
- items,
+interface AccordionContextValue {
+ openIds: string[];
+ toggle: (id: string) => void;
+}
+
+const AccordionContext = React.createContext<AccordionContextValue | null>(null);
+
+function useAccordion() {
+ const ctx = React.useContext(AccordionContext);
+ if (!ctx) throw new Error('Accordion components must be used within <Accordion>');
+ return ctx;
+}
+
+const ItemContext = React.createContext<string | null>(null);
+function ItemContextConsumer({ children }: { children: (value: string) => React.ReactNode }) {
+ const value = React.useContext(ItemContext);
+ if (value === null) throw new Error('Must be used within AccordionItem');
+ return <>{children(value)}</>;
+}
+
+export interface AccordionItemProps extends React.HTMLAttributes<HTMLDivElement> {
+ value: string;
+}
+
+const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps>(({
+ value,
+ className,
+ children,
+ ...props
+}, ref) => {
+ const { openIds } = useAccordion();
+ const open = openIds.includes(value);
+
+ return (
+  <div 
+   ref={ref}
+   className={cn("group border-b border-default", className)}
+   data-state={open ? 'open' : 'closed'}
+   data-value={value}
+   {...props}
+  >
+   {children}
+  </div>
+ );
+});
+AccordionItem.displayName = 'Accordion.Item';
+
+const AccordionItemWithProvider = React.forwardRef<HTMLDivElement, AccordionItemProps>((props, ref) => (
+ <ItemContext.Provider value={props.value}>
+  <AccordionItem ref={ref} {...props} />
+ </ItemContext.Provider>
+));
+AccordionItemWithProvider.displayName = 'Accordion.Item';
+
+const AccordionRoot = React.forwardRef<HTMLDivElement, AccordionProps>(({
+ data,
  defaultOpenId,
  multiple = false,
- className = '',
-}: AccordionProps) {
- // Initialize state. We use an array even for single-select to maintain a consistent state signature.
+ className,
+ children,
+ ...props
+}, ref) => {
  const [openIds, setOpenIds] = useState<string[]>(
- defaultOpenId ? [defaultOpenId] : []
+  defaultOpenId ? [defaultOpenId] : []
  );
 
- const isOpen = (id: string) => openIds.includes(id);
-
  const toggle = (id: string) => {
- setOpenIds((prev) => {
- if (multiple) {
- // Toggle the specific ID in/out of the array for multiple mode
- return isOpen(id) ? prev.filter((x) => x !== id) : [...prev, id];
- } else {
- // Replace the array entirely for single mode
- return isOpen(id) ? [] : [id];
- }
- });
+  setOpenIds((prev) => {
+   const isOpen = prev.includes(id);
+   if (multiple) {
+    return isOpen ? prev.filter((x) => x !== id) : [...prev, id];
+   } else {
+    return isOpen ? [] : [id];
+   }
+  });
  };
 
  return (
- <div className={cn("w-full border-t border-default bg-surface text-default", className)}>
- {items.map((item) => {
- const open = isOpen(item.id);
+  <AccordionContext.Provider value={{ openIds, toggle }}>
+   <div ref={ref} className={cn("w-full border-t border-default bg-surface text-default", className)} {...props}>
+    {data ? data.map((item) => (
+     <AccordionItemWithProvider key={item.id} value={item.id}>
+      <AccordionTrigger>{item.title}</AccordionTrigger>
+      <AccordionContent>{item.content}</AccordionContent>
+     </AccordionItemWithProvider>
+    )) : children}
+   </div>
+  </AccordionContext.Provider>
+ );
+});
+AccordionRoot.displayName = 'Accordion';
 
+export interface AccordionTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+
+const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTriggerProps>(({
+ className,
+ children,
+ onClick,
+ ...props
+}, ref) => {
+ const { toggle, openIds } = useAccordion();
  return (
- <div 
- key={item.id} 
- className="group border-b border-default"
- // Expose state to the DOM for CSS attribute selectors (e.g., [data-state="open"])
- // This enables CSS-only animations and styling without JS overhead.
- data-state={open ? 'open' : 'closed'}
- >
- {/* HEADER
- Native <button> is used to ensure out-of-the-box keyboard support.
- Browsers natively translate 'Enter' and 'Space' keydowns on buttons to 'click' events,
- making custom keyboard listeners redundant.
- */}
- <button
- className="flex justify-between items-center w-full px-4 py-3 bg-transparent border-none cursor-pointer text-left text-default outline-none hover:text-primary transition-colors duration-200 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
- aria-expanded={open}
- aria-controls={`panel-${item.id}`}
- id={`accordion-${item.id}`}
- onClick={() => toggle(item.id)}
- >
- <span className="font-sans text-base font-medium">{item.title}</span>
- {/* Chevron Icon: aria-hidden="true" prevents screen readers from announcing it */}
- <svg 
- className="text-muted transition-transform duration-200 ease-in-out w-4 h-4 group-data-[state=open]:rotate-180 group-data-[state=open]:text-primary" 
- width="20" height="20" viewBox="0 0 24 24" 
- fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
- aria-hidden="true"
- >
- <path d="m6 9 6 6 6-6"/>
- </svg>
- </button>
+  <ItemContextConsumer>
+   {(value) => {
+    const open = openIds.includes(value);
+    return (
+     <button
+      ref={ref}
+      type="button"
+      className={cn("flex justify-between items-center w-full px-4 py-3 bg-transparent border-none cursor-pointer text-left text-default outline-none hover:text-primary transition-colors duration-200 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary", className)}
+      aria-expanded={open}
+      aria-controls={`panel-${value}`}
+      id={`accordion-${value}`}
+      onClick={(e) => {
+       toggle(value);
+       onClick?.(e);
+      }}
+      {...props}
+     >
+      <span className="font-sans text-base font-medium">{children}</span>
+      <svg 
+       className="text-muted transition-transform duration-200 ease-in-out w-4 h-4 group-data-[state=open]:rotate-180 group-data-[state=open]:text-primary" 
+       width="20" height="20" viewBox="0 0 24 24" 
+       fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+       aria-hidden="true"
+      >
+       <path d="m6 9 6 6 6-6"/>
+      </svg>
+     </button>
+    );
+   }}
+  </ItemContextConsumer>
+ );
+});
+AccordionTrigger.displayName = 'Accordion.Trigger';
 
- {/* PANEL
- Rendered conditionally with framer-motion for smooth enter/exit animations.
- aria-labelledby binds the panel context directly to the triggering button.
- */}
- <AnimatePresence initial={false}>
- {open && (
- <motion.div
- id={`panel-${item.id}`}
- role="region"
- aria-labelledby={`accordion-${item.id}`}
- initial={{ height: 0, opacity: 0 }}
- animate={{ height: "auto", opacity: 1 }}
- exit={{ height: 0, opacity: 0 }}
- className="overflow-hidden"
- >
- <div className="text-muted font-sans text-base leading-relaxed px-4 pb-4">
- {item.content}
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </div>
+export interface AccordionContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+const AccordionContent = React.forwardRef<HTMLDivElement, AccordionContentProps>(({
+ className,
+ children,
+ ...props
+}, ref) => {
+ const { openIds } = useAccordion();
+ return (
+  <ItemContextConsumer>
+   {(value) => {
+    const open = openIds.includes(value);
+    return (
+     <AnimatePresence initial={false}>
+      {open && (
+       <motion.div
+        ref={ref as any}
+        id={`panel-${value}`}
+        role="region"
+        aria-labelledby={`accordion-${value}`}
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        className="overflow-hidden"
+       >
+        <div className={cn("text-muted font-sans text-base leading-relaxed px-4 pb-4", className)} {...props}>
+         {children}
+        </div>
+       </motion.div>
+      )}
+     </AnimatePresence>
+    );
+   }}
+  </ItemContextConsumer>
  );
- })}
- </div>
- );
-}
+});
+AccordionContent.displayName = 'Accordion.Content';
+
+export const Accordion = Object.assign(AccordionRoot, {
+ Item: AccordionItemWithProvider,
+ Trigger: AccordionTrigger,
+ Content: AccordionContent,
+});

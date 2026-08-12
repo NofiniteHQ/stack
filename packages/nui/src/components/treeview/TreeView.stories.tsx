@@ -119,3 +119,19 @@ export const InteractiveTest: StoryObj<typeof TreeView> = {
  await expect(nodeModulesItem).not.toHaveFocus();
  },
 };
+
+export const PrimitiveTreeView: StoryObj<typeof TreeView> = {
+ render: () => (
+  <div style={{ padding: '24px', border: '1px solid #e2e8f0', borderRadius: '8px', width: '320px' }}>
+   <TreeView>
+    <TreeView.Item id="root1" label="Documents" icon={<FolderIcon />}>
+     <TreeView.Item id="file1" label="resume.pdf" icon={<FileIcon />} />
+     <TreeView.Item id="file2" label="budget.xlsx" icon={<FileIcon />} />
+    </TreeView.Item>
+    <TreeView.Item id="root2" label="Pictures" icon={<FolderIcon />}>
+     <TreeView.Item id="pic1" label="vacation.jpg" icon={<FileIcon />} />
+    </TreeView.Item>
+   </TreeView>
+  </div>
+ )
+};

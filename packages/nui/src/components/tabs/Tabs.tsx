@@ -27,6 +27,12 @@ function useTabs() {
  * 1. Tabs Root
  * ============================================================ */
 
+export interface TabDataItem {
+ value: string;
+ label: React.ReactNode;
+ content: React.ReactNode;
+}
+
 export interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
  /** Controlled state value representing the active tab */
  value?: string;
@@ -34,38 +40,10 @@ export interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'o
  defaultValue?: string;
  /** Callback fired when the active tab changes */
  onChange?: (value: string) => void;
- children: React.ReactNode;
+ /** Data array for Smart Mode mapping */
+ data?: TabDataItem[];
+ children?: React.ReactNode;
 }
-
-/**
- * Tabs Component (Root)
- * * A Compound Component that manages the state and accessibility linking for a tabbed interface.
- */
-const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(
- ({ value, defaultValue, onChange, children, className, ...props }, ref) => {
- const isControlled = value !== undefined;
- const [internalValue, setInternalValue] = useState(defaultValue || '');
- 
- // Generate a stable, SSR-safe ID for ARIA linkage
- const idPrefix = useId();
-
- const currentValue = isControlled ? value : internalValue;
-
- const handleValueChange = (newValue: string) => {
- if (!isControlled) setInternalValue(newValue);
- onChange?.(newValue);
- };
-
- return (
- <TabsContext.Provider value={{ value: currentValue, onValueChange: handleValueChange, idPrefix }}>
- <div ref={ref} className={cn("flex flex-col w-full font-sans", className)} {...props}>
- {children}
- </div>
- </TabsContext.Provider>
- );
- }
-);
-TabsRoot.displayName = 'Tabs';
 
 /* ============================================================
  * 2. Tabs List
@@ -234,6 +212,57 @@ const TabsContent = forwardRef<HTMLDivElement, TabsContentProps>(
  }
 );
 TabsContent.displayName = 'Tabs.Content';
+
+/* ============================================================
+ * 5. Tabs Root (Smart / Primitive)
+ * ============================================================ */
+
+/**
+ * Tabs Component (Root)
+ * * A Compound Component that manages the state and accessibility linking for a tabbed interface.
+ */
+const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(
+ ({ value, defaultValue, onChange, data, children, className, ...props }, ref) => {
+ const isControlled = value !== undefined;
+ const [internalValue, setInternalValue] = useState(defaultValue || (data && data.length > 0 ? data[0].value : ''));
+ 
+ // Generate a stable, SSR-safe ID for ARIA linkage
+ const idPrefix = useId();
+
+ const currentValue = isControlled ? value : internalValue;
+
+ const handleValueChange = (newValue: string) => {
+ if (!isControlled) setInternalValue(newValue);
+ onChange?.(newValue);
+ };
+
+ return (
+ <TabsContext.Provider value={{ value: currentValue, onValueChange: handleValueChange, idPrefix }}>
+ <div ref={ref} className={cn("flex flex-col w-full font-sans", className)} {...props}>
+ {data ? (
+  <>
+   <TabsList>
+    {data.map((tab) => (
+     <TabsTrigger key={tab.value} value={tab.value}>
+      {tab.label}
+     </TabsTrigger>
+    ))}
+   </TabsList>
+   {data.map((tab) => (
+    <TabsContent key={tab.value} value={tab.value}>
+     {tab.content}
+    </TabsContent>
+   ))}
+  </>
+ ) : (
+  children
+ )}
+ </div>
+ </TabsContext.Provider>
+ );
+ }
+);
+TabsRoot.displayName = 'Tabs';
 
 /* ============================================================
  * Export

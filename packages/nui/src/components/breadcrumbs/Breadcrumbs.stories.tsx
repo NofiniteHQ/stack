@@ -19,46 +19,62 @@ const items = [
  { label: 'MacBook Pro' },
 ];
 
-export const Default: Story = {
+export const DataDriven: Story = {
  args: {
- items,
+ data: items,
  },
+};
+
+export const PrimitiveMode: Story = {
+ render: () => (
+  <Breadcrumbs>
+   <Breadcrumbs.List>
+    <Breadcrumbs.Item>
+     <Breadcrumbs.Link href="/">Root</Breadcrumbs.Link>
+     <Breadcrumbs.Separator />
+    </Breadcrumbs.Item>
+    <Breadcrumbs.Item>
+     <Breadcrumbs.Page>Primitives</Breadcrumbs.Page>
+    </Breadcrumbs.Item>
+   </Breadcrumbs.List>
+  </Breadcrumbs>
+ )
 };
 
 export const Collapsed: Story = {
  args: {
- items,
+ data: items,
  maxItems: 4,
  },
 };
 
 export const CustomSeparator: Story = {
  args: {
- items,
+ data: items,
  separator: '/',
  },
 };
 
 export const Minimal: Story = {
  args: {
- items: [{ label: 'Home', href: '#' }, { label: 'Profile' }],
+ data: [{ label: 'Home', href: '#' }, { label: 'Profile' }],
  },
 };
 
 export const LongLabels: Story = {
  args: {
- items: [
- { label: 'Home', href: '#' },
- { label: 'Very Long Category Name Example', href: '#' },
- { label: 'Another Long Section Name', href: '#' },
- { label: 'Current Page With Long Title' },
+ data: [
+  { label: 'Home', href: '#' },
+  { label: 'Very Long Category Name Example', href: '#' },
+  { label: 'Another Long Section Name', href: '#' },
+  { label: 'Current Page With Long Title' },
  ],
  },
 };
 
 export const DarkBackground: Story = {
  args: {
- items,
+ data: items,
  },
  decorators: [
  (Story) => (
@@ -75,9 +91,9 @@ export const DarkBackground: Story = {
  */
 export const InteractiveTest: Story = {
  args: {
- items: [
- { label: 'Dashboard', onClick: fn() },
- { label: 'Settings' },
+ data: [
+  { label: 'Dashboard', onClick: fn() },
+  { label: 'Settings' },
  ],
  },
  play: async ({ canvasElement, args }) => {
@@ -86,6 +102,6 @@ export const InteractiveTest: Story = {
  // The first item should trigger the click
  const link = canvas.getByText('Dashboard');
  await userEvent.click(link);
- await expect(args.items[0].onClick).toHaveBeenCalled();
+ await expect((args as any).data[0].onClick).toHaveBeenCalled();
  },
 };
