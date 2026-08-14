@@ -6,11 +6,18 @@ import { FileUploader } from './FileUploader';
 const meta: Meta<typeof FileUploader> = {
  title: 'Components/Forms/FileUploader',
  component: FileUploader,
- parameters: {
- layout: 'padded',
- },
+  parameters: {
+   layout: 'padded',
+  },
+  decorators: [
+   (Story) => (
+     <div className="max-w-2xl w-full mx-auto box-border">
+       <Story />
+     </div>
+   ),
+  ],
  argTypes: {
- onChange: { action: 'files changed' },
+  onChange: { action: 'files changed' },
  },
 };
 

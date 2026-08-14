@@ -9,7 +9,7 @@ import React, {
  useCallback,
  useId,
 } from 'react';
-import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
+import { useFloating, autoUpdate, offset, flip, shift, size, arrow } from '@floating-ui/react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
 import { Portal, onClickOutside } from '../../utils';
@@ -164,6 +164,8 @@ export interface HoverCardContentProps extends React.HTMLAttributes<HTMLDivEleme
  placement?: HoverCardPlacement;
  /** Gap in pixels between the trigger and the card. Defaults to 8px. */
  offset?: number;
+ /** If true, hides the directional arrow pointing to the trigger. */
+ hideArrow?: boolean;
 }
 
 /**
@@ -173,20 +175,26 @@ export interface HoverCardContentProps extends React.HTMLAttributes<HTMLDivEleme
 export function HoverCardContent({
  children,
  className,
- placement = 'bottom',
- offset: offsetProp = 8,
+ placement: preferredPlacement = 'bottom',
+ offset: offsetProp = 12,
+ hideArrow = false,
  ...props
 }: HoverCardContentProps) {
  const { open, setOpen, triggerRef, contentId, scheduleClose, clearTimers } = useHoverCard();
+ const [isMounted, setIsMounted] = useState(false);
+ const arrowRef = useRef<HTMLDivElement>(null);
 
- const { refs, x, y } = useFloating<HTMLElement>({
+ useEffect(() => setIsMounted(true), []);
+
+ const { refs, x, y, middlewareData, placement } = useFloating<HTMLElement>({
  open,
- placement,
+ placement: preferredPlacement,
  whileElementsMounted: autoUpdate,
  middleware: [
  offset(offsetProp),
  flip({ padding: 16, fallbackPlacements: ['top', 'bottom'] }),
  shift({ padding: 16 }),
+ ...(!hideArrow ? [arrow({ element: arrowRef, padding: 8 })] : []),
  ],
  });
 
@@ -216,6 +224,8 @@ export function HoverCardContent({
  return cleanup;
  }, [open, setOpen, refs.floating, triggerRef]);
 
+ if (!isMounted) return null;
+
  return (
  <AnimatePresence>
  {open && (
@@ -231,8 +241,8 @@ export function HoverCardContent({
  aria-modal="false"
  data-placement={placement}
  className={cn(
- 'absolute z-[1000] box-border min-w-[240px] max-w-[360px] p-4 bg-surface backdrop-blur-md text-default font-sans border border-glassBorder rounded-lg shadow-2xl',
- 'data-[placement=bottom]:origin-top data-[placement=top]:origin-bottom',
+ 'absolute z-[1000] box-border min-w-[240px] max-w-[360px] p-4 bg-surface backdrop-blur-md text-default font-sans border border-default rounded-lg shadow-2xl',
+ 'data-[placement^=bottom]:origin-top data-[placement^=top]:origin-bottom data-[placement^=left]:origin-right data-[placement^=right]:origin-left',
  className
  )}
  style={{ position: 'absolute', top: y ?? 0, left: x ?? 0 }}
@@ -244,6 +254,18 @@ export function HoverCardContent({
  onMouseLeave={scheduleClose}
  {...props}
  >
+ {!hideArrow && (
+    <div
+      ref={arrowRef}
+      className="absolute w-3 h-3 bg-surface border border-default z-[-1] rounded-sm"
+      style={{
+        left: middlewareData.arrow?.x != null ? `${middlewareData.arrow.x}px` : '',
+        top: middlewareData.arrow?.y != null ? `${middlewareData.arrow.y}px` : '',
+        [placement.startsWith('top') ? 'bottom' : placement.startsWith('bottom') ? 'top' : placement.startsWith('left') ? 'right' : 'left']: '-6px',
+        transform: 'rotate(45deg)',
+      }}
+    />
+ )}
  {children}
  </motion.div>
  </Portal>

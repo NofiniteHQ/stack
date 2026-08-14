@@ -9,22 +9,32 @@ const meta: Meta<typeof HoverCard> = {
  parameters: {
  layout: 'centered',
  },
+ argTypes: {
+  openDelay: { control: 'number' },
+  closeDelay: { control: 'number' },
+ },
 };
 
 export default meta;
 type Story = StoryObj<typeof HoverCard>;
 
 export const Default: Story = {
- render: () => (
- <HoverCard>
+ render: (args) => (
+ <HoverCard {...args}>
  <HoverCard.Trigger>
  <Button variant="outline">Hover me</Button>
  </HoverCard.Trigger>
- <HoverCard.Content>
- <p style={{ margin: 0 }}>Hover card content</p>
+ <HoverCard.Content hideArrow={args.hideArrow}>
+ <p className="m-0 text-sm">Hover card content</p>
  </HoverCard.Content>
  </HoverCard>
  ),
+ args: {
+  hideArrow: false,
+ },
+ argTypes: {
+  hideArrow: { control: 'boolean', description: 'Hide the directional arrow' },
+ }
 };
 
 export const TopPlacement: Story = {
@@ -34,7 +44,7 @@ export const TopPlacement: Story = {
  <Button variant="outline">Hover me</Button>
  </HoverCard.Trigger>
  <HoverCard.Content placement="top">
- <p style={{ margin: 0 }}>Top placement content</p>
+ <p className="m-0 text-sm">Top placement content</p>
  </HoverCard.Content>
  </HoverCard>
  ),
@@ -47,7 +57,7 @@ export const CustomDelay: Story = {
  <Button variant="outline">Slow hover</Button>
  </HoverCard.Trigger>
  <HoverCard.Content>
- <p style={{ margin: 0 }}>Custom delay content</p>
+ <p className="m-0 text-sm">Custom delay content</p>
  </HoverCard.Content>
  </HoverCard>
  ),
@@ -60,13 +70,13 @@ export const RichContent: Story = {
  <Button variant="outline" className="rounded-full">User Profile</Button>
  </HoverCard.Trigger>
  <HoverCard.Content>
- <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '200px' }}>
- <strong style={{ fontSize: '16px' }}>John Doe</strong>
- <span style={{ color: '#666', fontSize: '14px' }}>Senior Engineer @ Nofinite</span>
- <p style={{ fontSize: '12px', margin: '8px 0', lineHeight: 1.4 }}>
+ <div className="flex flex-col gap-2 min-w-[200px]">
+ <strong className="text-base">John Doe</strong>
+ <span className="text-muted text-sm">Senior Engineer @ Nofinite</span>
+ <p className="text-xs my-2 leading-relaxed">
  Building the next generation of scalable UI libraries.
  </p>
- <Button variant="primary" size="sm" className="w-full mt-2">
+ <Button variant="primary" className="w-full mt-2">
  Follow
  </Button>
  </div>
@@ -86,7 +96,7 @@ export const InteractiveTest: Story = {
  <Button variant="outline">Interactive Trigger</Button>
  </HoverCard.Trigger>
  <HoverCard.Content>
- <p>Interactive Content</p>
+ <p className="m-0 text-sm">Interactive Content</p>
  </HoverCard.Content>
  </HoverCard>
  ),

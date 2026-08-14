@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback, useId } from 'react';
+import React, { useEffect, useRef, useCallback, useId, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
 import { 
@@ -56,11 +56,14 @@ export function Modal({
  children,
  ...props
 }: ModalProps) {
- const overlayRef = useRef<HTMLDivElement | null>(null);
- const dialogRef = useRef<HTMLDivElement | null>(null);
- const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
- const baseId = useId();
+  useEffect(() => setIsMounted(true), []);
+
+  const baseId = useId();
  const titleId = labelledById || `${baseId}-title`;
  const descId = describedById || `${baseId}-desc`;
 
@@ -120,10 +123,12 @@ export function Modal({
  };
  }, [open, disableClickOutside, handleClose, initialFocusRef]);
 
- return (
- <Portal>
- <AnimatePresence>
- {open && (
+  if (!isMounted) return null;
+
+  return (
+  <Portal>
+  <AnimatePresence>
+  {open && (
  <motion.div 
  ref={overlayRef} 
  className={cn(
@@ -134,12 +139,11 @@ export function Modal({
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  transition={{ duration: 0.2 }}
- aria-hidden="true"
  >
  <motion.div
  ref={dialogRef}
  className={cn(
- "relative z-[9999] w-[calc(100%-2rem)] max-w-[500px] max-h-[90vh] m-4 flex flex-col bg-surface backdrop-blur-md text-default font-sans border border-glassBorder rounded-lg shadow-2xl outline-none will-change-[transform,opacity]",
+ "relative z-[9999] w-[calc(100%-2rem)] max-w-[500px] max-h-[90vh] m-4 flex flex-col bg-surface backdrop-blur-md text-default font-sans border border-default rounded-lg shadow-2xl outline-none will-change-[transform,opacity]",
  className
  )}
  initial={{ opacity: 0, scale: 0.95 }}
@@ -178,7 +182,7 @@ export function Modal({
  <button
  type="button"
  aria-label="Close dialog"
- className={cn("absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-transparent border-none rounded text-muted cursor-pointer transition-all duration-200 hover:bg-muted hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus p-0")}
+ className={cn("absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-transparent border-none rounded text-muted cursor-pointer transition-all duration-200 hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus p-0")}
  onClick={handleClose}
  >
  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

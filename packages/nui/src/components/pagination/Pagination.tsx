@@ -114,7 +114,7 @@ export function Pagination({
  {/* Previous Button */}
  <li className="block">
  <button
- className="inline-flex items-center justify-center min-w-[36px] h-9 px-2 bg-transparent border border-default rounded-md text-muted text-sm font-medium cursor-pointer transition-all duration-200 hover:not(:disabled):text-primary hover:not(:disabled):border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted"
+ className="inline-flex items-center justify-center min-w-[36px] h-9 px-2 bg-transparent border border-default rounded-md text-muted text-sm font-sans font-medium cursor-pointer transition-all duration-200 hover:not(:disabled):text-primary hover:not(:disabled):border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted"
  onClick={() => goTo(currentPage - 1)}
  disabled={disabled || currentPage === 1}
  aria-label="Previous Page"
@@ -141,9 +141,9 @@ export function Pagination({
  <li key={`page-${p}`} className="block">
  <button
  className={cn(
- "inline-flex items-center justify-center min-w-[36px] h-9 px-2 border rounded-md text-sm font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted",
+ "inline-flex items-center justify-center min-w-[36px] h-9 px-2 border rounded-md font-sans text-sm font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted",
  isCurrent 
- ? "border-primary text-primary font-bold shadow-sm" 
+ ? "border-primary text-primary font-bold shadow-sm bg-subtle" 
  : "bg-transparent border-transparent text-default hover:not(:disabled):text-primary hover:not(:disabled):border-primary"
  )}
  aria-current={isCurrent ? 'page' : undefined}
@@ -160,7 +160,7 @@ export function Pagination({
  {/* Next Button */}
  <li className="block">
  <button
- className="inline-flex items-center justify-center min-w-[36px] h-9 px-2 bg-transparent border border-default rounded-md text-muted text-sm font-medium cursor-pointer transition-all duration-200 hover:not(:disabled):text-primary hover:not(:disabled):border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted"
+ className="inline-flex items-center justify-center min-w-[36px] h-9 px-2 bg-transparent border border-default rounded-md text-muted text-sm font-sans font-medium cursor-pointer transition-all duration-200 hover:not(:disabled):text-primary hover:not(:disabled):border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted"
  onClick={() => goTo(currentPage + 1)}
  disabled={disabled || currentPage === total}
  aria-label="Next Page"

@@ -37,8 +37,11 @@ export function trapFocus(container: HTMLElement): () => void {
   // Attach the boundary logic
   container.addEventListener('keydown', handle);
 
-  // Automatically shift the user's focus into the trap when initialized
-  first?.focus();
+  // Automatically shift the user's focus into the trap when initialized,
+  // ONLY if focus has not already been moved into the container manually.
+  if (!container.contains(document.activeElement)) {
+    first?.focus();
+  }
 
   // Return the cleanup handler
   return () => container.removeEventListener('keydown', handle);

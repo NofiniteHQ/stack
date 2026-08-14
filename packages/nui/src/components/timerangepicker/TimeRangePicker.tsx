@@ -13,6 +13,7 @@ import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '../../utils';
 import { Portal, onClickOutside, restoreFocus } from '../../utils';
+import { Button } from '../button/Button';
 
 /* ----------------------------------------------------
  Helpers
@@ -112,6 +113,11 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
 
  const [open, setOpen] = useState(false);
  const [activePart, setActivePart] = useState<'from' | 'to'>('from');
+ const [isMounted, setIsMounted] = useState(false);
+ 
+ useEffect(() => {
+ setIsMounted(true);
+ }, []);
 
  const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -152,23 +158,38 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  }, [open]);
 
 
- /* ----------------------------------------------------
- Auto-Scroll to Selected Item
- ---------------------------------------------------- */
- // We run this effect when `open` changes AND when `activePart` changes!
- useEffect(() => {
- if (!open) return;
- const timer = setTimeout(() => {
- [hourColRef, minColRef, ampmColRef].forEach((colRef) => {
- if (!colRef.current) return;
- const selectedEl = colRef.current.querySelector('.selected');
- if (selectedEl) {
- selectedEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
- }
- });
- }, 10);
- return () => clearTimeout(timer);
- }, [open, activePart]);
+  /* ----------------------------------------------------
+  Auto-Scroll and Initial Focus
+  ---------------------------------------------------- */
+  // We run this effect when `open` changes AND when `activePart` changes!
+  useEffect(() => {
+  if (!open) return;
+  const timer = setTimeout(() => {
+  [hourColRef, minColRef, ampmColRef].forEach((colRef, idx) => {
+  if (!colRef.current) return;
+  const selectedEl = colRef.current.querySelector('.selected') as HTMLElement;
+  if (selectedEl) {
+  selectedEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  // If we just opened or switched tabs, focus the first column's selected item if nothing else in the dialog is focused
+  if (idx === 0) {
+  const activeNode = document.activeElement;
+  if (!activeNode || !colRef.current.parentElement?.parentElement?.contains(activeNode)) {
+  selectedEl.focus({ preventScroll: true });
+  }
+  }
+  } else if (idx === 0) {
+  const firstEl = colRef.current.querySelector('button') as HTMLElement;
+  if (firstEl) {
+  const activeNode = document.activeElement;
+  if (!activeNode || !colRef.current.parentElement?.parentElement?.contains(activeNode)) {
+  firstEl.focus({ preventScroll: true });
+  }
+  }
+  }
+  });
+  }, 10);
+  return () => clearTimeout(timer);
+  }, [open, activePart]);
 
  /* ----------------------------------------------------
  Column Generation
@@ -218,15 +239,86 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  return `${f} → ${t}`;
  };
 
- /* ----------------------------------------------------
- Render
- ---------------------------------------------------- */
+  /* ----------------------------------------------------
+  Keyboard Navigation
+  ---------------------------------------------------- */
+  const onTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+  if (disabled) return;
+  if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
+  e.preventDefault();
+  setOpen(true);
+  setActivePart('from');
+  }
+  };
+
+  const onDialogKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  if (e.key === 'Escape') {
+  e.preventDefault();
+  setOpen(false);
+  triggerRef.current?.focus();
+  return;
+  }
+
+  const isArrow = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key);
+  if (!isArrow) return;
+
+  const activeEl = document.activeElement as HTMLElement;
+
+  if (activeEl.getAttribute('role') === 'tab') {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+  e.preventDefault();
+  const nextPart = activePart === 'from' ? 'to' : 'from';
+  setActivePart(nextPart);
+  // Focus the newly active tab after React renders (setTimeout)
+  setTimeout(() => {
+  document.getElementById(`${id || 'timerange'}-tab-${nextPart}`)?.focus();
+  }, 0);
+  }
+  return;
+  }
+
+  e.preventDefault();
+  const cols = [hourColRef, minColRef];
+  if (clockType === 12) cols.push(ampmColRef);
+
+  let colIdx = cols.findIndex(col => col.current?.contains(activeEl));
+  if (colIdx === -1) colIdx = 0;
+
+  const col = cols[colIdx].current;
+  if (!col) return;
+
+  if (e.key === 'ArrowLeft') {
+  const prevCol = cols[Math.max(0, colIdx - 1)].current;
+  const target = (prevCol?.querySelector('.selected') as HTMLElement) || prevCol?.querySelector('button');
+  target?.focus();
+  } else if (e.key === 'ArrowRight') {
+  const nextCol = cols[Math.min(cols.length - 1, colIdx + 1)].current;
+  const target = (nextCol?.querySelector('.selected') as HTMLElement) || nextCol?.querySelector('button');
+  target?.focus();
+  } else {
+  const btns = Array.from(col.querySelectorAll('button'));
+  const idx = btns.indexOf(activeEl as HTMLButtonElement);
+  if (idx === -1) {
+  btns[0]?.focus();
+  } else {
+  const nextIdx = e.key === 'ArrowDown' 
+  ? (idx + 1) % btns.length 
+  : (idx - 1 + btns.length) % btns.length;
+  btns[nextIdx]?.focus();
+  }
+  }
+  };
+
+  /* ----------------------------------------------------
+  Render
+  ---------------------------------------------------- */
  return (
  <div ref={ref} className={cn("inline-block font-sans", className)} {...props}>
  {nameFrom && <input type="hidden" name={nameFrom} value={range.from ?? ''} />}
  {nameTo && <input type="hidden" name={nameTo} value={range.to ?? ''} />}
 
- <button
+ <Button
+ variant="outline"
  id={id}
  ref={(node) => {
  triggerRef.current = node;
@@ -234,7 +326,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  }}
  type="button"
  disabled={disabled}
- className="flex items-center justify-between w-full sm:w-[240px] px-2.5 py-1.5 bg-surface text-default text-sm border border-default rounded-md shadow-sm transition-colors duration-200 hover:border-default hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:bg-muted disabled:text-muted disabled:cursor-not-allowed"
+ className="flex items-center justify-between w-full sm:w-[240px] px-2.5 py-1.5 h-auto font-normal text-sm"
  aria-haspopup="dialog"
  aria-expanded={open}
  aria-controls={open ? `${id || 'time-picker'}-dialog` : undefined}
@@ -242,20 +334,25 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  setOpen((s) => !s);
  setActivePart('from');
  }}
- >
- <span className={(!range.from && !range.to) ? "text-muted" : ""}>
- {label()}
- </span>
- <svg className="text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+ onKeyDown={onTriggerKeyDown}
+ iconRight={
+ <svg className="text-muted shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  <circle cx="12" cy="12" r="10"></circle>
  <polyline points="12 6 12 12 16 14"></polyline>
  </svg>
- </button>
+ }
+ >
+ <span className={cn("block w-full text-left", (!range.from && !range.to) ? "text-muted" : "truncate")}>
+ {label()}
+ </span>
+ </Button>
 
+ {isMounted && (
+ <Portal>
  <AnimatePresence>
  {open && (
- <Portal>
- <div
+ <motion.div
+ key="timerangepicker-dialog"
  ref={refs.setFloating}
  className="z-50"
  style={{
@@ -264,33 +361,37 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  left: x ?? 0,
  transformOrigin: 'top left'
  }}
- >
- <motion.div 
- id={`${id || 'time-picker'}-dialog`}
- role="dialog"
- aria-modal="true"
- aria-label="Time range picker"
  initial={{ opacity: 0, scale: 0.95, y: -4 }}
  animate={{ opacity: 1, scale: 1, y: 0 }}
  exit={{ opacity: 0, scale: 0.95, y: -4 }}
  transition={{ duration: 0.15, ease: "easeOut" }}
- className="bg-glass backdrop-blur-md text-default border border-default rounded-lg shadow-xl p-3"
+ >
+ <div 
+ id={`${id || 'time-picker'}-dialog`}
+ role="dialog"
+ aria-modal="true"
+ aria-label="Time range picker"
+ className="bg-surface text-default border border-default rounded-lg shadow-lg p-3 focus-visible:outline-none"
+ tabIndex={-1}
+ onKeyDown={onDialogKeyDown}
  >
  
  {/* Internal Part Toggle */}
- <div className="flex gap-2 mb-4 p-1 bg-subtle rounded-md" role="tablist">
+ <div className="flex bg-subtle p-1 rounded-md mb-3" role="tablist">
  <button
+ id={`${id || 'timerange'}-tab-from`}
  role="tab"
  aria-selected={activePart === 'from'}
- className={cn("flex-1 border-none bg-transparent py-1.5 rounded-sm text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", activePart === 'from' && "bg-surface text-default font-medium shadow-sm ring-1 ring-default")}
+ className={cn("flex-1 border-none bg-transparent py-1.5 rounded-md text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", activePart === 'from' && "bg-surface text-default font-medium shadow-sm ring-1 ring-default")}
  onClick={() => setActivePart('from')}
  >
  Start Time
  </button>
  <button
+ id={`${id || 'timerange'}-tab-to`}
  role="tab"
  aria-selected={activePart === 'to'}
- className={cn("flex-1 border-none bg-transparent py-1.5 rounded-sm text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", activePart === 'to' && "bg-surface text-default font-medium shadow-sm ring-1 ring-default")}
+ className={cn("flex-1 border-none bg-transparent py-1.5 rounded-md text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", activePart === 'to' && "bg-surface text-default font-medium shadow-sm ring-1 ring-default")}
  onClick={() => setActivePart('to')}
  >
  End Time
@@ -298,7 +399,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  </div>
 
  {/* Time Columns */}
- <div className="flex h-[200px] border border-default rounded-md overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+ <div className="flex h-[200px] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
  {/* HOURS */}
  <div 
  role="listbox"
@@ -313,7 +414,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  key={`h-${h}`}
  role="option"
  aria-selected={sel}
- className={cn("shrink-0 flex items-center justify-center h-9 w-full bg-transparent border-none rounded-sm text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse font-bold shadow-sm hover:bg-primary", sel && "selected")}
+ className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
  onClick={() => commit(h, parsed.minute, parsed.ampm)}
  >
  {pad(h)}
@@ -336,7 +437,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  key={`m-${m}`}
  role="option"
  aria-selected={sel}
- className={cn("shrink-0 flex items-center justify-center h-9 w-full bg-transparent border-none rounded-sm text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse font-bold shadow-sm hover:bg-primary", sel && "selected")}
+ className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
  onClick={() => commit(parsed.hour, m, parsed.ampm)}
  >
  {pad(m)}
@@ -360,7 +461,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  key={a}
  role="option"
  aria-selected={sel}
- className={cn("shrink-0 flex items-center justify-center h-9 w-full bg-transparent border-none rounded-sm text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse font-bold shadow-sm hover:bg-primary", sel && "selected")}
+ className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
  onClick={() => commit(parsed.hour, parsed.minute, a)}
  >
  {a}
@@ -373,8 +474,9 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
 
  {/* FOOTER */}
  <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-default">
- <button
- className="bg-transparent border-none px-3 py-1 rounded-sm text-sm text-muted cursor-pointer transition-colors duration-200 hover:bg-muted hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+ <Button
+ variant="ghost"
+ size="sm"
  onClick={() => {
  const empty = { from: undefined, to: undefined };
  if (!controlled) setInternal(empty);
@@ -383,21 +485,23 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  }}
  >
  Clear
- </button>
+ </Button>
 
- <button
- className="bg-muted border-none px-3 py-1 rounded-sm text-sm font-bold text-default cursor-pointer transition-colors duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+ <Button
+ variant="primary"
+ size="sm"
  onClick={() => setOpen(false)}
  >
  Apply
- </button>
+ </Button>
  </div>
 
- </motion.div>
  </div>
- </Portal>
+ </motion.div>
  )}
  </AnimatePresence>
+ </Portal>
+ )}
  </div>
  );
 });

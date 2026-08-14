@@ -83,6 +83,11 @@ export function DatePicker({
  const [visible, setVisible] = useState<Date>(startOfMonth(selectedDate));
  const [open, setOpen] = useState(false);
  const [showYMM, setShowYMM] = useState(false);
+ const [isMounted, setIsMounted] = useState(false);
+
+ useEffect(() => {
+ setIsMounted(true);
+ }, []);
 
  const triggerRef = useRef<HTMLButtonElement | null>(null);
  const gridDayRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -335,45 +340,47 @@ export function DatePicker({
  <div className={cn("inline-block font-sans", className)}>
  {name && <input type="hidden" name={name} value={selected ?? ''} />}
 
- <button
- id={triggerId}
- ref={(node) => {
- triggerRef.current = node;
- refs.setReference(node);
- }}
- type="button"
- disabled={disabled}
- className={cn(
- "flex items-center justify-between gap-2 w-full sm:w-[240px] px-2.5 py-1.5 bg-surface text-default text-sm border border-default rounded-md shadow-sm transition-colors duration-200",
- "hover:border-default hover:bg-subtle",
- "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
- "disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed disabled:border-default"
- )}
- aria-haspopup="dialog"
- aria-expanded={open}
- aria-controls={open ? `${id || 'datepicker'}-dialog` : undefined}
- onClick={() => {
- setOpen((s) => !s);
- setShowYMM(false);
- }}
- >
- <span className={cn("truncate", !selected && "text-muted")}>
- {selected 
-    ? (formatDisplay ? formatDisplay(fromISO(selected)!) : fromISO(selected)!.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' }))
-    : placeholder}
- </span>
- <svg className="text-muted shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
- <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
- <line x1="16" y1="2" x2="16" y2="6"></line>
- <line x1="8" y1="2" x2="8" y2="6"></line>
- <line x1="3" y1="10" x2="21" y2="10"></line>
- </svg>
- </button>
+  <Button
+  variant="outline"
+  id={triggerId}
+  ref={(node) => {
+  triggerRef.current = node;
+  refs.setReference(node);
+  }}
+  type="button"
+  disabled={disabled}
+  className={cn(
+  "flex items-center justify-between w-full sm:w-[240px] px-2.5 py-1.5 h-auto font-normal text-sm"
+  )}
+  aria-haspopup="dialog"
+  aria-expanded={open}
+  aria-controls={open ? `${id || 'datepicker'}-dialog` : undefined}
+  onClick={() => {
+  setOpen((s) => !s);
+  setShowYMM(false);
+  }}
+  iconRight={
+  <svg className="text-muted shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+  <line x1="16" y1="2" x2="16" y2="6"></line>
+  <line x1="8" y1="2" x2="8" y2="6"></line>
+  <line x1="3" y1="10" x2="21" y2="10"></line>
+  </svg>
+  }
+  >
+  <span className={cn("block w-full text-left truncate", !selected && "text-muted")}>
+  {selected 
+     ? (formatDisplay ? formatDisplay(fromISO(selected)!) : fromISO(selected)!.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' }))
+     : placeholder}
+  </span>
+  </Button>
 
+ {isMounted && (
+ <Portal>
  <AnimatePresence>
  {open && (
- <Portal>
  <motion.div
+ key="datepicker-dialog"
  initial={{ opacity: 0, scale: 0.95 }}
  animate={{ opacity: 1, scale: 1 }}
  exit={{ opacity: 0, scale: 0.95 }}
@@ -519,9 +526,10 @@ role="dialog"
   )}
   </div>
  </motion.div>
- </Portal>
  )}
  </AnimatePresence>
+ </Portal>
+ )}
  </div>
  );
 }

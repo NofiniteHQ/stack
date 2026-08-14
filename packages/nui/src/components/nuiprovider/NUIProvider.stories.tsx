@@ -20,32 +20,21 @@ type Story = StoryObj<typeof NUIProvider>;
  */
 const DemoApp = () => {
  const { theme, resolvedTheme, setTheme } = useTheme();
+ const btnClass = "inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-md border border-default bg-surface text-default cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary font-sans";
 
  return (
- <div 
- style={{
- padding: '40px',
- border: '1px solid var(--nui-border-default, #e2e8f0)',
- borderRadius: '8px',
- background: 'var(--nui-bg-surface, #ffffff)', // Relies on CSS vars set by Provider
- color: 'var(--nui-fg-default, #0f172a)',
- width: '320px',
- textAlign: 'center',
- transition: 'all 0.3s ease',
- fontFamily: 'sans-serif'
- }}
- >
- <h3 style={{ marginTop: 0 }}>Theme Playground</h3>
+ <div className="p-10 border border-default rounded-lg bg-surface text-default w-[320px] text-center transition-all duration-300 font-sans shadow-sm">
+ <h3 className="mt-0 mb-6 text-lg font-bold text-default">Theme Playground</h3>
  
- <div style={{ margin: '20px 0', textAlign: 'left', fontSize: '0.9rem', backgroundColor: 'var(--nui-bg-subtle, #f8fafc)', padding: '12px', borderRadius: '6px' }}>
- <p style={{ margin: '0 0 8px 0' }}><strong>Selected:</strong> {theme}</p>
- <p style={{ margin: 0 }}><strong>Resolved:</strong> <span data-testid="story-resolved">{resolvedTheme}</span></p>
+ <div className="my-5 text-left text-sm bg-subtle p-4 rounded-md border border-default">
+ <p className="m-0 mb-2"><strong className="font-semibold text-default">Selected:</strong> <span className="text-muted">{theme}</span></p>
+ <p className="m-0"><strong className="font-semibold text-default">Resolved:</strong> <span data-testid="story-resolved" className="text-primary font-medium">{resolvedTheme}</span></p>
  </div>
 
- <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
- <button onClick={() => setTheme('light')} style={{ padding: '6px 12px', cursor: 'pointer' }}>Light ☀️</button>
- <button onClick={() => setTheme('dark')} style={{ padding: '6px 12px', cursor: 'pointer' }}>Dark 🌙</button>
- <button onClick={() => setTheme('system')} style={{ padding: '6px 12px', cursor: 'pointer' }}>System 💻</button>
+ <div className="flex gap-2 justify-center mt-6">
+ <button onClick={() => setTheme('light')} className={btnClass}>Light ☀️</button>
+ <button onClick={() => setTheme('dark')} className={btnClass}>Dark 🌙</button>
+ <button onClick={() => setTheme('system')} className={btnClass}>System 💻</button>
  </div>
  </div>
  );

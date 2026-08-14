@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
+import { Checkbox } from '../checkbox/Checkbox';
 
 /* ============================================================
  * Types
@@ -220,9 +222,9 @@ export function DataGrid<T>({
  Render
  ---------------------------------------------------- */
  return (
- <div className={cn("flex flex-col w-full border border-default rounded-lg bg-surface font-sans overflow-hidden", className)}>
+ <div className={cn("flex flex-col w-full border border-default rounded-lg bg-surface shadow-sm font-sans overflow-hidden", className)}>
  <div 
- className="w-full overflow-x-auto outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+ className="w-full overflow-x-auto outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
  onKeyDown={onKeyDownTable}
  tabIndex={0}
  >
@@ -232,13 +234,11 @@ export function DataGrid<T>({
  <thead className="bg-subtle border-b border-default">
  <tr role="row">
  {selectable && (
- <th className="px-4 py-3 font-bold text-muted whitespace-nowrap select-none w-12 text-center pr-0" scope="col">
- <input
- type="checkbox"
+ <th className="px-4 py-3 font-medium text-subtle whitespace-nowrap select-none w-12 text-center pr-0" scope="col">
+ <Checkbox
  aria-label="Select all on page"
  onChange={selectAllOnPage}
  checked={isAllPageSelected}
- className="cursor-pointer w-4 h-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
  />
  </th>
  )}
@@ -248,7 +248,7 @@ export function DataGrid<T>({
  return (
  <th
  key={col.key}
- className="px-4 py-3 font-bold text-muted whitespace-nowrap select-none"
+ className="px-4 py-3 font-medium text-subtle whitespace-nowrap select-none"
  style={{ 
  width: col.width,
  textAlign: col.align || 'left'
@@ -275,11 +275,17 @@ export function DataGrid<T>({
  <span>{col.title}</span>
  {col.sortable && (
  <span className={cn("text-muted opacity-30 transition-all duration-200 group-hover:opacity-100", isSorted && "opacity-100 text-primary")}>
- {isSorted && sort.dir === 'desc' ? (
- <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+ <AnimatePresence mode="wait">
+ {isSorted ? (
+   sort.dir === 'desc' ? (
+     <motion.svg key="desc" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ opacity: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></motion.svg>
+   ) : (
+     <motion.svg key="asc" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ opacity: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></motion.svg>
+   )
  ) : (
- <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+   <motion.svg key="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></motion.svg>
  )}
+ </AnimatePresence>
  </span>
  )}
  </div>
@@ -287,7 +293,7 @@ export function DataGrid<T>({
  );
  })}
 
- {showActions && <th className="px-4 py-3 font-bold text-muted whitespace-nowrap select-none text-right" scope="col"></th>}
+ {showActions && <th className="px-4 py-3 font-medium text-subtle whitespace-nowrap select-none text-right" scope="col"></th>}
  </tr>
  </thead>
 
@@ -325,13 +331,11 @@ export function DataGrid<T>({
  >
  {selectable && (
  <td className="px-4 py-3 text-default align-middle w-12 text-center pr-0">
- <input
- type="checkbox"
+ <Checkbox
  checked={isSelected}
  onClick={(e) => e.stopPropagation()}
  onChange={() => toggleSelectRow(rid)}
  aria-label={`Select row`}
- className="cursor-pointer w-4 h-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
  />
  </td>
  )}
@@ -362,8 +366,8 @@ export function DataGrid<T>({
 
  {/* PAGINATION */}
  {!disablePagination && totalPages > 1 && (
- <div className="flex items-center justify-between px-4 py-3 border-t border-default bg-surface">
- <span className="text-sm text-muted">
+ <div className="flex items-center justify-between px-4 py-3 border-t border-default bg-surface rounded-b-lg">
+ <span className="text-sm text-subtle">
  Page {currentPage} of {totalPages}
  </span>
  <div className="flex gap-2">

@@ -8,7 +8,16 @@ const meta: Meta<typeof Drawer> = {
  title: 'Components/Overlays/Drawer',
  component: Drawer,
  parameters: {
- layout: 'centered',
+  layout: 'centered',
+ },
+ args: {
+  transitionDuration: 0.3,
+ },
+ argTypes: {
+  transitionDuration: {
+   control: { type: 'range', min: 0.1, max: 2, step: 0.1 },
+   description: 'Animation duration in seconds',
+  },
  },
 };
 
@@ -28,17 +37,13 @@ const ControlledDrawer = (args: Partial<DrawerProps>) => {
  </Button>
 
  <Drawer {...args} open={open} onClose={() => setOpen(false)}>
- <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
- <h3 style={{ margin: 0, fontSize: '18px', fontFamily: 'sans-serif' }}>Drawer Content</h3>
- <p style={{ margin: 0, color: '#666', fontFamily: 'sans-serif' }}>
- This is auxiliary content loaded inside the Drawer.
+ <div className="flex flex-col gap-4">
+ <p className="text-default font-sans text-sm m-0">
+ This is some standard auxiliary content. You can place forms, lists, or any other elements here.
  </p>
- <Button 
- onClick={() => setOpen(false)}
- variant="outline"
- >
- Close
- </Button>
+ <div className="h-32 bg-subtle rounded-md border border-glassBorder flex items-center justify-center text-muted text-sm">
+ Placeholder Content
+ </div>
  </div>
  </Drawer>
  </>
@@ -49,31 +54,35 @@ const ControlledDrawer = (args: Partial<DrawerProps>) => {
 
 export const Default: Story = {
  render: (args) => <ControlledDrawer {...args} />,
+ args: {
+ title: 'Drawer Content',
+ description: 'This is auxiliary content loaded inside the Drawer.',
+ },
 };
 
 export const Left: Story = {
  render: (args) => <ControlledDrawer {...args} />,
- args: { position: 'left' , onClose: fn() },
+ args: { position: 'left', onClose: fn(), title: 'Left Drawer' },
 };
 
 export const Top: Story = {
  render: (args) => <ControlledDrawer {...args} />,
- args: { position: 'top' },
+ args: { position: 'top', title: 'Top Drawer' },
 };
 
 export const Bottom: Story = {
  render: (args) => <ControlledDrawer {...args} />,
- args: { position: 'bottom' },
+ args: { position: 'bottom', title: 'Bottom Drawer' },
 };
 
 export const DisableEsc: Story = {
  render: (args) => <ControlledDrawer {...args} />,
- args: { disableEsc: true },
+ args: { disableEsc: true, title: 'No Escape', description: 'Pressing escape will not close this drawer.' },
 };
 
 export const DisableClickOutside: Story = {
  render: (args) => <ControlledDrawer {...args} />,
- args: { disableClickOutside: true },
+ args: { disableClickOutside: true, title: 'No Click Outside', description: 'Clicking outside will not close this drawer.' },
 };
 
 /**
@@ -82,6 +91,9 @@ export const DisableClickOutside: Story = {
  */
 export const InteractiveTest: Story = {
  render: (args) => <ControlledDrawer {...args} />,
+ args: {
+ title: 'Drawer Content',
+ },
  play: async ({ canvasElement }) => {
  const canvas = within(canvasElement);
  
@@ -97,8 +109,8 @@ export const InteractiveTest: Story = {
  await expect(dialog).toBeInTheDocument();
  await expect(dialog).toHaveClass('translate-x-0');
 
- // 3. Close the drawer
- const closeButton = body.getByRole('button', { name: /Close/i });
+ // 3. Close the drawer (using the new native close button)
+ const closeButton = body.getByRole('button', { name: /Close dialog/i });
  await userEvent.click(closeButton);
  
  // Dialog state updates to closed immediately (initiating animation)

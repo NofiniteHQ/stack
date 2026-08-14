@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback, forwardRef } from 'react';
+import React, { useRef, useEffect, useState, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
 import { 
@@ -29,6 +29,14 @@ export interface DrawerProps extends React.HTMLAttributes<HTMLDivElement> {
  disableClickOutside?: boolean;
  /** Custom class name applied to the backdrop overlay */
  overlayClassName?: string;
+ /** Optional title displayed at the top of the Drawer */
+ title?: React.ReactNode;
+ /** Optional description displayed below the title */
+ description?: React.ReactNode;
+ /** If true, hides the default close 'X' button */
+ hideCloseButton?: boolean;
+ /** Transition duration in seconds. Defaults to 0.3 */
+ transitionDuration?: number;
 }
 
 /* ----------------------------------------------------
@@ -53,11 +61,17 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
  children,
  disableEsc = false,
  disableClickOutside = false,
+ title,
+ description,
+ hideCloseButton = false,
+ transitionDuration = 0.3,
  ...props
  },
  ref
  ) => {
  // 1. Mount & Animation States handled by framer-motion
+ const [isMounted, setIsMounted] = useState(false);
+ useEffect(() => setIsMounted(true), []);
 
  const overlayRef = useRef<HTMLDivElement | null>(null);
  const internalDrawerRef = useRef<HTMLDivElement | null>(null);
@@ -105,8 +119,8 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
  scrollLock.lock();
 
  // WAI-ARIA Standard: Hide siblings from screen readers
- const inertTargets = overlayRef.current
- ? applyInertToSiblings(overlayRef.current)
+ const inertTargets = internalDrawerRef.current
+ ? applyInertToSiblings(internalDrawerRef.current)
  : [];
 
  // Trap focus inside the drawer
@@ -129,6 +143,8 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
  };
  }, [open, disableClickOutside, handleClose]);
 
+ if (!isMounted) return null;
+
  return (
  <Portal>
  <AnimatePresence>
@@ -143,7 +159,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
  initial={{ opacity: 0 }}
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
- transition={{ duration: 0.2 }}
+ transition={{ duration: transitionDuration }}
  aria-hidden="true"
  />
  <motion.div
@@ -165,12 +181,43 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
  x: position === 'left' ? '-100%' : position === 'right' ? '100%' : 0,
  y: position === 'top' ? '-100%' : position === 'bottom' ? '100%' : 0,
  }}
- transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+ transition={{ type: 'tween', ease: [0.32, 0.72, 0, 1], duration: transitionDuration }}
  role="dialog"
  aria-modal="true"
  {...props}
  >
- {children}
+ {(title || description) && (
+   <div className="p-5 pb-3 pr-10 shrink-0">
+     {title && (
+       <h2 className="text-lg font-semibold tracking-tight leading-tight m-0 text-default">
+         {title}
+       </h2>
+     )}
+     {description && (
+       <p className="mt-2 text-muted text-sm leading-relaxed mb-0">
+         {description}
+       </p>
+     )}
+   </div>
+ )}
+
+ <div className={cn("px-5 pb-5 overflow-y-auto flex-1", !(title || description) && "pt-5")}>
+   {children}
+ </div>
+
+ {!hideCloseButton && (
+   <button
+     type="button"
+     aria-label="Close dialog"
+     className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-transparent border-none rounded text-muted cursor-pointer transition-all duration-200 hover:bg-muted hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus p-0"
+     onClick={handleClose}
+   >
+     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+       <line x1="18" y1="6" x2="6" y2="18"></line>
+       <line x1="6" y1="6" x2="18" y2="18"></line>
+     </svg>
+   </button>
+ )}
  </motion.div>
  </>
  )}

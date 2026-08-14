@@ -1,8 +1,8 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, fireEvent, expect, waitFor, fn } from '@storybook/test';
-// 1. Import VirtualListProps
-import { VirtualList, VirtualListProps } from './VirtualList'; 
+// 1. Import VirtualListProps and VirtualListHandle
+import { VirtualList, VirtualListProps, VirtualListHandle } from './VirtualList'; 
 
 /* ----------------------------------------------------
  Define the Mock Data Type
@@ -16,14 +16,19 @@ const meta: Meta<typeof VirtualList> = {
  title: 'Components/Enterprise/VirtualList',
  component: VirtualList,
  tags: ['autodocs'],
- parameters: {
- docs: {
- description: {
- component:
- 'High-performance scrolling for massive datasets. Uses GPU-accelerated transforms and windowing logic.',
- },
- },
- },
+  parameters: {
+    docs: {
+      description: {
+        component: 'High-performance scrolling for massive datasets. Uses GPU-accelerated transforms and windowing logic.',
+      },
+    },
+  },
+  argTypes: {
+    items: {
+      control: false,
+      description: 'Array of data items to render. (Control disabled to prevent UI lag)',
+    },
+  },
 };
 
 export default meta;
@@ -59,6 +64,80 @@ export const CustomOverscan: Story = {
  })),
  overscan: 20,
  },
+};
+
+/**
+ * Demonstrates the ResizeObserver auto-sizing capability.
+ * Notice that the `height` prop is OMITTED. The list automatically expands to fill its parent container!
+ */
+export const AutoSizingContainer: Story = {
+  render: (args) => (
+    <div className="flex flex-col h-[600px] w-full max-w-2xl border border-default rounded-xl overflow-hidden bg-slate-50 dark:bg-[#0a0a0b] p-6">
+      <div className="mb-4">
+        <h3 className="text-lg font-bold">Auto-Sizing List</h3>
+        <p className="text-sm text-muted">Resize the window and the list will automatically adjust its internal height math!</p>
+      </div>
+      <div className="flex-1 min-h-0 border border-default rounded-md">
+        <VirtualList 
+          {...args}
+          // Intentionally omitting 'height' to trigger the ResizeObserver
+          height={undefined}
+        />
+      </div>
+    </div>
+  ),
+  args: {
+    ...MillionItemStressTest.args,
+  }
+};
+
+/**
+ * Demonstrates the programmatic scrollToIndex API using the forwarded VirtualListHandle.
+ */
+export const ScrollToIndexApi: Story = {
+  render: (args) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const listRef = React.useRef<VirtualListHandle>(null);
+
+    return (
+      <div className="flex flex-col h-[700px] w-full max-w-2xl border border-default rounded-xl overflow-hidden bg-slate-50 dark:bg-[#0a0a0b] p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold">Programmatic Scrolling</h3>
+            <p className="text-sm text-muted">Click the buttons to jump to specific rows instantly.</p>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => listRef.current?.scrollToIndex(0)}
+              className="px-3 py-1.5 text-sm font-medium bg-white dark:bg-slate-800 border border-default rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              Top (0)
+            </button>
+            <button 
+              onClick={() => listRef.current?.scrollToIndex(50000)}
+              className="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Jump to 50k
+            </button>
+            <button 
+              onClick={() => listRef.current?.scrollToIndex(99999)}
+              className="px-3 py-1.5 text-sm font-medium bg-slate-800 text-white rounded-md hover:bg-slate-900 transition-colors"
+            >
+              Bottom
+            </button>
+          </div>
+        </div>
+        <VirtualList 
+          {...args}
+          ref={listRef}
+        />
+      </div>
+    );
+  },
+  args: {
+    ...MillionItemStressTest.args,
+    height: 550,
+  }
 };
 
 /**

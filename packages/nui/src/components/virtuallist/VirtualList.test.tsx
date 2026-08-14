@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { createRef } from 'react';
 import { axe } from 'vitest-axe';
-import { VirtualList } from './VirtualList';
+import { VirtualList, VirtualListHandle } from './VirtualList';
 
 const MOCK_ITEMS = Array.from({ length: 1000 }, (_, i) => ({
  id: i,
@@ -32,28 +32,30 @@ describe('VirtualList Component', () => {
  expect(items.length).toBe(14);
  });
 
- it('calculates the correct translation offset during scroll', () => {
- const { container } = render(
- <VirtualList
- items={MOCK_ITEMS}
- height={VIEWPORT_HEIGHT}
- itemHeight={ITEM_HEIGHT}
- overscan={0} // Disable overscan for precise math check
- renderItem={(item) => <div>{item.name}</div>}
- />
- );
+  it('calculates the correct translation offset for absolute items during scroll', () => {
+    const { container } = render(
+      <VirtualList
+        items={MOCK_ITEMS}
+        height={VIEWPORT_HEIGHT}
+        itemHeight={ITEM_HEIGHT}
+        overscan={0} // Disable overscan for precise math check
+        renderItem={(item) => <div>{item.name}</div>}
+      />
+    );
 
- const viewport = container.firstChild as HTMLElement;
- const windowContainer = container.querySelector('.will-change-transform') as HTMLElement;
+    const viewport = container.firstChild as HTMLElement;
 
- // Scroll down 200px (Exactly 5 items)
- fireEvent.scroll(viewport, { target: { scrollTop: 200 } });
+    // Scroll down 200px (Exactly 5 items)
+    fireEvent.scroll(viewport, { target: { scrollTop: 200 } });
 
- // startIndex should be 5. OffsetY = 5 * 40 = 200px
- expect(windowContainer.style.transform).toBe('translateY(200px)');
- expect(screen.getByText('Item 5')).toBeInTheDocument();
- expect(screen.queryByText('Item 0')).not.toBeInTheDocument();
- });
+    // startIndex should be 5. Item 5 should be the first rendered item, transformed by 5 * 40 = 200px
+    const item5 = screen.getByText('Item 5').closest('[role="listitem"]') as HTMLElement;
+    expect(item5).toBeInTheDocument();
+    expect(item5.style.transform).toBe('translateY(200px)');
+    
+    // Item 0 should be culled from the DOM
+    expect(screen.queryByText('Item 0')).not.toBeInTheDocument();
+  });
 
  it('preserves consumer onScroll handlers', () => {
  const onScrollSpy = vi.fn();
@@ -70,18 +72,20 @@ describe('VirtualList Component', () => {
  expect(onScrollSpy).toHaveBeenCalled();
  });
 
- it('supports forwarded refs', () => {
- const ref = createRef<HTMLDivElement>();
- render(
- <VirtualList
- ref={ref}
- items={MOCK_ITEMS}
- height={VIEWPORT_HEIGHT}
- renderItem={() => null}
- />
- );
- expect(ref.current).toBeInstanceOf(HTMLDivElement);
- });
+  it('supports custom imperative handle refs', () => {
+    const ref = createRef<VirtualListHandle>();
+    render(
+      <VirtualList
+        ref={ref}
+        items={MOCK_ITEMS}
+        height={VIEWPORT_HEIGHT}
+        renderItem={() => null}
+      />
+    );
+    expect(ref.current).toBeDefined();
+    expect(ref.current?.element).toBeInstanceOf(HTMLDivElement);
+    expect(typeof ref.current?.scrollToIndex).toBe('function');
+  });
 
  it('uses keyExtractor for stable row identity', () => {
  const keyExtractorSpy = vi.fn((item) => item.id);

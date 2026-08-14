@@ -104,6 +104,12 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  const selectedTime = controlled ? value : internal;
 
  const [open, setOpen] = useState(false);
+ const [isMounted, setIsMounted] = useState(false);
+ 
+ useEffect(() => {
+ setIsMounted(true);
+ }, []);
+
  const generatedId = useId();
  const dialogId = id || `timepicker-${generatedId}`;
 
@@ -147,23 +153,28 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  }, [open]);
 
 
- /* ----------------------------------------------------
- Auto-Scroll to Selected Item
- ---------------------------------------------------- */
- useEffect(() => {
- if (!open) return;
- // Wait a tick for the popover to render and measure
- const timer = setTimeout(() => {
- [hourColRef, minColRef, ampmColRef].forEach((colRef) => {
- if (!colRef.current) return;
- const selectedEl = colRef.current.querySelector('[aria-selected="true"]');
- if (selectedEl) {
- selectedEl.scrollIntoView({ block: 'center', behavior: 'instant' });
- }
- });
- }, 0);
- return () => clearTimeout(timer);
- }, [open]);
+  /* ----------------------------------------------------
+  Auto-Scroll and Initial Focus
+  ---------------------------------------------------- */
+  useEffect(() => {
+  if (!open) return;
+  // Wait a tick for the popover to render and measure
+  const timer = setTimeout(() => {
+  [hourColRef, minColRef, ampmColRef].forEach((colRef, idx) => {
+  if (!colRef.current) return;
+  const selectedEl = colRef.current.querySelector('[aria-selected="true"]') as HTMLElement;
+  if (selectedEl) {
+  selectedEl.scrollIntoView({ block: 'center', behavior: 'instant' });
+  // Focus the selected item in the first column for keyboard navigation
+  if (idx === 0) selectedEl.focus({ preventScroll: true });
+  } else if (idx === 0) {
+  const firstEl = colRef.current.querySelector('button') as HTMLElement;
+  if (firstEl) firstEl.focus({ preventScroll: true });
+  }
+  });
+  }, 10);
+  return () => clearTimeout(timer);
+  }, [open]);
 
  /* ----------------------------------------------------
  Column Generation
@@ -201,6 +212,61 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  : `${pad(p.hour)}:${pad(p.minute)}`;
  };
 
+  /* ----------------------------------------------------
+  Keyboard Navigation
+  ---------------------------------------------------- */
+  const onTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+  if (disabled) return;
+  if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
+  e.preventDefault();
+  setOpen(true);
+  }
+  };
+
+  const onDialogKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  if (e.key === 'Escape') {
+  e.preventDefault();
+  setOpen(false);
+  triggerRef.current?.focus();
+  return;
+  }
+
+  const isArrow = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key);
+  if (!isArrow) return;
+  e.preventDefault();
+
+  const cols = [hourColRef, minColRef];
+  if (clockType === 12) cols.push(ampmColRef);
+
+  const activeEl = document.activeElement as HTMLElement;
+  let colIdx = cols.findIndex(col => col.current?.contains(activeEl));
+  if (colIdx === -1) colIdx = 0;
+
+  const col = cols[colIdx].current;
+  if (!col) return;
+
+  if (e.key === 'ArrowLeft') {
+  const prevCol = cols[Math.max(0, colIdx - 1)].current;
+  const target = (prevCol?.querySelector('[aria-selected="true"]') as HTMLElement) || prevCol?.querySelector('button');
+  target?.focus();
+  } else if (e.key === 'ArrowRight') {
+  const nextCol = cols[Math.min(cols.length - 1, colIdx + 1)].current;
+  const target = (nextCol?.querySelector('[aria-selected="true"]') as HTMLElement) || nextCol?.querySelector('button');
+  target?.focus();
+  } else {
+  const btns = Array.from(col.querySelectorAll('button'));
+  const idx = btns.indexOf(activeEl as HTMLButtonElement);
+  if (idx === -1) {
+  btns[0]?.focus();
+  } else {
+  const nextIdx = e.key === 'ArrowDown' 
+  ? (idx + 1) % btns.length 
+  : (idx - 1 + btns.length) % btns.length;
+  btns[nextIdx]?.focus();
+  }
+  }
+  };
+
  /* ----------------------------------------------------
  Render
  ---------------------------------------------------- */
@@ -209,6 +275,7 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  {name && <input type="hidden" name={name} value={selectedTime ?? ''} />}
 
  <Button
+ variant="outline"
  id={`${dialogId}-trigger`}
  ref={(node) => {
  triggerRef.current = node;
@@ -216,29 +283,33 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  }}
  type="button"
  disabled={disabled}
- variant="outline"
  className={cn(
- "flex items-center justify-between w-full sm:w-[120px] px-2.5 py-1.5 h-auto font-normal text-sm",
+ "flex items-center justify-between w-full sm:w-[140px] px-2.5 py-1.5 h-auto font-normal text-sm",
  !selectedTime && "text-muted"
  )}
  aria-haspopup="dialog"
  aria-expanded={open}
  aria-controls={open ? dialogId : undefined}
  onClick={() => setOpen((s) => !s)}
- >
- <span>
- {formatDisplay()}
- </span>
+ onKeyDown={onTriggerKeyDown}
+ iconRight={
  <svg className="text-muted shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  <circle cx="12" cy="12" r="10"></circle>
  <polyline points="12 6 12 12 16 14"></polyline>
  </svg>
+ }
+ >
+ <span className="truncate block w-full text-left">
+ {formatDisplay()}
+ </span>
  </Button>
 
+ {isMounted && (
+ <Portal>
  <AnimatePresence>
  {open && (
- <Portal>
  <motion.div
+ key="timepicker-dialog"
  ref={refs.setFloating}
  className="z-50"
  style={{
@@ -257,10 +328,11 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  role="dialog"
  aria-modal="true"
  aria-label="Time picker"
- className="bg-glass backdrop-blur-md text-default border border-default rounded-lg shadow-xl overflow-hidden focus-visible:outline-none"
+ className="bg-surface text-default border border-default rounded-lg shadow-lg p-3 focus-visible:outline-none"
  tabIndex={-1}
+ onKeyDown={onDialogKeyDown}
  >
- <div className="flex h-[220px]">
+ <div className="flex h-[220px] rounded-md overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
  
  {/* HOURS */}
  <div role="listbox" aria-label="Hours" className="flex flex-col overflow-y-auto p-2 w-16 border-r border-default last:border-r-0 scroll-smooth scrollbar-hide" ref={hourColRef}>
@@ -272,8 +344,8 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  role="option"
  aria-selected={sel}
  className={cn(
- "shrink-0 flex items-center justify-center h-9 w-full bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
- sel && "bg-primary text-inverse font-bold shadow-sm"
+ "shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+ sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary"
  )}
  onClick={() => commit(h, parsed.minute, parsed.ampm)}
  >
@@ -293,8 +365,8 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  role="option"
  aria-selected={sel}
  className={cn(
- "shrink-0 flex items-center justify-center h-9 w-full bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
- sel && "bg-primary text-inverse font-bold shadow-sm"
+ "shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+ sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary"
  )}
  onClick={() => commit(parsed.hour, m, parsed.ampm)}
  >
@@ -315,8 +387,8 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  role="option"
  aria-selected={sel}
  className={cn(
- "shrink-0 flex items-center justify-center h-9 w-full bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
- sel && "bg-primary text-inverse font-bold shadow-sm"
+ "shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+ sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary"
  )}
  onClick={() => commit(parsed.hour, parsed.minute, a)}
  >
@@ -329,9 +401,10 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  </div>
  </div>
  </motion.div>
- </Portal>
  )}
  </AnimatePresence>
+ </Portal>
+ )}
  </div>
  );
 });

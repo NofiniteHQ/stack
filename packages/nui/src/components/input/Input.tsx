@@ -14,9 +14,9 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 const inputSizeMap = {
- sm: "h-8 px-2 py-1 text-xs",
- md: "h-10 px-3 py-2 text-sm",
- lg: "h-12 px-4 py-3 text-base"
+ sm: "h-8 px-2.5 py-1 text-xs",
+ md: "h-9 px-3 py-1.5 text-sm",
+ lg: "h-11 px-4 py-2 text-base"
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -42,6 +42,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
  const errorId = `${inputId}-error`;
  const descriptionId = `${inputId}-description`;
  const describedBy = error ? errorId : description ? descriptionId : undefined;
+ const isInvalid = !!error || props['aria-invalid'] === true || props['aria-invalid'] === "true";
 
  return (
  <div className={cn("flex flex-col gap-1 w-full font-sans", wrapperClassName)}>
@@ -64,9 +65,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
  required={required}
  disabled={disabled}
  className={cn(
- "w-full bg-surface text-default border border-default rounded-md font-inherit transition-all duration-200 appearance-none outline-none placeholder:text-muted placeholder:opacity-80 hover:bg-subtle focus-visible:outline-none focus-visible:border-focus focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle",
+ "w-full bg-white dark:bg-[#0a0a0b] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-md font-sans transition-all duration-200 appearance-none outline-none shadow-sm",
+ "placeholder:text-slate-400 dark:placeholder:text-slate-500",
+ "hover:border-slate-300 dark:hover:border-slate-700",
+ "focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20",
+ "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900",
  inputSizeMap[inputSize],
- !!error && "border-danger focus-visible:ring-danger",
+ isInvalid && "border-red-500 focus-visible:ring-red-500/20 focus-visible:border-red-500",
  !!leftIcon && "pl-[40px]",
  !!rightIcon && "pr-[40px]",
  className
@@ -80,13 +85,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
  </div>
 
  {description && !error && (
- <div id={descriptionId} className="text-xs text-muted mt-[2px]">
+ <div id={descriptionId} className="text-[13px] text-slate-500 dark:text-slate-400 mt-1">
  {description}
  </div>
  )}
 
  {error && (
- <div id={errorId} className="text-xs text-danger font-medium mt-[2px]" aria-live="polite">
+ <div id={errorId} className="text-[13px] text-red-500 font-medium mt-1" aria-live="polite">
  {error}
  </div>
  )}

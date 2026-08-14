@@ -68,15 +68,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, className }) => {
         .vds-slider-thumb {
           background-color: var(--color-primary) !important;
         }
-
-        /* YouTube Iframe Fix */
-        .nui-vidstack-player media-provider[data-youtube] iframe {
-          top: -50% !important;
-          height: 200% !important;
-        }
       `}</style>
       <MediaPlayer 
         src={url} 
+        load="play"
         className={cn("w-full h-full nui-vidstack-player", resolvedTheme === 'dark' ? 'dark' : 'light')}
         data-color-scheme={resolvedTheme}
       >

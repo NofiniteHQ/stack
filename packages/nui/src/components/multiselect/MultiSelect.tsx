@@ -11,6 +11,7 @@ import React, {
 } from 'react';
 import { Portal, onClickOutside, restoreFocus, cn } from '../../utils';
 import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
+import { Checkbox } from '../checkbox/Checkbox';
 
 
 /* ============================================================
@@ -101,8 +102,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  whileElementsMounted: autoUpdate,
  middleware: [
  offset(4),
- flip({ padding: 16, fallbackPlacements: ['top-start', 'bottom-start'] }),
- shift({ padding: 16 }),
+ flip({ padding: 8, fallbackPlacements: ['top-start', 'bottom-start'] }),
+ shift({ padding: 8, crossAxis: false }),
  size({
  apply({ rects, elements }) {
  Object.assign(elements.floating.style, {
@@ -248,11 +249,11 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
 
  // Render individual tags
  return (
- <div className="flex flex-wrap gap-1 py-0.5">
+ <div className="flex flex-wrap gap-1.5 py-0.5">
  {selectedValues.map(val => {
  const label = options.find(o => o.value === val)?.label ?? val;
  return (
- <span key={val} className="inline-flex items-center rounded-sm border border-default bg-muted px-2 py-0.5 text-xs font-medium text-default">
+ <span key={val} className="inline-flex items-center rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300">
  {label}
  </span>
  );
@@ -276,7 +277,10 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  ref={setTriggerRef}
  id={labelId}
  type="button"
- className={cn("flex min-h-[40px] w-full items-center justify-between rounded-md border border-default bg-surface px-3 py-2 text-left text-sm text-default shadow-sm transition-all duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle", error && "border-danger focus-visible:ring-danger")}
+ className={cn(
+   "flex min-h-[40px] w-full items-center justify-between rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] px-3 py-2 text-left text-sm text-slate-900 dark:text-slate-100 shadow-sm transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-700 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900", 
+   error && "border-red-500 focus-visible:ring-red-500/20 focus-visible:border-red-500"
+ )}
  aria-haspopup="listbox"
  aria-expanded={open}
  aria-controls={open ? listboxId : undefined}
@@ -299,7 +303,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  <div
  id={listboxId}
  ref={refs.setFloating}
- className="z-50 max-h-60 overflow-y-auto rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-md outline-none animate-in fade-in zoom-in-95"
+ className="z-50 max-h-60 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] p-1.5 shadow-md outline-none animate-in fade-in zoom-in-95 font-sans box-border"
  role="listbox"
  aria-multiselectable="true"
  aria-labelledby={labelId}
@@ -325,8 +329,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  aria-selected={isSelected}
  aria-disabled={opt.disabled || undefined}
  className={cn(
- "flex cursor-pointer select-none items-center gap-3 rounded-md px-3 py-2 text-sm text-default outline-none transition-colors duration-200",
- isActive && !opt.disabled && "bg-subtle",
+ "flex cursor-pointer select-none items-center gap-3 rounded-sm px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition-colors duration-200",
+ isActive && !opt.disabled && "bg-slate-100 dark:bg-slate-800",
  opt.disabled && "cursor-not-allowed opacity-50 disabled:bg-transparent"
  )}
  tabIndex={-1}
@@ -335,14 +339,10 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  onMouseEnter={() => !opt.disabled && setActiveIndex(i)}
  >
  
- {/* Custom Checkbox UI */}
- <div className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all duration-200", isSelected ? "border-default bg-subtle text-default" : "border-default bg-surface")} aria-hidden="true">
- {isSelected && (
- <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
- <polyline points="20 6 9 17 4 12"></polyline>
- </svg>
- )}
- </div>
+  {/* NUI Checkbox UI (visual only, click handled by parent) */}
+  <div className="flex h-5 w-5 shrink-0 items-center justify-center pointer-events-none" aria-hidden="true">
+    <Checkbox checked={isSelected} readOnly tabIndex={-1} />
+  </div>
 
  <span className="truncate">{opt.label}</span>
  </div>

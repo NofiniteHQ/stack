@@ -30,7 +30,8 @@ export const DataDriven: StoryObj<typeof Select> = {
  args: { 
  data: fruitOptions,
  placeholder: 'Select a fruit...',
- style: { width: '300px' , onChange: fn() }
+ onChange: fn(),
+ style: { width: '300px' }
  },
 };
 
@@ -80,7 +81,8 @@ export const InteractiveTest: StoryObj<typeof Select> = {
  args: {
  data: fruitOptions,
  placeholder: 'Select a fruit...',
- style: { width: '300px' , onChange: fn()}
+ onChange: fn(),
+ style: { width: '300px' }
  },
  play: async ({ canvasElement }) => {
  const canvas = within(canvasElement);

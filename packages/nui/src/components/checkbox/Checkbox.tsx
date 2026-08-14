@@ -65,7 +65,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
  <input
  ref={internalRef}
  type="checkbox"
- className="peer appearance-none w-full h-full m-0 bg-surface border border-solid border-strong rounded-[4px] shadow-sm transition-all duration-200 cursor-inherit hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus checked:bg-primary checked:border-primary checked:text-inverse data-[state=indeterminate]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:text-inverse disabled:bg-subtle disabled:opacity-50"
+ className="peer appearance-none w-full h-full m-0 bg-white dark:bg-[#0a0a0b] border border-solid border-slate-300 dark:border-slate-700 rounded shadow-sm transition-all duration-200 cursor-inherit hover:border-slate-400 dark:hover:border-slate-600 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-blue-500/20 focus-visible:border-blue-500 checked:bg-blue-600 checked:border-blue-600 checked:text-white data-[state=indeterminate]:bg-blue-600 data-[state=indeterminate]:border-blue-600 data-[state=indeterminate]:text-white disabled:bg-slate-50 dark:disabled:bg-slate-900 disabled:opacity-50"
  disabled={disabled}
  checked={currentChecked}
  onChange={handleChange}
@@ -83,7 +83,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
  animate={{ opacity: 1, scale: 1 }}
  exit={{ opacity: 0, scale: 0.5 }}
  transition={{ duration: 0.15 }}
- className="absolute inset-0 flex items-center justify-center pointer-events-none text-inverse" 
+ className="absolute inset-0 flex items-center justify-center pointer-events-none text-white" 
  aria-hidden="true"
  >
  {indeterminate ? (
@@ -114,7 +114,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
  </AnimatePresence>
  </div>
 
- {label && <span className="font-sans text-sm text-default leading-normal">{label}</span>}
+ {label && <span className="font-sans text-sm text-slate-900 dark:text-slate-100 leading-normal">{label}</span>}
  </label>
  );
  }

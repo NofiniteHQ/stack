@@ -21,13 +21,13 @@ export const Default: Story = {
  <Tabs.Trigger value="password">Password</Tabs.Trigger>
  <Tabs.Trigger value="notifications">Notifications</Tabs.Trigger>
  </Tabs.List>
- <Tabs.Content value="profile" style={{ color: '#475569', fontFamily: 'sans-serif' }}>
+ <Tabs.Content value="profile" className="text-subtle pt-4">
  Manage your public profile and bio.
  </Tabs.Content>
- <Tabs.Content value="password" style={{ color: '#475569', fontFamily: 'sans-serif' }}>
+ <Tabs.Content value="password" className="text-subtle pt-4">
  Update your password and security settings.
  </Tabs.Content>
- <Tabs.Content value="notifications" style={{ color: '#475569', fontFamily: 'sans-serif' }}>
+ <Tabs.Content value="notifications" className="text-subtle pt-4">
  Configure how you receive alerts.
  </Tabs.Content>
  </Tabs>
@@ -38,17 +38,17 @@ export const Controlled: Story = {
  render: function ControlledExample() {
  const [tab, setTab] = useState('one');
  return (
- <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
- <p style={{ margin: 0, fontFamily: 'monospace', fontSize: '14px', color: '#64748b' }}>
- Active Tab State: <strong>{tab}</strong>
+ <div className="flex flex-col gap-4">
+ <p className="m-0 font-mono text-sm text-muted">
+ Active Tab State: <strong className="text-default">{tab}</strong>
  </p>
  <Tabs value={tab} onChange={setTab}>
  <Tabs.List>
  <Tabs.Trigger value="one">Step 1</Tabs.Trigger>
  <Tabs.Trigger value="two">Step 2</Tabs.Trigger>
  </Tabs.List>
- <Tabs.Content value="one" style={{ fontFamily: 'sans-serif' }}>First Step Content</Tabs.Content>
- <Tabs.Content value="two" style={{ fontFamily: 'sans-serif' }}>Second Step Content</Tabs.Content>
+ <Tabs.Content value="one" className="text-subtle pt-4">First Step Content</Tabs.Content>
+ <Tabs.Content value="two" className="text-subtle pt-4">Second Step Content</Tabs.Content>
  </Tabs>
  </div>
  );

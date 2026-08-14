@@ -27,7 +27,8 @@ export const Default: Story = {
  args: { 
  options,
  placeholder: 'Select frameworks...',
- style: { width: '300px' , onChange: fn() }
+ onChange: fn(),
+ style: { width: '300px' }
  },
 };
 
@@ -87,6 +88,7 @@ export const InteractiveTest: Story = {
  args: {
  options,
  placeholder: 'Select frameworks...',
+ onChange: fn(),
  style: { width: '300px' }
  },
  play: async ({ canvasElement }) => {

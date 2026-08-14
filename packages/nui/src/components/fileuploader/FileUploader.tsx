@@ -38,8 +38,10 @@ export interface FileUploaderProps {
  maxSize?: number;
  /** Custom class name applied to the root container */
  className?: string;
- /** Custom text or element displayed inside the dropzone */
+ /** Custom text or element displayed inside the dropzone (Primary Title) */
  placeholder?: React.ReactNode;
+ /** Secondary text or description below the placeholder */
+ description?: React.ReactNode;
  /** Disables the dropzone and prevents file selection */
  disabled?: boolean;
 }
@@ -58,11 +60,12 @@ export function FileUploader({
  defaultValue,
  onChange,
  multiple = false,
- accept,
- maxSize,
- className,
- placeholder = 'Drag & drop files here, or click to browse',
- disabled = false,
+  accept,
+  maxSize,
+  className,
+  placeholder,
+  description,
+  disabled = false,
 }: FileUploaderProps) {
  const inputRef = useRef<HTMLInputElement | null>(null);
  
@@ -134,7 +137,7 @@ export function FileUploader({
  Render
  ---------------------------------------------------- */
  return (
- <div className={cn("flex flex-col gap-4 font-sans w-full", className)}>
+ <div className={cn("flex flex-col gap-4 font-sans box-border", className)}>
  
  {/* DROP ZONE */}
  <div
@@ -142,32 +145,68 @@ export function FileUploader({
  tabIndex={disabled ? -1 : 0}
  aria-label="Upload files"
  aria-disabled={disabled}
- className={cn(
- "flex flex-col items-center justify-center gap-4 p-4 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
- isDragOver 
- ? "border-default bg-subtle text-default" 
- : disabled 
- ? "opacity-60 cursor-not-allowed bg-subtle border-default text-muted" 
- : "border-default bg-surface text-muted hover:bg-subtle hover:text-default"
- )}
- onClick={() => !disabled && inputRef.current?.click()}
- onKeyDown={(e) => {
- if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
- e.preventDefault();
- inputRef.current?.click();
- }
- }}
- onDragOver={onDragOver}
- onDragLeave={onDragLeave}
- onDrop={onDrop}
- >
- <svg className="opacity-70" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
- <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
- <polyline points="17 8 12 3 7 8"></polyline>
- <line x1="12" y1="3" x2="12" y2="15"></line>
- </svg>
- <span className="text-sm font-medium text-center">{placeholder}</span>
- </div>
+        className={cn(
+          "relative flex flex-col items-center justify-center px-6 py-10 gap-4 overflow-hidden border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus active:scale-[0.99] box-border",
+          isDragOver 
+            ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400" 
+            : disabled 
+            ? "opacity-60 cursor-not-allowed bg-subtle border-default text-muted" 
+            : "border-slate-300 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/20 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+        )}
+        onClick={() => !disabled && inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+      >
+        {/* Animated background pulse for drag over */}
+        {isDragOver && (
+          <div className="absolute inset-0 bg-blue-500/5 dark:bg-blue-400/5 animate-pulse pointer-events-none" />
+        )}
+
+        {/* The elevated puck target */}
+        <div className={cn(
+          "flex items-center justify-center w-12 h-12 rounded-full shadow-sm border transition-transform duration-200 z-10",
+          isDragOver 
+            ? "bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 scale-110" 
+            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+        )}>
+          {/* Optical centering: -translate-y-[1px] balances the heavy bottom line of the upload icon */}
+          <svg className={cn("w-5 h-5 transition-colors duration-200 relative -translate-y-[1px]", isDragOver ? "text-blue-600 dark:text-blue-400" : "text-slate-500 dark:text-slate-400")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        
+        {/* Typography */}
+        <div className="flex flex-col items-center text-center gap-1.5 z-10">
+          <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            {placeholder || (
+              <>
+                <span className="text-blue-600 dark:text-blue-400 hover:underline">Click to upload</span>
+                {' '}
+                <span className="font-medium text-slate-500 dark:text-slate-400">or drag and drop</span>
+              </>
+            )}
+          </div>
+          {(description || accept || maxSize) && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {description || (() => {
+                const parts = [];
+                if (accept) parts.push(accept.replace(/,\s*/g, ', '));
+                if (maxSize) parts.push(`max. ${formatBytes(maxSize)}`);
+                return parts.join(' ');
+              })()}
+            </p>
+          )}
+        </div>
+      </div>
 
  {/* HIDDEN NATIVE INPUT */}
  <input
@@ -183,40 +222,42 @@ export function FileUploader({
  aria-hidden="true"
  />
 
- {/* FILE LIST PREVIEW */}
- {files.length > 0 && (
- <ul className="list-none p-0 m-0 flex flex-col gap-2" aria-label="Selected files">
- {files.map((file) => {
- // Create a stable key based on file properties
- const fileKey = `${file.name}-${file.size}-${file.lastModified}`;
- 
- return (
- <li key={fileKey} className="flex items-center justify-between p-4 bg-surface border border-default rounded-md">
- <div className="flex items-center gap-2 min-w-0">
- <svg className="text-muted shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
- <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
- <polyline points="13 2 13 9 20 9"></polyline>
- </svg>
- <div className="flex flex-col min-w-0">
- <span className="text-sm font-medium text-default truncate">{file.name}</span>
- <span className="text-xs text-muted">{formatBytes(file.size)}</span>
- </div>
- </div>
- 
- <button
- type="button"
- className="flex items-center justify-center p-1 ml-4 bg-transparent border-none rounded-sm text-muted cursor-pointer transition-all duration-200 hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:opacity-50 disabled:cursor-not-allowed"
- aria-label={`Remove ${file.name}`}
- onClick={() => removeFile(file)}
- disabled={disabled}
- >
- <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
- <line x1="18" y1="6" x2="6" y2="18"></line>
- <line x1="6" y1="6" x2="18" y2="18"></line>
- </svg>
- </button>
- </li>
- );
+        {/* FILE LIST PREVIEW */}
+        {files.length > 0 && (
+          <ul className="list-none p-0 m-0 flex flex-col gap-2 box-border" aria-label="Selected files">
+            {files.map((file) => {
+              // Create a stable key based on file properties
+              const fileKey = `${file.name}-${file.size}-${file.lastModified}`;
+              
+              return (
+                <li key={fileKey} className="group flex items-center justify-between p-3 bg-white dark:bg-[#0a0a0b] border border-slate-200 dark:border-slate-800 shadow-sm rounded-xl transition-all hover:border-blue-200 dark:hover:border-blue-900/50 box-border">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shrink-0 border border-blue-100 dark:border-blue-900/30">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <polyline points="13 2 13 9 20 9"></polyline>
+                  </svg>
+                </div>
+                <div className="flex flex-col min-w-0 justify-center">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate pr-4 leading-tight">{file.name}</span>
+                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">{formatBytes(file.size)}</span>
+                </div>
+              </div>
+              
+              <button
+                type="button"
+                className="flex items-center justify-center p-1.5 ml-4 bg-transparent border-none rounded-full text-slate-400 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus md:opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                aria-label={`Remove ${file.name}`}
+                onClick={() => removeFile(file)}
+                disabled={disabled}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </li>
+          );
  })}
  </ul>
  )}

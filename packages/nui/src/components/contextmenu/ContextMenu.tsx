@@ -225,20 +225,20 @@ export function ContextMenu({
  >
  {items.map((item, idx) => {
  if (item.type === 'separator') {
- return <div key={`sep-${idx}`} className="my-1 h-px bg-default" role="separator" />;
+ return <div key={`sep-${idx}`} className="my-1 border-b border-default" role="separator" />;
  }
 
  const isActive = idx === activeIndex;
 
  return (
- <div
- key={`item-${idx}`}
- className={cn(
- "mx-1 flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1 text-sm text-default transition-all duration-200",
- isActive && !item.danger && "bg-muted text-default",
- item.danger && isActive && "bg-danger-subtle text-danger",
- item.disabled && "cursor-not-allowed opacity-50 text-muted"
- )}
+  <div
+  key={`item-${idx}`}
+  className={cn(
+  "flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-default transition-colors duration-200",
+  isActive && !item.danger && "bg-subtle text-default",
+  item.danger && isActive && "bg-danger-subtle text-danger",
+  item.disabled && "cursor-not-allowed opacity-50 text-muted"
+  )}
  role="menuitem"
  tabIndex={-1}
  aria-disabled={item.disabled || undefined}

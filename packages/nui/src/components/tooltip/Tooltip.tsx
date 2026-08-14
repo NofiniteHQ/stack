@@ -48,7 +48,10 @@ export function Tooltip({
  delay = 200,
  offset = 8,
 }: TooltipProps) {
- const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => setIsMounted(true), []);
 
  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -157,9 +160,9 @@ export function Tooltip({
  <>
  {trigger}
 
- <AnimatePresence>
- {isOpen && (
- <Portal>
+  <AnimatePresence>
+  {isMounted && isOpen && (
+  <Portal>
  <motion.div
  ref={refs.setFloating}
  id={tooltipId}
@@ -170,7 +173,7 @@ export function Tooltip({
  exit={{ opacity: 0, scale: 0.95 }}
  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
  className={cn(
- 'absolute z-[10000] max-w-[280px] px-3 py-1.5 bg-surface backdrop-blur-md text-default border border-glassBorder font-sans text-xs font-medium leading-[1.4] rounded-md text-center pointer-events-none shadow-2xl',
+ 'absolute z-[10000] max-w-[280px] px-3 py-1.5 bg-surface backdrop-blur-md text-default border border-default font-sans text-xs font-medium leading-[1.4] rounded-md text-center pointer-events-none shadow-2xl',
  className
  )}
  style={{
@@ -184,14 +187,12 @@ export function Tooltip({
  
  <div 
   ref={arrowRef}
-  className="absolute w-2.5 h-2.5 bg-surface border-glassBorder z-[-1] rotate-45 rounded-[1px]"
+  className="absolute w-2.5 h-2.5 bg-surface border border-default z-[-1] rounded-[1px]"
   style={{
   left: middlewareData.arrow?.x != null ? `${middlewareData.arrow.x}px` : '',
   top: middlewareData.arrow?.y != null ? `${middlewareData.arrow.y}px` : '',
-  ...(floatingPlacement.startsWith('top') ? { bottom: '-5px', borderBottomWidth: '1px', borderRightWidth: '1px' } : {}),
-  ...(floatingPlacement.startsWith('bottom') ? { top: '-5px', borderTopWidth: '1px', borderLeftWidth: '1px' } : {}),
-  ...(floatingPlacement.startsWith('left') ? { right: '-5px', borderTopWidth: '1px', borderRightWidth: '1px' } : {}),
-  ...(floatingPlacement.startsWith('right') ? { left: '-5px', borderBottomWidth: '1px', borderLeftWidth: '1px' } : {}),
+  [floatingPlacement.startsWith('top') ? 'bottom' : floatingPlacement.startsWith('bottom') ? 'top' : floatingPlacement.startsWith('left') ? 'right' : 'left']: '-5px',
+  transform: 'rotate(45deg)',
   }}
   />
  </motion.div>

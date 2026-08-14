@@ -93,8 +93,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
  const countId = id ? `${id}-count` : undefined;
  const describedBy = [helperId, (showCount || maxLength) ? countId : undefined].filter(Boolean).join(' ') || undefined;
 
+ const hasCounter = showCount || maxLength;
+
  return (
- <div className={cn("flex flex-col w-full font-sans", className)}>
+ <div className={cn("relative flex flex-col w-full font-sans", className)}>
  <textarea
  ref={setRefs}
  id={id}
@@ -114,17 +116,18 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
  placeholder={placeholder}
  rows={rows}
  className={cn(
- "w-full box-border px-3 py-2 bg-surface text-default font-inherit text-sm leading-relaxed border border-default rounded-md transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus placeholder:text-subtle hover:bg-subtle disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed disabled:resize-none read-only:bg-subtle read-only:cursor-default",
- autoGrow ? "resize-none overflow-hidden" : "resize-y min-h-[2.25rem]",
- error && "border-error focus-visible:ring-error",
+ "w-full box-border px-3 py-2 bg-surface text-default font-inherit text-sm leading-relaxed border border-default shadow-sm rounded-md transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:border-focus placeholder:text-subtle hover:border-strong disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed disabled:resize-none read-only:bg-subtle read-only:cursor-default",
+ autoGrow ? "resize-none overflow-hidden" : "resize-y min-h-[2.5rem]",
+ hasCounter && "pb-7",
+ error && "border-danger hover:border-danger focus-visible:ring-danger focus-visible:border-danger",
  )}
  {...rest}
  />
 
- {(showCount || maxLength) && (
+ {hasCounter && (
  <div 
  id={countId} 
- className="mt-1 text-xs font-medium text-muted text-right select-none" 
+ className="absolute bottom-2 right-2 text-[11px] font-medium text-muted bg-surface/90 backdrop-blur-sm px-1 pointer-events-none select-none rounded" 
  aria-live="polite"
  >
  {safeValue.length}

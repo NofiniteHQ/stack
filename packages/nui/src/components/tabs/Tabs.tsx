@@ -189,7 +189,7 @@ const TabsContent = forwardRef<HTMLDivElement, TabsContentProps>(
  const isSelected = selectedValue === value;
 
  return (
- <AnimatePresence>
+ <AnimatePresence mode="wait">
  {isSelected && (
  <motion.div
  ref={ref as any}
@@ -248,11 +248,13 @@ const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(
      </TabsTrigger>
     ))}
    </TabsList>
-   {data.map((tab) => (
-    <TabsContent key={tab.value} value={tab.value}>
-     {tab.content}
-    </TabsContent>
-   ))}
+   <AnimatePresence mode="wait">
+    {data.map((tab) => (
+     <TabsContent key={tab.value} value={tab.value}>
+      {tab.content}
+     </TabsContent>
+    ))}
+   </AnimatePresence>
   </>
  ) : (
   children

@@ -19,12 +19,10 @@ export type PopoverPlacement = 'top' | 'bottom' | 'left' | 'right';
  * Context
  * ------------------------------------------------------*/
 interface PopoverContextValue {
- open: boolean;
- setOpen: React.Dispatch<React.SetStateAction<boolean>>;
- triggerRef: React.RefObject<HTMLElement | null>;
- contentId: string;
- hover: boolean;
- hoverTimeoutRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  triggerRef: React.RefObject<HTMLElement | null>;
+  contentId: string;
 }
 
 const PopoverContext = createContext<PopoverContextValue | null>(null);
@@ -40,35 +38,26 @@ function usePopover() {
  * ------------------------------------------------------*/
 
 export interface PopoverRootProps {
- children: React.ReactNode; 
- defaultOpen?: boolean;
- /** If true, the popover automatically opens on hover */
- hover?: boolean;
+  children: React.ReactNode; 
+  defaultOpen?: boolean;
 }
 
-export function PopoverRoot({ children, defaultOpen = false, hover = false }: PopoverRootProps) {
- const [open, setOpen] = useState(defaultOpen);
- const triggerRef = useRef<HTMLElement | null>(null);
- const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
- const contentId = `popover-${useId()}`;
+export function PopoverRoot({ children, defaultOpen = false }: PopoverRootProps) {
+  const [open, setOpen] = useState(defaultOpen);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const contentId = `popover-${useId()}`;
 
- useEffect(() => {
- if (!open && triggerRef.current) {
- restoreFocus(triggerRef.current);
- }
- }, [open]);
+  useEffect(() => {
+    if (!open && triggerRef.current) {
+      restoreFocus(triggerRef.current);
+    }
+  }, [open]);
 
- useEffect(() => {
-   return () => {
-     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-   };
- }, []);
-
- return (
- <PopoverContext.Provider value={{ open, setOpen, triggerRef, contentId, hover, hoverTimeoutRef }}>
- {children}
- </PopoverContext.Provider>
- );
+  return (
+    <PopoverContext.Provider value={{ open, setOpen, triggerRef, contentId }}>
+      {children}
+    </PopoverContext.Provider>
+  );
 }
 PopoverRoot.displayName = 'Popover';
 
@@ -81,7 +70,7 @@ export interface PopoverTriggerProps {
 }
 
 export function PopoverTrigger({ children }: PopoverTriggerProps) {
- const { open, setOpen, triggerRef, contentId, hover, hoverTimeoutRef } = usePopover();
+  const { open, setOpen, triggerRef, contentId } = usePopover();
 
  const child = React.Children.only(children) as React.ReactElement<React.HTMLProps<HTMLElement>>;
  const childRef = child.props.ref ?? (child as unknown as { ref?: React.Ref<HTMLElement> }).ref;
@@ -99,24 +88,9 @@ export function PopoverTrigger({ children }: PopoverTriggerProps) {
  'aria-expanded': open,
  'aria-controls': open ? contentId : undefined,
  onClick: (e: React.MouseEvent<HTMLElement>) => {
-  if (!hover) {
     e.preventDefault();
     setOpen((prev) => !prev);
-  }
-  child.props.onClick?.(e);
-  },
-  onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
-  if (hover) {
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    setOpen(true);
-  }
-  child.props.onMouseEnter?.(e);
-  },
-  onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
-  if (hover) {
-    hoverTimeoutRef.current = setTimeout(() => setOpen(false), 200);
-  }
-  child.props.onMouseLeave?.(e);
+    child.props.onClick?.(e);
   },
  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
  if (e.key === 'Escape' && open) {
@@ -157,7 +131,10 @@ export function PopoverContent({
  showArrow = false,
  ...props
 }: PopoverContentProps) {
- const { open, setOpen, triggerRef, contentId, hover, hoverTimeoutRef } = usePopover();
+  const { open, setOpen, triggerRef, contentId } = usePopover();
+  const [isMounted, setIsMounted] = useState(false);
+
+ useEffect(() => setIsMounted(true), []);
 
  const arrowRef = useRef<HTMLDivElement>(null);
 
@@ -209,7 +186,7 @@ export function PopoverContent({
  return () => document.removeEventListener('keydown', handler);
  }, [open, setOpen]);
 
-
+ if (!isMounted) return null;
 
  return (
  <AnimatePresence>
@@ -225,7 +202,7 @@ export function PopoverContent({
  aria-modal="true"
  data-placement={floatingPlacement}
  className={cn(
- 'z-[9999] min-w-[220px] max-w-[360px] p-4 bg-glass backdrop-blur-md text-default font-sans border border-glassBorder rounded-lg shadow-xl',
+ 'z-[9999] min-w-[220px] max-w-[360px] p-4 bg-surface backdrop-blur-md text-default font-sans border border-default rounded-lg shadow-2xl',
  className
  )}
  {...props}
@@ -235,32 +212,21 @@ export function PopoverContent({
  left: x ?? 0,
  transformOrigin: floatingPlacement.startsWith('top') ? 'bottom' : floatingPlacement.startsWith('bottom') ? 'top' : floatingPlacement.startsWith('left') ? 'right' : 'left'
  }}
- onMouseEnter={(e) => {
-    if (hover && hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-    props.onMouseEnter?.(e);
-  }}
-  onMouseLeave={(e) => {
-    if (hover) {
-      hoverTimeoutRef.current = setTimeout(() => setOpen(false), 200);
-    }
-    props.onMouseLeave?.(e);
-  }}
  >
  {children}
  
  {showArrow && (
  <div 
  ref={arrowRef}
- className="absolute w-3 h-3 bg-surface border-glassBorder z-[-1] rotate-45 rounded-[2px]"
+ className="absolute w-3 h-3 bg-surface border border-default z-[-1] rounded-sm"
  style={{
  left: middlewareData.arrow?.x != null ? `${middlewareData.arrow.x}px` : '',
  top: middlewareData.arrow?.y != null ? `${middlewareData.arrow.y}px` : '',
- ...(floatingPlacement.startsWith('top') ? { bottom: '-6px', borderBottomWidth: '1px', borderRightWidth: '1px' } : {}),
- ...(floatingPlacement.startsWith('bottom') ? { top: '-6px', borderTopWidth: '1px', borderLeftWidth: '1px' } : {}),
- ...(floatingPlacement.startsWith('left') ? { right: '-6px', borderTopWidth: '1px', borderRightWidth: '1px' } : {}),
- ...(floatingPlacement.startsWith('right') ? { left: '-6px', borderBottomWidth: '1px', borderLeftWidth: '1px' } : {}),
+ transform: 'rotate(45deg)',
+ ...(floatingPlacement.startsWith('top') ? { bottom: '-6px' } : {}),
+ ...(floatingPlacement.startsWith('bottom') ? { top: '-6px' } : {}),
+ ...(floatingPlacement.startsWith('left') ? { right: '-6px' } : {}),
+ ...(floatingPlacement.startsWith('right') ? { left: '-6px' } : {}),
  }}
  />
  )}

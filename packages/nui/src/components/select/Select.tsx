@@ -80,6 +80,12 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  const selectedOption = data.find((o) => o.value === selectedValue) ?? null;
 
  const [open, setOpen] = useState(false);
+ const [isMounted, setIsMounted] = useState(false);
+ 
+ useEffect(() => {
+ setIsMounted(true);
+ }, []);
+
  const [activeIndex, setActiveIndex] = useState<number>(() => data.findIndex((o) => !o.disabled));
 
  // Used for WAI-ARIA keyboard typeahead navigation
@@ -98,8 +104,8 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  whileElementsMounted: autoUpdate,
  middleware: [
  offset(4),
- flip({ padding: 16, fallbackPlacements: ['top-start', 'bottom-start'] }),
- shift({ padding: 16 }),
+ flip({ padding: 8, fallbackPlacements: ['top-start', 'bottom-start'] }),
+ shift({ padding: 8, crossAxis: false }),
  size({
  apply({ rects, elements }) {
  Object.assign(elements.floating.style, {
@@ -246,7 +252,10 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  ref={setTriggerRef}
  id={labelId}
  type="button"
- className={cn("flex min-h-[40px] w-full items-center justify-between rounded-md border border-default bg-surface px-3 py-2 text-left text-sm text-default shadow-sm transition-all duration-200 active:scale-[0.98] hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle", error && "border-danger focus-visible:ring-danger")}
+ className={cn(
+  "flex min-h-[40px] w-full items-center justify-between rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] px-3 py-2 text-left text-sm text-slate-900 dark:text-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] hover:border-slate-300 dark:hover:border-slate-700 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900", 
+  error && "border-red-500 focus-visible:ring-red-500/20 focus-visible:border-red-500"
+ )}
  aria-haspopup="listbox"
  aria-expanded={open}
  aria-controls={open ? listboxId : undefined}
@@ -260,25 +269,27 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  {selectedOption ? (
  selectedOption.label
  ) : (
- <span className="text-muted">{placeholder}</span>
+ <span className="text-slate-400 dark:text-slate-500">{placeholder}</span>
  )}
  </span>
- <svg className={cn("ml-2 h-4 w-4 shrink-0 text-muted transition-transform duration-200", open && "rotate-180")} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+ <svg className={cn("ml-2 h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500 transition-transform duration-200", open && "rotate-180")} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  <polyline points="6 9 12 15 18 9"></polyline>
  </svg>
  </button>
 
+ {isMounted && (
+ <Portal>
  <AnimatePresence>
  {open && (
- <Portal>
  <motion.div
+ key="select-dropdown"
  initial={{ opacity: 0, y: -5 }}
  animate={{ opacity: 1, y: 0 }}
  exit={{ opacity: 0, y: -5 }}
  transition={{ duration: 0.15, ease: "easeOut" }}
  id={listboxId}
  ref={refs.setFloating}
- className="z-50 rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-md outline-none overflow-hidden"
+ className="z-50 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] p-1.5 shadow-md outline-none overflow-hidden font-sans box-border"
  role="presentation"
  aria-labelledby={labelId}
  tabIndex={0}
@@ -308,10 +319,9 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  aria-selected={isSelected}
  aria-disabled={opt.disabled || undefined}
  className={cn(
- "flex w-full h-full cursor-pointer select-none items-center justify-between rounded-md px-3 text-sm text-default outline-none transition-colors duration-200",
- isActive && !opt.disabled && "bg-subtle text-default",
- isSelected && "font-bold text-default",
- isSelected && isActive && !opt.disabled && "bg-subtle",
+ "flex w-full h-full cursor-pointer select-none items-center justify-between rounded-sm px-3 text-sm text-slate-900 dark:text-slate-100 outline-none transition-colors duration-200",
+ isActive && !opt.disabled && "bg-slate-100 dark:bg-slate-800",
+ isSelected && "font-medium",
  opt.disabled && "cursor-not-allowed opacity-50 disabled:bg-transparent"
  )}
  tabIndex={-1}
@@ -321,7 +331,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  >
  <span className="truncate">{opt.label}</span>
  {isSelected && (
- <svg className="ml-2 shrink-0 text-default" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+ <svg className="ml-2 shrink-0 text-blue-600 dark:text-blue-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  <polyline points="20 6 9 17 4 12"></polyline>
  </svg>
  )}
@@ -330,9 +340,10 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  }}
  />
  </motion.div>
- </Portal>
  )}
  </AnimatePresence>
+ </Portal>
+ )}
  </div>
  );
 });

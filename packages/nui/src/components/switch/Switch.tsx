@@ -51,14 +51,6 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
  onChange?.(nextState);
  };
 
- const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
- if (e.key === ' ' || e.key === 'Enter') {
- e.preventDefault();
- toggle();
- }
- props.onKeyDown?.(e);
- };
-
  const handleLabelClick = (e: React.MouseEvent) => {
  if (disabled) return;
  e.preventDefault(); 
@@ -89,19 +81,18 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
  aria-disabled={disabled}
  aria-describedby={description ? descriptionId : undefined}
  className={cn(
- "relative shadow-sm inline-flex shrink-0 items-center m-0 p-0.5 rounded-full cursor-pointer transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50",
+ "relative inline-flex shrink-0 items-center p-[2px] rounded-full cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50",
  size === 'sm' ? "w-9 h-5" : "w-11 h-6",
- currentChecked ? "bg-primary border border-primary text-inverse hover:not(:disabled):opacity-90" : "bg-surface border border-default hover:not(:disabled):bg-subtle",
+ currentChecked ? "bg-primary border-transparent text-inverse hover:not(:disabled):opacity-90" : "bg-muted border-transparent hover:not(:disabled):bg-subtle",
  className
  )}
  onClick={toggle}
- onKeyDown={handleKeyDown}
  disabled={disabled}
  {...props}
  >
  <motion.span 
  className={cn(
- "block rounded-full shadow-sm bg-surface", 
+ "block rounded-full shadow-md bg-white pointer-events-none", 
  size === 'sm' ? "w-4 h-4" : "w-5 h-5"
  )} 
  animate={{ x: currentChecked ? (size === 'sm' ? 16 : 20) : 0 }}

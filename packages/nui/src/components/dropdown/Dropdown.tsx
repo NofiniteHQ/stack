@@ -220,7 +220,7 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
  animate={{ opacity: 1, scale: 1 }}
  exit={{ opacity: 0, scale: 0.95 }}
  className={cn(
- "absolute z-50 min-w-[180px] overflow-hidden rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-xl", 
+ "absolute z-50 min-w-[180px] overflow-hidden rounded-lg border border-glassBorder bg-surface backdrop-blur-md p-1 font-sans shadow-2xl outline-none", 
  className
  )}
  id={`${id}-menu`}
@@ -272,7 +272,7 @@ const DropdownItem = forwardRef<HTMLDivElement, DropdownItemProps>(
  return (
  <div
  ref={ref}
- className={cn("flex w-full cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm text-default outline-none transition-colors duration-200 hover:bg-accent hover:text-accent focus-visible:bg-accent focus-visible:text-accent", className)}
+ className={cn("flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-default outline-none transition-colors duration-200 hover:bg-subtle focus-visible:bg-subtle", className)}
  role="menuitem"
  tabIndex={-1} 
  onClick={handleClick}
@@ -314,7 +314,7 @@ const DropdownRoot = forwardRef<HTMLDivElement, DropdownRootProps>(
                     return (
                       <div 
                         key={`separator-${index}`} 
-                        className="h-px bg-muted my-1" 
+                        className="border-b border-default my-1" 
                         role="separator" 
                       />
                     );

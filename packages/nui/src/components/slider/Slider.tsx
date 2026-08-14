@@ -180,35 +180,37 @@ export function Slider({
  return (
  <div 
  className={cn(
- "relative w-full flex items-center touch-none select-none text-default", 
+ "relative w-full flex items-center touch-none select-none text-slate-900 dark:text-slate-100 py-2", 
  disabled && "opacity-50 pointer-events-none",
  className
  )}
  onMouseDown={handlePointerDown}
  onTouchStart={handlePointerDown}
- {...props} // <-- Spread the rest of the props (including style) to the root element
+ {...props} 
  >
- <div className="group relative w-full h-5 px-2 flex items-center cursor-pointer">
- {/* Track */}
- <div ref={trackRef} className="relative w-full h-2 bg-muted rounded-full overflow-hidden">
+ {/* Track Container */}
+ <div ref={trackRef} className="group relative w-full h-5 flex items-center cursor-pointer">
+ {/* Inactive Background Track */}
+ <div className="absolute w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full" />
+ 
+ {/* Active Filled Track */}
  <motion.div 
  className={cn(
- "absolute top-0 left-0 h-full rounded-full",
- disabled ? "bg-subtle" : "bg-primary"
+ "absolute left-0 h-2 rounded-full",
+ disabled ? "bg-slate-400 dark:bg-slate-600" : "bg-blue-600 dark:bg-blue-500"
  )}
  animate={{ width: `${percent}%` }}
  transition={isDragging ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 30 }}
  />
- </div>
 
  {/* Thumb */}
  <motion.div
  ref={thumbRef}
  className={cn(
- "absolute top-1/2 w-4 h-4 rounded-full cursor-grab shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+ "absolute top-1/2 w-[18px] h-[18px] rounded-full cursor-grab shadow-sm border-solid focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-blue-500/20 transition-shadow",
  disabled 
- ? "bg-subtle border border-default" 
- : "bg-surface border-2 border-primary active:bg-primary active:border-primary active:text-inverse hover:scale-125 active:scale-110 active:cursor-grabbing hover:shadow-md transition-shadow"
+ ? "bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600" 
+ : "bg-white dark:bg-white border-2 border-blue-600 dark:border-blue-500 hover:scale-110 active:scale-95 active:cursor-grabbing hover:shadow-md"
  )}
  role="slider"
  aria-label={ariaLabel}

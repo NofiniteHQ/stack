@@ -20,10 +20,10 @@ type Story = StoryObj<typeof Pagination>;
 const PaginationControlled = (args: Partial<PaginationProps>) => {
  const [page, setPage] = useState(args.page || 1);
  return (
- <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+ <div className="flex flex-col items-center gap-8">
  <Pagination {...args} page={page} onChange={setPage} total={args.total || 10} />
- <p style={{ fontFamily: 'sans-serif', color: '#64748b' }}>
- Currently viewing page <strong>{page}</strong> of {args.total || 10}
+ <p className="font-sans text-sm text-muted m-0">
+ Currently viewing page <strong className="text-default">{page}</strong> of {args.total || 10}
  </p>
  </div>
  );
