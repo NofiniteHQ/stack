@@ -92,7 +92,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(({
  {/* Circle Indicator */}
  <div 
  className={cn(
- "shrink-0 flex items-center justify-center w-7 h-7 rounded-full border-2 border-solid text-sm font-bold transition-all duration-200 group-focus-visible:outline-none group-focus-visible:ring-2 group-focus-visible:ring-primary z-10 bg-surface",
+ "shrink-0 flex items-center justify-center w-7 h-7 rounded-full border-2 border-solid text-sm font-bold transition-all duration-200 group-focus-visible:outline-none group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-[var(--nui-fg-default)] z-10 bg-surface",
  isActive ? "border-primary text-primary" :
  isCompleted ? "bg-primary border-primary text-inverse" :
  "border-default text-muted"

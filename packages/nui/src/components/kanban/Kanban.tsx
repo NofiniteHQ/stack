@@ -139,7 +139,7 @@ export function Kanban({ columns, onChange, className, columnClassName, ...props
                                       {...itemProvided.draggableProps}
                                       {...itemProvided.dragHandleProps}
                                       className={cn(
-                                        "mb-3 p-4 bg-surface rounded-xl border border-default shadow-sm text-sm text-default cursor-grab active:cursor-grabbing hover:border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/20 focus-visible:border-primary group",
+                                        "mb-3 p-4 bg-surface rounded-xl border border-default shadow-sm text-sm text-default cursor-grab active:cursor-grabbing hover:border-strong hover:shadow-md focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:border-[var(--nui-fg-default)] group",
                                         itemSnapshot.isDragging && "shadow-2xl border-primary ring-2 ring-primary/30 scale-[1.02] rotate-2 opacity-95 z-50"
                                       )}
                                       style={itemProvided.draggableProps.style}

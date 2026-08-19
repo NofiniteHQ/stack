@@ -78,7 +78,7 @@ export function Badge({
  };
 
  const classes = cn(
- 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+ 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
  pill ? 'rounded-full' : 'rounded-md',
  variantStyles[variant],
  !dot && sizeStyles[size],

@@ -73,7 +73,7 @@ export const Closable: Story = {
       return (
         <button 
           onClick={() => setIsVisible(true)}
-          className="px-4 py-2 bg-surface border border-default rounded-md hover:bg-subtle text-sm text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          className="px-4 py-2 bg-surface border border-default rounded-md hover:bg-subtle text-sm text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]"
         >
           Reset Alert
         </button>

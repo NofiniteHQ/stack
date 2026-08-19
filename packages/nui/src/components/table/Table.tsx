@@ -160,7 +160,7 @@ function SmartTable<T>({
  {col.sortable ? (
  <button
  type="button"
- className="inline-flex items-center gap-2 w-full py-1 bg-transparent border-none font-bold text-default cursor-pointer rounded-sm transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary "
+ className="inline-flex items-center gap-2 w-full py-1 bg-transparent border-none font-bold text-default cursor-pointer rounded-sm transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] "
  onClick={() => toggleSort(col)}
  style={{ justifyContent: col.align === 'right' ? 'flex-end' : col.align === 'center' ? 'center' : 'flex-start' }}
  >

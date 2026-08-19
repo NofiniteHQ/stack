@@ -202,7 +202,7 @@ export const TreeItem = forwardRef<HTMLLIElement, TreeItemProps>(({
  aria-selected={isSelected}
  aria-disabled={disabled}
  tabIndex={tabIndex ?? -1} 
- className={cn("relative outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary group", className)}
+ className={cn("relative outline-none focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] group", className)}
  onClick={(e) => {
  e.stopPropagation();
  if (disabled) return;
@@ -214,7 +214,7 @@ export const TreeItem = forwardRef<HTMLLIElement, TreeItemProps>(({
  >
  <div 
  className={cn(
- "flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-all duration-200 hover:text-primary group-focus-visible:outline-none group-focus-visible:ring-2 group-focus-visible:ring-primary group-focus-visible:bg-subtle",
+ "flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-all duration-200 hover:text-primary group-focus-visible:outline-none group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-[var(--nui-fg-default)] group-focus-visible:bg-subtle",
  isSelected ? "text-primary font-medium" : "text-subtle",
  disabled && "opacity-50 cursor-not-allowed"
  )}

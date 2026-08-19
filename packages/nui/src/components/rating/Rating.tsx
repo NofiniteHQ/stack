@@ -138,7 +138,7 @@ export function Rating({
  return (
  <div
  className={cn(
- "inline-flex items-center gap-1 font-sans select-none touch-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-sm",
+ "inline-flex items-center gap-1 font-sans select-none touch-none focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] rounded-sm",
  size === 'sm' && "text-base",
  size === 'md' && "text-2xl",
  size === 'lg' && "text-3xl",

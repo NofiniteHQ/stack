@@ -22,6 +22,8 @@
       },
       "default": "./dist/index.js"
     },
+    "./dist/index.css": "./dist/index.css",
+    "./styles.css": "./dist/index.css",
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"
   },

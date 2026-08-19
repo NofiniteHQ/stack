@@ -20,7 +20,7 @@ type Story = StoryObj<typeof NUIProvider>;
  */
 const DemoApp = () => {
  const { theme, resolvedTheme, setTheme } = useTheme();
- const btnClass = "inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-md border border-default bg-surface text-default cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary font-sans";
+ const btnClass = "inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-md border border-default bg-surface text-default cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] font-sans";
 
  return (
  <div className="p-10 border border-default rounded-lg bg-surface text-default w-[320px] text-center transition-all duration-300 font-sans shadow-sm">

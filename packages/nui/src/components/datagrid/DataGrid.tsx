@@ -224,7 +224,7 @@ export function DataGrid<T>({
  return (
  <div className={cn("flex flex-col w-full border border-default rounded-lg bg-surface shadow-sm font-sans overflow-hidden", className)}>
  <div 
- className="w-full overflow-x-auto outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+ className="w-full overflow-x-auto outline-none focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] rounded-lg"
  onKeyDown={onKeyDownTable}
  tabIndex={0}
  >
@@ -259,7 +259,7 @@ export function DataGrid<T>({
  <div 
  className={cn(
  "inline-flex items-center gap-2",
- col.sortable && "cursor-pointer hover:text-primary group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm",
+ col.sortable && "cursor-pointer hover:text-primary group focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] rounded-sm",
  col.align === 'right' && "justify-end",
  col.align === 'center' && "justify-center"
  )}
@@ -321,7 +321,7 @@ export function DataGrid<T>({
  "border-b border-default last:border-b-0 transition-colors duration-150 ease-in-out hover:bg-subtle",
  isSelected && "bg-subtle hover:bg-muted",
  isFocused && "outline-none ring-2 ring-inset ring-primary",
- onRowClick && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+ onRowClick && "cursor-pointer focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]"
  )}
  onClick={() => {
  if (selectable) toggleSelectRow(rid);
@@ -372,7 +372,7 @@ export function DataGrid<T>({
  </span>
  <div className="flex gap-2">
  <button
- className="flex items-center justify-center w-8 h-8 bg-transparent border border-default rounded-md text-default cursor-pointer transition-all duration-200 hover:text-primary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-transparent disabled:hover:border-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+ className="flex items-center justify-center w-8 h-8 bg-transparent border border-default rounded-md text-default cursor-pointer transition-all duration-200 hover:text-primary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-transparent disabled:hover:border-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]"
  onClick={() => setPage(currentPage - 1)}
  disabled={currentPage === 1}
  aria-label="Previous Page"
@@ -380,7 +380,7 @@ export function DataGrid<T>({
  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
  </button>
  <button
- className="flex items-center justify-center w-8 h-8 bg-transparent border border-default rounded-md text-default cursor-pointer transition-all duration-200 hover:text-primary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-transparent disabled:hover:border-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+ className="flex items-center justify-center w-8 h-8 bg-transparent border border-default rounded-md text-default cursor-pointer transition-all duration-200 hover:text-primary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-transparent disabled:hover:border-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]"
  onClick={() => setPage(currentPage + 1)}
  disabled={currentPage === totalPages}
  aria-label="Next Page"

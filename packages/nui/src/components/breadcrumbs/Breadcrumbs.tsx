@@ -103,7 +103,7 @@ const BreadcrumbsLink = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttr
 }, ref) => (
  <a
   ref={ref}
-  className={cn("text-muted no-underline transition-colors cursor-pointer hover:text-primary hover:underline hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary", className)}
+  className={cn("text-muted no-underline transition-colors cursor-pointer hover:text-primary hover:underline hover:decoration-primary focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]", className)}
   {...props}
  />
 ));

@@ -186,7 +186,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
  <button
  type="button"
  aria-label="Close notification"
- className="shrink-0 flex items-center justify-center w-6 h-6 rounded-sm text-muted transition-all duration-200 bg-transparent border-none cursor-pointer p-0 hover:bg-muted hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+ className="shrink-0 flex items-center justify-center w-6 h-6 rounded-sm text-muted transition-all duration-200 bg-transparent border-none cursor-pointer p-0 hover:bg-muted hover:text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]"
  onClick={(e) => {
  e.preventDefault();
  clearTimer();

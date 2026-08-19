@@ -253,7 +253,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  id={labelId}
  type="button"
  className={cn(
-  "flex min-h-[40px] w-full items-center justify-between rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] px-3 py-2 text-left text-sm text-slate-900 dark:text-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] hover:border-slate-300 dark:hover:border-slate-700 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900", 
+  "flex min-h-[40px] w-full items-center justify-between rounded-md border border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] px-3 py-2 text-left text-sm text-slate-900 dark:text-slate-100 transition-all duration-200 active:scale-[0.98] hover:border-slate-300 dark:hover:border-slate-700 focus-visible:outline-none focus-visible:border-[var(--nui-fg-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900", 
   error && "border-red-500 focus-visible:ring-red-500/20 focus-visible:border-red-500"
  )}
  aria-haspopup="listbox"
@@ -289,7 +289,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  transition={{ duration: 0.15, ease: "easeOut" }}
  id={listboxId}
  ref={refs.setFloating}
- className="z-50 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] p-1.5 shadow-md outline-none overflow-hidden font-sans box-border"
+ className="z-50 rounded-md border border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] p-1.5 shadow-md outline-none overflow-hidden font-sans box-border"
  role="presentation"
  aria-labelledby={labelId}
  tabIndex={0}
@@ -331,7 +331,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  >
  <span className="truncate">{opt.label}</span>
  {isSelected && (
- <svg className="ml-2 shrink-0 text-blue-600 dark:text-blue-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+ <svg className="ml-2 shrink-0 text-primary dark:text-primary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
  <polyline points="20 6 9 17 4 12"></polyline>
  </svg>
  )}

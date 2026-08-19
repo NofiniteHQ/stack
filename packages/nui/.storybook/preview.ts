@@ -1,7 +1,6 @@
 import React from 'react';
 import 'uno.css';
-import '../src/styles/index.css';
-import '@nofinite/nuicss/virtual.css';
+import '../../nuicss/dist/index.css';
 import { NUIProvider } from '../src/components/nuiprovider/NUIProvider';
 
 const preview = {

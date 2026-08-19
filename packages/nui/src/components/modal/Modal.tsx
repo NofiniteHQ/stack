@@ -182,7 +182,7 @@ export function Modal({
  <button
  type="button"
  aria-label="Close dialog"
- className={cn("absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-transparent border-none rounded text-muted cursor-pointer transition-all duration-200 hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus p-0")}
+ className={cn("absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-transparent border-none rounded text-muted cursor-pointer transition-all duration-200 hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] p-0")}
  onClick={handleClose}
  >
  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

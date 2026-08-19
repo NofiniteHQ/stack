@@ -146,12 +146,12 @@ export function FileUploader({
  aria-label="Upload files"
  aria-disabled={disabled}
         className={cn(
-          "relative flex flex-col items-center justify-center px-6 py-10 gap-4 overflow-hidden border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus active:scale-[0.99] box-border",
+          "relative flex flex-col items-center justify-center px-6 py-10 gap-4 overflow-hidden border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 ease-out focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] active:scale-[0.99] box-border",
           isDragOver 
-            ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400" 
+            ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 text-primary dark:text-primary" 
             : disabled 
             ? "opacity-60 cursor-not-allowed bg-subtle border-default text-muted" 
-            : "border-slate-300 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/20 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+            : "border-slate-300 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/20 hover:border-primary dark:hover:border-primary hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
         )}
         onClick={() => !disabled && inputRef.current?.click()}
         onKeyDown={(e) => {
@@ -177,7 +177,7 @@ export function FileUploader({
             : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
         )}>
           {/* Optical centering: -translate-y-[1px] balances the heavy bottom line of the upload icon */}
-          <svg className={cn("w-5 h-5 transition-colors duration-200 relative -translate-y-[1px]", isDragOver ? "text-blue-600 dark:text-blue-400" : "text-slate-500 dark:text-slate-400")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg className={cn("w-5 h-5 transition-colors duration-200 relative -translate-y-[1px]", isDragOver ? "text-primary dark:text-primary" : "text-slate-500 dark:text-slate-400")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="17 8 12 3 7 8"></polyline>
             <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -189,7 +189,7 @@ export function FileUploader({
           <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             {placeholder || (
               <>
-                <span className="text-blue-600 dark:text-blue-400 hover:underline">Click to upload</span>
+                <span className="text-primary dark:text-primary hover:underline">Click to upload</span>
                 {' '}
                 <span className="font-medium text-slate-500 dark:text-slate-400">or drag and drop</span>
               </>
@@ -230,9 +230,9 @@ export function FileUploader({
               const fileKey = `${file.name}-${file.size}-${file.lastModified}`;
               
               return (
-                <li key={fileKey} className="group flex items-center justify-between p-3 bg-white dark:bg-[#0a0a0b] border border-slate-200 dark:border-slate-800 shadow-sm rounded-xl transition-all hover:border-blue-200 dark:hover:border-blue-900/50 box-border">
+                <li key={fileKey} className="group flex items-center justify-between p-3 bg-white dark:bg-[#0a0a0b] border border-slate-200 dark:border-slate-800 shadow-sm rounded-xl transition-all hover:border-primary dark:hover:border-primary box-border">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shrink-0 border border-blue-100 dark:border-blue-900/30">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-primary dark:text-primary shrink-0 border border-blue-100 dark:border-blue-900/30">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                     <polyline points="13 2 13 9 20 9"></polyline>
@@ -246,7 +246,7 @@ export function FileUploader({
               
               <button
                 type="button"
-                className="flex items-center justify-center p-1.5 ml-4 bg-transparent border-none rounded-full text-slate-400 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus md:opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                className="flex items-center justify-center p-1.5 ml-4 bg-transparent border-none rounded-full text-slate-400 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] md:opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 aria-label={`Remove ${file.name}`}
                 onClick={() => removeFile(file)}
                 disabled={disabled}

@@ -18,6 +18,7 @@ export default defineConfig(() => ({
       entry: path.resolve(__dirname, 'src/plugin/index.ts'),
       name: 'Nuicss',
       fileName: 'index',
+      cssFileName: 'index',
       formats: ['es', 'cjs'] as any,
     },
     rollupOptions: {

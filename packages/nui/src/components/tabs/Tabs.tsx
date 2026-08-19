@@ -201,7 +201,7 @@ const TabsContent = forwardRef<HTMLDivElement, TabsContentProps>(
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  transition={{ duration: 0.2 }}
- className={cn("py-6 text-default outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-sm", className)}
+ className={cn("py-6 text-default outline-none focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:rounded-sm", className)}
  {...props}
  >
  {children}

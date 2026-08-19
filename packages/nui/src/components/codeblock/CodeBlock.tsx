@@ -37,9 +37,9 @@ const tokenColorMap: Record<string, string> = {
   'hljs-string': 'text-green-600 dark:text-green-400',
   'hljs-regexp': 'text-green-600 dark:text-green-400',
   'hljs-symbol': 'text-orange-600 dark:text-orange-400',
-  'hljs-class': 'text-blue-600 dark:text-blue-400 font-semibold',
-  'hljs-title': 'text-blue-600 dark:text-blue-400 font-semibold',
-  'hljs-function': 'text-blue-600 dark:text-blue-400 font-semibold',
+  'hljs-class': 'text-primary dark:text-primary font-semibold',
+  'hljs-title': 'text-primary dark:text-primary font-semibold',
+  'hljs-function': 'text-primary dark:text-primary font-semibold',
   'hljs-params': 'text-default',
   'hljs-comment': 'text-gray-500 italic',
   'hljs-doctag': 'text-gray-500 italic',
@@ -47,7 +47,7 @@ const tokenColorMap: Record<string, string> = {
   'hljs-attr': 'text-cyan-600 dark:text-cyan-400',
   'hljs-attribute': 'text-cyan-600 dark:text-cyan-400',
   'hljs-variable': 'text-red-600 dark:text-red-400',
-  'hljs-name': 'text-blue-600 dark:text-blue-400 font-semibold',
+  'hljs-name': 'text-primary dark:text-primary font-semibold',
   'hljs-tag': 'text-default',
 };
 

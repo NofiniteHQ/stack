@@ -10,6 +10,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
  inputSize?: 'sm' | 'md' | 'lg';
  leftIcon?: React.ReactNode;
  rightIcon?: React.ReactNode;
+ rightIconClassName?: string;
  wrapperClassName?: string;
 }
 
@@ -28,6 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
  inputSize = 'md',
  leftIcon,
  rightIcon,
+ rightIconClassName,
  className,
  wrapperClassName,
  id,
@@ -65,13 +67,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
  required={required}
  disabled={disabled}
  className={cn(
- "w-full bg-white dark:bg-[#0a0a0b] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-md font-sans transition-all duration-200 appearance-none outline-none shadow-sm",
- "placeholder:text-slate-400 dark:placeholder:text-slate-500",
- "hover:border-slate-300 dark:hover:border-slate-700",
- "focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/20",
- "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900",
+ "peer w-full bg-surface text-default border border-solid border-subtle rounded-md font-sans transition-all duration-200 appearance-none outline-none",
+ "placeholder:text-muted",
+ "hover:border-strong",
+ "focus-visible:outline-none focus-visible:border-[var(--nui-fg-subtle)] focus-visible:ring-1 focus-visible:ring-[var(--nui-fg-subtle)]",
+ "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle",
  inputSizeMap[inputSize],
- isInvalid && "border-red-500 focus-visible:ring-red-500/20 focus-visible:border-red-500",
+ isInvalid && "border-danger focus-visible:border-danger focus-visible:shadow-[inset_0_0_0_1px_var(--nui-color-danger)]",
  !!leftIcon && "pl-[40px]",
  !!rightIcon && "pr-[40px]",
  className
@@ -81,17 +83,17 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
  {...props}
  />
 
- {rightIcon && <span className="absolute right-3 flex items-center justify-center text-muted pointer-events-none">{rightIcon}</span>}
+ {rightIcon && <span className={cn("absolute right-3 flex items-center justify-center text-muted pointer-events-none", rightIconClassName)}>{rightIcon}</span>}
  </div>
 
  {description && !error && (
- <div id={descriptionId} className="text-[13px] text-slate-500 dark:text-slate-400 mt-1">
+ <div id={descriptionId} className="text-[13px] text-muted mt-1">
  {description}
  </div>
  )}
 
  {error && (
- <div id={errorId} className="text-[13px] text-red-500 font-medium mt-1" aria-live="polite">
+ <div id={errorId} className="text-[13px] text-danger font-medium mt-1" aria-live="polite">
  {error}
  </div>
  )}

@@ -118,7 +118,7 @@
   --color-primary-subtle: color-mix(in srgb, var(--color-primary) 10%, transparent);
 
   /* Focus */
-  --focus-ring: var(--color-primary);
+  --focus-ring: var(--fg-default);
   --focus-ring-offset: var(--bg-page);
 
   /* ------------------------------------------------------------

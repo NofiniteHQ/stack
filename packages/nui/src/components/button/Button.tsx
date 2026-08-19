@@ -17,18 +17,18 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const buttonVariants = {
   variant: {
-  default: "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50",
-  primary: "bg-blue-600 text-white border-transparent shadow-sm hover:bg-blue-700",
-  outline: "bg-transparent border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50",
-  ghost: "bg-transparent text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800",
-  danger: "bg-red-600 text-white border-transparent shadow-sm hover:bg-red-700",
-  link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline"
+    default: "bg-surface text-default border border-solid border-subtle hover:bg-subtle",
+    primary: "bg-primary text-primary-fg border-solid border-transparent hover:bg-primary/90",
+    outline: "bg-transparent border border-solid border-strong text-default hover:bg-subtle",
+    ghost: "bg-transparent text-default border border-solid border-transparent hover:bg-subtle",
+    danger: "bg-danger text-danger-fg border-solid border-transparent hover:bg-danger/90",
+    link: "text-primary border border-solid border-transparent underline-offset-4 hover:underline"
   },
   size: {
-  sm: "h-8 px-3 text-xs rounded-md",
-  md: "h-9 px-4 text-sm rounded-md",
-  lg: "h-11 px-8 text-sm rounded-md",
-  icon: "h-9 w-9 p-0 rounded-md"
+    sm: "h-8 px-3 text-xs rounded-md",
+    md: "h-9 px-4 text-sm rounded-md",
+    lg: "h-11 px-8 text-sm rounded-md",
+    icon: "h-9 w-9 p-0 rounded-md"
   }
 };
 
@@ -54,7 +54,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
  ref={ref}
  disabled={isDisabled}
   className={cn(
-  "inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-colors duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none",
+  "inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98]",
+  // Ultra-minimalist native outline focus state, absolutely no blue rings or complex shadows
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
+  "disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none",
   buttonVariants.variant[variant],
   buttonVariants.size[size],
   className

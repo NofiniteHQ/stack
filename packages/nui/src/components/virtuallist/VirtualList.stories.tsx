@@ -115,7 +115,7 @@ export const ScrollToIndexApi: Story = {
             </button>
             <button 
               onClick={() => listRef.current?.scrollToIndex(50000)}
-              className="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
             >
               Jump to 50k
             </button>

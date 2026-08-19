@@ -71,7 +71,7 @@ export function Alert({
  {closable && (
  <button
  type="button"
- className="absolute right-4 top-4 flex items-center justify-center rounded-md p-1 bg-transparent border-none text-inherit cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+ className="absolute right-4 top-4 flex items-center justify-center rounded-md p-1 bg-transparent border-none text-inherit cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]"
  aria-label="Close alert"
  onClick={onClose}
  >

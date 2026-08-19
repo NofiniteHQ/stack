@@ -70,7 +70,7 @@ export const CollapsibleTrigger = React.forwardRef<HTMLButtonElement, Collapsibl
       ref={ref}
       type="button"
       className={cn(
-        "group flex justify-between items-center w-full px-0 py-3 bg-transparent border-none cursor-pointer text-left text-default outline-none hover:text-primary transition-colors duration-200 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary font-sans text-base font-medium",
+        "group flex justify-between items-center w-full px-0 py-3 bg-transparent border-none cursor-pointer text-left text-default outline-none hover:text-primary transition-colors duration-200 focus-visible:rounded-sm focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] font-sans text-base font-medium",
         className
       )}
       onClick={(e) => {

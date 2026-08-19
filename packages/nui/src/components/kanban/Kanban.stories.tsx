@@ -19,7 +19,7 @@ const INITIAL_DATA: KanbanColumnProps[] = [
     id: 'todo',
     title: 'To Do',
     items: [
-      { id: 't1', content: <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">DESIGN</span></div><strong>Design System Audit</strong><p className="text-muted mt-1 text-xs">Review all semantic colors</p></div> },
+      { id: 't1', content: <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-primary">DESIGN</span></div><strong>Design System Audit</strong><p className="text-muted mt-1 text-xs">Review all semantic colors</p></div> },
       { id: 't2', content: <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">FEATURE</span></div><strong>Create Kanban</strong><p className="text-muted mt-1 text-xs">Implement drag and drop</p></div> },
       { id: 't3', content: <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">DOCS</span></div><strong>Write documentation</strong></div> },
     ],
@@ -36,7 +36,7 @@ const INITIAL_DATA: KanbanColumnProps[] = [
     title: 'Done',
     items: [
       { id: 't5', content: <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">INFRA</span></div><strong>Setup repository</strong></div> },
-      { id: 't6', content: <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">DESIGN</span></div><strong>Initial styling pass</strong></div> },
+      { id: 't6', content: <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-primary">DESIGN</span></div><strong>Initial styling pass</strong></div> },
     ],
   },
 ];

@@ -77,7 +77,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(
  'inline-flex items-center justify-center rounded-full border font-medium transition-colors duration-200',
  selected ? 'border-primary bg-primary text-inverse' : 'border-default bg-subtle text-default hover:bg-muted',
  sizeStyles[size],
- isInteractive && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+ isInteractive && 'cursor-pointer focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
  className
  )}
  // Assign button role only if it actually does something
@@ -97,7 +97,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(
  {removable && (
  <button
  type="button"
- className="ml-1.5 inline-flex items-center justify-center rounded-full appearance-none border-none bg-transparent p-0.5 text-muted hover:bg-black/10 dark:hover:bg-white/10 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-background transition-all duration-200"
+ className="ml-1.5 inline-flex items-center justify-center rounded-full appearance-none border-none bg-transparent p-0.5 text-muted hover:bg-black/10 dark:hover:bg-white/10 hover:text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:ring-offset-1 focus-visible:ring-offset-background transition-all duration-200"
  aria-label="Remove"
  onClick={(e) => {
  // * Event Propagation: 

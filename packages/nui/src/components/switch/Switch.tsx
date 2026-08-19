@@ -81,7 +81,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
  aria-disabled={disabled}
  aria-describedby={description ? descriptionId : undefined}
  className={cn(
- "relative inline-flex shrink-0 items-center p-[2px] rounded-full cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50",
+ "relative inline-flex shrink-0 items-center p-[2px] rounded-full cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50",
  size === 'sm' ? "w-9 h-5" : "w-11 h-6",
  currentChecked ? "bg-primary border-transparent text-inverse hover:not(:disabled):opacity-90" : "bg-muted border-transparent hover:not(:disabled):bg-subtle",
  className

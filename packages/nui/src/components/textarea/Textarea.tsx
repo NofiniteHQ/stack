@@ -116,7 +116,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
  placeholder={placeholder}
  rows={rows}
  className={cn(
- "w-full box-border px-3 py-2 bg-surface text-default font-inherit text-sm leading-relaxed border border-default shadow-sm rounded-md transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:border-focus placeholder:text-subtle hover:border-strong disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed disabled:resize-none read-only:bg-subtle read-only:cursor-default",
+ "w-full box-border px-3 py-2 bg-surface text-default font-inherit text-sm leading-relaxed border border-solid border-default rounded-md transition-all duration-200 focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:border-focus placeholder:text-subtle hover:border-strong disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed disabled:resize-none read-only:bg-subtle read-only:cursor-default",
  autoGrow ? "resize-none overflow-hidden" : "resize-y min-h-[2.5rem]",
  hasCounter && "pb-7",
  error && "border-danger hover:border-danger focus-visible:ring-danger focus-visible:border-danger",

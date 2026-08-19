@@ -100,7 +100,7 @@ const RadioGroupItem = forwardRef<HTMLInputElement, RadioItemProps>(({
  aria-checked={isChecked ? "true" : "false"}
  onChange={(e) => context.onChange(e.target.value)}
  className={cn(
- "appearance-none w-4 h-4 m-0 rounded-full border border-solid border-strong bg-surface shadow-sm transition-all duration-200 cursor-pointer hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus checked:border-[5px] checked:border-primary checked:bg-surface disabled:cursor-not-allowed disabled:opacity-50",
+ "appearance-none w-4 h-4 m-0 rounded-full border border-solid border-strong bg-surface transition-all duration-200 cursor-pointer hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] checked:border-[5px] checked:border-primary checked:bg-surface disabled:cursor-not-allowed disabled:opacity-50",
  className
  )}
  {...props}

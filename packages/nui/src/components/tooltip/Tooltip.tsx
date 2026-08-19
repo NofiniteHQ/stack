@@ -133,7 +133,7 @@ export function Tooltip({
  'aria-describedby': isOpen ? tooltipId : undefined,
  className: cn(
  child.props.className,
- 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus '
+ 'focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] '
  ),
  onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
  show();

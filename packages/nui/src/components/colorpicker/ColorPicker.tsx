@@ -68,7 +68,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(
               disabled={disabled}
               className={cn(
                 "flex-shrink-0 relative flex items-center justify-center h-8 w-8 rounded-md bg-transparent border border-transparent outline-none cursor-pointer transition-colors duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                "focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
                 disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-subtle",
                 className
               )}
@@ -123,7 +123,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(
             </Button>
           )}
         </Popover.Trigger>
-        <Popover.Content placement="bottom-start" className="p-3 w-[260px] bg-surface border border-default rounded-lg shadow-xl z-50">
+        <Popover.Content placement="bottom-start" className="p-3 w-[260px] bg-surface border border-solid border-default rounded-lg shadow-xl z-50">
           <div className="grid grid-cols-7 gap-2">
             {presets.map((c) => (
               <Popover.Close key={c}>
@@ -142,7 +142,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(
             
             {showCustom && (
               <div 
-                className="relative w-6 h-6 rounded-full border border-default shadow-sm focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-focus hover:scale-110 transition-transform overflow-hidden cursor-pointer flex items-center justify-center" 
+                className="relative w-6 h-6 rounded-full border border-solid border-default shadow-sm focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-focus hover:scale-110 transition-transform overflow-hidden cursor-pointer flex items-center justify-center" 
                 style={{ background: 'conic-gradient(from 180deg at 50% 50%, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}
                 title="Custom Color"
               >

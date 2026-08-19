@@ -23,7 +23,7 @@ const CardRoot = React.forwardRef<HTMLDivElement, CardProps>(
  className={cn(
  'flex flex-col p-5 bg-surface text-default border border-default rounded-lg font-sans shadow-sm transition-all duration-200 ease-in-out',
  hover && 'hover:shadow-md',
- clickable && 'cursor-pointer select-none hover:border-default active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+ clickable && 'cursor-pointer select-none hover:border-default active:scale-[0.98] focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
  className
  )}
  // Assign button role if clickable for screen readers

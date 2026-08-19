@@ -59,7 +59,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
  <Comp
  ref={ref}
  className={cn(
- "inline-flex items-center gap-1 font-sans text-inherit font-medium outline-offset-2 rounded-sm transition-colors cursor-pointer underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:decoration-current",
+ "inline-flex items-center gap-1 font-sans text-inherit font-medium outline-offset-2 rounded-sm transition-colors cursor-pointer underline underline-offset-4 focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:decoration-current",
  variantClasses[variant],
  underlineClasses[underline],
  className

@@ -371,7 +371,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  role="dialog"
  aria-modal="true"
  aria-label="Time range picker"
- className="bg-surface text-default border border-default rounded-lg shadow-lg p-3 focus-visible:outline-none"
+ className="bg-surface text-default border border-solid border-default rounded-lg shadow-lg p-3 focus-visible:outline-none"
  tabIndex={-1}
  onKeyDown={onDialogKeyDown}
  >
@@ -382,7 +382,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  id={`${id || 'timerange'}-tab-from`}
  role="tab"
  aria-selected={activePart === 'from'}
- className={cn("flex-1 border-none bg-transparent py-1.5 rounded-md text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", activePart === 'from' && "bg-surface text-default font-medium shadow-sm ring-1 ring-default")}
+ className={cn("flex-1 border-none bg-transparent py-1.5 rounded-md text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]", activePart === 'from' && "bg-surface text-default font-medium ring-1 ring-default")}
  onClick={() => setActivePart('from')}
  >
  Start Time
@@ -391,7 +391,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  id={`${id || 'timerange'}-tab-to`}
  role="tab"
  aria-selected={activePart === 'to'}
- className={cn("flex-1 border-none bg-transparent py-1.5 rounded-md text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", activePart === 'to' && "bg-surface text-default font-medium shadow-sm ring-1 ring-default")}
+ className={cn("flex-1 border-none bg-transparent py-1.5 rounded-md text-sm text-muted cursor-pointer transition-all duration-200 hover:text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]", activePart === 'to' && "bg-surface text-default font-medium ring-1 ring-default")}
  onClick={() => setActivePart('to')}
  >
  End Time
@@ -399,7 +399,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  </div>
 
  {/* Time Columns */}
- <div className="flex h-[200px] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+ <div className="flex h-[200px] overflow-hidden focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]">
  {/* HOURS */}
  <div 
  role="listbox"
@@ -414,7 +414,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  key={`h-${h}`}
  role="option"
  aria-selected={sel}
- className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
+ className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
  onClick={() => commit(h, parsed.minute, parsed.ampm)}
  >
  {pad(h)}
@@ -437,7 +437,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  key={`m-${m}`}
  role="option"
  aria-selected={sel}
- className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
+ className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
  onClick={() => commit(parsed.hour, m, parsed.ampm)}
  >
  {pad(m)}
@@ -461,7 +461,7 @@ export const TimeRangePicker = forwardRef<HTMLDivElement, TimeRangePickerProps>(
  key={a}
  role="option"
  aria-selected={sel}
- className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
+ className={cn("shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]", sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary", sel && "selected")}
  onClick={() => commit(parsed.hour, parsed.minute, a)}
  >
  {a}

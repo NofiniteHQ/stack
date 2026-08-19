@@ -211,7 +211,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
 
  <input
  className={cn(
- 'h-10 w-full rounded-md border border-default bg-surface px-3 text-sm text-default shadow-sm outline-none transition-all duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:border-focus focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle',
+ 'h-10 w-full rounded-md border border-solid border-default bg-surface px-3 text-sm text-default shadow-sm outline-none transition-all duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle',
  !!leftIcon && 'pl-10',
  !!rightIcon && 'pr-10'
  )}
@@ -249,7 +249,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  transition={{ duration: 0.15 }}
  id={listboxId}
  role="presentation"
- className="absolute left-0 top-full mt-1 z-50 w-full rounded-md border border-default bg-glass backdrop-blur-md p-1 shadow-md overflow-hidden"
+ className="absolute left-0 top-full mt-1 z-50 w-full rounded-md border border-solid border-default bg-glass backdrop-blur-md p-1 shadow-md overflow-hidden"
  >
  {filtered.length === 0 ? (
  <div className="p-3 text-center text-sm italic text-muted">{emptyMessage}</div>

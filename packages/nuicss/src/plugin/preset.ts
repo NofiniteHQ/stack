@@ -1,7 +1,7 @@
-import type { NuicssConfig } from '@nofinite/nuicss';
+import type { NuicssConfig } from './config';
 import { presetUno, presetWind } from 'unocss';
 
-export function nuiPreset(): NuicssConfig {
+export function nuicssPreset(): NuicssConfig {
   return {
     presets: [
       presetUno(),

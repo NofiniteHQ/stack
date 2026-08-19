@@ -87,6 +87,9 @@ export const InteractiveRangeTest: Story = {
  
  await userEvent.click(day10);
  await userEvent.click(day15);
+
+ const applyBtn = body.getByRole('button', { name: 'Apply' });
+ await userEvent.click(applyBtn);
  
  await expect(args.onChange).toHaveBeenCalledWith({
  from: '2026-10-10',

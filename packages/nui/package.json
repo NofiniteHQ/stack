@@ -16,18 +16,11 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
-    "./styles.css": "./dist/index.css",
     "./components/*": {
       "types": "./dist/types/components/*.d.ts",
       "import": "./dist/components/*.js",
       "require": "./dist/components/*.cjs",
       "default": "./dist/components/*.js"
-    },
-    "./preset": {
-      "types": "./dist/types/preset.d.ts",
-      "import": "./dist/preset.js",
-      "require": "./dist/preset.cjs",
-      "default": "./dist/preset.js"
     },
     "./utils/*": {
       "types": "./dist/types/utils/*.d.ts",

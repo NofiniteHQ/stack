@@ -1,9 +1,9 @@
-import { defineConfig } from '../nuicss/src/plugin/config';
-import { nuiPreset } from './src/preset';
+import { defineConfig } from 'unocss';
+import { nuicssPreset } from '../../nuicss/dist/index.mjs';
 
 export default defineConfig({
   presets: [
-    nuiPreset(),
+    nuicssPreset(),
   ],
   content: {
     pipeline: {

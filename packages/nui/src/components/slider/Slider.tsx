@@ -197,7 +197,7 @@ export function Slider({
  <motion.div 
  className={cn(
  "absolute left-0 h-2 rounded-full",
- disabled ? "bg-slate-400 dark:bg-slate-600" : "bg-blue-600 dark:bg-blue-500"
+ disabled ? "bg-slate-400 dark:bg-slate-600" : "bg-primary dark:bg-blue-500"
  )}
  animate={{ width: `${percent}%` }}
  transition={isDragging ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 30 }}
@@ -207,7 +207,7 @@ export function Slider({
  <motion.div
  ref={thumbRef}
  className={cn(
- "absolute top-1/2 w-[18px] h-[18px] rounded-full cursor-grab shadow-sm border-solid focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-blue-500/20 transition-shadow",
+ "absolute top-1/2 w-[18px] h-[18px] rounded-full cursor-grab shadow-sm border-solid focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] transition-shadow",
  disabled 
  ? "bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600" 
  : "bg-white dark:bg-white border-2 border-blue-600 dark:border-blue-500 hover:scale-110 active:scale-95 active:cursor-grabbing hover:shadow-md"
