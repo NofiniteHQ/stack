@@ -67,3 +67,8 @@ export * from './components/image/Image';
 export * from './components/watermark/Watermark';
 export * from './components/calendar/Calendar';
 export * from './components/clipboard/Clipboard';
+
+export * from './components/fileuploader/FileUploader';
+export * from './components/treeview/TreeView';
+export * from './components/video/VideoPlayer';
+export * from './components/timeline/Timeline';
