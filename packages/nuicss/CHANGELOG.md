@@ -1,5 +1,11 @@
 ﻿# @nofinite/nuicss
 
+## 3.0.1
+
+### Patch Changes
+
+- e1dbb0b: fix(nuicss): include index.global.js CDN script in nx build target
+
 ## 3.0.0
 
 ### Major Changes
