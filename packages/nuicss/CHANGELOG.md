@@ -1,4 +1,14 @@
-# @nofinite/nuicss
+﻿# @nofinite/nuicss
+
+## 3.0.0
+
+### Major Changes
+
+- 7d77e5e: **NUI CSS 3.0.0 Architecture Rewrite:**
+  - **UnoCSS Integration:** Transitioned to an UnoCSS-powered underlying engine, drastically improving compilation speed and leveraging standard utilities.
+  - **Zero-Configuration:** Developers can now seamlessly import `@nofinite/nuicss/styles.css` without polluting their stack with virtual module imports.
+  - **Semantic Tokens:** Built-in semantic design system variables (e.g. `bg-surface`, `text-muted`, `border-subtle`).
+  - **Enhanced DX:** Fully compliant with existing open source configurations. Included Vitest suite for preset robustness.
 
 ## 2.0.1
 
