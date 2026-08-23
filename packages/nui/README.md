@@ -1,6 +1,6 @@
 <div align="center">
 
-# NUI
+# NUI v3
 
 **A robust, accessible, and lightweight React component library designed for modern web applications.**
 
@@ -28,25 +28,40 @@
 
 ## Overview
 
-NUI provides a set of accessible, production-ready components to help you build modern web applications faster. It handles the complex detailsâ€”like focus management and accessibilityâ€”so you can focus on building your product.
+NUI provides a set of accessible, production-ready components to help you build modern web applications faster. It handles the complex details—like focus management and accessibility—so you can focus on building your product.
 
 * **Accessible:** WAI-ARIA compliant out of the box.
 * **Type-Safe:** Built with TypeScript for a great developer experience.
-* **Lightweight:** Modular design with zero heavy dependencies.
+* **Lightweight:** Modular design powered by the high-performance `@nofinite/nuicss` utility engine.
 
 ---
 
 ## Installation
 
+NUI relies on our utility CSS engine `@nofinite/nuicss`. You must install both packages.
+
 ```bash
 # pnpm
-pnpm add @nofinite/nui
+pnpm add @nofinite/nui @nofinite/nuicss
 
 # npm
-npm install @nofinite/nui
+npm install @nofinite/nui @nofinite/nuicss
+```
 
-# yarn
-yarn add @nofinite/nui
+Once installed, simply wrap your application in the `<NUIProvider>`:
+
+```tsx
+import { NUIProvider } from '@nofinite/nui';
+import '@nofinite/nuicss/styles.css';
+import '@nofinite/nuicss/virtual.css';
+
+function App({ children }) {
+  return (
+    <NUIProvider>
+      {children}
+    </NUIProvider>
+  );
+}
 ```
 
 ## Documentation

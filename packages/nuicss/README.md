@@ -1,8 +1,8 @@
 <div align="center">
 
-# NUI CSS v2
+# NUI CSS v3
 
-**The next-generation JIT utility CSS engine. Blazing fast, zero-configuration out of the box, and perfectly compliant with modern web standards.**
+**The next-generation utility CSS engine. Powered by UnoCSS for blazing fast, on-demand class generation, and perfectly compliant with modern web standards.**
 
 <p align="center">
   <a href="https://opensource.nofinite.com/docs/nuicss">
@@ -22,13 +22,11 @@
 
 ## Overview
 
-NUI CSS v2 introduces a completely custom **Just-In-Time (JIT) TypeScript Engine**. By reading your source files at development time (via Vite or PostCSS) or directly in the browser via CDN, NUI CSS compiles exactly the CSS you need—and absolutely nothing more—in milliseconds.
+NUI CSS v3 is built entirely on top of **UnoCSS**. It provides a heavily optimized preset that gives you the exact design tokens, components, and animations used by Nofinite's core libraries.
 
-* **Framework Agnostic:** Pure CSS components with no JS dependencies. Build native HTML `<dialog>` modals and CSS `scroll-snap` carousels out-of-the-box.
+* **Framework Agnostic:** Pure CSS components with no JS dependencies. 
 * **Zero-Config by Default:** Drop it into Vite, PostCSS, or a `<script>` tag and instantly start using utilities like `.flex`, `.text-primary`, and `.p-4`.
 * **Arbitrary Values:** Instantly compile custom layouts using brackets: `w-[343px]`, `grid-cols-[200px_1fr]`, or `bg-[#ff0055]`.
-* **Logic-Driven Variants:** Fully supports modern pseudo-classes and state logic (`has-[:checked]`, `peer-focus`, `group-has-[.active]`).
-* **Micro-interactions:** Comprehensive `scale-*` (50 to 150) and `delay-*` stagger classes.
 * **Built-in Keyframes:** Ships with modern animations: `animate-zoom-in`, `animate-zoom-out`, `animate-slide-up`, `animate-slide-down`.
 
 ---
@@ -47,17 +45,9 @@ npm install -D @nofinite/nuicss
 
 ## Setup
 
-### 1. CDN (Easiest)
+### 1. Vite (Recommended for SPAs)
 
-For prototyping or standard HTML/HTMX/Templ stacks, just include the script in your `<head>`. It automatically observes DOM mutations and injects compiled CSS in real-time.
-
-```html
-<script src="https://unpkg.com/@nofinite/nuicss/dist/browser.js"></script>
-```
-
-### 2. Vite (Recommended for SPAs)
-
-NUI CSS integrates perfectly into Vite for HMR and instant class generation.
+NUI CSS integrates perfectly into Vite for HMR and instant class generation via our wrapper over the UnoCSS plugin.
 
 ```ts
 // vite.config.ts
@@ -71,11 +61,12 @@ export default defineConfig({
 });
 ```
 
-Import the virtual module into your application's root entry file (e.g., `main.tsx` or `App.tsx`):
+Import the base CSS variables and the virtual module into your application's root entry file (e.g., `main.tsx` or `App.tsx`):
 
 ```tsx
 // main.tsx
-import '@nofinite/nuicss/virtual.css';
+import '@nofinite/nuicss/styles.css'; // Core variables and reset
+import '@nofinite/nuicss/virtual.css'; // Auto-generated utility classes
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -83,9 +74,23 @@ import App from './App';
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 ```
 
+### 2. CDN (Plug and Play)
+
+For quick prototyping or standard HTML stacks, you can use our bundled browser runtime. It automatically observes DOM mutations and injects compiled CSS in real-time, just like standard UnoCSS/Tailwind CDNs, but packed with NUI CSS tokens.
+
+```html
+<head>
+  <!-- 1. The Nuicss variables and reset -->
+  <link rel="stylesheet" href="https://unpkg.com/@nofinite/nuicss@latest/dist/index.css" />
+
+  <!-- 2. The Nuicss JIT Runtime Engine -->
+  <script src="https://unpkg.com/@nofinite/nuicss@latest/dist/index.global.js"></script>
+</head>
+```
+
 ### 3. PostCSS
 
-If you aren't using Vite, NUI CSS operates as a standard PostCSS plugin.
+If you aren't using Vite, NUI CSS operates as a standard PostCSS plugin via `@unocss/postcss`.
 
 ```js
 // postcss.config.js
@@ -96,54 +101,38 @@ export default {
 };
 ```
 
-Include the `@nuicss` directives in your main CSS file:
-
-```css
-/* index.css */
-@nuicss base;
-@nuicss utilities;
-```
-
 ---
 
 ## Configuration & Extensibility
 
-NUI CSS works instantly out of the box, but you can heavily customize the engine by creating a `nuicss.config.ts` (or `.js`) file in your project root.
+You can heavily customize the engine by creating a `nuicss.config.ts` (or `.js`) file in your project root. It uses standard UnoCSS configuration schemas.
 
 ```ts
-import type { NuicssConfig } from '@nofinite/nuicss';
+// nuicss.config.ts
+import { defineConfig, nuicssPreset } from '@nofinite/nuicss';
 
-export default {
-  // 1. Scan specific files
-  content: ['./src/**/*.{tsx,jsx,html}'],
-  
-  // 2. Override default theme tokens
+export default defineConfig({
+  presets: [
+    nuicssPreset()
+  ],
+  // 1. Override default theme tokens
   theme: {
-    colorsBg: {
-      surface: '#111111'
+    colors: {
+      primary: '#ff0055'
     }
   },
-
-  // 3. Inject Custom RegEx Engine Rules
-  rules: [
-    {
-      pattern: /^super-bold$/,
-      generator: () => 'font-weight: 1000; letter-spacing: -2px;'
+  // 2. Scan specific files (NUI CSS automatically scans src/**/*.{ts,tsx} by default)
+  content: {
+    pipeline: {
+      include: ['./src/**/*.{tsx,jsx,html}']
     }
-  ]
-} satisfies NuicssConfig;
+  }
+});
 ```
 
 ---
 
 ## Developer DX Features
-
-NUI CSS v2 comes with helper utilities designed for modern web apps.
-
-### Native Framework Agnostic Components
-Because NUI CSS generates standard CSS, you can build complex components relying on browser standards rather than framework logic:
-- **Modals:** Use the HTML `<dialog>` tag + `animate-zoom-in`.
-- **Carousels:** Use `overflow-x-auto snap-x snap-mandatory` wrappers.
 
 ### JS/TS Theme Resolver
 When you need to draw on a `<canvas>` or use charting libraries, you often need the exact hex value of a CSS variable.

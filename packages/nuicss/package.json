@@ -23,7 +23,7 @@
       "default": "./dist/index.js"
     },
     "./dist/index.css": "./dist/index.css",
-    "./styles.css": "./dist/index.css",
+    "./styles.css": "./dist/index.css", "./cdn": "./dist/index.global.js",
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"
   },
@@ -60,11 +60,12 @@
     "valibot": "^1.4.2"
   },
   "devDependencies": {
+    "@unocss/runtime": "^66.8.1",
     "esbuild": "^0.19.11",
     "jiti": "^2.7.0",
     "postcss": "^8.5.15"
   },
   "scripts": {
-    "build": "nx run nuicss:build"
+    "build": "nx run nuicss:build && npm run build:cdn", "build:cdn": "node build-cdn.js"
   }
 }
