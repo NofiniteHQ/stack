@@ -1,2 +1,3 @@
 @import "./theme.css";
-@import "./reset.css";
+@import "./reset.css";
+@unocss;

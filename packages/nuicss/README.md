@@ -74,12 +74,11 @@ export default defineConfig({
 });
 ```
 
-Import the core styles and generated utilities into your application's root entry file (e.g., `main.tsx` or `App.tsx`):
+Import the CSS engine into your application's root entry file (e.g., `main.tsx` or `App.tsx`):
 
 ```tsx
 // main.tsx
-import '@nofinite/nuicss/styles.css'; // Core variables and reset
-import '@nofinite/nuicss/virtual.css'; // Auto-generated utility classes
+import '@nofinite/nuicss/styles.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -102,11 +101,11 @@ export default {
 };
 ```
 
-Include the `@unocss` directive in your main CSS file:
+Import the CSS engine in your main CSS file:
 
 ```css
 /* index.css */
-@unocss;
+@import '@nofinite/nuicss/styles.css';
 ```
 
 ---
