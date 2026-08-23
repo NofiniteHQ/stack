@@ -48,11 +48,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
       - name: Run Tests
-        run: pnpm nx run-many -t test
+        run: pnpm nx affected -t test --exclude nui
 
       - name: Build Packages
-        run: pnpm nx run-many -t build
+        run: pnpm nx affected -t build
 
   publish:
     name: Publish Packages
@@ -83,8 +86,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
       - name: Build Packages
-        run: pnpm nx run-many -t build
+        run: pnpm nx affected -t build
 
       - name: Create Release Pull Request or Publish
         uses: changesets/action@v1
