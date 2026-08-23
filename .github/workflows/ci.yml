@@ -52,10 +52,10 @@ jobs:
         uses: nrwl/nx-set-shas@v4
 
       - name: Run Tests
-        run: pnpm nx affected -t test --exclude nui
+        run: pnpm nx affected -t test --exclude nui,nuicss-react-app
 
       - name: Build Packages
-        run: pnpm nx affected -t build
+        run: pnpm nx affected -t build --exclude nui,nuicss-react-app
 
   publish:
     name: Publish Packages
@@ -90,7 +90,7 @@ jobs:
         uses: nrwl/nx-set-shas@v4
 
       - name: Build Packages
-        run: pnpm nx affected -t build
+        run: pnpm nx affected -t build --exclude nui,nuicss-react-app
 
       - name: Create Release Pull Request or Publish
         uses: changesets/action@v1
