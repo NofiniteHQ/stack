@@ -1,16 +1,26 @@
-const { execSync } = require('child_process');
 const fs = require('fs');
+const path = require('path');
+const { nuicssPreset } = require('./dist/index.js');
 
-console.log('Building CDN config...');
-execSync('npx esbuild src/cdn.ts --bundle --minify --format=iife --outfile=dist/cdn-config.js --external:@unocss/* --external:unocss', { stdio: 'inherit' });
+console.log('Generating browser config...');
+const config = nuicssPreset();
+
+const cdnConfigScript = `
+window.__unocss = window.__unocss || {};
+window.__unocss.theme = Object.assign(window.__unocss.theme || {}, ${JSON.stringify(config.theme)});
+window.__unocss.shortcuts = Object.assign(window.__unocss.shortcuts || {}, ${JSON.stringify(config.shortcuts)});
+`;
 
 console.log('Concatenating with UnoCSS runtime...');
-const config = fs.readFileSync('dist/cdn-config.js', 'utf8');
-// Use the full runtime to ensure presetWind/presetUno are available if the user explicitly needs them,
-// but actually uno.global.js is the standard drop-in for Tailwind/Uno equivalence.
-const runtime = fs.readFileSync('node_modules/@unocss/runtime/uno.global.js', 'utf8');
+let runtimePath;
+try {
+  runtimePath = path.join(path.dirname(require.resolve('@unocss/runtime')), '../uno.global.js');
+} catch (e) {
+  console.error("Could not find @unocss/runtime!");
+  process.exit(1);
+}
+const runtime = fs.readFileSync(runtimePath, 'utf8');
 
-fs.writeFileSync('dist/index.global.js', config + '\n' + runtime, 'utf8');
-fs.unlinkSync('dist/cdn-config.js');
+fs.writeFileSync('dist/index.global.js', cdnConfigScript + '\n' + runtime, 'utf8');
 
 console.log('Built dist/index.global.js successfully!');
