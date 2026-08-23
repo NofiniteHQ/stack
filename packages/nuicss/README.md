@@ -2,7 +2,7 @@
 
 # NUI CSS v3
 
-**The next-generation utility CSS engine. Powered by UnoCSS for blazing fast, on-demand class generation, and perfectly compliant with modern web standards.**
+**The next-generation utility CSS engine. Blazing fast, on-demand class generation, perfectly compliant with modern web standards, and zero-configuration out of the box.**
 
 <p align="center">
   <a href="https://opensource.nofinite.com/docs/nuicss">
@@ -22,7 +22,7 @@
 
 ## Overview
 
-NUI CSS v3 is built entirely on top of **UnoCSS**. It provides a heavily optimized preset that gives you the exact design tokens, components, and animations used by Nofinite's core libraries.
+NUI CSS v3 introduces a highly optimized **Just-In-Time (JIT) Engine**. By reading your source files, it compiles exactly the CSS you need—and absolutely nothing more—in milliseconds.
 
 * **Framework Agnostic:** Pure CSS components with no JS dependencies. 
 * **Zero-Config by Default:** Drop it into Vite, PostCSS, or a `<script>` tag and instantly start using utilities like `.flex`, `.text-primary`, and `.p-4`.
@@ -47,7 +47,7 @@ npm install -D @nofinite/nuicss
 
 ### 1. Vite (Recommended for SPAs)
 
-NUI CSS integrates perfectly into Vite for HMR and instant class generation via our wrapper over the UnoCSS plugin.
+NUI CSS integrates perfectly into Vite for HMR and instant class generation.
 
 ```ts
 // vite.config.ts
@@ -76,7 +76,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 
 ### 2. CDN (Plug and Play)
 
-For quick prototyping or standard HTML stacks, you can use our bundled browser runtime. It automatically observes DOM mutations and injects compiled CSS in real-time, just like standard UnoCSS/Tailwind CDNs, but packed with NUI CSS tokens.
+For quick prototyping or standard HTML stacks, you can use our bundled browser runtime. It automatically observes DOM mutations and injects compiled CSS in real-time.
 
 ```html
 <head>
@@ -90,14 +90,16 @@ For quick prototyping or standard HTML stacks, you can use our bundled browser r
 
 ### 3. PostCSS
 
-If you aren't using Vite, NUI CSS operates as a standard PostCSS plugin via `@unocss/postcss`.
+If you aren't using Vite, NUI CSS operates perfectly as a standard PostCSS plugin.
 
 ```js
 // postcss.config.js
+import nuicssPostcss from '@nofinite/nuicss/postcss';
+
 export default {
-  plugins: {
-    '@nofinite/nuicss/postcss': {}
-  }
+  plugins: [
+    nuicssPostcss()
+  ]
 };
 ```
 
@@ -105,7 +107,7 @@ export default {
 
 ## Configuration & Extensibility
 
-You can heavily customize the engine by creating a `nuicss.config.ts` (or `.js`) file in your project root. It uses standard UnoCSS configuration schemas.
+You can heavily customize the engine by creating a `nuicss.config.ts` (or `.js`) file in your project root.
 
 ```ts
 // nuicss.config.ts
