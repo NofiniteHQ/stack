@@ -169,11 +169,10 @@ export function Head() {
 ```
 
 ---
+## Acknowledgements
+
+NUI CSS's underlying compilation engine is powered by the incredible [UnoCSS](https://github.com/unocss/unocss) ecosystem.
 
 ## License
 
 This project is licensed under the [Apache License, Version 2.0](./LICENSE).
-
-## Acknowledgements
-
-NUI CSS's underlying compilation engine is powered by the incredible [UnoCSS](https://github.com/unocss/unocss) ecosystem.
