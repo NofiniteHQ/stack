@@ -5,11 +5,30 @@
   "projectType": "library",
   "targets": {
     "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/nuicss/dist"],
+      "options": {
+        "commands": [
+          "pnpm nx run nuicss:build-vite",
+          "cd packages/nuicss && node build-cdn.js"
+        ],
+        "parallel": false
+      }
+    },
+    "build-vite": {
       "executor": "@nx/vite:build",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/nuicss/dist",
         "configFile": "packages/nuicss/vite.config.ts"
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/nuicss"
       }
     }
   }
