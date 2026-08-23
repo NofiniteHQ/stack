@@ -1,5 +1,11 @@
 ﻿# @nofinite/nuicss
 
+## 3.0.3
+
+### Patch Changes
+
+- fdb9185: fix(nuicss): remove CommonJS require statements from CDN build to support direct browser execution
+
 ## 3.0.2
 
 ### Patch Changes
