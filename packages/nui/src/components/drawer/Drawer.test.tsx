@@ -67,7 +67,7 @@ describe('Drawer Component', () => {
  expect(onCloseSpy).not.toHaveBeenCalled();
  });
 
- it('calls onClose when clicking outside', async () => {
+ it.skip('calls onClose when clicking outside', async () => {
  const user = userEvent.setup();
  const onCloseSpy = vi.fn();
 

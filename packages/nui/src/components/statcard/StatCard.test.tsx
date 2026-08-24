@@ -44,8 +44,8 @@ describe('StatCard Component', () => {
   });
 
   it('renders tooltip trigger when info is provided', async () => {
-    render(<StatCard label="Info Stat" value="0" info="Helpful tooltip context" />);
-    const trigger = screen.getByRole('article').querySelector('.cursor-help');
+    const { container } = render(<StatCard label="Info Stat" value="0" info="Helpful tooltip context" />);
+    const trigger = container.querySelector('.cursor-help');
     expect(trigger).toBeInTheDocument();
     
     // We can simulate hover if we want, but just verifying the trigger is present is good enough for StatCard tests,

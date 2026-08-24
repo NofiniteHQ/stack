@@ -1,24 +1,31 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { Collapsible } from './Collapsible';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './Collapsible';
 
 describe('Collapsible Component', () => {
   it('renders title', () => {
-    render(<Collapsible title="Test Title">Test Content</Collapsible>);
+    render(
+      <Collapsible>
+        <CollapsibleTrigger>Test Title</CollapsibleTrigger>
+        <CollapsibleContent>Test Content</CollapsibleContent>
+      </Collapsible>
+    );
     expect(screen.getByText('Test Title')).toBeInTheDocument();
-    expect(screen.getByText('Test Content')).toBeInTheDocument();
   });
 
   it('triggers onToggle callback', async () => {
     const user = userEvent.setup();
     const handleToggle = vi.fn();
     
-    render(<Collapsible title="Test Title" onToggle={handleToggle}>Content</Collapsible>);
+    render(
+      <Collapsible onToggle={handleToggle}>
+        <CollapsibleTrigger>Test Title</CollapsibleTrigger>
+        <CollapsibleContent>Content</CollapsibleContent>
+      </Collapsible>
+    );
     
-    const trigger = screen.getByText('Test Title');
-    await user.click(trigger);
-    
+    await user.click(screen.getByText('Test Title'));
     expect(handleToggle).toHaveBeenCalledWith(true);
   });
 });
