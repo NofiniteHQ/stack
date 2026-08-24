@@ -1,4 +1,4 @@
-﻿name: CI - nui
+name: CI - nui
 
 on:
   push:
