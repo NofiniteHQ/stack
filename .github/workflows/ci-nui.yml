@@ -75,10 +75,10 @@ jobs:
       - name: Create Release Pull Request or Publish
         uses: changesets/action@v2
         with:
-          publish: pnpm changeset publish
-          version: pnpm changeset version
-          commit: "chore(release): version nui"
-          title: "chore(release): version nui"
+          publish-script: pnpm changeset publish
+          version-script: pnpm changeset version
+          commit-message: "chore(release): version nui"
+          pr-title: "chore(release): version nui"
         env:
           GITHUB_TOKEN: ${ secrets.GITHUB_TOKEN }
           NPM_TOKEN: ${ secrets.NPM_TOKEN }
