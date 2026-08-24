@@ -1,0 +1,41 @@
+name: CI - utils
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'packages/utils/**'
+  pull_request:
+    paths:
+      - 'packages/utils/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test utils
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Tests
+        run: pnpm nx run utils:test
+
+      - name: Build
+        run: pnpm nx run utils:build
