@@ -51,11 +51,8 @@ npm install -D @nofinite/nuicss
 For prototyping or standard HTML/HTMX/Templ stacks, just include the script in your `<head>`. It automatically observes DOM mutations and injects compiled CSS in real-time.
 
 ```html
-<!-- 1. The Nuicss variables and reset -->
-<link rel="stylesheet" href="https://unpkg.com/@nofinite/nuicss@latest/dist/index.css" />
-
-<!-- 2. The Nuicss JIT Runtime Engine -->
-<script src="https://unpkg.com/@nofinite/nuicss@latest/dist/index.global.js"></script>
+<!-- NUI CSS JIT Runtime Engine (Auto-injects styles) -->
+<script src="https://cdn.jsdelivr.net/npm/@nofinite/nuicss"></script>
 ```
 
 ### 2. Vite (Recommended for SPAs)
