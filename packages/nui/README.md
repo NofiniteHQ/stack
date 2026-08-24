@@ -40,7 +40,7 @@ NUI provides a set of accessible, production-ready components to help you build 
 
 NUI follows a **decoupled styling architecture**:
 1. **`@nofinite/nui`**: Contains purely the React logic, accessibility primitives, and component structures.
-2. **`@nofinite/nuicss`**: The dedicated CSS engine (powered by UnoCSS/Tailwind) that handles all NUI component styling, tokens, and themes.
+2. **`@nofinite/nuicss`**: The dedicated CSS engine that handles all NUI component styling, tokens, and themes.
 
 This separation allows you to integrate NUI into your existing CSS pipeline effortlessly, or use the pre-compiled NUI CSS via CDN.
 
@@ -65,7 +65,7 @@ yarn add @nofinite/nui @nofinite/nuicss
 Import the pre-compiled `nuicss` engine at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
 
 ```tsx
-import '@nofinite/nuicss/dist/index.css';
+import '@nofinite/nuicss';
 ```
 
 *(Alternatively, you can load it via our CDN in your HTML `<head>`: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss@3/dist/index.css">`)*
