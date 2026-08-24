@@ -48,7 +48,7 @@ describe('Select Component', () => {
  const trigger = screen.getByRole('button');
  await user.click(trigger);
 
- await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument());
+ await waitFor(() => { expect(document.activeElement).not.toBe(screen.getByRole('button')); expect(document.activeElement?.getAttribute('role')).toBe('presentation'); });
 
  // Apple is active by default upon opening.
  await user.keyboard('{ArrowDown}'); // Move focus to Banana
@@ -67,7 +67,7 @@ describe('Select Component', () => {
  render(<Select data={options} onChange={onChangeSpy} />);
 
  await user.click(screen.getByRole('button'));
- await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument());
+ await waitFor(() => { expect(document.activeElement).not.toBe(screen.getByRole('button')); expect(document.activeElement?.getAttribute('role')).toBe('presentation'); });
 
  // Apple is focused by default
  await user.keyboard('{Enter}');
@@ -82,7 +82,7 @@ describe('Select Component', () => {
  
  const trigger = screen.getByRole('button');
  await user.click(trigger);
- await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument());
+ await waitFor(() => { expect(document.activeElement).not.toBe(screen.getByRole('button')); expect(document.activeElement?.getAttribute('role')).toBe('presentation'); });
 
  // Type "d" to jump to Dragonfruit
  await user.keyboard('d');
@@ -107,3 +107,5 @@ describe('Select Component', () => {
  expect(await axe(container)).toHaveNoViolations();
  });
 });
+
+

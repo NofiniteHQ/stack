@@ -10,7 +10,7 @@ import {
  useFormContext,
 } from 'react-hook-form';
 import { cn } from '../../utils/cn/cn';
-import { Slot } from '../../utils/slot/Slot';
+import { Slot } from '../../utils/slot/slot';
 
 /* ============================================================
  * Form Contexts
@@ -174,3 +174,5 @@ export {
  FormMessage,
  FormField,
 };
+
+
