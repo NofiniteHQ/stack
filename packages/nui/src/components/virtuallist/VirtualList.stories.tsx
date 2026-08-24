@@ -96,8 +96,7 @@ export const AutoSizingContainer: Story = {
  */
 export const ScrollToIndexApi: Story = {
   render: (args) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const listRef = React.useRef<VirtualListHandle>(null);
+        const listRef = React.useRef<VirtualListHandle>(null);
 
     return (
       <div className="flex flex-col h-[700px] w-full max-w-2xl border border-default rounded-xl overflow-hidden bg-slate-50 dark:bg-[#0a0a0b] p-6">
