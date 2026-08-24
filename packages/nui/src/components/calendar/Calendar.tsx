@@ -341,7 +341,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
           <div
             className="text-sm font-medium cursor-pointer hover:text-primary transition-colors select-none"
             onClick={() => setShowYMM((s) => !s)}
-            aria-expanded={showYMM}
+            
           >
             {headerMonthLabel} {headerYearLabel}
           </div>

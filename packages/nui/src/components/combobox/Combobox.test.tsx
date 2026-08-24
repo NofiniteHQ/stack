@@ -14,7 +14,7 @@ describe('Combobox Component', () => {
  describe('Filtering & Input', () => {
  it('filters options based on input value', async () => {
  const user = userEvent.setup();
- render(<Combobox options={OPTIONS} />);
+ render(<Combobox data={OPTIONS} />);
  const input = screen.getByRole('combobox');
 
  await user.type(input, 'ba');
@@ -30,7 +30,7 @@ describe('Combobox Component', () => {
  describe('Keyboard Navigation', () => {
  it('navigates through options using ArrowDown/ArrowUp', async () => {
  const user = userEvent.setup();
- render(<Combobox options={OPTIONS} />);
+ render(<Combobox data={OPTIONS} />);
  const input = screen.getByRole('combobox');
 
  await user.click(input); // Open list
@@ -46,7 +46,7 @@ describe('Combobox Component', () => {
  it('selects an option on Enter key', async () => {
  const user = userEvent.setup();
  const onChangeSpy = vi.fn();
- render(<Combobox options={OPTIONS} onChange={onChangeSpy} />);
+ render(<Combobox data={OPTIONS} onChange={onChangeSpy} />);
  const input = screen.getByRole('combobox');
 
  await user.type(input, 'app');
@@ -59,7 +59,7 @@ describe('Combobox Component', () => {
 
  it('reverts label on Escape key if no selection was made', async () => {
  const user = userEvent.setup();
- render(<Combobox options={OPTIONS} defaultValue="apple" />);
+ render(<Combobox data={OPTIONS} defaultValue="apple" />);
  const input = screen.getByRole('combobox') as HTMLInputElement;
 
  // Clear input and type something invalid
@@ -71,7 +71,7 @@ describe('Combobox Component', () => {
  });
 
  it('has no accessibility violations', async () => {
- const { container } = render(<Combobox options={OPTIONS} />);
+ const { container } = render(<Combobox data={OPTIONS} />);
  expect(await axe(container)).toHaveNoViolations();
  });
  });

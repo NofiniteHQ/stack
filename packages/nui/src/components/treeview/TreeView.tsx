@@ -128,7 +128,7 @@ export const TreeViewRoot = forwardRef<HTMLDivElement, TreeViewProps>(({
  [treeIdPrefix, toggleExpand]
  );
 
- const renderNodes = (nodes: TreeNode[], level: number = 1): React.ReactNode => {
+ const renderNodes = (nodes: TreeNode[], level = 1): React.ReactNode => {
  return nodes.map((node, index) => {
   const isFirst = level === 1 && index === 0;
   return (
