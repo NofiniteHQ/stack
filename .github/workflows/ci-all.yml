@@ -1,15 +1,7 @@
 name: CI/CD
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-  pull_request:
-    branches:
-      - main
-      - dev
-
+  workflow_dispatch:
 jobs:
   build-and-test:
     name: Build & Test
@@ -60,7 +52,7 @@ jobs:
   publish:
     name: Publish Packages
     needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
