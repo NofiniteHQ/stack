@@ -73,7 +73,7 @@ jobs:
         run: pnpm nx run locale:build
 
       - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           publish: pnpm changeset publish
           version: pnpm changeset version
