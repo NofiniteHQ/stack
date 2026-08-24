@@ -1,5 +1,17 @@
 # @nofinite/nui
 
+## 3.0.2
+
+### Patch Changes
+
+- f7a2dfc: fix(build): correctly resolve Vite output directory for rollup
+
+## 3.0.1
+
+### Patch Changes
+
+- 037d327: fix: explicitly externalize dependencies to prevent build crash and ensure dist is generated
+
 ## 2.0.3
 
 ### Patch Changes
@@ -16,7 +28,7 @@
 
 ### Major Changes
 
-- Introduced a new design token system, added new components, enhanced existing ones, and shipped the global nui.* API for dialogs and toasts.
+- Introduced a new design token system, added new components, enhanced existing ones, and shipped the global nui.\* API for dialogs and toasts.
 
 ## 1.1.2
 

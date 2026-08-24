@@ -1,5 +1,0 @@
-﻿---
-"@nofinite/nui": patch
----
-
-fix: explicitly externalize dependencies to prevent build crash and ensure dist is generated
