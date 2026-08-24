@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "@nofinite/nui",
   "version": "3.0.0",
   "private": false,
@@ -96,3 +96,4 @@
     "@hookform/resolvers": "^5.7.1"
   }
 }
+
