@@ -41,7 +41,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Set Nx SHAs
-        uses: nrwl/nx-set-shas@v4
+        uses: nrwl/nx-set-shas@v5
 
       - name: Run Tests
         run: pnpm nx affected -t test --exclude nui,nuicss-react-app
@@ -79,7 +79,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Set Nx SHAs
-        uses: nrwl/nx-set-shas@v4
+        uses: nrwl/nx-set-shas@v5
 
       - name: Build Packages
         run: pnpm nx affected -t build --exclude nui,nuicss-react-app
