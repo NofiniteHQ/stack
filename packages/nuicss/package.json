@@ -69,5 +69,7 @@
   "scripts": {
     "build": "nx run nuicss:build && npm run build:cdn",
     "build:cdn": "node build-cdn.js"
-  }
+  },
+  "jsdelivr": "./dist/index.global.js",
+  "unpkg": "./dist/index.global.js"
 }
