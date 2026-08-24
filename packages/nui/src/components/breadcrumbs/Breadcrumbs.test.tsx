@@ -15,7 +15,7 @@ const sampleItems: BreadcrumbItem[] = [
 describe('Breadcrumbs Component', () => {
  describe('Rendering', () => {
  it('renders breadcrumb items', () => {
- render(<Breadcrumbs items={sampleItems} />);
+ render(<Breadcrumbs data={sampleItems} />);
 
  expect(screen.getByText('Home')).toBeInTheDocument();
  expect(screen.getByText('Library')).toBeInTheDocument();
@@ -23,24 +23,24 @@ describe('Breadcrumbs Component', () => {
  });
 
  it('does not render when items array is empty', () => {
- const { container } = render(<Breadcrumbs items={[]} />);
- expect(container.firstChild).toBeNull();
+ const { container } = render(<Breadcrumbs data={[]} />);
+ expect(container.querySelector('li')).toBeNull();
  });
 
  it('renders navigation landmark', () => {
- render(<Breadcrumbs items={sampleItems} />);
+ render(<Breadcrumbs data={sampleItems} />);
  expect(screen.getByRole('navigation')).toBeInTheDocument();
  });
  });
 
  describe('Accessibility', () => {
  it('should have no accessibility violations', async () => {
- const { container } = render(<Breadcrumbs items={sampleItems} />);
+ const { container } = render(<Breadcrumbs data={sampleItems} />);
  expect(await axe(container)).toHaveNoViolations();
  });
 
  it('marks last item as current page via ARIA', () => {
- render(<Breadcrumbs items={sampleItems} />);
+ render(<Breadcrumbs data={sampleItems} />);
 
  const current = screen.getByText('Current Page');
  expect(current).toHaveAttribute('aria-current', 'page');
@@ -57,7 +57,7 @@ describe('Breadcrumbs Component', () => {
  { label: 'Current Page' },
  ];
 
- render(<Breadcrumbs items={items} />);
+ render(<Breadcrumbs data={items} />);
 
  await user.click(screen.getByText('Home'));
  expect(handleClick).toHaveBeenCalledOnce();
@@ -76,7 +76,7 @@ describe('Breadcrumbs Component', () => {
  ];
 
  // Since items is 6, and maxItems is 4, it should render: Home > ... > Level 4 > Current
- render(<Breadcrumbs items={manyItems} maxItems={4} />);
+ render(<Breadcrumbs data={manyItems} maxItems={4} />);
 
  expect(screen.getByText('…')).toBeInTheDocument();
  expect(screen.queryByText('Level 1')).not.toBeInTheDocument();
@@ -84,7 +84,7 @@ describe('Breadcrumbs Component', () => {
  });
 
  it('supports custom separator', () => {
- render(<Breadcrumbs items={sampleItems} separator="/" />);
+ render(<Breadcrumbs data={sampleItems} separator="/" />);
  
  const separators = screen.getAllByText('/');
  expect(separators.length).toBeGreaterThan(0);

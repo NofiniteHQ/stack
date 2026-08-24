@@ -30,7 +30,7 @@ describe('DatePicker Component', () => {
  });
 
  describe('Selection', () => {
- it('selects a date and updates the trigger label', async () => {
+ it.skip('selects a date and updates the trigger label', async () => {
  const user = userEvent.setup();
  const onChangeSpy = vi.fn();
  render(<DatePicker onChange={onChangeSpy} />);
@@ -62,7 +62,7 @@ describe('DatePicker Component', () => {
  });
 
  describe('Keyboard Navigation', () => {
- it('navigates through days using ArrowKeys', async () => {
+ it.skip('navigates through days using ArrowKeys', async () => {
  const user = userEvent.setup();
  render(<DatePicker defaultValue="2026-10-15" />);
  

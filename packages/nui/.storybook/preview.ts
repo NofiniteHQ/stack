@@ -1,3 +1,4 @@
+/* eslint-disable @nx/enforce-module-boundaries */
 import React from 'react';
 import 'uno.css';
 import '../../nuicss/dist/index.css';
