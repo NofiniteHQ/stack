@@ -66,18 +66,9 @@
   "dependencies": {
     "@floating-ui/react-dom": "^2.1.9",
     "@vidstack/react": "^1.15.6",
-    "@visx/axis": "^4.0.0",
     "@visx/curve": "^4.0.0",
-    "@visx/event": "^4.0.0",
-    "@visx/gradient": "^4.0.0",
-    "@visx/grid": "^4.0.0",
-    "@visx/group": "^4.0.0",
-    "@visx/responsive": "^4.0.0",
     "@visx/scale": "^4.0.0",
     "@visx/shape": "^4.0.0",
-    "@visx/tooltip": "^4.0.0",
-    "@visx/vendor": "^4.0.0",
-    "@visx/visx": "^4.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
     "lowlight": "^3.3.0",
@@ -87,13 +78,12 @@
     "vidstack": "^1.15.6"
   },
   "devDependencies": {
+    "@hookform/resolvers": "^5.7.1",
     "@nofinite/nuicss": "workspace:*",
     "@storybook/test-runner": "^0.24.4",
     "jest-image-snapshot": "^6.5.2",
     "playwright": "^1.62.0",
-    "vitest-axe": "^0.1.0",
     "valibot": "^1.4.2",
-    "@hookform/resolvers": "^5.7.1"
+    "vitest-axe": "^0.1.0"
   }
 }
-
