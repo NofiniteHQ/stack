@@ -6,7 +6,7 @@ import { Kbd } from './Kbd';
 describe('Kbd', () => {
   it('renders correctly', () => {
     render(<Kbd>Cmd</Kbd>);
-    const kbd = screen.getByText('Cmd');
+    const kbd = screen.getByText('Ctrl');
     expect(kbd).toBeInTheDocument();
     expect(kbd.tagName).toBe('KBD');
   });

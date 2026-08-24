@@ -112,7 +112,7 @@ const AccordionRoot = React.forwardRef<HTMLDivElement, AccordionProps>(({
 });
 AccordionRoot.displayName = 'Accordion';
 
-export interface AccordionTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+export type AccordionTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement>
 
 const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTriggerProps>(({
  className,
@@ -156,7 +156,7 @@ const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTriggerPro
 });
 AccordionTrigger.displayName = 'Accordion.Trigger';
 
-export interface AccordionContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+export type AccordionContentProps = React.HTMLAttributes<HTMLDivElement>
 
 const AccordionContent = React.forwardRef<HTMLDivElement, AccordionContentProps>(({
  className,
