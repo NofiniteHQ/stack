@@ -1,5 +1,11 @@
 # @nofinite/nui
 
+## 3.0.2
+
+### Patch Changes
+
+- f7a2dfc: fix(build): correctly resolve Vite output directory for rollup
+
 ## 3.0.1
 
 ### Patch Changes
