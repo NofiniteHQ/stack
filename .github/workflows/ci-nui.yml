@@ -78,7 +78,7 @@ jobs:
           publish-script: pnpm changeset publish
           version-script: pnpm changeset version
           commit-message: "chore(release): version nui"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-title: "chore(release): version nui"
         env:
-          GITHUB_TOKEN: ${ secrets.GITHUB_TOKEN }
-          NPM_TOKEN: ${ secrets.NPM_TOKEN }
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
