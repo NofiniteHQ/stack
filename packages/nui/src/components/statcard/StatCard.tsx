@@ -154,6 +154,7 @@ export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
         {!isLoading && (trend || trendValue || trendLabel || sparklineData) && (
           <div 
             className="mt-4 flex items-center space-x-2.5 z-10 w-full" 
+            role="group"
             aria-label={getTrendAriaLabel()}
           >
             {(trendValue || trend) && (

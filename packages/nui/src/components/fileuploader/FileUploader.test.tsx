@@ -18,7 +18,7 @@ describe('FileUploader Component', () => {
 
  it('renders placeholder', () => {
  render(<FileUploader />);
- expect(screen.getByText(/drag & drop files/i)).toBeInTheDocument();
+ expect(screen.getByText(/drag and drop/i)).toBeInTheDocument();
  });
 
  it('uploads file via hidden input interaction', async () => {

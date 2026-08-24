@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils';
 
-export interface KbdProps extends React.HTMLAttributes<HTMLElement> {}
+export type KbdProps = React.HTMLAttributes<HTMLElement>
 
 /**
  * Kbd Component

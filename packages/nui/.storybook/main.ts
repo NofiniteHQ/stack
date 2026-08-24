@@ -1,3 +1,4 @@
+/* eslint-disable @nx/enforce-module-boundaries */
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 

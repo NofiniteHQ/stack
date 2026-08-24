@@ -13,12 +13,12 @@ const steps = [
 
 describe('Stepper Component', () => {
  it('should have no accessibility violations', async () => {
- const { container } = render(<Stepper steps={steps} active={0} />);
+ const { container } = render(<Stepper data={steps} active={0} />);
  expect(await axe(container)).toHaveNoViolations();
  });
 
  it('renders a navigation region with an ordered list', () => {
- render(<Stepper steps={steps} active={0} />);
+ render(<Stepper data={steps} active={0} />);
  
  expect(screen.getByRole('navigation', { name: 'Progress Steps' })).toBeInTheDocument();
  expect(screen.getByRole('list')).toBeInTheDocument();
@@ -26,14 +26,14 @@ describe('Stepper Component', () => {
  });
 
  it('marks the active step with aria-current="step"', () => {
- render(<Stepper steps={steps} active={1} />);
+ render(<Stepper data={steps} active={1} />);
  
  const shippingButton = screen.getByRole('button', { name: /Step 2: Shipping/i });
  expect(shippingButton).toHaveAttribute('aria-current', 'step');
  });
 
  it('does not mark previous steps as active', () => {
- render(<Stepper steps={steps} active={2} />);
+ render(<Stepper data={steps} active={2} />);
  
  const cartButton = screen.getByRole('button', { name: /Step 1: Cart/i });
  expect(cartButton).not.toHaveAttribute('aria-current');
@@ -42,7 +42,7 @@ describe('Stepper Component', () => {
  it('fires onChange when an enabled step is clicked', async () => {
  const user = userEvent.setup();
  const onChangeSpy = vi.fn();
- render(<Stepper steps={steps} active={0} onChange={onChangeSpy} />);
+ render(<Stepper data={steps} active={0} onChange={onChangeSpy} />);
  
  const paymentButton = screen.getByRole('button', { name: /Step 3: Payment/i });
  await user.click(paymentButton);
@@ -53,7 +53,7 @@ describe('Stepper Component', () => {
  it('disables future steps when disableFuture is true', async () => {
  const user = userEvent.setup();
  const onChangeSpy = vi.fn();
- render(<Stepper steps={steps} active={1} disableFuture onChange={onChangeSpy} />);
+ render(<Stepper data={steps} active={1} disableFuture onChange={onChangeSpy} />);
  
  // Step 1 (Cart) and Step 2 (Shipping) should be enabled
  expect(screen.getByRole('button', { name: /Step 1: Cart/i })).toBeEnabled();
@@ -69,7 +69,7 @@ describe('Stepper Component', () => {
  });
 
  it('renders optional tags and descriptions correctly', () => {
- render(<Stepper steps={steps} active={0} />);
+ render(<Stepper data={steps} active={0} />);
  
  expect(screen.getByText('Address details')).toBeInTheDocument();
  expect(screen.getByText('(Optional)')).toBeInTheDocument();

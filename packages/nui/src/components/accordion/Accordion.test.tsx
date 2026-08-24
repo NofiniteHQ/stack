@@ -13,14 +13,14 @@ const items: AccordionItem[] = [
 describe('Accordion Component', () => {
  describe('Rendering', () => {
  it('renders all titles', () => {
- render(<Accordion items={items} />);
+ render(<Accordion data={items} />);
  expect(screen.getByText('First')).toBeInTheDocument();
  expect(screen.getByText('Second')).toBeInTheDocument();
  expect(screen.getByText('Third')).toBeInTheDocument();
  });
 
  it('initializes with defaultOpenId', () => {
- render(<Accordion items={items} defaultOpenId="two" />);
+ render(<Accordion data={items} defaultOpenId="two" />);
  const button = screen.getByRole('button', { name: 'Second' });
 
  expect(button).toHaveAttribute('aria-expanded', 'true');
@@ -30,7 +30,7 @@ describe('Accordion Component', () => {
  describe('Single mode (default)', () => {
  it('opens one item at a time', async () => {
  const user = userEvent.setup();
- render(<Accordion items={items} />);
+ render(<Accordion data={items} />);
 
  const first = screen.getByRole('button', { name: 'First' });
  const second = screen.getByRole('button', { name: 'Second' });
@@ -45,7 +45,7 @@ describe('Accordion Component', () => {
 
  it('closes open item when clicked again', async () => {
  const user = userEvent.setup();
- render(<Accordion items={items} />);
+ render(<Accordion data={items} />);
  const first = screen.getByRole('button', { name: 'First' });
 
  await user.click(first);
@@ -59,7 +59,7 @@ describe('Accordion Component', () => {
  describe('Multiple mode', () => {
  it('allows multiple items open', async () => {
  const user = userEvent.setup();
- render(<Accordion items={items} multiple />);
+ render(<Accordion data={items} multiple />);
 
  const first = screen.getByRole('button', { name: 'First' });
  const second = screen.getByRole('button', { name: 'Second' });
@@ -75,7 +75,7 @@ describe('Accordion Component', () => {
  describe('Keyboard Accessibility', () => {
  it('toggles via native button keyboard support (Enter and Space)', async () => {
  const user = userEvent.setup();
- render(<Accordion items={items} />);
+ render(<Accordion data={items} />);
  const first = screen.getByRole('button', { name: 'First' });
 
  // Simulate user tabbing into the component
@@ -94,7 +94,7 @@ describe('Accordion Component', () => {
 
  describe('ARIA Relationships', () => {
  it('sets correct aria-controls and aria-labelledby', () => {
- render(<Accordion items={items} defaultOpenId="one" />);
+ render(<Accordion data={items} defaultOpenId="one" />);
  const first = screen.getByRole('button', { name: 'First' });
 
  const panelId = first.getAttribute('aria-controls');
@@ -114,7 +114,7 @@ describe('Accordion Component', () => {
 
  describe('Accessibility', () => {
  it('has no accessibility violations', async () => {
- const { container } = render(<Accordion items={items} />);
+ const { container } = render(<Accordion data={items} />);
  expect(await axe(container)).toHaveNoViolations();
  });
  });

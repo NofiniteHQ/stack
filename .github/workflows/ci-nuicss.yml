@@ -43,7 +43,7 @@ jobs:
   publish:
     name: Publish nuicss
     needs: build-and-test
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -78,7 +78,7 @@ jobs:
           publish-script: pnpm changeset publish
           version-script: pnpm changeset version
           commit-message: "chore(release): version nuicss"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-title: "chore(release): version nuicss"
         env:
-          GITHUB_TOKEN: ${ secrets.GITHUB_TOKEN }
-          NPM_TOKEN: ${ secrets.NPM_TOKEN }
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

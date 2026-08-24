@@ -1,4 +1,5 @@
 /** @vitest-environment jsdom */
+import userEvent from '@testing-library/user-event';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { axe } from 'vitest-axe';
@@ -26,9 +27,9 @@ describe('Clipboard Component', () => {
     render(<Clipboard value="hello world" />);
     const btn = screen.getByRole('button', { name: 'Copy to clipboard' });
     
-    fireEvent.click(btn);
+    await userEvent.click(btn);
     
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('hello world');
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith('hello world'));
   });
 
   it('temporarily shows success state', async () => {
