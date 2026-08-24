@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { defineConfig } from 'unocss';
 import { nuicssPreset } from '../../nuicss/dist/index.mjs';
 
