@@ -44,7 +44,7 @@ export default defineConfig({
   ],
 
   build: {
-    outDir: './dist',
+    outdir: path.resolve(__dirname, 'dist'),
     cssMinify: 'lightningcss',
     emptyOutDir: true,
     sourcemap: true,
@@ -70,14 +70,14 @@ export default defineConfig({
       output: [
         {
           format: 'es',
-          dir: './dist',
+          dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].js',
         },
         {
           format: 'cjs',
-          dir: './dist',
+          dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].cjs',
@@ -95,3 +95,4 @@ export default defineConfig({
     pool: 'forks',
   },
 });
+
