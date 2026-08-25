@@ -1,5 +1,11 @@
 ﻿# @nofinite/nuicss
 
+## 3.0.5
+
+### Patch Changes
+
+- eb5c75c: fix: Nuicss PostCSS wrapper natively configures UnoCSS and fixes missing Typescript declarations.
+
 ## 3.0.4
 
 ### Patch Changes
