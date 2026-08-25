@@ -240,22 +240,22 @@ const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(
  <TabsContext.Provider value={{ value: currentValue, onValueChange: handleValueChange, idPrefix }}>
  <div ref={ref} className={cn("flex flex-col w-full font-sans", className)} {...props}>
  {data ? (
-  <>
-   <TabsList>
-    {data.map((tab) => (
-     <TabsTrigger key={tab.value} value={tab.value}>
-      {tab.label}
-     </TabsTrigger>
-    ))}
-   </TabsList>
-   <AnimatePresence mode="wait">
-    {data.map((tab) => (
-     <TabsContent key={tab.value} value={tab.value}>
-      {tab.content}
-     </TabsContent>
-    ))}
-   </AnimatePresence>
-  </>
+   <>
+    <TabsList>
+     {data.map((tab) => (
+      <TabsTrigger key={tab.value} value={tab.value}>
+       {tab.label}
+      </TabsTrigger>
+     ))}
+    </TabsList>
+    <div className="relative">
+     {data.map((tab) => (
+      <TabsContent key={tab.value} value={tab.value}>
+       {tab.content}
+      </TabsContent>
+     ))}
+    </div>
+   </>
  ) : (
   children
  )}
