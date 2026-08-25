@@ -1,5 +1,11 @@
 # @nofinite/nui
 
+## 3.0.4
+
+### Patch Changes
+
+- 5ebc05e: fix: add .npmignore to prevent pnpm publish from ignoring dist folders
+
 ## 3.0.3
 
 ### Patch Changes
