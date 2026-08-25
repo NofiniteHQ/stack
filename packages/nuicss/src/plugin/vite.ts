@@ -7,10 +7,10 @@ export function nuicssVitePlugin(options: any = {}): PluginOption {
     ...options
   };
   const unoPlugin = unocssVitePlugin(finalOptions);
-  const aliasPlugin = {
+  const aliasPlugin: any = {
     name: 'nuicss-alias',
     enforce: 'pre' as const,
-    resolveId(id: string, importer?: string, options?: any) {
+    resolveId(this: any, id: string, importer?: string, options?: any) {
       if (id === '@nofinite/nuicss/virtual.css' || id === 'virtual:nuicss.css') {
         return this.resolve('virtual:uno.css', importer, { skipSelf: true, ...options });
       }

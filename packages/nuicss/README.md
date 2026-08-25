@@ -52,7 +52,7 @@ For prototyping or standard HTML/HTMX/Templ stacks, just include the script in y
 
 ```html
 <!-- NUI CSS JIT Runtime Engine (Auto-injects styles) -->
-<script src="https://cdn.jsdelivr.net/npm/@nofinite/nuicss"></script>
+<script src="https://unpkg.com/@nofinite/nuicss"></script>
 ```
 
 ### 2. Vite (Recommended for SPAs)
