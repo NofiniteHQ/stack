@@ -10,6 +10,7 @@
       "options": {
         "commands": [
           "pnpm nx run nuicss:build-vite",
+          "cd packages/nuicss && npx tsc -p tsconfig.lib.json",
           "cd packages/nuicss && node build-cdn.js"
         ],
         "parallel": false
