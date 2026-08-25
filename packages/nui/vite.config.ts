@@ -44,7 +44,7 @@ export default defineConfig({
   ],
 
   build: {
-    outdir: path.resolve(__dirname, 'dist'),
+    outDir: path.resolve(__dirname, 'dist'),
     cssMinify: 'lightningcss',
     emptyOutDir: true,
     sourcemap: true,

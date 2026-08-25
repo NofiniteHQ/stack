@@ -41,6 +41,18 @@ jobs:
       - name: Build
         run: pnpm nx run nui:build
 
+      - name: Verify package contents
+        working-directory: packages/nui
+        run: |
+          TARBALL_FILES=$(npm pack --dry-run 2>&1)
+          if ! echo "$TARBALL_FILES" | grep -q "dist/components"; then
+            echo "Error: dist/components is missing from the tarball!"
+            echo "Tarball contents:"
+            echo "$TARBALL_FILES"
+            exit 1
+          fi
+          echo "Verification passed. dist/components is present."
+
   publish:
     name: Publish nui
     needs: build-and-test
@@ -73,6 +85,18 @@ jobs:
 
       - name: Build
         run: pnpm nx run nui:build
+
+      - name: Verify package contents
+        working-directory: packages/nui
+        run: |
+          TARBALL_FILES=$(npm pack --dry-run 2>&1)
+          if ! echo "$TARBALL_FILES" | grep -q "dist/components"; then
+            echo "Error: dist/components is missing from the tarball!"
+            echo "Tarball contents:"
+            echo "$TARBALL_FILES"
+            exit 1
+          fi
+          echo "Verification passed. dist/components is present."
 
       - name: Create Release Pull Request or Publish
         uses: changesets/action@v2
