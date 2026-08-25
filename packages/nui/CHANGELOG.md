@@ -1,5 +1,11 @@
 # @nofinite/nui
 
+## 3.0.3
+
+### Patch Changes
+
+- 6fcf4a0: fix(build): ensure all 68 components are properly exported from the package entry point
+
 ## 3.0.2
 
 ### Patch Changes

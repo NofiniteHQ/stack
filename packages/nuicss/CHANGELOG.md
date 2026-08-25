@@ -1,5 +1,11 @@
 ﻿# @nofinite/nuicss
 
+## 3.0.4
+
+### Patch Changes
+
+- 8bbe3ff: fix(plugin): safely unwrap postcss default export for CJS environments
+
 ## 3.0.2
 
 ### Patch Changes
