@@ -52,3 +52,4 @@ jobs:
             exit 1
           fi
           echo "Verification passed. dist/components is present."
+
