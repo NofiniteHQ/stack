@@ -31,6 +31,9 @@ export default config;
 // and https://nx.dev/recipes/storybook/custom-builder-configs
 config.viteFinal = async (viteConfig) => {
   return mergeConfig(viteConfig, {
+    css: {
+      transformer: 'postcss',
+    },
     plugins: [
       nuicssVitePlugin({ configFile: './nuicss.config.ts' })
     ]

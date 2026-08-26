@@ -1,0 +1,95 @@
+{
+  "$schema": "https://opensource.nofinite.com/schema/components.json",
+  "name": "@nofinite/nui",
+  "version": "3.0.4",
+  "description": "High-performance, semantic React UI primitive library.",
+  "repository": "https://github.com/NofiniteHQ/stack.git",
+  "style": "default",
+  "framework": "react",
+  "iconLibrary": "lucide-react",
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "src/styles/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/utils"
+  },
+  "components": [
+    {
+      "name": "accordion",
+      "dependencies": ["framer-motion"],
+      "files": ["src/components/accordion/Accordion.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "avatar",
+      "dependencies": [],
+      "files": ["src/components/avatar/Avatar.tsx", "src/components/avatar/AvatarGroup.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "button",
+      "dependencies": [],
+      "files": ["src/components/button/Button.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "chip",
+      "dependencies": [],
+      "files": ["src/components/chip/Chip.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "codeblock",
+      "dependencies": ["prismjs"],
+      "files": ["src/components/codeblock/CodeBlock.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "dialog",
+      "dependencies": ["framer-motion", "@floating-ui/react-dom"],
+      "files": ["src/components/dialog/DialogProvider.tsx", "src/components/dialog/dialogStore.ts"],
+      "type": "components:ui"
+    },
+    {
+      "name": "dropdown",
+      "dependencies": ["framer-motion", "@floating-ui/react-dom"],
+      "files": ["src/components/dropdown/Dropdown.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "fileuploader",
+      "dependencies": [],
+      "files": ["src/components/fileuploader/FileUploader.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "select",
+      "dependencies": ["framer-motion", "@floating-ui/react-dom"],
+      "files": ["src/components/select/Select.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "timepicker",
+      "dependencies": ["framer-motion", "@floating-ui/react-dom"],
+      "files": ["src/components/timepicker/TimePicker.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "timerangepicker",
+      "dependencies": ["framer-motion", "@floating-ui/react-dom"],
+      "files": ["src/components/timerangepicker/TimeRangePicker.tsx"],
+      "type": "components:ui"
+    },
+    {
+      "name": "virtuallist",
+      "dependencies": [],
+      "files": ["src/components/virtuallist/VirtualList.tsx"],
+      "type": "components:ui"
+    }
+  ]
+}

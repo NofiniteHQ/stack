@@ -43,6 +43,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
  asChild = false,
  children, 
  disabled,
+ onClick,
  ...props 
  }, ref) => {
  
@@ -52,7 +53,16 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
  return (
  <Comp
  ref={ref}
- disabled={isDisabled}
+ disabled={asChild ? undefined : isDisabled}
+ aria-disabled={isDisabled ? "true" : undefined}
+ data-disabled={isDisabled ? "" : undefined}
+ onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+   if (isDisabled) {
+     e.preventDefault();
+     return;
+   }
+   onClick?.(e);
+ }}
   className={cn(
   "inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98]",
   // Ultra-minimalist native outline focus state, absolutely no blue rings or complex shadows

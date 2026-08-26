@@ -1,6 +1,6 @@
 {
   "name": "@nofinite/nui",
-  "version": "3.0.4",
+  "version": "3.0.6",
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
@@ -83,6 +83,7 @@
     "@storybook/test-runner": "^0.24.4",
     "jest-image-snapshot": "^6.5.2",
     "playwright": "^1.62.0",
+    "react-docgen-typescript": "^2.4.0",
     "valibot": "^1.4.2",
     "vitest-axe": "^0.1.0"
   }

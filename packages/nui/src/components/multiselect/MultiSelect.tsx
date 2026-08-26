@@ -253,7 +253,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  {selectedValues.map(val => {
  const label = options.find(o => o.value === val)?.label ?? val;
  return (
- <span key={val} className="inline-flex items-center rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+ <span key={val} className="inline-flex items-center rounded bg-subtle px-2 py-0.5 text-xs font-medium text-default">
  {label}
  </span>
  );
@@ -278,8 +278,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  id={labelId}
  type="button"
  className={cn(
-   "flex min-h-[40px] w-full items-center justify-between rounded-md border border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] px-3 py-2 text-left text-sm text-slate-900 dark:text-slate-100 transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-700 focus-visible:outline-none focus-visible:border-[var(--nui-fg-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900", 
-   error && "border-red-500 focus-visible:ring-red-500/20 focus-visible:border-red-500"
+   "flex min-h-[40px] w-full items-center justify-between rounded-md border border-solid border-default bg-surface px-3 py-2 text-left text-sm text-default transition-all duration-200 hover:border-strong focus-visible:outline-none focus-visible:border-[var(--nui-fg-default)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle", 
+   error && "border-danger focus-visible:ring-danger/20 focus-visible:border-danger"
  )}
  aria-haspopup="listbox"
  aria-expanded={open}
@@ -303,7 +303,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  <div
  id={listboxId}
  ref={refs.setFloating}
- className="z-50 max-h-60 overflow-y-auto rounded-md border border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a0a0b] p-1.5 shadow-md outline-none animate-in fade-in zoom-in-95 font-sans box-border"
+ className="z-50 max-h-60 overflow-y-auto rounded-md border border-solid border-default bg-surface p-1.5 shadow-md outline-none animate-in fade-in zoom-in-95 font-sans box-border"
  role="listbox"
  aria-multiselectable="true"
  aria-labelledby={labelId}
@@ -329,8 +329,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(({
  aria-selected={isSelected}
  aria-disabled={opt.disabled || undefined}
  className={cn(
- "flex cursor-pointer select-none items-center gap-3 rounded-sm px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition-colors duration-200",
- isActive && !opt.disabled && "bg-slate-100 dark:bg-slate-800",
+ "flex cursor-pointer select-none items-center gap-3 rounded-sm px-3 py-2 text-sm text-default outline-none transition-colors duration-200",
+ isActive && !opt.disabled && "bg-subtle",
  opt.disabled && "cursor-not-allowed opacity-50 disabled:bg-transparent"
  )}
  tabIndex={-1}

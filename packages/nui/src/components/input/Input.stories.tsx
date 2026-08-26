@@ -46,11 +46,18 @@ export const WithError: Story = {
 };
 
 export const WithIcons: Story = {
- args: {
- label: 'Search',
- leftIcon: <span style={{ fontSize: '14px' }}>🔍</span>,
- rightIcon: <span style={{ fontSize: '12px', background: '#eee', padding: '2px 4px', borderRadius: '4px' }}>⌘K</span>,
- },
+ render: (args) => (
+   <Input
+     {...args}
+     label="Search"
+     leftIcon={<span style={{ fontSize: '14px' }}>🔍</span>}
+     rightIcon={(
+       <span style={{ fontSize: '12px', background: '#eee', padding: '2px 4px', borderRadius: '4px' }}>
+         ⌘K
+       </span>
+     )}
+   />
+ ),
 };
 
 export const Small: Story = {

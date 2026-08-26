@@ -65,7 +65,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
  <input
  ref={internalRef}
  type="checkbox"
- className="peer appearance-none w-full h-full m-0 bg-white dark:bg-[#0a0a0b] border border-solid border-slate-300 dark:border-slate-700 rounded transition-all duration-200 cursor-inherit hover:border-slate-400 dark:hover:border-slate-600 focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:border-[var(--nui-fg-default)] checked:bg-primary checked:border-primary checked:text-white data-[state=indeterminate]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:text-white disabled:bg-slate-50 dark:disabled:bg-slate-900 disabled:opacity-50"
+ className="peer appearance-none w-full h-full m-0 bg-surface border border-solid border-subtle rounded transition-all duration-200 cursor-inherit hover:border-strong focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:border-[var(--nui-fg-default)] checked:bg-primary checked:border-primary checked:text-white data-[state=indeterminate]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:text-white disabled:bg-subtle disabled:opacity-50"
  disabled={disabled}
  checked={currentChecked}
  onChange={handleChange}

@@ -180,7 +180,7 @@ export function Slider({
  return (
  <div 
  className={cn(
- "relative w-full flex items-center touch-none select-none text-slate-900 dark:text-slate-100 py-2", 
+ "relative w-full flex items-center touch-none select-none text-default py-2", 
  disabled && "opacity-50 pointer-events-none",
  className
  )}
@@ -191,13 +191,13 @@ export function Slider({
  {/* Track Container */}
  <div ref={trackRef} className="group relative w-full h-5 flex items-center cursor-pointer">
  {/* Inactive Background Track */}
- <div className="absolute w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full" />
+ <div className="absolute w-full h-2 bg-subtle rounded-full" />
  
  {/* Active Filled Track */}
  <motion.div 
  className={cn(
  "absolute left-0 h-2 rounded-full",
- disabled ? "bg-slate-400 dark:bg-slate-600" : "bg-primary dark:bg-blue-500"
+ disabled ? "bg-muted" : "bg-primary"
  )}
  animate={{ width: `${percent}%` }}
  transition={isDragging ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 30 }}
@@ -209,8 +209,8 @@ export function Slider({
  className={cn(
  "absolute top-1/2 w-[18px] h-[18px] rounded-full cursor-grab shadow-sm border-solid focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] transition-shadow",
  disabled 
- ? "bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600" 
- : "bg-white dark:bg-white border-2 border-blue-600 dark:border-blue-500 hover:scale-110 active:scale-95 active:cursor-grabbing hover:shadow-md"
+ ? "bg-surface border-2 border-subtle" 
+ : "bg-surface border-2 border-primary hover:scale-110 active:scale-95 active:cursor-grabbing hover:shadow-md"
  )}
  role="slider"
  aria-label={ariaLabel}
