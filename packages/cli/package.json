@@ -1,0 +1,36 @@
+{
+  "name": "nofinite",
+  "version": "0.0.1",
+  "description": "The official CLI for Nofinite and @nofinite/nui",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "nofinite": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./dist/index.js"
+  },
+  "keywords": [
+    "nofinite",
+    "nui",
+    "cli",
+    "react",
+    "ui"
+  ],
+  "author": "NofiniteHQ",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NofiniteHQ/stack.git",
+    "directory": "packages/cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,10 +1,6 @@
-packages:
+﻿packages:
   - 'packages/*'
-  - 'packages/nui/*'
-  - 'packages/nuicss/*'
-  - 'packages/utils/*'
-  - 'packages/locale/*'
-  - 'examples/nuicss/*'
+  - 'examples/*'
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'

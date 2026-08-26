@@ -10,7 +10,7 @@ import {
  useFormContext,
 } from 'react-hook-form';
 import { cn } from '../../utils/cn/cn';
-import { Slot } from '../../utils/slot/Slot';
+import { Slot } from '../../utils/slot/slot';
 
 /* ============================================================
  * Form Contexts
@@ -98,8 +98,8 @@ const FormLabel = forwardRef<HTMLLabelElement, React.LabelHTMLAttributes<HTMLLab
  ref={ref}
  htmlFor={formItemId}
  className={cn(
- 'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-900 dark:text-slate-100 font-sans',
- error && 'text-red-500',
+ 'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-default font-sans',
+ error && 'text-danger',
  className
  )}
  {...props}
@@ -134,7 +134,7 @@ const FormDescription = forwardRef<HTMLParagraphElement, React.HTMLAttributes<HT
  <p
  ref={ref}
  id={formDescriptionId}
- className={cn('text-[13px] text-slate-500 dark:text-slate-400 font-sans mt-2', className)}
+ className={cn('text-[13px] text-muted font-sans mt-2', className)}
  {...props}
  />
  );
@@ -155,7 +155,7 @@ const FormMessage = forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLPa
  <p
  ref={ref}
  id={formMessageId}
- className={cn('text-[13px] font-medium text-red-500 font-sans mt-2', className)}
+ className={cn('text-[13px] font-medium text-danger font-sans mt-2', className)}
  {...props}
  >
  {body}
@@ -174,3 +174,5 @@ export {
  FormMessage,
  FormField,
 };
+
+

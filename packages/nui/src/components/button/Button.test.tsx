@@ -83,5 +83,22 @@ describe('Button Component', () => {
 
  expect(ref.current).toBeInstanceOf(HTMLButtonElement);
  });
+
+ it('handles disabled state correctly when using asChild', async () => {
+  const user = userEvent.setup();
+  const handleClick = vi.fn();
+  render(
+    <Button asChild disabled onClick={handleClick}>
+      <a href="/test">Link</a>
+    </Button>
+  );
+
+  const link = screen.getByRole('link');
+  expect(link).not.toHaveAttribute('disabled');
+  expect(link).toHaveAttribute('aria-disabled', 'true');
+  
+  await user.click(link);
+  expect(handleClick).not.toHaveBeenCalled();
+  });
  });
 });
