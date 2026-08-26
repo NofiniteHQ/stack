@@ -41,7 +41,7 @@ jobs:
       - name: Build
         run: pnpm nx run nuicss:build
 
-  publish:
+
     name: Publish nuicss
     needs: build-and-test
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'

@@ -84,7 +84,7 @@ async function generateDocs() {
         } else if (typeName === 'enum' && propDetails.type.value) {
           typeName = propDetails.type.value.map(v => v.value).join(' | ');
         }
-        typeName = typeName.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+        typeName = typeName.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' ');
         const defaultValue = propDetails.defaultValue ? String(propDetails.defaultValue.value).replace(/\n/g, ' ') : '-';
         const description = propDetails.description ? propDetails.description.replace(/\n/g, ' ') : '-';
         const required = propDetails.required ? '**Yes**' : 'No';
