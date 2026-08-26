@@ -22,7 +22,7 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(({
         role="separator"
         aria-orientation={orientation}
         className={cn(
-          "shrink-0 bg-[var(--border-default)]",
+          "shrink-0 bg-subtle",
           isHorizontal ? "w-full h-[1px]" : "h-full w-[1px]",
           className
         )}
@@ -46,7 +46,7 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(({
     >
       <div 
         className={cn(
-          "bg-[var(--border-default)]", 
+          "bg-subtle", 
           isHorizontal ? "h-[1px] flex-1" : "w-[1px] flex-1"
         )} 
       />
@@ -60,7 +60,7 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(({
       </div>
       <div 
         className={cn(
-          "bg-[var(--border-default)]", 
+          "bg-subtle", 
           isHorizontal ? "h-[1px] flex-1" : "w-[1px] flex-1"
         )} 
       />

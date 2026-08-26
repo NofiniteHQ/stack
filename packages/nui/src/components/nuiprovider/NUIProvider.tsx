@@ -117,8 +117,13 @@ export function NUIProvider({
  }, [theme, isMounted, applyTheme]);
 
  // 5. Render Provider
+ const contextValue = React.useMemo(
+  () => ({ theme, resolvedTheme, setTheme }),
+  [theme, resolvedTheme]
+ );
+
  return (
- <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme }}>
+ <ThemeContext.Provider value={contextValue}>
  {children}
  </ThemeContext.Provider>
  );

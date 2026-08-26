@@ -79,7 +79,7 @@ export function Avatar({
  return (
  <div
  className={cn(
- "relative inline-flex items-center justify-center shrink-0 bg-muted text-default border border-transparent overflow-hidden",
+ "relative inline-flex items-center justify-center shrink-0 bg-muted text-default border border-transparent",
  sizeClasses[size],
  shapeClasses[shape],
  loading && "bg-muted animate-pulse cursor-wait",

@@ -47,6 +47,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(
  // We unify both the custom onSelect and the standard HTML onClick 
  // so consumers can use either without breaking the component's internal logic.
  const handleSelect = (e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>) => {
+ if ((e.target as HTMLElement).closest('button[aria-label="Remove"]')) return;
  onSelect?.();
  if (e.type === 'click' && onClick) {
  onClick(e as React.MouseEvent<HTMLDivElement>);

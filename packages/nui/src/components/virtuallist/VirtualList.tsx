@@ -129,7 +129,14 @@ function VirtualListInner<T>(
   return (
     <div
       ref={internalRef}
-      className={cn("relative w-full overflow-y-auto overflow-x-hidden bg-surface border border-default rounded-md font-sans will-change-[scroll-position] focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]", className)}
+      className={cn(
+        "relative w-full overflow-y-auto overflow-x-hidden bg-surface border border-default rounded-md font-sans will-change-[scroll-position] focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
+        "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5",
+        "[&::-webkit-scrollbar-track]:bg-transparent",
+        "[&::-webkit-scrollbar-thumb]:bg-subtle [&::-webkit-scrollbar-thumb]:rounded-full",
+        "hover:[&::-webkit-scrollbar-thumb]:bg-muted",
+        className
+      )}
       style={{ height: height !== undefined ? `${height}px` : '100%' }}
  onScroll={handleScroll}
  role="list"

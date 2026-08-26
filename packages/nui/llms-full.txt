@@ -1,0 +1,1930 @@
+# NUI (@nofinite/nui) - Full AI Context
+
+## Core Philosophy & Strict Styling
+- NEVER use absolute Tailwind colors like bg-white or text-blue-500.
+- ALWAYS use nuicss semantic tokens: bg-surface, text-default, border-subtle, bg-primary-subtle, text-danger, etc.
+- Ensure strict TypeScript, WAI-ARIA accessibility, and keyboard navigation.
+- Use focus-visible for focus rings: focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--nui-fg-default)]
+
+
+
+---
+
+# Accordion (accordion)
+
+## Import
+```tsx
+import { Accordion } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Accordion` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data` | `AccordionItem[]` | `-` | Array of items for Smart Default mode |
+| `defaultOpenId` | `string` | `-` | ID of the item that should be open by default |
+| `multiple` | `boolean` | `false` | If true, allows multiple accordion panels to remain open simultaneously |
+
+
+
+
+---
+
+# Alert (alert)
+
+## Import
+```tsx
+import { Alert } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Alert` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `variant` | `AlertVariant` | `info` | - |
+| `title` | `ReactNode` | `-` | - |
+| `closable` | `boolean` | `false` | Determines if the close icon button is rendered |
+| `onClose` | `() => void` | `-` | Callback fired when the close button is clicked.  Note: The component is controlled; it does not unmount itself. |
+| `className` | `string` | `-` | - |
+| `asChild` | `boolean` | `-` | Renders the component using its child element |
+
+
+
+
+---
+
+# Attachment (attachment)
+
+## Import
+```tsx
+import { Attachment } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Attachment` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `filename`* | `string` | `-` | - |
+| `filesize`* | `number` | `-` | - |
+| `filetype`* | `string` | `-` | - |
+| `src` | `string` | `-` | - |
+| `isLoading` | `boolean` | `false` | - |
+| `className` | `string` | `-` | - |
+
+
+
+
+---
+
+# Avatar (avatar)
+
+## Import
+```tsx
+import { Avatar, AvatarGroup } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Avatar` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `src` | `string` | `-` | - |
+| `alt` | `string` | `-` | - |
+| `name` | `string` | `-` | - |
+| `size` | `AvatarSize` | `md` | - |
+| `shape` | `AvatarShape` | `circle` | - |
+| `status` | `AvatarStatus` | `-` | - |
+| `fallbackIcon` | `ReactNode` | `-` | - |
+| `loading` | `boolean` | `-` | - |
+| `className` | `string` | `-` | - |
+
+### `AvatarGroup` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `max` | `number` | `3` | Maximum number of avatars to display before truncating |
+| `size` | `AvatarSize` | `md` | Size passed down to all nested Avatar components |
+| `className` | `string` | `-` | - |
+
+
+
+
+---
+
+# Badge (badge)
+
+## Import
+```tsx
+import { Badge, BadgeGroup } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Badge` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `count` | `number` | `-` | Displays a numerical count inside the badge |
+| `max` | `number` | `99` | The maximum number to display before showing a '+' (e.g., 99+) |
+| `variant` | `BadgeVariant` | `default` | - |
+| `size` | `BadgeSize` | `md` | - |
+| `pill` | `boolean` | `false` | Rounds the edges to create a pill shape |
+| `dot` | `boolean` | `false` | Renders a small, empty circular indicator instead of text |
+| `href` | `string` | `-` | If provided, renders the badge as an <a> tag |
+| `onClick` | `MouseEventHandler<HTMLElement>` | `-` | If provided, renders the badge as a <button> tag |
+| `iconLeft` | `ReactNode` | `-` | - |
+| `iconRight` | `ReactNode` | `-` | - |
+| `asChild` | `boolean` | `-` | Renders the component using its child element |
+
+### `BadgeGroup` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `max` | `number` | `3` | - |
+
+
+
+
+---
+
+# Breadcrumbs (breadcrumbs)
+
+## Import
+```tsx
+import { Breadcrumbs } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Breadcrumbs` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data` | `BreadcrumbItem[]` | `-` | Array of items for Smart Default mode |
+| `maxItems` | `number` | `5` | The maximum number of items to display before truncating the middle path. Default: 5 |
+| `separator` | `ReactNode` | `›` | The visual separator between items. Default: '›' |
+
+
+
+
+---
+
+# Button (button)
+
+## Import
+```tsx
+import { Button } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Button` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `variant` | `ButtonVariant` | `default` | - |
+| `size` | `ButtonSize` | `md` | - |
+| `isLoading` | `boolean` | `false` | - |
+| `iconLeft` | `ReactNode` | `-` | - |
+| `iconRight` | `ReactNode` | `-` | - |
+| `asChild` | `boolean` | `false` | - |
+
+
+
+
+---
+
+# Calendar (calendar)
+
+## Import
+```tsx
+import { Calendar } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Calendar` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `mode` | `"single" \| "range"` | `-` | - |
+| `value` | `string \| DateRange` | `-` | - |
+| `defaultValue` | `string \| DateRange` | `-` | - |
+| `onChange` | `((v: string) => void) \| ((v: DateRange) => void)` | `-` | - |
+| `minDate` | `string` | `-` | - |
+| `maxDate` | `string` | `-` | - |
+| `locale` | `string` | `-` | - |
+| `defaultMonth` | `Date` | `-` | - |
+
+
+
+
+---
+
+# Card (card)
+
+## Import
+```tsx
+import { Card } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Card` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `clickable` | `boolean` | `false` | If true, makes the card interactive via mouse and keyboard (Enter/Space) |
+| `hover` | `boolean` | `false` | If true, adds a shadow elevation effect on hover |
+
+
+
+
+---
+
+# Carousel (carousel)
+
+## Import
+```tsx
+import { Carousel } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Carousel` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `showArrows` | `boolean` | `true` | - |
+| `showDots` | `boolean` | `true` | - |
+| `itemWidth` | `string` | `100%` | - |
+| `gap` | `string` | `1rem` | - |
+| `align` | `"start" \| "center" \| "end"` | `start` | - |
+| `autoPlay` | `boolean` | `false` | - |
+| `interval` | `number` | `3000` | - |
+| `loop` | `boolean` | `false` | - |
+
+
+
+
+---
+
+# Checkbox (checkbox)
+
+## Import
+```tsx
+import { Checkbox } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Checkbox` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `checked` | `boolean` | `-` | - |
+| `defaultChecked` | `boolean` | `-` | - |
+| `indeterminate` | `boolean` | `false` | - |
+| `onChange` | `(checked: boolean) => void` | `-` | - |
+| `label` | `ReactNode` | `-` | - |
+
+
+
+
+---
+
+# Chip (chip)
+
+## Import
+```tsx
+import { Chip } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Chip` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `removable` | `boolean` | `false` | If true, renders a trailing 'X' button that triggers onRemove |
+| `selected` | `boolean` | `false` | Controls the visual and ARIA active state of the chip |
+| `iconLeft` | `ReactNode` | `-` | - |
+| `iconRight` | `ReactNode` | `-` | - |
+| `size` | `ChipSize` | `md` | - |
+| `onRemove` | `() => void` | `-` | Callback fired when the 'X' button is clicked |
+| `onSelect` | `() => void` | `-` | Callback fired when the main body of the chip is clicked or activated via keyboard |
+
+
+
+
+---
+
+# Clipboard (clipboard)
+
+## Import
+```tsx
+import { Clipboard } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Clipboard` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value`* | `string` | `-` | - |
+| `timeout` | `number` | `2000` | - |
+| `hideIcon` | `boolean` | `false` | - |
+
+
+
+
+---
+
+# Codeblock (codeblock)
+
+## Import
+```tsx
+import { CodeBlock } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `CodeBlock` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `language`* | `string` | `-` | - |
+| `onLanguageChange` | `(lang: string) => void` | `-` | - |
+| `code`* | `string` | `-` | - |
+| `className` | `string` | `-` | - |
+| `readOnlyLanguage` | `boolean` | `false` | - |
+
+
+
+
+---
+
+# Collapsible (collapsible)
+
+## Import
+```tsx
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Collapsible` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `defaultOpen` | `boolean` | `false` | - |
+| `isOpen` | `boolean` | `-` | - |
+| `onToggle` | `(isOpen: boolean) => void` | `-` | - |
+
+
+
+
+---
+
+# Colorpicker (colorpicker)
+
+## Import
+```tsx
+import { ColorPicker } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `ColorPicker` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `string` | `#000000` | The currently selected color in hex format |
+| `onChange` | `(color: string) => void` | `-` | Callback fired when a color is selected |
+| `presets` | `string[]` | `[   '#000000', '#52525b', '#a1a1aa', '#ffffff',   '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#d946ef', '#f43f5e',   '#7f1d1d', '#7c2d12', '#78350f', '#3f6212', '#14532d', '#134e4a', '#164e63', '#1e3a8a', '#312e81', '#581c87', '#701a75' ]` | Array of hex colors to show in the preset grid |
+| `showCustom` | `boolean` | `true` | Whether to show the native color picker input for custom colors |
+| `disabled` | `boolean` | `false` | Disable the color picker |
+| `icon` | `LucideIcon` | `-` | Custom icon to display on the trigger button. Defaults to Palette. |
+| `variant` | `"default" \| "icon"` | `default` | Visual variant for the trigger button. 'default' is a form input, 'icon' is a compact toolbar button. |
+| `showText` | `boolean` | `true` | Show the hex text in the default variant |
+| `showSwatch` | `boolean` | `true` | Show the color swatch circle in the default variant |
+| `showIcon` | `boolean` | `true` | Show the palette icon in the default variant |
+
+
+
+
+---
+
+# Combobox (combobox)
+
+## Import
+```tsx
+import { Combobox } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Combobox` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data`* | `ComboboxOption[]` | `-` | - |
+| `value` | `string` | `-` | Controlled value of the combobox |
+| `defaultValue` | `string` | `-` | Initial uncontrolled value |
+| `onChange` | `(value: string) => void` | `-` | Callback fired when an option is selected |
+| `placeholder` | `string` | `Select...` | - |
+| `disabled` | `boolean` | `false` | - |
+| `emptyMessage` | `string` | `No results found` | Message displayed when filtering returns zero results |
+| `filter` | `(input: string, option: ComboboxOption) => boolean` | `-` | Custom filter function. Defaults to simple substring matching on the label. |
+| `leftIcon` | `ReactNode` | `-` | - |
+| `rightIcon` | `ReactNode` | `-` | - |
+| `renderOption` | `(option: ComboboxOption, active: boolean) => ReactNode` | `-` | Custom renderer for the entire option row |
+| `renderOptionIcon` | `(option: ComboboxOption) => ReactNode` | `-` | Custom renderer strictly for the option's icon |
+
+
+
+
+---
+
+# Contextmenu (contextmenu)
+
+## Import
+```tsx
+import { ContextMenu } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `ContextMenu` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `items`* | `ContextMenuItem[]` | `-` | - |
+| `className` | `string` | `-` | - |
+| `asChild` | `boolean` | `false` | * If true, the ContextMenu will not wrap children in a <div>. Instead, it clones the child and directly attaches the onContextMenu event. Child MUST be a valid single React Element. |
+
+
+
+
+---
+
+# Datepicker (datepicker)
+
+## Import
+```tsx
+import { DatePicker } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `DatePicker` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `string` | `-` | - |
+| `defaultValue` | `string` | `-` | - |
+| `onChange` | `(v: string) => void` | `-` | - |
+| `minDate` | `string` | `-` | - |
+| `maxDate` | `string` | `-` | - |
+| `placeholder` | `string` | `Select date` | - |
+| `name` | `string` | `-` | - |
+| `locale` | `string` | `en-US` | - |
+| `id` | `string` | `-` | - |
+| `className` | `string` | `-` | - |
+| `disabled` | `boolean` | `false` | - |
+| `formatDisplay` | `(date: Date) => string` | `-` | - |
+
+
+
+
+---
+
+# Daterangepicker (daterangepicker)
+
+## Import
+```tsx
+import { DateRangePicker } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `DateRangePicker` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `DateRange` | `-` | - |
+| `defaultValue` | `DateRange` | `-` | - |
+| `onChange` | `(r: DateRange) => void` | `-` | - |
+| `minDate` | `string` | `-` | - |
+| `maxDate` | `string` | `-` | - |
+| `placeholder` | `string` | `Pick range` | - |
+| `locale` | `string` | `en-US` | - |
+| `id` | `string` | `-` | - |
+| `className` | `string` | `-` | - |
+| `nameFrom` | `string` | `-` | - |
+| `nameTo` | `string` | `-` | - |
+| `disabled` | `boolean` | `false` | - |
+| `formatDisplay` | `(date: Date) => string` | `-` | - |
+
+
+
+
+---
+
+# Divider (divider)
+
+## Import
+```tsx
+import { Divider } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Divider` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `orientation` | `"horizontal" \| "vertical"` | `horizontal` | - |
+
+
+
+
+---
+
+# Drawer (drawer)
+
+## Import
+```tsx
+import { Drawer } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Drawer` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `open`* | `boolean` | `-` | Controls the open/closed state of the drawer |
+| `onClose`* | `() => void` | `-` | Callback fired when the drawer requests to be closed (e.g., Escape key, outside click) |
+| `position` | `"left" \| "right" \| "bottom" \| "top"` | `right` | The edge of the screen the drawer attaches to. Defaults to 'right' |
+| `disableEsc` | `boolean` | `false` | Prevents the drawer from closing when the Escape key is pressed |
+| `disableClickOutside` | `boolean` | `false` | Prevents the drawer from closing when a click occurs outside the content area |
+| `overlayClassName` | `string` | `-` | Custom class name applied to the backdrop overlay |
+| `title` | `ReactNode` | `-` | Optional title displayed at the top of the Drawer |
+| `description` | `ReactNode` | `-` | Optional description displayed below the title |
+| `hideCloseButton` | `boolean` | `false` | If true, hides the default close 'X' button |
+| `transitionDuration` | `number` | `0.3` | Transition duration in seconds. Defaults to 0.3 |
+
+
+
+
+---
+
+# Dropdown (dropdown)
+
+## Import
+```tsx
+import { Dropdown } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Dropdown` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data` | `DropdownDataItem[]` | `-` | - |
+| `align` | `"start" \| "end"` | `start` | - |
+
+
+
+
+---
+
+# Emptystate (emptystate)
+
+## Import
+```tsx
+import { EmptyState } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `EmptyState` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `icon` | `ReactNode` | `-` | The icon or illustration to display at the top of the empty state. |
+| `title`* | `string` | `-` | The main title describing the empty state. |
+| `description` | `ReactNode` | `-` | The descriptive text explaining what is missing or how to resolve it. |
+| `actions` | `ReactNode` | `-` | Call to action buttons or links. |
+
+
+
+
+---
+
+# Fileuploader (fileuploader)
+
+## Import
+```tsx
+import { FileUploader } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `FileUploader` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `File[]` | `-` | Controlled state for the selected files |
+| `defaultValue` | `File[]` | `-` | Uncontrolled initial state for the selected files |
+| `onChange` | `(files: File[]) => void` | `-` | Callback fired when the list of selected files changes |
+| `multiple` | `boolean` | `false` | Whether to allow multiple files to be selected. Defaults to false. |
+| `accept` | `string` | `-` | A comma-separated list of allowed file extensions or MIME types (e.g., '.jpg, .png, application/pdf') |
+| `maxSize` | `number` | `-` | Maximum allowed file size in bytes |
+| `className` | `string` | `-` | Custom class name applied to the root container |
+| `placeholder` | `ReactNode` | `-` | Custom text or element displayed inside the dropzone (Primary Title) |
+| `description` | `ReactNode` | `-` | Secondary text or description below the placeholder |
+| `disabled` | `boolean` | `false` | Disables the dropzone and prevents file selection |
+
+
+
+
+---
+
+# Form (form)
+
+## Import
+```tsx
+import { FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+*This component inherits standard HTML props or has no custom props documented.*
+
+
+---
+
+# Hovercard (hovercard)
+
+## Import
+```tsx
+import { HoverCard, HoverCard.Trigger, HoverCard.Content } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `HoverCard` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `openDelay` | `number` | `200` | Delay in milliseconds before the card opens. Defaults to 200ms. |
+| `closeDelay` | `number` | `300` | Delay in milliseconds before the card closes. Defaults to 300ms. |
+
+### `HoverCard.Content` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `placement` | `HoverCardPlacement` | `bottom` | Preferred placement of the card relative to the trigger. Defaults to 'bottom' |
+| `offset` | `number` | `12` | Gap in pixels between the trigger and the card. Defaults to 8px. |
+| `hideArrow` | `boolean` | `false` | If true, hides the directional arrow pointing to the trigger. |
+
+
+
+
+---
+
+# Image (image)
+
+## Import
+```tsx
+import { Image } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Image` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `fallbackSrc` | `string` | `-` | - |
+| `fallback` | `ReactNode` | `-` | - |
+
+
+
+
+---
+
+# Input (input)
+
+## Import
+```tsx
+import { Input } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Input` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `label` | `ReactNode` | `-` | - |
+| `description` | `ReactNode` | `-` | - |
+| `error` | `ReactNode` | `-` | - |
+| `inputSize` | `"sm" \| "md" \| "lg"` | `md` | - |
+| `leftIcon` | `ReactNode` | `-` | - |
+| `rightIcon` | `ReactNode` | `-` | - |
+| `rightIconClassName` | `string` | `-` | - |
+| `wrapperClassName` | `string` | `-` | - |
+
+
+
+
+---
+
+# Kbd (kbd)
+
+## Import
+```tsx
+import { Kbd } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+*This component inherits standard HTML props or has no custom props documented.*
+
+
+---
+
+# Layout (layout)
+
+## Import
+```tsx
+import { Container, Flex, Stack, HStack, Grid } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Container` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `size` | `"sm" \| "md" \| "lg" \| "xl" \| "full"` | `lg` | The maximum width bounds for the container. Defaults to 'lg'. |
+| `asChild` | `boolean` | `false` | Merges props into the immediate child when true, allowing polymorphic rendering |
+
+### `Flex` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `direction` | `"row" \| "column" \| "row-reverse" \| "column-reverse"` | `row` | Defines the flex-direction. Defaults to 'row'. |
+| `align` | `"start" \| "center" \| "end" \| "stretch" \| "baseline"` | `stretch` | Defines the align-items cross-axis behavior. Defaults to 'stretch'. |
+| `justify` | `"start" \| "center" \| "end" \| "between" \| "around" \| "evenly"` | `start` | Defines the justify-content main-axis behavior. Defaults to 'start'. |
+| `wrap` | `"wrap" \| "nowrap" \| "wrap-reverse"` | `nowrap` | Defines the flex-wrap behavior. Defaults to 'nowrap'. |
+| `gap` | `string \| number` | `0` | The gap between flex items. Accepts numbers (px) or valid CSS strings. Defaults to 0. |
+
+### `Stack` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `align` | `"start" \| "center" \| "end" \| "stretch" \| "baseline"` | `stretch` | Defines the align-items cross-axis behavior. Defaults to 'stretch'. |
+| `wrap` | `"wrap" \| "nowrap" \| "wrap-reverse"` | `nowrap` | Defines the flex-wrap behavior. Defaults to 'nowrap'. |
+| `justify` | `"start" \| "center" \| "end" \| "between" \| "around" \| "evenly"` | `start` | Defines the justify-content main-axis behavior. Defaults to 'start'. |
+| `gap` | `string \| number` | `0` | The gap between flex items. Accepts numbers (px) or valid CSS strings. Defaults to 0. |
+
+### `HStack` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `align` | `"start" \| "center" \| "end" \| "stretch" \| "baseline"` | `stretch` | Defines the align-items cross-axis behavior. Defaults to 'stretch'. |
+| `wrap` | `"wrap" \| "nowrap" \| "wrap-reverse"` | `nowrap` | Defines the flex-wrap behavior. Defaults to 'nowrap'. |
+| `justify` | `"start" \| "center" \| "end" \| "between" \| "around" \| "evenly"` | `start` | Defines the justify-content main-axis behavior. Defaults to 'start'. |
+| `gap` | `string \| number` | `0` | The gap between flex items. Accepts numbers (px) or valid CSS strings. Defaults to 0. |
+
+### `Grid` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `columns` | `number \| "auto-fit" \| "auto-fill"` | `auto-fit` | Number of fixed columns, or responsive auto algorithms. Defaults to 'auto-fit'. |
+| `gap` | `string \| number` | `16` | The gap between grid items. Accepts numbers (px) or valid CSS strings. Defaults to 16. |
+| `minColWidth` | `string` | `250px` | The minimum width a column can shrink to before wrapping. Used with auto-fit/fill. Defaults to '250px'. |
+
+
+
+
+---
+
+# Link (link)
+
+## Import
+```tsx
+import { Link } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Link` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `variant` | `LinkVariant` | `default` | - |
+| `underline` | `LinkUnderline` | `hover` | - |
+| `isExternal` | `boolean` | `false` | Automatically applies `target="_blank"` and `rel="noopener noreferrer"` for external routing security. |
+| `asChild` | `boolean` | `false` | * Polymorphic Prop: When true, delegates rendering to its child. Crucial for integrating with framework routers like Next.js `<Link>` or React Router. |
+
+
+
+
+---
+
+# Megamenu (megamenu)
+
+## Import
+```tsx
+import { MegaMenu } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+*This component inherits standard HTML props or has no custom props documented.*
+
+
+---
+
+# Modal (modal)
+
+## Import
+```tsx
+import { Modal } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Modal` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `open`* | `boolean` | `-` | - |
+| `onClose`* | `() => void` | `-` | - |
+| `title` | `ReactNode` | `-` | - |
+| `description` | `ReactNode` | `-` | - |
+| `labelledById` | `string` | `-` | - |
+| `describedById` | `string` | `-` | - |
+| `disableClickOutside` | `boolean` | `false` | - |
+| `disableEsc` | `boolean` | `false` | - |
+| `initialFocusRef` | `RefObject<HTMLElement>` | `-` | - |
+| `overlayClassName` | `string` | `-` | - |
+| `hideCloseButton` | `boolean` | `false` | Hides the 'X' close button in the top right corner. |
+
+
+
+
+---
+
+# Multiselect (multiselect)
+
+## Import
+```tsx
+import { MultiSelect } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `MultiSelect` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `options`* | `MultiSelectOption[]` | `-` | Array of available options |
+| `value` | `string[]` | `-` | Controlled state for selected values |
+| `defaultValue` | `string[]` | `-` | Uncontrolled initial state for selected values |
+| `onChange` | `(value: string[]) => void` | `-` | Callback fired when the selection changes |
+| `placeholder` | `string` | `Select multiple...` | Text displayed when no options are selected |
+| `name` | `string` | `-` | Name attribute applied to hidden inputs for native form submission |
+| `error` | `boolean` | `false` | Toggles error styling |
+| `maxTags` | `number` | `3` | Number of tags to render before collapsing into a summary string (e.g., "3 selected") |
+
+
+
+
+---
+
+# Nuiprovider (nuiprovider)
+
+## Import
+```tsx
+import { useTheme, NUIProvider } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `NUIProvider` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `defaultTheme` | `ThemeMode` | `system` | The default theme if nothing is in local storage. Defaults to 'system'. |
+| `storageKey` | `string` | `nui-theme` | The local storage key used to persist the theme preference. Defaults to 'nui-theme'. |
+
+
+
+
+---
+
+# Numberinput (numberinput)
+
+## Import
+```tsx
+import { NumberInput } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `NumberInput` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `number \| ""` | `-` | - |
+| `defaultValue` | `number \| ""` | `-` | - |
+| `onChange` | `(value: number \| "") => void` | `-` | - |
+| `min` | `number` | `-` | - |
+| `max` | `number` | `-` | - |
+| `step` | `number` | `1` | - |
+| `hideStepper` | `boolean` | `false` | - |
+| `error` | `ReactNode` | `-` | - |
+| `label` | `ReactNode` | `-` | - |
+| `leftIcon` | `ReactNode` | `-` | - |
+| `rightIcon` | `ReactNode` | `-` | - |
+| `description` | `ReactNode` | `-` | - |
+| `inputSize` | `"sm" \| "md" \| "lg"` | `-` | - |
+| `rightIconClassName` | `string` | `-` | - |
+| `wrapperClassName` | `string` | `-` | - |
+
+
+
+
+---
+
+# Pagination (pagination)
+
+## Import
+```tsx
+import { Pagination } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Pagination` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `page`* | `number` | `-` | The current active page number (1-indexed) |
+| `total`* | `number` | `-` | The total number of pages available |
+| `onChange`* | `(page: number) => void` | `-` | Callback fired when a new page is selected |
+| `siblings` | `number` | `1` | Number of page links to show on each side of the current page. Defaults to 1. |
+| `className` | `string` | `-` | Custom class name applied to the root navigation element |
+| `disabled` | `boolean` | `false` | Disables all interaction with the pagination controls |
+
+
+
+
+---
+
+# Passwordinput (passwordinput)
+
+## Import
+```tsx
+import { PasswordInput } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `PasswordInput` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `error` | `ReactNode` | `-` | - |
+| `label` | `ReactNode` | `-` | - |
+| `leftIcon` | `ReactNode` | `-` | - |
+| `rightIcon` | `ReactNode` | `-` | - |
+| `description` | `ReactNode` | `-` | - |
+| `inputSize` | `"sm" \| "md" \| "lg"` | `-` | - |
+| `rightIconClassName` | `string` | `-` | - |
+| `wrapperClassName` | `string` | `-` | - |
+
+
+
+
+---
+
+# Pininput (pininput)
+
+## Import
+```tsx
+import { PinInput } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `PinInput` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `length` | `number` | `4` | - |
+| `value` | `string` | `-` | - |
+| `defaultValue` | `string` | `` | - |
+| `onChange` | `(value: string) => void` | `-` | - |
+| `onComplete` | `(value: string) => void` | `-` | - |
+| `mask` | `boolean` | `false` | - |
+| `disabled` | `boolean` | `false` | - |
+| `autoFocus` | `boolean` | `false` | - |
+| `placeholder` | `string` | `○` | - |
+| `type` | `"numeric" \| "alphabetic" \| "alphanumeric"` | `numeric` | - |
+| `otp` | `boolean` | `false` | - |
+| `size` | `"sm" \| "md" \| "lg"` | `md` | - |
+
+
+
+
+---
+
+# Popover (popover)
+
+## Import
+```tsx
+import { Popover, Popover.Trigger, Popover.Content, Popover.Close } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Popover` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `defaultOpen` | `boolean` | `false` | - |
+
+### `Popover.Content` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `placement` | `PopoverPlacement` | `bottom` | Preferred placement of the popover relative to the trigger. Defaults to 'bottom' |
+| `offset` | `number` | `8` | Gap in pixels between the trigger and the popover. Defaults to 8px. |
+| `showArrow` | `boolean` | `false` | Whether to show a directional arrow pointing to the trigger. Defaults to false for modern aesthetic. |
+
+
+
+
+---
+
+# Progress (progress)
+
+## Import
+```tsx
+import { Progress } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Progress` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `number` | `-` | The current progress value |
+| `max` | `number` | `100` | The maximum possible value. Defaults to 100. |
+| `indeterminate` | `boolean` | `false` | Forces the progress bar into an animated indeterminate state |
+| `size` | `"sm" \| "md" \| "lg"` | `md` | The visual height of the progress bar. Defaults to 'md'. |
+| `variant` | `"success" \| "warning" \| "default" \| "danger"` | `default` | The semantic color variant. Defaults to 'default'. |
+| `label` | `string` | `Progress` | WAI-ARIA hidden label for screen readers. Defaults to 'Progress'. |
+
+
+
+
+---
+
+# Radiogroup (radiogroup)
+
+## Import
+```tsx
+import { RadioGroup } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `RadioGroup` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `string` | `-` | - |
+| `defaultValue` | `string` | `-` | - |
+| `onChange` | `(value: string) => void` | `-` | - |
+| `name` | `string` | `-` | - |
+| `disabled` | `boolean` | `false` | - |
+| `orientation` | `"horizontal" \| "vertical"` | `vertical` | - |
+
+
+
+
+---
+
+# Rating (rating)
+
+## Import
+```tsx
+import { Rating } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Rating` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `number` | `-` | Controlled state value |
+| `defaultValue` | `number` | `0` | Uncontrolled initial value |
+| `max` | `number` | `5` | The maximum possible rating. Determines how many icons to render. Defaults to 5. |
+| `onChange` | `(value: number) => void` | `-` | Callback fired when a rating is selected |
+| `icon` | `ReactNode` | `(  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>  </svg> )` | Custom React node for the empty state |
+| `iconFilled` | `ReactNode` | `(  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>  </svg> )` | Custom React node for the filled state |
+| `size` | `"sm" \| "md" \| "lg"` | `md` | Size variant |
+| `readOnly` | `boolean` | `false` | Makes the rating strictly decorative |
+| `disabled` | `boolean` | `false` | Disables interactions and applies a muted style |
+| `allowHalf` | `boolean` | `false` | Enables fractional half-step selections (e.g., 3.5 stars) |
+
+
+
+
+---
+
+# Resizable (resizable)
+
+## Import
+```tsx
+import { Resizable } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Resizable` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `direction` | `"horizontal" \| "vertical"` | `horizontal` | The flex layout direction. Defaults to 'horizontal'. |
+| `onLayout` | `(sizes: number[]) => void` | `-` | Callback fired when the user completes a resize action, providing an array of panel sizes (percentages) |
+
+
+
+
+---
+
+# Scrollarea (scrollarea)
+
+## Import
+```tsx
+import { ScrollArea } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `ScrollArea` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `orientation` | `"both" \| "horizontal" \| "vertical"` | `vertical` | - |
+
+
+
+
+---
+
+# Segmentedcontrol (segmentedcontrol)
+
+## Import
+```tsx
+import { SegmentedControl } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `SegmentedControl` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `options`* | `SegmentedControlOption[]` | `-` | - |
+| `value` | `string` | `-` | - |
+| `defaultValue` | `string` | `-` | - |
+| `onChange` | `(value: string) => void` | `-` | - |
+| `name` | `string` | `-` | - |
+| `disabled` | `boolean` | `false` | - |
+| `size` | `"sm" \| "md" \| "lg"` | `md` | - |
+| `fullWidth` | `boolean` | `false` | - |
+
+
+
+
+---
+
+# Select (select)
+
+## Import
+```tsx
+import { Select } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Select` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data`* | `SelectOption[]` | `-` | Array of available options |
+| `value` | `string` | `-` | Controlled state value |
+| `defaultValue` | `string` | `-` | Uncontrolled initial value |
+| `onChange` | `(value: string) => void` | `-` | Callback fired when an option is selected |
+| `placeholder` | `string` | `Select...` | Text displayed when no option is selected |
+| `name` | `string` | `-` | Name attribute applied to the hidden input for native form submission |
+| `error` | `boolean` | `false` | Applies error styling to the trigger button |
+
+
+
+
+---
+
+# Skeleton (skeleton)
+
+## Import
+```tsx
+import { Skeleton } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Skeleton` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `size` | `SkeletonSize` | `md` | The predefined height mapping for the skeleton |
+| `width` | `string \| number` | `-` | Explicit width override (supports numbers as px, or strings like '100%') |
+| `height` | `string \| number` | `-` | Explicit height override (supports numbers as px, or strings like '50px') |
+| `animated` | `boolean` | `true` | Enables or disables the sweeping shimmer animation. Defaults to true. |
+| `circle` | `boolean` | `false` | Forces the skeleton into a perfect circle, ignoring the size height |
+| `ariaHidden` | `boolean` | `true` | Hides the element from screen readers. Defaults to true (recommended). |
+
+
+
+
+---
+
+# Slider (slider)
+
+## Import
+```tsx
+import { Slider } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Slider` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `min` | `number` | `0` | The minimum allowed value. Defaults to 0. |
+| `max` | `number` | `100` | The maximum allowed value. Defaults to 100. |
+| `step` | `number` | `1` | The interval between valid values. Defaults to 1. |
+| `value` | `number` | `-` | The controlled value of the slider. |
+| `defaultValue` | `number` | `-` | The initial uncontrolled value of the slider. |
+| `onChange` | `(value: number) => void` | `-` | Callback fired when the value changes. |
+| `disabled` | `boolean` | `false` | Disables the slider and prevents interaction. |
+
+
+
+
+---
+
+# Spinner (spinner)
+
+## Import
+```tsx
+import { Spinner } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Spinner` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `size` | `"sm" \| "md" \| "lg" \| "xl"` | `md` | The predefined size of the spinner. Defaults to 'md'. |
+| `variant` | `"primary" \| "muted" \| "inverse"` | `primary` | The color theme variant. Defaults to 'primary'. |
+| `label` | `string` | `Loading...` | WAI-ARIA label read by screen readers. Defaults to 'Loading...'. |
+
+
+
+
+---
+
+# Statcard (statcard)
+
+## Import
+```tsx
+import { StatCard } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `StatCard` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `label`* | `ReactNode` | `-` | - |
+| `value`* | `ReactNode` | `-` | - |
+| `icon` | `ReactNode` | `-` | - |
+| `trend` | `"up" \| "down" \| "neutral"` | `-` | - |
+| `trendValue` | `ReactNode` | `-` | - |
+| `trendLabel` | `ReactNode` | `-` | - |
+| `isLoading` | `boolean` | `false` | - |
+| `info` | `ReactNode` | `-` | - |
+| `progressValue` | `number` | `-` | - |
+| `progressMax` | `number` | `100` | - |
+| `accent` | `"success" \| "warning" \| "default" \| "danger" \| "brand"` | `default` | - |
+| `sparklineData` | `number[]` | `-` | - |
+
+
+
+
+---
+
+# Stepper (stepper)
+
+## Import
+```tsx
+import { Stepper } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Stepper` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data`* | `(string \| StepItem)[]` | `-` | Array of steps. Can be simple strings or rich objects. |
+| `active`* | `number` | `-` | The 0-based index of the currently active step. |
+| `onChange` | `(index: number) => void` | `-` | Callback fired when a step is clicked. |
+| `disableFuture` | `boolean` | `false` | Prevents the user from clicking on steps that come after the currently active one. |
+| `orientation` | `"horizontal" \| "vertical"` | `horizontal` | The orientation of the stepper |
+
+
+
+
+---
+
+# Switch (switch)
+
+## Import
+```tsx
+import { Switch } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Switch` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `checked` | `boolean` | `-` | - |
+| `defaultChecked` | `boolean` | `-` | - |
+| `onChange` | `(checked: boolean) => void` | `-` | - |
+| `disabled` | `boolean` | `false` | - |
+| `label` | `ReactNode` | `-` | - |
+| `description` | `ReactNode` | `-` | - |
+| `name` | `string` | `-` | - |
+| `value` | `string` | `-` | - |
+| `size` | `"sm" \| "md"` | `md` | - |
+| `wrapperClassName` | `string` | `-` | - |
+
+
+
+
+---
+
+# Table (table)
+
+## Import
+```tsx
+import { Table.Header, Table.Body, Table.Row, Table.Head, Table.Cell, Table } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Table` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `columns` | `TableColumn<T>[]` | `-` | Array of column configuration objects |
+| `data` | `T[]` | `-` | Array of data objects to render |
+| `rowKey` | `string \| number \| symbol \| ((row: T) => string)` | `-` | A unique identifier for each row (string/number key, or a function that returns a string) |
+| `emptyText` | `ReactNode` | `-` | Text or React Node to display when the data array is empty |
+| `ref` | `Ref<HTMLTableElement>` | `-` | - |
+
+
+
+
+---
+
+# Tabs (tabs)
+
+## Import
+```tsx
+import { Tabs } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Tabs` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `string` | `-` | Controlled state value representing the active tab |
+| `defaultValue` | `string` | `-` | Uncontrolled initial value |
+| `onChange` | `(value: string) => void` | `-` | Callback fired when the active tab changes |
+| `data` | `TabDataItem[]` | `-` | Data array for Smart Mode mapping |
+
+
+
+
+---
+
+# Textarea (textarea)
+
+## Import
+```tsx
+import { Textarea } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Textarea` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `showCount` | `boolean` | `false` | - |
+| `autoGrow` | `boolean` | `true` | - |
+| `error` | `boolean` | `false` | - |
+| `helperId` | `string` | `-` | - |
+
+
+
+
+---
+
+# Timeline (timeline)
+
+## Import
+```tsx
+import { Timeline } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Timeline` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data` | `TimelineItem[]` | `-` | Array of items for Smart Default mode |
+| `orientation` | `"horizontal" \| "vertical"` | `vertical` | - |
+| `hideLine` | `boolean` | `false` | If true, hides the connecting lines between all nodes |
+
+
+
+
+---
+
+# Timepicker (timepicker)
+
+## Import
+```tsx
+import { TimePicker } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `TimePicker` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `string` | `-` | Standard HTML5 time format: HH:mm (24-hour format internally) |
+| `defaultValue` | `string` | `-` | Uncontrolled default time |
+| `onChange` | `(v: string) => void` | `-` | Callback fired when a time segment is selected |
+| `clockType` | `12 \| 24` | `12` | 12-hour or 24-hour clock formatting. Defaults to 12. |
+| `minuteStep` | `number` | `1` | Step interval for the minute column. Defaults to 1. |
+| `placeholder` | `string` | `Select time` | Placeholder text when empty |
+| `name` | `string` | `-` | Name attribute for the hidden input (for native forms) |
+| `disabled` | `boolean` | `false` | Disables the time picker trigger |
+
+
+
+
+---
+
+# Timerangepicker (timerangepicker)
+
+## Import
+```tsx
+import { TimeRangePicker } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `TimeRangePicker` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `TimeRange` | `-` | Controlled time range object |
+| `defaultValue` | `TimeRange` | `-` | Uncontrolled default time range object |
+| `onChange` | `(v: TimeRange) => void` | `-` | Callback fired when either the start or end time changes |
+| `clockType` | `12 \| 24` | `12` | Uses 12-hour or 24-hour clock formatting. Defaults to 12. |
+| `minuteStep` | `number` | `1` | Step interval for the minute column. Defaults to 1. |
+| `placeholder` | `string` | `Select time range` | Placeholder text displayed when no range is selected |
+| `nameFrom` | `string` | `-` | Name attribute applied to the "from" hidden input for native forms |
+| `nameTo` | `string` | `-` | Name attribute applied to the "to" hidden input for native forms |
+| `disabled` | `boolean` | `false` | Disables the picker entirely |
+
+
+
+
+---
+
+# Toast (toast)
+
+## Import
+```tsx
+import { ToastProvider } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+*This component inherits standard HTML props or has no custom props documented.*
+
+
+---
+
+# Tooltip (tooltip)
+
+## Import
+```tsx
+import { Tooltip } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Tooltip` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `label`* | `ReactNode` | `-` | The text or content displayed inside the tooltip |
+| `children`* | `ReactElement<unknown, string \| JSXElementConstructor<any>>` | `-` | The trigger element. Must be a single valid React Element (like a button) |
+| `className` | `string` | `-` | Additional CSS classes for the tooltip container |
+| `delay` | `number` | `200` | Delay in milliseconds before showing the tooltip on hover/focus. Defaults to 200. |
+| `offset` | `number` | `8` | Distance in pixels between the tooltip and the trigger. Defaults to 8. |
+
+
+
+
+---
+
+# Transferlist (transferlist)
+
+## Import
+```tsx
+import { TransferList } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `TransferList` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `options`* | `TransferListOption[]` | `-` | - |
+| `value` | `string[]` | `-` | - |
+| `defaultValue` | `string[]` | `[]` | - |
+| `onChange` | `(value: string[]) => void` | `-` | - |
+| `leftTitle` | `ReactNode` | `Available` | - |
+| `rightTitle` | `ReactNode` | `Selected` | - |
+| `className` | `string` | `-` | - |
+
+
+
+
+---
+
+# Treeview (treeview)
+
+## Import
+```tsx
+import { TreeContext, TreeView, TreeView.Item } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `TreeView` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `data` | `TreeNode[]` | `-` | - |
+| `selectedId` | `string` | `-` | - |
+| `defaultExpandedIds` | `string[]` | `[]` | - |
+| `onSelect` | `(id: string, node: any) => void` | `-` | - |
+
+### `TreeView.Item` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `id`* | `string` | `-` | - |
+| `label`* | `ReactNode` | `-` | - |
+| `icon` | `ReactNode` | `-` | - |
+| `disabled` | `boolean` | `-` | - |
+| `level` | `number` | `1` | - |
+| `tabIndex` | `number` | `-` | - |
+
+
+
+
+---
+
+# Video (video)
+
+## Import
+```tsx
+import { VideoPlayer } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `VideoPlayer` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `url`* | `string` | `-` | - |
+| `className` | `string` | `-` | - |
+
+
+
+
+---
+
+# Virtuallist (virtuallist)
+
+## Import
+```tsx
+import { VirtualList } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `VirtualList` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `items`* | `T[]` | `-` | Array of data items to render |
+| `height` | `number` | `-` | Height of the scrollable viewport in pixels. If omitted, it will automatically size to its container. |
+| `itemHeight` | `number` | `-` | Fixed height for each row in pixels. Defaults to 40. |
+| `overscan` | `number` | `-` | Extra rows to render above and below the viewport to prevent white flashes during fast scrolling |
+| `keyExtractor` | `(item: T, index: number) => string \| number` | `-` | Extracts a unique React key for each item. Crucial for stable rendering during sorts/filters! |
+| `renderItem`* | `(item: T, index: number) => ReactNode` | `-` | The render function for the row |
+| `ref` | `ForwardedRef<VirtualListHandle>` | `-` | - |
+
+
+
+
+---
+
+# Watermark (watermark)
+
+## Import
+```tsx
+import { Watermark } from '@nofinite/nui';
+```
+
+## Architecture & Styling Rules
+- **Semantic Tokens ONLY:** Use `bg-surface`, `text-default`, `border-subtle`, `bg-primary-subtle`, `text-danger`, etc. DO NOT USE raw tailwind colors (no `bg-blue-500`, no `text-gray-900`).
+- **Accessibility:** Must adhere to strict WAI-ARIA standards. Ensure proper `role` and `aria-*` attributes.
+
+## API / Props
+### `Watermark` Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `text`* | `string \| string[]` | `-` | The text to display. Can be an array for multi-line watermarks. |
+| `opacity` | `number` | `0.05` | - |
+| `rotate` | `number` | `-20` | - |
+| `gap` | `number` | `120` | The spacing between watermark instances |
+| `fontSize` | `number` | `16` | - |
+| `color` | `string` | `currentColor` | - |
+| `zIndex` | `number` | `10` | - |
+
+

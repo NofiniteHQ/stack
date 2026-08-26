@@ -335,7 +335,7 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  <div className="flex h-[220px] rounded-md overflow-hidden focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]">
  
  {/* HOURS */}
- <div role="listbox" aria-label="Hours" className="flex flex-col overflow-y-auto p-2 w-16 border-r border-default last:border-r-0 scroll-smooth scrollbar-hide" ref={hourColRef}>
+ <div role="listbox" aria-label="Hours" className="flex flex-1 flex-col overflow-y-auto p-2 min-w-[72px] border-r border-default last:border-r-0 scroll-smooth scrollbar-hide" ref={hourColRef}>
  {hours.map((h) => {
  const sel = parsed.hour === h;
  return (
@@ -344,7 +344,7 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  role="option"
  aria-selected={sel}
  className={cn(
- "shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
+ "shrink-0 flex items-center justify-center h-9 w-full min-w-[40px] mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
  sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary"
  )}
  onClick={() => commit(h, parsed.minute, parsed.ampm)}
@@ -356,7 +356,7 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  </div>
 
  {/* MINUTES */}
- <div role="listbox" aria-label="Minutes" className="flex flex-col overflow-y-auto p-2 w-16 border-r border-default last:border-r-0 scroll-smooth scrollbar-hide" ref={minColRef}>
+ <div role="listbox" aria-label="Minutes" className="flex flex-1 flex-col overflow-y-auto p-2 min-w-[72px] border-r border-default last:border-r-0 scroll-smooth scrollbar-hide" ref={minColRef}>
  {minutes.map((m) => {
  const sel = parsed.minute === m;
  return (
@@ -365,7 +365,7 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  role="option"
  aria-selected={sel}
  className={cn(
- "shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
+ "shrink-0 flex items-center justify-center h-9 w-full min-w-[40px] mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
  sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary"
  )}
  onClick={() => commit(parsed.hour, m, parsed.ampm)}
@@ -378,7 +378,7 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
 
  {/* AM / PM (Only for 12h clock) */}
  {clockType === 12 && (
- <div role="listbox" aria-label="AM/PM" className="flex flex-col overflow-y-auto p-2 w-16 border-r border-default last:border-r-0 scroll-smooth scrollbar-hide" ref={ampmColRef}>
+ <div role="listbox" aria-label="AM/PM" className="flex flex-1 flex-col overflow-y-auto p-2 min-w-[72px] border-r border-default last:border-r-0 scroll-smooth scrollbar-hide" ref={ampmColRef}>
  {(['AM', 'PM'] as const).map((a) => {
  const sel = parsed.ampm === a;
  return (
@@ -387,7 +387,7 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(({
  role="option"
  aria-selected={sel}
  className={cn(
- "shrink-0 flex items-center justify-center h-9 w-9 mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
+ "shrink-0 flex items-center justify-center h-9 w-full min-w-[40px] mx-auto bg-transparent border-none rounded-md text-default text-sm cursor-pointer transition-colors duration-200 hover:bg-subtle focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
  sel && "bg-primary text-inverse hover:bg-primary hover:text-inverse focus-visible:bg-primary"
  )}
  onClick={() => commit(parsed.hour, parsed.minute, a)}

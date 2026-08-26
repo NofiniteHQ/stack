@@ -1,10 +1,12 @@
 /* src/components/layout/Container.tsx */
 import React, { forwardRef } from 'react';
-import { cn } from '../../utils';
+import { cn, Slot } from '../../utils';
 
 export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
  /** The maximum width bounds for the container. Defaults to 'lg'. */
  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+ /** Merges props into the immediate child when true, allowing polymorphic rendering */
+ asChild?: boolean;
 }
 
 const sizeClasses = {
@@ -24,16 +26,18 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(({
  size = 'lg',
  className,
  children,
+ asChild = false,
  ...props
 }, ref) => {
+ const Comp = asChild ? Slot : "div";
  return (
- <div
+ <Comp
  ref={ref}
  className={cn("w-full mx-auto px-4", sizeClasses[size], className)}
  {...props}
  >
  {children}
- </div>
+ </Comp>
  );
 });
 
