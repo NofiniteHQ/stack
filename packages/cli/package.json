@@ -1,7 +1,7 @@
 {
   "name": "nofinite",
   "version": "0.0.1",
-  "description": "The official CLI for Nofinite and @nofinite/nui",
+  "description": "The official CLI for Nofinite.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",

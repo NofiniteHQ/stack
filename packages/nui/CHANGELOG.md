@@ -1,5 +1,11 @@
 # @nofinite/nui
 
+## 3.0.5
+
+### Patch Changes
+
+- 96fb026: fix: remove redundant AnimatePresence in TabsRoot to prevent framer-motion mode wait warnings
+
 ## 3.0.4
 
 ### Patch Changes
