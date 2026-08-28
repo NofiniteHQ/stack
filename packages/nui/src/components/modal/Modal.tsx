@@ -156,7 +156,7 @@ export function Modal({
  aria-describedby={description ? descId : undefined}
  tabIndex={-1} 
  onClick={(e) => e.stopPropagation()}
- {...props}
+ {...(props as any)}
  >
  {(title || description) && (
  <div className={cn("p-5 pb-3 pr-10")}>

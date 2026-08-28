@@ -9,7 +9,7 @@ import React, {
  useCallback,
  useId,
 } from 'react';
-import { useFloating, autoUpdate, offset, flip, shift, size, arrow } from '@floating-ui/react-dom';
+import { useFloating, autoUpdate, offset, flip, shift, arrow } from '@floating-ui/react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
 import { Portal, onClickOutside } from '../../utils';
@@ -158,7 +158,7 @@ HoverCardTrigger.displayName = 'HoverCard.Trigger';
 /* -------------------------------------------------------
  * 3. Content
  * ------------------------------------------------------*/
-export interface HoverCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface HoverCardContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
  children: React.ReactNode;
  /** Preferred placement of the card relative to the trigger. Defaults to 'bottom' */
  placement?: HoverCardPlacement;
@@ -252,7 +252,7 @@ export function HoverCardContent({
  clearTimers();
  }}
  onMouseLeave={scheduleClose}
- {...props}
+ {...(props as any)}
  >
  {!hideArrow && (
     <div

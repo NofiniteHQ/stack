@@ -11,8 +11,7 @@ import { Calendar } from '../calendar/Calendar';
 /* ------------------------------------------
  Helpers
 ------------------------------------------- */
-const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-const toISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
 
 function fromISO(s?: string | null): Date | null {
   if (!s) return null;

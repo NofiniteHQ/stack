@@ -50,7 +50,7 @@ export function Carousel({
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
   
-  const isScrollingTimeout = useRef<NodeJS.Timeout | null>(null);
+  const isScrollingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const teleportTo = useCallback((targetVirtualIndex: number, currentVirtualIndex: number) => {
     const container = scrollRef.current;
@@ -219,6 +219,7 @@ export function Carousel({
       handleScroll();
       return () => el.removeEventListener('scroll', handleScroll);
     }
+    return undefined;
   }, [handleScroll]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

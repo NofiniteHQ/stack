@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
-import { VirtualList } from '../virtuallist/VirtualList';
+import { VirtualList, VirtualListHandle } from '../virtuallist/VirtualList';
 
 export interface ComboboxOption {
  label: string;
@@ -82,7 +82,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  const [open, setOpen] = useState(false);
  const [activeIndex, setActiveIndex] = useState<number>(-1);
  const wrapperRef = useRef<HTMLDivElement | null>(null);
- const listRef = useRef<HTMLDivElement | null>(null);
+ const listRef = useRef<VirtualListHandle | null>(null);
 
  // Merge forwarded ref with our internal wrapper ref
  const setRefs = useCallback(
@@ -148,18 +148,7 @@ export const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
  // Auto-scroll for VirtualList
  useEffect(() => {
  if (open && listRef.current && activeIndex >= 0) {
- const list = listRef.current;
- const itemHeight = 36;
- const scrollTop = list.scrollTop;
- const viewportHeight = list.clientHeight || 240;
- const itemTop = activeIndex * itemHeight;
- const itemBottom = itemTop + itemHeight;
-
- if (itemTop < scrollTop) {
- list.scrollTop = itemTop;
- } else if (itemBottom > scrollTop + viewportHeight) {
- list.scrollTop = itemBottom - viewportHeight;
- }
+ listRef.current.scrollToIndex(activeIndex);
  }
  }, [activeIndex, open]);
 

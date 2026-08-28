@@ -49,7 +49,7 @@ export interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'o
  * 2. Tabs List
  * ============================================================ */
 
-export interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface TabsListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
  children: React.ReactNode;
 }
 
@@ -101,7 +101,7 @@ const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
  aria-orientation="horizontal"
  className={cn("flex flex-nowrap gap-4 border-b border-default overflow-x-auto scrollbar-hide", className)}
  onKeyDown={handleKeyDown}
- {...props}
+ {...(props as any)}
  >
  {children}
  </div>
@@ -154,7 +154,7 @@ const TabsTrigger = forwardRef<HTMLButtonElement, TabsTriggerProps>(
  if (!disabled) onValueChange(value);
  onFocus?.(e);
  }}
- {...props}
+ {...(props as any)}
  >
  {children}
  {isSelected && (
@@ -173,7 +173,7 @@ TabsTrigger.displayName = 'Tabs.Trigger';
  * 4. Tabs Content
  * ============================================================ */
 
-export interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface TabsContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
  /** The unique identifier connecting this panel to its trigger */
  value: string;
 }
@@ -202,7 +202,7 @@ const TabsContent = forwardRef<HTMLDivElement, TabsContentProps>(
  exit={{ opacity: 0 }}
  transition={{ duration: 0.2 }}
  className={cn("py-6 text-default outline-none focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:rounded-sm", className)}
- {...props}
+ {...(props as any)}
  >
  {children}
  </motion.div>
@@ -238,7 +238,7 @@ const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(
 
  return (
  <TabsContext.Provider value={{ value: currentValue, onValueChange: handleValueChange, idPrefix }}>
- <div ref={ref} className={cn("flex flex-col w-full font-sans", className)} {...props}>
+ <div ref={ref} className={cn("flex flex-col w-full font-sans", className)} {...(props as any)}>
  {data ? (
    <>
     <TabsList>

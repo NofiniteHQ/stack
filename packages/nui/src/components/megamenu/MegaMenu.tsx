@@ -45,7 +45,7 @@ function useMegaMenuItem() {
  * 1. MegaMenu Root
  * ============================================================ */
 
-export type MegaMenuProps = React.HTMLAttributes<HTMLDivElement>;
+export type MegaMenuProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'>;
 
 const MegaMenuRoot = forwardRef<HTMLDivElement, MegaMenuProps>(({
   className,
@@ -111,7 +111,7 @@ const MegaMenuRoot = forwardRef<HTMLDivElement, MegaMenuProps>(({
             setActiveValue(null);
           }
         }}
-        {...props}
+        {...(props as any)}
       >
         {children}
       </div>
@@ -136,7 +136,7 @@ const MegaMenuItem = forwardRef<HTMLDivElement, MegaMenuItemProps>(({
 }, ref) => {
   return (
     <MegaMenuItemContext.Provider value={{ value }}>
-      <div ref={ref} className={cn("inline-block", className)} {...props}>
+      <div ref={ref} className={cn("inline-block", className)} {...(props as any)}>
         {children}
       </div>
     </MegaMenuItemContext.Provider>
@@ -200,7 +200,7 @@ const MegaMenuTrigger = forwardRef<HTMLButtonElement, MegaMenuTriggerProps>(({
         setActiveTriggerNode(e.currentTarget);
         onClick?.(e);
       }}
-      {...props}
+      {...(props as any)}
     >
       {children}
       <svg 
@@ -219,7 +219,7 @@ MegaMenuTrigger.displayName = 'MegaMenu.Trigger';
  * 4. MegaMenu Content
  * ============================================================ */
 
-export type MegaMenuContentProps = React.HTMLAttributes<HTMLDivElement>;
+export type MegaMenuContentProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'>;
 
 const MegaMenuContent = forwardRef<HTMLDivElement, MegaMenuContentProps>(({
   className,
@@ -243,7 +243,7 @@ const MegaMenuContent = forwardRef<HTMLDivElement, MegaMenuContentProps>(({
       exit={{ opacity: 0, x: 10, position: 'absolute' }}
       transition={{ duration: 0.2 }}
       className={cn("w-max top-0 left-0", className)}
-      {...props}
+      {...(props as any)}
     >
       {children}
     </motion.div>,
@@ -256,7 +256,7 @@ MegaMenuContent.displayName = 'MegaMenu.Content';
  * 5. MegaMenu Viewport
  * ============================================================ */
 
-export type MegaMenuViewportProps = React.HTMLAttributes<HTMLDivElement>;
+export type MegaMenuViewportProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'>;
 
 const MegaMenuViewport = forwardRef<HTMLDivElement, MegaMenuViewportProps>(({
   className,
@@ -282,7 +282,7 @@ const MegaMenuViewport = forwardRef<HTMLDivElement, MegaMenuViewportProps>(({
               "relative bg-surface backdrop-blur-md ring-1 ring-[var(--border-default)] rounded-lg shadow-2xl overflow-hidden transform-gpu",
               className
             )}
-            {...props}
+            {...(props as any)}
           >
             {/* The Portal target node */}
             <div 
@@ -319,7 +319,7 @@ const MegaMenuLink = forwardRef<HTMLAnchorElement, MegaMenuLinkProps>(({
         "block w-full cursor-pointer select-none rounded-md px-3 py-2 text-sm font-medium text-default no-underline transition-colors hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:bg-subtle",
         className
       )}
-      {...props}
+      {...(props as any)}
     >
       {children}
     </a>

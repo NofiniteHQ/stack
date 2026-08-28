@@ -69,7 +69,7 @@ const TimelineRoot = React.forwardRef<HTMLDivElement, TimelineProps>(({
         )}
         role="list"
         aria-label="Timeline"
-        {...props}
+        {...(props as any)}
       >
         {data ? data.map((item, index) => (
           <TimelineItem key={item.id} index={index}>
@@ -112,7 +112,7 @@ const TimelineItem = React.forwardRef<HTMLDivElement, TimelineItemProps>(({
         className
       )}
       role="listitem"
-      {...props}
+      {...(props as any)}
     >
       {!shouldHideLine && (
         <div 
@@ -150,7 +150,7 @@ const TimelineNode = React.forwardRef<HTMLDivElement, TimelineNodeProps>(({
       statusBorders[status],
       className
     )}
-    {...props}
+    {...(props as any)}
   >
     {children ?? (
       icon ? (
@@ -163,7 +163,7 @@ const TimelineNode = React.forwardRef<HTMLDivElement, TimelineNodeProps>(({
 ));
 TimelineNode.displayName = 'Timeline.Node';
 
-export interface TimelineContentProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface TimelineContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'onDrag' | 'onDragStart' | 'onDragEnd'> {
   time?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -188,7 +188,7 @@ const TimelineContent = React.forwardRef<HTMLDivElement, TimelineContentProps>((
         isVert ? "ml-6 pt-1" : "mt-6 ml-1",
         className
       )}
-      {...props}
+      {...(props as any)}
     >
       {children ?? (
         <>

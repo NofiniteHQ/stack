@@ -8,12 +8,15 @@ import React, {
  useState,
  useId,
 } from 'react';
-import { useFloating, autoUpdate, offset, flip, shift, size, arrow } from '@floating-ui/react-dom';
+import { useFloating, autoUpdate, offset, flip, shift, arrow, Placement } from '@floating-ui/react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils';
 import { Portal, restoreFocus, trapFocus, onClickOutside } from '../../utils';
 
-export type PopoverPlacement = 'top' | 'bottom' | 'left' | 'right';
+/* -------------------------------------------------------
+ * Types
+ * ------------------------------------------------------*/
+export type PopoverPlacement = Placement;
 
 /* -------------------------------------------------------
  * Context
@@ -108,7 +111,7 @@ PopoverTrigger.displayName = 'Popover.Trigger';
 /* -------------------------------------------------------
  * 3. Content
  * ------------------------------------------------------*/
-export interface PopoverContentProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface PopoverContentProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
  children: React.ReactNode;
  /** Preferred placement of the popover relative to the trigger. Defaults to 'bottom' */
  placement?: PopoverPlacement;
@@ -205,7 +208,7 @@ export function PopoverContent({
  'z-[9999] min-w-[220px] max-w-[360px] p-4 bg-surface backdrop-blur-md text-default font-sans border border-default rounded-lg shadow-2xl',
  className
  )}
- {...props}
+ {...(props as any)}
  style={{
  position: 'absolute',
  top: y ?? 0,

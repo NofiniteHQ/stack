@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '../../utils';
 import { Input, InputProps } from '../input/Input';
