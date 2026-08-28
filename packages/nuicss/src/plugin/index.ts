@@ -1,3 +1,4 @@
+import '../styles/index.css';
 
 
 export { nuicssPreset } from './preset';
