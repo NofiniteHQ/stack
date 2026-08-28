@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { defineConfig } from 'unocss';
-import { nuicssPreset } from '../../nuicss/dist/index.mjs';
+import { nuicssPreset } from '../../nuicss/src/plugin/index';
 
 export default defineConfig({
   presets: [
