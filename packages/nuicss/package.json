@@ -54,6 +54,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@unocss/config": "^66.7.5",
     "@unocss/postcss": "^66.7.5",
     "@unocss/vite": "^66.7.5",
     "glob": "^13.0.6",
