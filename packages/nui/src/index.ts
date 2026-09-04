@@ -19,6 +19,7 @@ export * from './components/contextmenu/ContextMenu';
 export * from './components/datepicker/DatePicker';
 export * from './components/daterangepicker/DateRangePicker';
 export * from './components/dialog/DialogProvider';
+export * from './components/dialog/dialogStore';
 export * from './components/divider/Divider';
 export * from './components/drawer/Drawer';
 export * from './components/dropdown';
