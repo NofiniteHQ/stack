@@ -68,7 +68,6 @@ export default defineConfig({
       external: [
         /^react(\/.*)?$/,
         /^unocss(\/.*)?$/,
-        /^@nofinite\/nuicss(\/.*)?$/,
         ...externalDeps
       ],
       treeshake: true,
