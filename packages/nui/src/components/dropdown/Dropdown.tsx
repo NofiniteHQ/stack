@@ -44,7 +44,7 @@ export type DropdownDataItem = {
   disabled?: boolean;
 };
 
-export interface DropdownRootProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DropdownRootProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
   children: React.ReactNode;
   data?: DropdownDataItem[];
   align?: 'start' | 'end';
@@ -122,7 +122,7 @@ DropdownTrigger.displayName = 'Dropdown.Trigger';
  * 3. Dropdown Menu
  * ============================================================ */
 
-export interface DropdownMenuProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DropdownMenuProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
  children: React.ReactNode;
  align?: 'start' | 'end';
 }
@@ -231,7 +231,7 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
  left: x ?? 0,
  transformOrigin: placement.startsWith('top') ? 'bottom left' : 'top left'
  }}
- {...props}
+ {...(props as any)}
  >
  {children}
  </motion.div>
@@ -247,7 +247,7 @@ DropdownMenu.displayName = 'Dropdown.Menu';
  * 4. Dropdown Item
  * ============================================================ */
 
-export interface DropdownItemProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DropdownItemProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
  children: React.ReactNode;
  onSelect?: () => void;
 }
@@ -277,7 +277,7 @@ const DropdownItem = forwardRef<HTMLDivElement, DropdownItemProps>(
  tabIndex={-1} 
  onClick={handleClick}
  onKeyDown={handleKeyDown}
- {...props}
+ {...(props as any)}
  >
  {children}
  </div>
@@ -304,7 +304,7 @@ const DropdownRoot = forwardRef<HTMLDivElement, DropdownRootProps>(
 
     return (
       <DropdownContext.Provider value={{ open, setOpen, triggerRef, id }}>
-        <div ref={ref} className={cn("relative inline-block font-sans", className)} {...props}>
+        <div ref={ref} className={cn("relative inline-block font-sans", className)} {...(props as any)}>
           {data ? (
             <>
               <DropdownTrigger>{children}</DropdownTrigger>

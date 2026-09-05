@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # NUI
 
@@ -38,11 +38,8 @@ NUI provides a set of accessible, production-ready components to help you build 
 
 ## Architecture
 
-NUI follows a **decoupled styling architecture**:
-1. **`@nofinite/nui`**: Contains purely the React logic, accessibility primitives, and component structures.
-2. **`@nofinite/nuicss`**: The dedicated CSS engine that handles all NUI component styling, tokens, and themes.
-
-This separation allows you to integrate NUI into your existing CSS pipeline effortlessly, or use the pre-compiled NUI CSS via CDN.
+NUI is designed to be **completely standalone and zero-config**:
+All component styles, animations, and semantic design tokens are compiled into a single optimized stylesheet at build-time. You do not need to install any external CSS framework or configure UnoCSS/Tailwind to use NUI.
 
 ---
 
@@ -50,25 +47,23 @@ This separation allows you to integrate NUI into your existing CSS pipeline effo
 
 ```bash
 # pnpm
-pnpm add @nofinite/nui @nofinite/nuicss
+pnpm add @nofinite/nui
 
 # npm
-npm install @nofinite/nui @nofinite/nuicss
+npm install @nofinite/nui
 
 # yarn
-yarn add @nofinite/nui @nofinite/nuicss
+yarn add @nofinite/nui
 ```
 
 ## Quick Start
 
-### 1. Import CSS
-Import the pre-compiled `nuicss` engine at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+### 1. Import Styles
+Import the pre-compiled stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
 
 ```tsx
-import '@nofinite/nuicss';
+import '@nofinite/nui/styles.css';
 ```
-
-*(Alternatively, you can load it via our CDN in your HTML `<head>`: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss@3/dist/index.css">`)*
 
 ### 2. Add the Provider
 Wrap your application in the `<NUIProvider>` to automatically manage dark mode, theme toggling, and layout state.

@@ -55,7 +55,8 @@ export type CalendarProps = CalendarSingleProps | CalendarRangeProps;
 
 export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
   (props, ref) => {
-    const { minDate, maxDate, locale = 'en-US', className, mode = 'single', defaultMonth, ...restProps } = props;
+    // Destructure value, defaultValue, onChange so they don't leak into restProps
+    const { minDate, maxDate, locale = 'en-US', className, mode = 'single', defaultMonth, value, defaultValue, onChange, ...restProps } = props as any;
 
     // --- State Initialization ---
     // Single Mode

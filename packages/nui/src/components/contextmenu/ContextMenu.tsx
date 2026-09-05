@@ -2,13 +2,12 @@
 
 import React, {
  useEffect,
- useRef,
  useState,
  useLayoutEffect,
  ReactNode,
  KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
-import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
+import { useFloating, offset, flip, shift } from '@floating-ui/react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, Portal, onClickOutside } from '../../utils';
 
@@ -52,9 +51,8 @@ export function ContextMenu({
 }: ContextMenuProps) {
  const [open, setOpen] = useState(false);
  const [activeIndex, setActiveIndex] = useState<number>(0);
- const [coords, setCoords] = useState({ x: 0, y: 0 });
 
- const { refs, x, y, placement: floatingPlacement } = useFloating<HTMLElement>({
+ const { refs, x, y, placement: floatingPlacement } = useFloating({
  open,
  placement: 'bottom-start',
  middleware: [
@@ -69,7 +67,6 @@ export function ContextMenu({
  ---------------------------------------------------- */
  const handleContext = (e: React.MouseEvent) => {
  e.preventDefault();
- setCoords({ x: e.clientX, y: e.clientY });
  
  refs.setReference({
  getBoundingClientRect: () => ({
@@ -81,7 +78,7 @@ export function ContextMenu({
  bottom: e.clientY,
  width: 0,
  height: 0,
- }),
+ } as DOMRect),
  });
 
  setOpen(true);

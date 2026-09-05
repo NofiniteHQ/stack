@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, KeyboardEvent, ClipboardEvent } from 'react';
 import { cn } from '../../utils';
-import { Input } from '../input/Input';
+
 
 export interface PinInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   length?: number;

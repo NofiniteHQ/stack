@@ -18,10 +18,11 @@ export const Kbd = React.forwardRef<HTMLElement, KbdProps>(({ className, childre
 
   let content = children;
   
-  if (typeof content === 'string' && !isMac) {
-    content = content.replace(/⌘|cmd|command/gi, 'Ctrl');
-    content = content.replace(/⌥|option/gi, 'Alt');
-    content = content.replace(/⇧|shift/gi, 'Shift');
+  if (typeof children === 'string' && !isMac) {
+    let str = children.replace(/⌘|cmd|command/gi, 'Ctrl');
+    str = str.replace(/⌥|option/gi, 'Alt');
+    str = str.replace(/⇧|shift/gi, 'Shift');
+    content = str;
   }
 
   return (

@@ -17,7 +17,7 @@ export const useCollapsible = () => {
   return context;
 };
 
-export interface CollapsibleProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CollapsibleProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onToggle' | 'onDrag' | 'onDragStart' | 'onDragEnd'> {
   defaultOpen?: boolean;
   isOpen?: boolean;
   onToggle?: (isOpen: boolean) => void;

@@ -37,8 +37,6 @@ export function nuicssPreset(): NuicssConfig {
     content: {
       pipeline: {
         include: [
-          /.*\/node_modules\/@nofinite\/nui\/.*\.js$/,
-          /.*\/node_modules\/@nofinite\/nui\/.*\.cjs$/,
           /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
           'src/**/*.{js,ts,jsx,tsx}',
         ],

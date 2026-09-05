@@ -16,7 +16,7 @@ import {
 /* ----------------------------------------------------
  Props
 ---------------------------------------------------- */
-export interface DrawerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'onDrag' | 'onDragStart' | 'onDragEnd'> {
  /** Controls the open/closed state of the drawer */
  open: boolean;
  /** Callback fired when the drawer requests to be closed (e.g., Escape key, outside click) */
@@ -184,7 +184,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
  transition={{ type: 'tween', ease: [0.32, 0.72, 0, 1], duration: transitionDuration }}
  role="dialog"
  aria-modal="true"
- {...props}
+ {...(props as any)}
  >
  {(title || description) && (
    <div className="p-5 pb-3 pr-10 shrink-0">

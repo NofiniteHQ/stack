@@ -23,7 +23,7 @@ export default defineConfig(() => ({
     },
     rollupOptions: {
       external: [
-        'fs', 'path', 'vite', 'postcss', 'glob', 'jiti', 'unocss', '@unocss/vite', '@unocss/postcss',
+        'fs', 'path', 'vite', 'postcss', 'glob', 'jiti', 'unocss', '@unocss/vite', '@unocss/postcss', '@unocss/config', '@unocss/core',
         /^node:/, 'os', 'crypto', 'util', 'assert', 'url', 'process', 'tty', 'vm', 'perf_hooks'
       ],
     },
