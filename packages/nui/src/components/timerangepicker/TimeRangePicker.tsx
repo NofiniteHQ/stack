@@ -5,11 +5,9 @@ import React, {
  useRef,
  useEffect,
  useMemo,
- useCallback,
- useLayoutEffect,
  forwardRef,
 } from 'react';
-import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
+import { useFloating, autoUpdate, offset, flip, shift } from '@floating-ui/react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '../../utils';
 import { Portal, onClickOutside, restoreFocus } from '../../utils';

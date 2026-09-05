@@ -3,12 +3,11 @@
 import React, {
  useState,
  useRef,
- useLayoutEffect,
  useEffect,
  useCallback,
  useId,
 } from 'react';
-import { useFloating, autoUpdate, offset as floatingOffset, flip, shift, size, arrow } from '@floating-ui/react-dom';
+import { useFloating, autoUpdate, offset as floatingOffset, flip, shift, arrow } from '@floating-ui/react-dom';
 import { cn } from '../../utils';
 import { Portal } from '../../utils';
 import { motion, AnimatePresence } from 'framer-motion';

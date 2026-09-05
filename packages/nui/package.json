@@ -16,6 +16,7 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
+    "./styles.css": "./dist/styles.css",
     "./components/*": {
       "types": "./dist/types/components/*.d.ts",
       "import": "./dist/components/*.js",
@@ -81,9 +82,11 @@
     "@hookform/resolvers": "^5.7.1",
     "@nofinite/nuicss": "workspace:*",
     "@storybook/test-runner": "^0.24.4",
+    "@unocss/vite": "^66.7.5",
     "jest-image-snapshot": "^6.5.2",
     "playwright": "^1.62.0",
     "react-docgen-typescript": "^2.4.0",
+    "unocss": "^66.7.5",
     "valibot": "^1.4.2",
     "vitest-axe": "^0.1.0"
   }

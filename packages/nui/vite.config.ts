@@ -4,6 +4,7 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import fs from 'node:fs';
 import path from 'node:path';
+import UnoCSS from 'unocss/vite';
 
 const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
 const externalDeps = [
@@ -20,6 +21,9 @@ export default defineConfig({
   },
 
   plugins: [
+    UnoCSS({
+      configFile: path.resolve(__dirname, 'nuicss.config.ts')
+    }),
     react(),
     nxViteTsPaths(),
 
@@ -56,7 +60,8 @@ export default defineConfig({
       entry: {
         index: 'src/index.build.ts',
       },
-      cssFileName: 'index',
+      name: 'nui',
+      cssFileName: 'styles',
     },
 
     rollupOptions: {
@@ -72,14 +77,14 @@ export default defineConfig({
           format: 'es',
           dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
-          preserveModulesRoot: 'src',
+          preserveModulesRoot: path.resolve(__dirname, 'src'),
           entryFileNames: '[name].js',
         },
         {
           format: 'cjs',
           dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
-          preserveModulesRoot: 'src',
+          preserveModulesRoot: path.resolve(__dirname, 'src'),
           entryFileNames: '[name].cjs',
           exports: 'named',
         },

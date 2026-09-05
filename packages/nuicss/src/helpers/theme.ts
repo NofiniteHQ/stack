@@ -10,7 +10,7 @@ export function getThemeValue(category: string, key: string, fallback?: string):
     return fallback || '';
   }
   
-  const varName = `--nui-${category}-${key}`;
+  const varName = `--${category}-${key}`;
   const root = document.documentElement;
   
   // getComputedStyle can be expensive if called in a tight loop, 

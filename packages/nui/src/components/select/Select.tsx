@@ -5,14 +5,13 @@ import React, {
  useRef,
  useEffect,
  useCallback,
- useLayoutEffect,
  KeyboardEvent,
  forwardRef,
 } from 'react';
 import { Portal, onClickOutside, restoreFocus, cn } from '../../utils';
 import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { VirtualList } from '../virtuallist/VirtualList';
+import { VirtualList, VirtualListHandle } from '../virtuallist/VirtualList';
 
 /* ============================================================
  * Types
@@ -91,7 +90,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  // Used for WAI-ARIA keyboard typeahead navigation
  const typeaheadRef = useRef({ buffer: '', lastTime: 0 });
  const triggerRef = useRef<HTMLButtonElement | null>(null);
- const listRef = useRef<HTMLDivElement | null>(null);
+ const listRef = useRef<VirtualListHandle | null>(null);
 
  const reactId = React.useId();
  const baseId = id ?? reactId;
@@ -155,18 +154,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(({
  // Auto-scroll to active item when navigating via keyboard
  useEffect(() => {
  if (open && listRef.current && activeIndex >= 0) {
- const list = listRef.current;
- const itemHeight = 36; 
- const scrollTop = list.scrollTop;
- const viewportHeight = list.clientHeight || 240;
- const itemTop = activeIndex * itemHeight;
- const itemBottom = itemTop + itemHeight;
-
- if (itemTop < scrollTop) {
- list.scrollTop = itemTop;
- } else if (itemBottom > scrollTop + viewportHeight) {
- list.scrollTop = itemBottom - viewportHeight;
- }
+ listRef.current.scrollToIndex(activeIndex);
  }
  }, [activeIndex, open]);
 

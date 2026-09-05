@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useId, useMemo } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '../../utils';
