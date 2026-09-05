@@ -384,6 +384,9 @@ importers:
 
   packages/nuicss:
     dependencies:
+      '@unocss/config':
+        specifier: ^66.7.5
+        version: 66.7.5
       '@unocss/postcss':
         specifier: ^66.7.5
         version: 66.7.5(postcss@8.5.15)
