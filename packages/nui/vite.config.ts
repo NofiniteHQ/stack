@@ -50,7 +50,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, 'dist'),
     cssMinify: 'lightningcss',
-    emptyOutDir: false,
+    emptyOutDir: true,
     sourcemap: true,
     cssCodeSplit: false,
     reportCompressedSize: true,
@@ -68,6 +68,7 @@ export default defineConfig({
       external: [
         /^react(\/.*)?$/,
         /^unocss(\/.*)?$/,
+        /^@nofinite\/nuicss(\/.*)?$/,
         ...externalDeps
       ],
       treeshake: true,
@@ -76,14 +77,14 @@ export default defineConfig({
           format: 'es',
           dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
-          preserveModulesRoot: 'src',
+          preserveModulesRoot: path.resolve(__dirname, 'src'),
           entryFileNames: '[name].js',
         },
         {
           format: 'cjs',
           dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
-          preserveModulesRoot: 'src',
+          preserveModulesRoot: path.resolve(__dirname, 'src'),
           entryFileNames: '[name].cjs',
           exports: 'named',
         },
