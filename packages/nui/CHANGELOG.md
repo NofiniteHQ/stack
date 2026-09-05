@@ -1,5 +1,11 @@
 # @nofinite/nui
 
+## 3.0.6
+
+### Patch Changes
+
+- 2a2a36d: refactor(nui): implement semantic design tokens and fix polymorphic asChild DOM leakage across all components
+
 ## 3.0.5
 
 ### Patch Changes
