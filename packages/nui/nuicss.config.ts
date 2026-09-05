@@ -1,17 +1,14 @@
 /* eslint-disable */
 import { defineConfig } from 'unocss';
-import { nuicssPreset } from '../../nuicss/src/plugin/preset';
+import { nuicssPreset } from '@nofinite/nuicss';
 
 export default defineConfig({
   presets: [
     nuicssPreset(),
   ],
   content: {
-    pipeline: {
-      include: [
-        /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
-        'src/**/*.{js,ts,jsx,tsx}',
-      ],
-    },
+    filesystem: [
+      'src/**/*.{js,ts,jsx,tsx}',
+    ],
   },
 });

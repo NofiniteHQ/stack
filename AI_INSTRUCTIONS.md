@@ -26,3 +26,7 @@ If you need to verify that a package's exports, CSS files, or tarball contents a
 Be extremely careful when adding raw CSS imports (e.g., `import '../styles/index.css'`) to TypeScript files that are exposed as plugin entrypoints.
 Node.js tooling (such as Nx project graph evaluators, Jest, and UnoCSS's `jiti` config loader) cannot parse raw CSS files natively and will crash with an `Unknown file extension '.css'` error.
 - If a config file (like `nuicss.config.ts`) needs to import a preset from another package in this workspace, **import directly from the specific sub-module** (e.g., `src/plugin/preset`) to bypass the top-level CSS import in the main entrypoint.
+
+# AI Guidelines
+
+- **Temporary Files:** ALL AI-generated scratch scripts, temporary HTML/JS testing files, data parsing scripts, or any other temporary garbage files MUST be placed in the /temp/ directory. Do not place them in the root directory. The /temp/ directory is gitignored and ensures the workspace stays clean.
