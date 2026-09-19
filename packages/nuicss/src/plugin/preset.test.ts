@@ -57,10 +57,10 @@ describe('nuicssPreset', () => {
 
     // Check if the keyframes are generated
     expect(css).toContain('@keyframes zoom-in');
-    expect(css).toContain('transform: scale(0.95)');
+    expect(css).toMatch(/transform:\s*scale\(\.?95\)/);
 
     // Check if the animation utility classes are generated
-    expect(css).toContain('animation:zoom-in 200ms');
+    expect(css).toMatch(/animation:\s*(\.2s|200ms).*zoom-in/);
   });
 
   it('should support arbitrary values', async () => {

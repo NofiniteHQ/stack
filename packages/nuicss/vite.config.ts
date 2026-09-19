@@ -15,9 +15,11 @@ export default defineConfig(() => ({
     emptyOutDir: false,
     reportCompressedSize: true,
     lib: {
-      entry: path.resolve(__dirname, 'src/plugin/index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'src/plugin/index.ts'),
+        components: path.resolve(__dirname, 'src/shortcuts/index.ts'),
+      },
       name: 'Nuicss',
-      fileName: 'index',
       cssFileName: 'index',
       formats: ['es', 'cjs'] as any,
     },

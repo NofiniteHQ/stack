@@ -1,4 +1,4 @@
-:root {
+:where(:root) {
   /* ------------------------------------------------------------
   1. PRIMITIVE TOKENS (RAW VALUES)
   ------------------------------------------------------------ */
@@ -337,8 +337,7 @@
 13. DARK MODE
 ------------------------------------------------------------ */
 
-[data-theme='dark'],
-.dark {
+:where([data-theme='dark'], .dark) {
   /* Backgrounds */
   --bg-page: var(--slate-950);
   --bg-canvas: var(--slate-950);

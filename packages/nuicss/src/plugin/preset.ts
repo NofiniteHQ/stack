@@ -1,6 +1,7 @@
 import type { NuicssConfig } from './config';
 import * as presetWind4Module from '@unocss/preset-wind4';
 import processorLightningCSSRaw from '@unocss/processor-lightningcss';
+import { componentShortcuts } from '../shortcuts';
 
 const resolveFunction = (mod: any, fallbackKey?: string) => {
   if (typeof mod === 'function') return mod;
@@ -73,16 +74,31 @@ export function nuicssPreset(): NuicssConfig {
         },
       ],
     ],
-    shortcuts: {
-      'ring-focus': 'ring-[color:var(--focus-ring)]',
-      'ring-offset-surface': 'ring-offset-[color:var(--bg-surface)]',
-      'ring-offset-background': 'ring-offset-[color:var(--bg-page)]',
+    shortcuts: [
+      ...(Array.isArray(componentShortcuts) ? componentShortcuts : []),
+      ['ring-focus', 'ring-[color:var(--focus-ring)]', { layer: 'components' }],
+      [
+        'ring-offset-surface',
+        'ring-offset-[color:var(--bg-surface)]',
+        { layer: 'components' },
+      ],
+      [
+        'ring-offset-background',
+        'ring-offset-[color:var(--bg-page)]',
+        { layer: 'components' },
+      ],
+    ],
+    layers: {
+      components: 10,
+      default: 20,
+      utilities: 30,
     },
     content: {
       pipeline: {
         include: [
           /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
           'src/**/*.{js,ts,jsx,tsx}',
+          '**/node_modules/@nofinite/nui/**/*.{js,mjs,cjs,jsx,tsx}',
         ],
       },
     },
@@ -178,14 +194,16 @@ export function nuicssPreset(): NuicssConfig {
         popover: 'var(--shadow-popover)',
       },
       fontFamily: {
-        sans: 'var(--font-sans)',
-        serif: 'var(--font-serif)',
-        mono: 'var(--font-mono)',
+        sans: 'var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif)',
+        serif:
+          'var(--font-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif)',
+        mono: 'var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace)',
       },
       font: {
-        sans: 'var(--font-sans)',
-        serif: 'var(--font-serif)',
-        mono: 'var(--font-mono)',
+        sans: 'var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif)',
+        serif:
+          'var(--font-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif)',
+        mono: 'var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace)',
       },
       animation: {
         keyframes: {

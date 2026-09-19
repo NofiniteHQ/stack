@@ -6,12 +6,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import UnoCSS from 'unocss/vite';
 
-const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
+const packageJson = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8')
+);
 const externalDeps = [
   ...Object.keys(packageJson.dependencies || {}),
   ...Object.keys(packageJson.peerDependencies || {}),
-  'react/jsx-runtime'
-].map(dep => new RegExp(`^${dep}(\\/.*)?$`));
+  'react/jsx-runtime',
+].map((dep) => new RegExp(`^${dep}(\\/.*)?$`));
 
 export default defineConfig({
   root: __dirname,
@@ -22,7 +24,7 @@ export default defineConfig({
 
   plugins: [
     UnoCSS({
-      configFile: path.resolve(__dirname, 'nuicss.config.ts')
+      configFile: path.resolve(__dirname, 'nuicss.config.ts'),
     }),
     react(),
     nxViteTsPaths(),
@@ -36,15 +38,38 @@ export default defineConfig({
       name: 'add-use-client',
       renderChunk(code, chunk) {
         if (chunk.fileName.includes('.js') || chunk.fileName.includes('.cjs')) {
-          if (chunk.fileName.includes('components/') || chunk.fileName === 'index.js' || chunk.fileName === 'index.cjs') {
-            if (!code.startsWith('"use client";') && !code.startsWith("'use client';")) {
+          if (
+            chunk.fileName.includes('components/') ||
+            chunk.fileName === 'index.js' ||
+            chunk.fileName === 'index.cjs'
+          ) {
+            if (
+              !code.startsWith('"use client";') &&
+              !code.startsWith("'use client';")
+            ) {
               return { code: '"use client";\n' + code, map: null };
             }
           }
         }
         return null;
-      }
-    }
+      },
+    },
+    {
+      name: 'wrap-styles-in-layer',
+      closeBundle() {
+        const cssPath = path.resolve(__dirname, 'dist/styles.css');
+        if (fs.existsSync(cssPath)) {
+          const raw = fs.readFileSync(cssPath, 'utf8');
+          if (!raw.startsWith('@layer base, components, utilities;')) {
+            fs.writeFileSync(
+              cssPath,
+              `@layer base, components, utilities;\n@layer components {\n${raw}\n}`,
+              'utf8'
+            );
+          }
+        }
+      },
+    },
   ],
 
   build: {
@@ -69,7 +94,7 @@ export default defineConfig({
         /^react(\/.*)?$/,
         /^unocss(\/.*)?$/,
         /^@nofinite\/nuicss(\/.*)?$/,
-        ...externalDeps
+        ...externalDeps,
       ],
       treeshake: true,
       output: [
@@ -100,4 +125,3 @@ export default defineConfig({
     pool: 'forks',
   },
 });
-

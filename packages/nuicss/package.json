@@ -22,8 +22,24 @@
       },
       "default": "./dist/index.js"
     },
+    "./components": {
+      "types": "./dist/shortcuts/index.d.ts",
+      "import": {
+        "types": "./dist/shortcuts/index.d.ts",
+        "default": "./dist/components.mjs"
+      },
+      "require": {
+        "types": "./dist/shortcuts/index.d.ts",
+        "default": "./dist/components.js"
+      },
+      "default": "./dist/components.js"
+    },
+    "./components.css": "./dist/components.css",
+    "./primitives.css": "./dist/primitives.css",
+    "./forms.css": "./dist/forms.css",
+    "./tiptap.css": "./dist/tiptap.css",
     "./dist/index.css": "./dist/index.css",
-    "./styles.css": "./dist/index.css",
+    "./styles.css": "./dist/styles.css",
     "./cdn": "./dist/index.global.js",
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"

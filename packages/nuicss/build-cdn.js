@@ -1,29 +1,108 @@
 const fs = require('fs');
 const path = require('path');
-const { nuicssPreset } = require('./dist/index.js');
+const { createGenerator } = require('unocss');
+const {
+  nuicssPreset,
+  rawShortcuts,
+  primitiveShortcuts,
+  formShortcuts,
+} = require('./dist/index.js');
 
-console.log('Generating browser config...');
-const config = nuicssPreset();
+async function build() {
+  console.log('Generating browser config and static stylesheets...');
+  const config = nuicssPreset();
 
-// Read the compiled CSS to inject it directly via JS (One-link CDN)
-const baseCss = fs.readFileSync('dist/index.css', 'utf8');
+  // Read the compiled base CSS (Reset + Design Tokens)
+  const baseCss = fs.readFileSync('dist/index.css', 'utf8');
 
-const runtimeDir = path.join(
-  path.dirname(require.resolve('@unocss/runtime')),
-  '..'
-);
-const presetWind4Path = path.join(runtimeDir, 'preset-wind4.global.js');
-const coreRuntimePath = path.join(runtimeDir, 'core.global.js');
+  // ========================================================
+  // 1. Generate Static Superclass CSS Bundles
+  // ========================================================
+  const uno = await createGenerator(config);
 
-if (!fs.existsSync(presetWind4Path) || !fs.existsSync(coreRuntimePath)) {
-  console.error('Could not find required @unocss/runtime files!');
-  process.exit(1);
-}
+  // 1a. All Components (components.css)
+  if (Array.isArray(rawShortcuts)) {
+    const allTokens = rawShortcuts
+      .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
+      .join(' ');
+    const { css: allCss } = await uno.generate(allTokens);
+    const layeredAllCss = `@layer components {\n${allCss}\n}`;
+    fs.writeFileSync('dist/components.css', layeredAllCss, 'utf8');
+    console.log(
+      `Generated dist/components.css (${Buffer.byteLength(
+        layeredAllCss,
+        'utf8'
+      )} bytes)`
+    );
 
-const presetWind4Code = fs.readFileSync(presetWind4Path, 'utf8');
-const coreRuntimeCode = fs.readFileSync(coreRuntimePath, 'utf8');
+    // 1b. Standalone All-In-One styles.css (Base + Components)
+    const combinedStyles = `@layer base, components, utilities;\n\n${baseCss}\n\n${layeredAllCss}`;
+    fs.writeFileSync('dist/styles.css', combinedStyles, 'utf8');
+    console.log(
+      `Generated dist/styles.css (${Buffer.byteLength(
+        combinedStyles,
+        'utf8'
+      )} bytes)`
+    );
+  }
 
-const cdnConfigScript = `
+  // 1c. Primitives Only (primitives.css)
+  if (Array.isArray(primitiveShortcuts)) {
+    const primitiveTokens = primitiveShortcuts
+      .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
+      .join(' ');
+    const { css: primCss } = await uno.generate(primitiveTokens);
+    const layeredPrimCss = `@layer components {\n${primCss}\n}`;
+    fs.writeFileSync('dist/primitives.css', layeredPrimCss, 'utf8');
+    console.log(
+      `Generated dist/primitives.css (${Buffer.byteLength(
+        layeredPrimCss,
+        'utf8'
+      )} bytes)`
+    );
+  }
+
+  // 1d. Forms Only (forms.css)
+  if (Array.isArray(formShortcuts)) {
+    const formTokens = formShortcuts
+      .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
+      .join(' ');
+    const { css: fCss } = await uno.generate(formTokens);
+    const layeredFormsCss = `@layer components {\n${fCss}\n}`;
+    fs.writeFileSync('dist/forms.css', layeredFormsCss, 'utf8');
+    console.log(
+      `Generated dist/forms.css (${Buffer.byteLength(
+        layeredFormsCss,
+        'utf8'
+      )} bytes)`
+    );
+  }
+
+  // 1e. Tiptap styles
+  if (fs.existsSync('src/styles/tiptap.css')) {
+    fs.copyFileSync('src/styles/tiptap.css', 'dist/tiptap.css');
+    console.log('Copied dist/tiptap.css');
+  }
+
+  // ========================================================
+  // 2. Generate One-Link Browser Runtime (dist/index.global.js)
+  // ========================================================
+  const runtimeDir = path.join(
+    path.dirname(require.resolve('@unocss/runtime')),
+    '..'
+  );
+  const presetWind4Path = path.join(runtimeDir, 'preset-wind4.global.js');
+  const coreRuntimePath = path.join(runtimeDir, 'core.global.js');
+
+  if (!fs.existsSync(presetWind4Path) || !fs.existsSync(coreRuntimePath)) {
+    console.error('Could not find required @unocss/runtime files!');
+    process.exit(1);
+  }
+
+  const presetWind4Code = fs.readFileSync(presetWind4Path, 'utf8');
+  const coreRuntimeCode = fs.readFileSync(coreRuntimePath, 'utf8');
+
+  const cdnConfigScript = `
 // Inject Base CSS (Reset + Design Tokens)
 (function() {
   if (typeof document !== 'undefined') {
@@ -53,11 +132,15 @@ window.__unocss.presets = [
     : {}
 ];
 window.__unocss.theme = Object.assign(window.__unocss.theme || {}, ${JSON.stringify(
-  config.theme
-)});
-window.__unocss.shortcuts = Object.assign(window.__unocss.shortcuts || {}, ${JSON.stringify(
-  config.shortcuts
-)});
+    config.theme
+  )});
+window.__unocss.shortcuts = Array.isArray(${JSON.stringify(config.shortcuts)})
+  ? (window.__unocss.shortcuts || []).concat(${JSON.stringify(
+    config.shortcuts
+  )})
+  : Object.assign(window.__unocss.shortcuts || {}, ${JSON.stringify(
+    config.shortcuts
+  )});
 window.__unocss.rules = (window.__unocss.rules || []).concat([
   [
     /^bg-(page|canvas|surface|surface-raised|surface-overlay|subtle|muted|accent|overlay|glass|inset|card)(?:\\/(\\d+))?$/,
@@ -104,17 +187,23 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
 ]);
 `;
 
-console.log('Assembling Preset-Wind4 + Config + Core Runtime...');
-const finalBundle = [
-  '// @nofinite/nuicss CDN Bundle - UnoCSS Preset-Wind4 + NuiCSS Base + Runtime',
-  presetWind4Code,
-  cdnConfigScript,
-  coreRuntimeCode,
-].join('\n');
+  console.log('Assembling Preset-Wind4 + Config + Core Runtime...');
+  const finalBundle = [
+    '// @nofinite/nuicss CDN Bundle - UnoCSS Preset-Wind4 + NuiCSS Base + Runtime',
+    presetWind4Code,
+    cdnConfigScript,
+    coreRuntimeCode,
+  ].join('\n');
 
-fs.writeFileSync('dist/index.global.js', finalBundle, 'utf8');
-console.log(
-  'Built dist/index.global.js successfully! (' +
-    Buffer.byteLength(finalBundle, 'utf8') +
-    ' bytes)'
-);
+  fs.writeFileSync('dist/index.global.js', finalBundle, 'utf8');
+  console.log(
+    'Built dist/index.global.js successfully! (' +
+      Buffer.byteLength(finalBundle, 'utf8') +
+      ' bytes)'
+  );
+}
+
+build().catch((err) => {
+  console.error('Build CDN failed:', err);
+  process.exit(1);
+});
