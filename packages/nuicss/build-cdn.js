@@ -78,12 +78,6 @@ async function build() {
     );
   }
 
-  // 1e. Tiptap styles
-  if (fs.existsSync('src/styles/tiptap.css')) {
-    fs.copyFileSync('src/styles/tiptap.css', 'dist/tiptap.css');
-    console.log('Copied dist/tiptap.css');
-  }
-
   // ========================================================
   // 2. Generate One-Link Browser Runtime (dist/index.global.js)
   // ========================================================
