@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { LinkPreview } from './LinkPreview';
 
 const meta = {
-  title: 'Components/Data Display/LinkPreview',
+  title: 'Media/LinkPreview',
   component: LinkPreview,
   parameters: {
     layout: 'padded',

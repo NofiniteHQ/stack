@@ -18,7 +18,12 @@ const rows: User[] = [
 ];
 
 const columns: DataGridColumn<User>[] = [
-  { key: 'name', title: 'Components/Data Display/DataGrid', sortable: true },
+  {
+    key: 'name',
+    title: 'Widgets/DataGrid',
+    tags: ['autodocs'],
+    sortable: true,
+  },
   { key: 'age', title: 'Age', sortable: true, align: 'right' },
 ];
 

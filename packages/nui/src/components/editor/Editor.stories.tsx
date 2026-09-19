@@ -4,7 +4,7 @@ import { Editor } from './Editor';
 import { useState } from 'react';
 
 const meta: Meta<typeof Editor> = {
-  title: 'Components/Forms/Editor',
+  title: 'Forms/Editor',
   component: Editor,
   tags: ['autodocs'],
 };

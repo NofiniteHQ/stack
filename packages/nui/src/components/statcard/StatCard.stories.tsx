@@ -1,11 +1,19 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect, fn } from '@storybook/test';
-import { Users, DollarSign, Activity, Pointer, HardDrive, Target, AlertTriangle } from 'lucide-react';
+import {
+  Users,
+  DollarSign,
+  Activity,
+  Pointer,
+  HardDrive,
+  Target,
+  AlertTriangle,
+} from 'lucide-react';
 import { StatCard } from './StatCard';
 
 const meta: Meta<typeof StatCard> = {
-  title: 'Components/Data Display/StatCard',
+  title: 'Primitives/StatCard',
   component: StatCard,
   parameters: {
     layout: 'padded',
@@ -29,7 +37,7 @@ export const Default: Story = {
     <div className="w-[340px]">
       <StatCard {...args} />
     </div>
-  )
+  ),
 };
 
 export const NegativeTrend: Story = {
@@ -45,7 +53,7 @@ export const NegativeTrend: Story = {
     <div className="w-[340px]">
       <StatCard {...args} />
     </div>
-  )
+  ),
 };
 
 export const LoadingState: Story = {
@@ -61,7 +69,7 @@ export const LoadingState: Story = {
     <div className="w-[340px]">
       <StatCard {...args} />
     </div>
-  )
+  ),
 };
 
 export const WithTooltip: Story = {
@@ -77,7 +85,7 @@ export const WithTooltip: Story = {
     <div className="w-[340px]">
       <StatCard {...args} />
     </div>
-  )
+  ),
 };
 
 export const WithProgress: Story = {
@@ -94,7 +102,7 @@ export const WithProgress: Story = {
     <div className="w-[340px]">
       <StatCard {...args} />
     </div>
-  )
+  ),
 };
 
 export const WithSparkline: Story = {
@@ -110,7 +118,7 @@ export const WithSparkline: Story = {
     <div className="w-[340px]">
       <StatCard {...args} />
     </div>
-  )
+  ),
 };
 
 export const WithAccent: Story = {
@@ -127,7 +135,7 @@ export const WithAccent: Story = {
     <div className="w-[340px]">
       <StatCard {...args} />
     </div>
-  )
+  ),
 };
 
 export const Interactive: Story = {
@@ -151,5 +159,5 @@ export const Interactive: Story = {
     const card = canvas.getByRole('button');
     await userEvent.click(card);
     await expect(args.onClick).toHaveBeenCalled();
-  }
+  },
 };

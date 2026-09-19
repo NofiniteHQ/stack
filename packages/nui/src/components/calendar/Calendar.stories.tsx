@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Calendar } from './Calendar';
 
 const meta: Meta<typeof Calendar> = {
-  title: 'Components/Data Display/Calendar',
+  title: 'Pickers/Calendar',
   component: Calendar,
   parameters: {
     layout: 'centered',
@@ -20,12 +20,10 @@ export const Default: Story = {
     return (
       <div className="flex flex-col gap-4 items-center">
         <Calendar {...args} value={date} onChange={setDate} />
-        <div className="text-sm text-muted">
-          Selected: {date || 'None'}
-        </div>
+        <div className="text-sm text-muted">Selected: {date || 'None'}</div>
       </div>
     );
-  }
+  },
 };
 
 export const WithMinMaxDate: Story = {
@@ -34,32 +32,30 @@ export const WithMinMaxDate: Story = {
     const now = new Date();
     const y = now.getFullYear();
     const m = String(now.getMonth() + 1).padStart(2, '0');
-    
+
     // Allow selecting from 5th to 20th of current month
     const minDate = `${y}-${m}-05`;
     const maxDate = `${y}-${m}-20`;
 
-    return (
-      <Calendar {...args} minDate={minDate} maxDate={maxDate} />
-    );
-  }
+    return <Calendar {...args} minDate={minDate} maxDate={maxDate} />;
+  },
 };
 
 export const RangeMode: Story = {
   render: (args) => {
-    const [range, setRange] = useState<{from?: string, to?: string}>({});
+    const [range, setRange] = useState<{ from?: string; to?: string }>({});
     return (
       <div className="flex flex-col gap-4 items-center">
-        <Calendar 
-          {...args} 
-          mode="range" 
-          value={range} 
-          onChange={(r: any) => setRange(r)} 
+        <Calendar
+          {...args}
+          mode="range"
+          value={range}
+          onChange={(r: any) => setRange(r)}
         />
         <div className="text-sm text-muted">
           Selected: {range.from || 'None'} → {range.to || 'None'}
         </div>
       </div>
     );
-  }
+  },
 };

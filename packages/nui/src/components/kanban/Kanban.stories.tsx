@@ -4,7 +4,8 @@ import { Kanban, KanbanColumnProps } from './Kanban';
 import { Plus, MoreHorizontal } from 'lucide-react';
 
 const meta = {
-  title: 'Components/Enterprise/Kanban',
+  title: 'Widgets/Kanban',
+  tags: ['autodocs'],
   component: Kanban,
   parameters: {
     layout: 'padded',

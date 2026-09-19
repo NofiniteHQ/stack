@@ -3,124 +3,126 @@ import { within, userEvent, expect } from '@storybook/test';
 import { Accordion } from './Accordion';
 
 const meta: Meta<typeof Accordion> = {
- title: 'Components/Data Display/Accordion',
- component: Accordion,
- tags: ['autodocs'],
- parameters: {
- layout: 'padded',
- },
+  title: 'Widgets/Accordion',
+  component: Accordion,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof Accordion>;
 
 const demoItems = [
- {
- id: 'item-1',
- title: 'What is NUI?',
- content: (
- <p>
- NUI is a design system focused on composability, accessibility,
- and developer experience.
- </p>
- ),
- },
- {
- id: 'item-2',
- title: 'Is it accessible?',
- content: (
- <p>
- Yes. The accordion follows WAI-ARIA guidelines,
- supports keyboard navigation, and screen readers.
- </p>
- ),
- },
- {
- id: 'item-3',
- title: 'Can multiple items stay open?',
- content: (
- <p>
- When <code>multiple</code> is enabled, more than one item
- can remain expanded.
- </p>
- ),
- },
+  {
+    id: 'item-1',
+    title: 'What is NUI?',
+    content: (
+      <p>
+        NUI is a design system focused on composability, accessibility, and
+        developer experience.
+      </p>
+    ),
+  },
+  {
+    id: 'item-2',
+    title: 'Is it accessible?',
+    content: (
+      <p>
+        Yes. The accordion follows WAI-ARIA guidelines, supports keyboard
+        navigation, and screen readers.
+      </p>
+    ),
+  },
+  {
+    id: 'item-3',
+    title: 'Can multiple items stay open?',
+    content: (
+      <p>
+        When <code>multiple</code> is enabled, more than one item can remain
+        expanded.
+      </p>
+    ),
+  },
 ];
 
 export const DataDriven: Story = {
- render: (args) => (
- <div className="w-full max-w-2xl mx-auto mt-10">
-  <Accordion {...args} />
- </div>
- ),
- args: {
- data: demoItems,
- },
+  render: (args) => (
+    <div className="w-full max-w-2xl mx-auto mt-10">
+      <Accordion {...args} />
+    </div>
+  ),
+  args: {
+    data: demoItems,
+  },
 };
 
 export const PrimitiveMode: Story = {
- render: () => (
- <div className="w-full max-w-2xl mx-auto mt-10">
-  <Accordion>
-   <Accordion.Item value="item-1">
-    <Accordion.Trigger>Custom Header 1</Accordion.Trigger>
-    <Accordion.Content>Custom content with complex internal layouts.</Accordion.Content>
-   </Accordion.Item>
-   <Accordion.Item value="item-2">
-    <Accordion.Trigger>Custom Header 2</Accordion.Trigger>
-    <Accordion.Content>More manually composed content.</Accordion.Content>
-   </Accordion.Item>
-  </Accordion>
- </div>
- ),
+  render: () => (
+    <div className="w-full max-w-2xl mx-auto mt-10">
+      <Accordion>
+        <Accordion.Item value="item-1">
+          <Accordion.Trigger>Custom Header 1</Accordion.Trigger>
+          <Accordion.Content>
+            Custom content with complex internal layouts.
+          </Accordion.Content>
+        </Accordion.Item>
+        <Accordion.Item value="item-2">
+          <Accordion.Trigger>Custom Header 2</Accordion.Trigger>
+          <Accordion.Content>More manually composed content.</Accordion.Content>
+        </Accordion.Item>
+      </Accordion>
+    </div>
+  ),
 };
 
 export const DefaultOpen: Story = {
- args: {
- data: demoItems,
- defaultOpenId: 'item-2',
- },
+  args: {
+    data: demoItems,
+    defaultOpenId: 'item-2',
+  },
 };
 
 export const MultipleOpen: Story = {
- args: {
- data: demoItems,
- multiple: true,
- },
+  args: {
+    data: demoItems,
+    multiple: true,
+  },
 };
 
 export const LongContent: Story = {
- args: {
- data: [
- {
- id: 'long',
- title: 'Long Content Example',
- content: (
- <div>
- <p>
- This demonstrates how the accordion handles larger
- blocks of content and animation transitions.
- </p>
- <p>
- The grid-based animation ensures smooth expansion
- without layout jumps.
- </p>
- <p>
- This pattern is production-safe and widely used
- in modern UI libraries.
- </p>
- </div>
- ),
- },
- ],
- },
+  args: {
+    data: [
+      {
+        id: 'long',
+        title: 'Long Content Example',
+        content: (
+          <div>
+            <p>
+              This demonstrates how the accordion handles larger blocks of
+              content and animation transitions.
+            </p>
+            <p>
+              The grid-based animation ensures smooth expansion without layout
+              jumps.
+            </p>
+            <p>
+              This pattern is production-safe and widely used in modern UI
+              libraries.
+            </p>
+          </div>
+        ),
+      },
+    ],
+  },
 };
 
 export const CustomStyled: Story = {
- args: {
- data: demoItems,
- className: 'custom-accordion',
- },
+  args: {
+    data: demoItems,
+    className: 'custom-accordion',
+  },
 };
 
 /**
@@ -128,20 +130,22 @@ export const CustomStyled: Story = {
  * Runs automatically in Storybook to verify click behavior.
  */
 export const InteractiveTest: Story = {
- args: {
- data: demoItems,
- },
- play: async ({ canvasElement }) => {
- const canvas = within(canvasElement);
- const firstItemButton = canvas.getByRole('button', { name: 'What is NUI?' });
- 
- // Validate initial closed state
- await expect(firstItemButton).toHaveAttribute('aria-expanded', 'false');
- 
- // Simulate user click
- await userEvent.click(firstItemButton);
- 
- // Validate opened state
- await expect(firstItemButton).toHaveAttribute('aria-expanded', 'true');
- },
+  args: {
+    data: demoItems,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const firstItemButton = canvas.getByRole('button', {
+      name: 'What is NUI?',
+    });
+
+    // Validate initial closed state
+    await expect(firstItemButton).toHaveAttribute('aria-expanded', 'false');
+
+    // Simulate user click
+    await userEvent.click(firstItemButton);
+
+    // Validate opened state
+    await expect(firstItemButton).toHaveAttribute('aria-expanded', 'true');
+  },
 };

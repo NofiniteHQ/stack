@@ -4,7 +4,7 @@ import { within, userEvent, expect } from '@storybook/test';
 import { TransferList, TransferListProps } from './TransferList';
 
 const meta: Meta<typeof TransferList> = {
-  title: 'Components/Data Display/TransferList',
+  title: 'Widgets/TransferList',
   component: TransferList,
   parameters: {
     layout: 'centered',
@@ -36,7 +36,8 @@ const InteractiveWrapper = (args: Partial<TransferListProps>) => {
         onChange={setValue}
       />
       <div className="text-sm text-muted">
-        Selected Values: <strong data-testid="output">{value.join(', ')}</strong>
+        Selected Values:{' '}
+        <strong data-testid="output">{value.join(', ')}</strong>
       </div>
     </div>
   );
@@ -50,7 +51,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const output = canvas.getByTestId('output');
-    
+
     // Check initial
     await expect(output.textContent).toBe('4, 5');
 
@@ -59,18 +60,22 @@ export const Default: Story = {
     await userEvent.click(leftCheckbox);
 
     // Move to right
-    const moveRightBtn = canvas.getByRole('button', { name: 'Move selected right' });
+    const moveRightBtn = canvas.getByRole('button', {
+      name: 'Move selected right',
+    });
     await userEvent.click(moveRightBtn);
-    
+
     // Now 1 is in the right list
     await expect(output.textContent).toContain('1');
     await expect(output.textContent).toContain('4');
     await expect(output.textContent).toContain('5');
-    
+
     // Move all left
-    const moveAllLeftBtn = canvas.getByRole('button', { name: 'Move all left' });
+    const moveAllLeftBtn = canvas.getByRole('button', {
+      name: 'Move all left',
+    });
     await userEvent.click(moveAllLeftBtn);
-    
+
     await expect(output.textContent).toBe('');
-  }
+  },
 };

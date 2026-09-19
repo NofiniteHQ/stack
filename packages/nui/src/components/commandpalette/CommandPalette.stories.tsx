@@ -14,7 +14,7 @@ import { Button } from '../button/Button';
 
 const mockSections: CommandSection[] = [
   {
-    title: 'Components/Overlays/CommandPalette',
+    title: 'Overlays/CommandPalette',
     items: [
       {
         id: '1',

@@ -4,7 +4,7 @@ import { within, userEvent, expect } from '@storybook/test';
 import { NumberInput, NumberInputProps } from './NumberInput';
 
 const meta: Meta<typeof NumberInput> = {
-  title: 'Components/Forms/NumberInput',
+  title: 'Forms/NumberInput',
   component: NumberInput,
   parameters: {
     layout: 'centered',
@@ -14,24 +14,29 @@ const meta: Meta<typeof NumberInput> = {
     min: { control: 'number' },
     max: { control: 'number' },
     step: { control: 'number' },
-  }
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof NumberInput>;
 
 const InteractiveWrapper = (args: Partial<NumberInputProps>) => {
-  const [value, setValue] = useState<number | ''>(args.value !== undefined ? args.value : 0);
+  const [value, setValue] = useState<number | ''>(
+    args.value !== undefined ? args.value : 0
+  );
   return (
     <div className="w-[300px] font-sans">
       <NumberInput
         {...args}
         value={value}
         onChange={setValue}
-        label={args.label || "Amount"}
+        label={args.label || 'Amount'}
       />
       <div className="mt-4 text-sm text-muted">
-        Current internal state: <strong data-testid="output-value" className="text-default">{value === '' ? "'' (empty string)" : value}</strong>
+        Current internal state:{' '}
+        <strong data-testid="output-value" className="text-default">
+          {value === '' ? "'' (empty string)" : value}
+        </strong>
       </div>
     </div>
   );
@@ -67,9 +72,9 @@ export const Default: Story = {
     await userEvent.clear(input);
     await userEvent.type(input, '150');
     await userEvent.click(canvasElement); // Reliably trigger blur
-    await new Promise(r => setTimeout(r, 50)); // Allow React state to flush
+    await new Promise((r) => setTimeout(r, 50)); // Allow React state to flush
     await expect(output.textContent).toBe('100');
-  }
+  },
 };
 
 export const DecimalStep: Story = {
@@ -79,7 +84,7 @@ export const DecimalStep: Story = {
     min: 0,
     step: 0.5,
     defaultValue: 10.5,
-  }
+  },
 };
 
 export const Disabled: Story = {
@@ -87,7 +92,7 @@ export const Disabled: Story = {
     label: 'Quantity (Disabled)',
     disabled: true,
     value: 5,
-  }
+  },
 };
 
 export const WithError: Story = {
@@ -95,5 +100,5 @@ export const WithError: Story = {
     label: 'Age',
     error: 'Age must be 18 or older',
     value: 12,
-  }
+  },
 };

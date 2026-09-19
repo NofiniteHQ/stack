@@ -4,7 +4,7 @@ import { within, userEvent, expect } from '@storybook/test';
 import { PasswordInput, PasswordInputProps } from './PasswordInput';
 
 const meta: Meta<typeof PasswordInput> = {
-  title: 'Components/Forms/PasswordInput',
+  title: 'Forms/PasswordInput',
   component: PasswordInput,
   parameters: {
     layout: 'centered',
@@ -22,7 +22,7 @@ export const Default: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Check initial type is password
     const input = canvas.getByLabelText('Password') as HTMLInputElement;
     await expect(input.type).toBe('password');
@@ -34,14 +34,14 @@ export const Default: Story = {
     // Toggle to text
     const toggleBtn = canvas.getByLabelText('Show password');
     await userEvent.click(toggleBtn);
-    
+
     await expect(input.type).toBe('text');
     await expect(toggleBtn).toHaveAttribute('aria-label', 'Hide password');
 
     // Toggle back to password
     await userEvent.click(toggleBtn);
     await expect(input.type).toBe('password');
-  }
+  },
 };
 
 export const WithError: Story = {
@@ -49,5 +49,5 @@ export const WithError: Story = {
     label: 'Confirm Password',
     defaultValue: 'hunter2',
     error: 'Passwords do not match.',
-  }
+  },
 };

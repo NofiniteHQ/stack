@@ -15,6 +15,9 @@ const config: StorybookConfig = {
       },
     },
   },
+  docs: {
+    autodocs: 'tag',
+  },
 };
 
 function getAbsolutePath(value: string): any {
@@ -34,8 +37,6 @@ config.viteFinal = async (viteConfig) => {
     css: {
       transformer: 'postcss',
     },
-    plugins: [
-      nuicssVitePlugin({ configFile: './nuicss.config.ts' })
-    ]
+    plugins: [nuicssVitePlugin({ configFile: './nuicss.config.ts' })],
   });
 };
