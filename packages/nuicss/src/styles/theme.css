@@ -58,22 +58,21 @@
 
   /* Backgrounds */
   --bg-page: var(--slate-50);
+  --bg-canvas: var(--slate-50);
   --bg-surface: var(--white);
   --bg-surface-raised: var(--slate-50);
   --bg-surface-overlay: var(--white);
   --bg-subtle: var(--slate-50);
   --bg-muted: var(--slate-100);
+  --bg-inset: var(--slate-100);
+  --bg-card: var(--white);
   --bg-accent: var(--slate-100);
   --bg-overlay: rgba(0, 0, 0, 0.4);
   --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border: rgba(0, 0, 0, 0.08);
 
   /* Selected */
-  --bg-selected: color-mix(
-    in srgb,
-    var(--brand-primary) 8%,
-    transparent
-  );
+  --bg-selected: color-mix(in srgb, var(--brand-primary) 8%, transparent);
   --bg-selected-hover: color-mix(
     in srgb,
     var(--brand-primary) 12%,
@@ -82,6 +81,7 @@
 
   /* Foreground */
   --fg-default: var(--slate-900);
+  --fg-card: var(--slate-900);
   --fg-subtle: var(--slate-600);
   --fg-muted: var(--slate-500);
   --fg-accent: var(--slate-900);
@@ -102,29 +102,57 @@
   --color-primary-active: var(--brand-primary-active);
   --color-primary-fg: var(--brand-primary-fg);
 
+  /* Secondary Action (Minimalist / Subtle Action) */
+  --color-secondary: var(--slate-100);
+  --color-secondary-hover: var(--slate-200);
+  --color-secondary-active: var(--slate-300);
+  --color-secondary-fg: var(--slate-900);
+  --color-secondary-subtle: color-mix(
+    in srgb,
+    var(--color-secondary) 15%,
+    transparent
+  );
+
   /* Feedback */
   --color-danger: var(--red-500);
-  --color-danger-subtle: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  --color-danger-subtle: color-mix(
+    in srgb,
+    var(--color-danger) 10%,
+    transparent
+  );
   --color-danger-fg: var(--white);
   --color-success: var(--green-500);
-  --color-success-subtle: color-mix(in srgb, var(--color-success) 10%, transparent);
+  --color-success-subtle: color-mix(
+    in srgb,
+    var(--color-success) 10%,
+    transparent
+  );
   --color-success-fg: var(--white);
   --color-warning: var(--amber-500);
-  --color-warning-subtle: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  --color-warning-subtle: color-mix(
+    in srgb,
+    var(--color-warning) 10%,
+    transparent
+  );
   --color-warning-fg: var(--white);
   --color-info: var(--blue-500);
   --color-info-subtle: color-mix(in srgb, var(--color-info) 10%, transparent);
   --color-info-fg: var(--white);
-  --color-primary-subtle: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  --color-primary-subtle: color-mix(
+    in srgb,
+    var(--color-primary) 10%,
+    transparent
+  );
 
   /* Focus */
   --focus-ring: var(--fg-default);
   --focus-ring-offset: var(--bg-page);
 
   /* ------------------------------------------------------------
-  4. SPACING SCALE (4px BASE)
+  4. SPACING SCALE (4px BASE + TAILWIND PARITY)
   ------------------------------------------------------------ */
 
+  --spacing: 0.25rem;
   --space-0: 0px;
   --space-0-5: 0.125rem; /* 2px */
   --space-1: 0.25rem; /* 4px */
@@ -135,17 +163,27 @@
   --space-4: 1rem; /* 16px */
   --space-5: 1.25rem; /* 20px */
   --space-6: 1.5rem; /* 24px */
+  --space-7: 1.75rem; /* 28px */
   --space-8: 2rem; /* 32px */
+  --space-9: 2.25rem; /* 36px */
   --space-10: 2.5rem; /* 40px */
+  --space-11: 2.75rem; /* 44px */
   --space-12: 3rem; /* 48px */
   --space-14: 3.5rem; /* 56px */
   --space-16: 4rem; /* 64px */
   --space-20: 5rem; /* 80px */
   --space-24: 6rem; /* 96px */
+  --space-28: 7rem; /* 112px */
   --space-32: 8rem; /* 128px */
+  --space-36: 9rem; /* 144px */
   --space-40: 10rem; /* 160px */
+  --space-44: 11rem; /* 176px */
   --space-48: 12rem; /* 192px */
+  --space-52: 13rem; /* 208px */
   --space-64: 16rem; /* 256px */
+  --space-72: 18rem; /* 288px */
+  --space-80: 20rem; /* 320px */
+  --space-96: 24rem; /* 384px */
   --space-auto: auto;
 
   /* ------------------------------------------------------------
@@ -154,8 +192,10 @@
 
   --radius-none: 0px;
   --radius-sm: 0.25rem; /* 4px */
+  --radius-control: 0.375rem; /* 6px - buttons & inputs */
   --radius-md: 0.375rem; /* 6px */
   --radius-lg: 0.5rem; /* 8px */
+  --radius-container: 0.75rem; /* 12px - cards & dialogs */
   --radius-xl: 0.75rem; /* 12px */
   --radius-2xl: 1rem; /* 16px */
   --radius-3xl: 1.5rem; /* 24px */
@@ -168,8 +208,7 @@
   /* Fonts */
   --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Font Sizes */
   --text-xs: 0.75rem; /* 12px */
@@ -211,16 +250,22 @@
   --leading-loose: 2;
 
   /* ------------------------------------------------------------
-  7. SHADOWS (Modern Smooth Optical)
+  7. SHADOWS (Modern Dual-Layer Optical)
   ------------------------------------------------------------ */
 
   --shadow-none: 0 0 #0000;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 2px 4px rgba(0,0,0,0.04), 0 4px 6px rgba(0,0,0,0.08);
-  --shadow-lg: 0 4px 6px rgba(0,0,0,0.04), 0 10px 15px rgba(0,0,0,0.08);
-  --shadow-xl: 0 10px 15px rgba(0,0,0,0.04), 0 20px 25px rgba(0,0,0,0.08);
-  --shadow-2xl: 0 20px 25px rgba(0,0,0,0.04), 0 40px 50px rgba(0,0,0,0.1);
-  --shadow-inner: inset 0 2px 4px 0 rgba(0,0,0,0.06);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06),
+    0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06),
+    0 4px 6px -4px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-popover: 0 10px 38px -10px rgba(22, 23, 24, 0.12),
+    0 10px 20px -15px rgba(22, 23, 24, 0.08);
 
   /* ------------------------------------------------------------
   8. TRANSITIONS & ANIMATIONS
@@ -292,33 +337,45 @@
 13. DARK MODE
 ------------------------------------------------------------ */
 
-[data-theme='dark'], .dark {
+[data-theme='dark'],
+.dark {
   /* Backgrounds */
   --bg-page: var(--slate-950);
+  --bg-canvas: var(--slate-950);
   --bg-surface: var(--slate-900);
   --bg-surface-raised: var(--slate-800);
   --bg-surface-overlay: var(--slate-900);
   --bg-subtle: var(--slate-800);
   --bg-muted: var(--slate-800);
+  --bg-inset: #090d16;
+  --bg-card: var(--slate-900);
   --bg-accent: var(--slate-800);
   --bg-overlay: rgba(0, 0, 0, 0.7);
-  --glass-bg: rgba(15, 23, 42, 0.7);
+  --glass-bg: rgba(15, 23, 42, 0.75);
   --glass-border: rgba(255, 255, 255, 0.1);
 
   /* Selected */
-  --bg-selected: color-mix(
-    in srgb,
-    var(--brand-primary) 20%,
-    transparent
-  );
+  --bg-selected: color-mix(in srgb, var(--brand-primary) 20%, transparent);
   --bg-selected-hover: color-mix(
     in srgb,
     var(--brand-primary) 30%,
     transparent
   );
 
+  /* Secondary Action */
+  --color-secondary: var(--slate-800);
+  --color-secondary-hover: var(--slate-700);
+  --color-secondary-active: var(--slate-600);
+  --color-secondary-fg: var(--slate-50);
+  --color-secondary-subtle: color-mix(
+    in srgb,
+    var(--color-secondary) 25%,
+    transparent
+  );
+
   /* Foreground */
   --fg-default: var(--slate-50);
+  --fg-card: var(--slate-50);
   --fg-subtle: var(--slate-300);
   --fg-muted: var(--slate-400);
   --fg-accent: var(--slate-50);
@@ -336,190 +393,6 @@
   --brand-primary: var(--brand-500);
   --brand-primary-hover: var(--brand-400);
   --brand-primary-active: var(--brand-600);
-}
-
-/* ------------------------------------------------------------
-14. EDITOR OVERRIDES (Force UI integrity over tailwind prose)
------------------------------------------------------------- */
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] {
-  list-style: none !important;
-  padding: 0 !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-start !important;
-  margin-bottom: 0.25rem !important;
-  margin-top: 0.25rem !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li > label {
-  margin-right: 0.5rem !important;
-  user-select: none !important;
-  margin-top: 0.25rem !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li > div {
-  flex: 1 1 auto !important;
-  margin: 0 !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li > div > p {
-  margin: 0 !important;
-}
-
-/* ------------------------------------------------------------
-15. TIPTAP TYPOGRAPHY & STRUCTURAL RESETS
------------------------------------------------------------- */
-
-/* Base Typography */
-.tiptap-wrapper .tiptap p {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  line-height: var(--leading-normal);
-}
-
-.tiptap-wrapper .tiptap h1,
-.tiptap-wrapper .tiptap h2,
-.tiptap-wrapper .tiptap h3,
-.tiptap-wrapper .tiptap h4 {
-  font-weight: var(--weight-bold);
-  color: var(--fg-default);
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  line-height: var(--leading-tight);
-}
-
-.tiptap-wrapper .tiptap h1 { font-size: var(--text-3xl); }
-.tiptap-wrapper .tiptap h2 { font-size: var(--text-2xl); }
-.tiptap-wrapper .tiptap h3 { font-size: var(--text-xl); }
-
-/* Links */
-.tiptap-wrapper .tiptap a {
-  color: var(--color-primary);
-  text-decoration: underline;
-  cursor: pointer;
-  text-underline-offset: 2px;
-}
-
-/* Lists */
-.tiptap-wrapper .tiptap ul,
-.tiptap-wrapper .tiptap ol {
-  padding-left: 1.5rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.tiptap-wrapper .tiptap ul { list-style-type: disc; }
-.tiptap-wrapper .tiptap ol { list-style-type: decimal; }
-
-.tiptap-wrapper .tiptap li p {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
-}
-
-/* Blockquotes */
-.tiptap-wrapper .tiptap blockquote {
-  border-left: 3px solid var(--border-strong);
-  padding-left: 1rem;
-  margin-left: 0;
-  margin-right: 0;
-  color: var(--fg-muted);
-  font-style: italic;
-}
-
-/* Code & Preformatted */
-.tiptap-wrapper .tiptap pre {
-  background-color: var(--slate-900);
-  color: var(--slate-50);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
-.tiptap-wrapper .tiptap code {
-  background-color: var(--bg-subtle);
-  color: var(--color-primary);
-  padding: 0.2rem 0.4rem;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 0.875em;
-}
-
-.tiptap-wrapper .tiptap pre code {
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
-  border-radius: 0;
-  font-size: inherit;
-}
-
-/* ------------------------------------------------------------
-16. TIPTAP TABLES & PLACEHOLDERS
------------------------------------------------------------- */
-
-/* Invisible Placeholder Fix */
-.tiptap-wrapper .tiptap p.is-editor-empty:first-child::before {
-  color: var(--fg-muted);
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-  font-style: italic;
-}
-
-/* Table Structural Fix */
-.tiptap-wrapper .tiptap table {
-  border-collapse: collapse;
-  table-layout: fixed;
-  width: 100%;
-  margin: 1rem 0;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-}
-
-.tiptap-wrapper .tiptap table td,
-.tiptap-wrapper .tiptap table th {
-  min-width: 1em;
-  border: 1px solid var(--border-default);
-  padding: 0.5rem 0.75rem;
-  vertical-align: top;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.tiptap-wrapper .tiptap table th {
-  font-weight: var(--weight-bold);
-  text-align: left;
-  background-color: var(--bg-subtle);
-}
-
-.tiptap-wrapper .tiptap table .selectedCell:after {
-  z-index: 2;
-  position: absolute;
-  content: "";
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: var(--bg-selected);
-  pointer-events: none;
-}
-
-.tiptap-wrapper .tiptap table .column-resize-handle {
-  position: absolute;
-  right: -2px;
-  top: 0;
-  bottom: -2px;
-  width: 4px;
-  background-color: var(--color-primary);
-  pointer-events: none;
 }
 
 /* ------------------------------------------------------------
@@ -556,12 +429,12 @@
 }
 
 /* Hide Number Input Spinners */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
+input[type='number'] {
   -moz-appearance: textfield;
 }

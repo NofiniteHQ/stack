@@ -1,35 +1,79 @@
 import type { NuicssConfig } from './config';
-import { presetUno, presetWind } from 'unocss';
+import * as presetWind4Module from '@unocss/preset-wind4';
+import processorLightningCSSRaw from '@unocss/processor-lightningcss';
+
+const resolveFunction = (mod: any, fallbackKey?: string) => {
+  if (typeof mod === 'function') return mod;
+  if (fallbackKey && typeof mod?.[fallbackKey] === 'function')
+    return mod[fallbackKey];
+  if (typeof mod?.default === 'function') return mod.default;
+  return mod;
+};
+
+const getPresetWind4 = resolveFunction(presetWind4Module, 'presetWind4');
+const getProcessorLightningCSS = resolveFunction(processorLightningCSSRaw);
+
+const borderDirectionMap: Record<string, string[]> = {
+  't-': ['border-top-color'],
+  'b-': ['border-bottom-color'],
+  'l-': ['border-left-color'],
+  'r-': ['border-right-color'],
+  'x-': ['border-left-color', 'border-right-color'],
+  'y-': ['border-top-color', 'border-bottom-color'],
+  '': ['border-color'],
+};
 
 export function nuicssPreset(): NuicssConfig {
   return {
-    presets: [
-      presetUno(),
-      presetWind(),
+    presets: [getPresetWind4()],
+    processors: [getProcessorLightningCSS()],
+    rules: [
+      // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card)
+      [
+        /^bg-(page|canvas|surface|surface-raised|surface-overlay|subtle|muted|accent|overlay|glass|inset|card)(?:\/(\d+))?$/,
+        ([, name, opacity]) => {
+          const varName =
+            name === 'glass'
+              ? '--glass-bg'
+              : name === 'accent'
+              ? '--bg-accent'
+              : `--bg-${name}`;
+          const val = opacity
+            ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
+            : `color-mix(in srgb, var(${varName}) var(--un-bg-opacity, 100%), transparent)`;
+          return { 'background-color': val };
+        },
+      ],
+      // Semantic text foreground tokens with native opacity modifier support (e.g. text-default, text-subtle/70)
+      [
+        /^text-(default|subtle|muted|accent|inverse|disabled|card)(?:\/(\d+))?$/,
+        ([, name, opacity]) => {
+          const varName = `--fg-${name}`;
+          const val = opacity
+            ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
+            : `color-mix(in srgb, var(${varName}) var(--un-text-opacity, 100%), transparent)`;
+          return { color: val };
+        },
+      ],
+      // Semantic border tokens with directional & opacity modifier support (e.g. border-default, border-t-subtle, border-x-strong/60)
+      [
+        /^border-([trblxy]-)?(default|subtle|strong|hover|focus|disabled|glassBorder)(?:\/(\d+))?$/,
+        ([, dir = '', name, opacity]) => {
+          const props = borderDirectionMap[dir] || ['border-color'];
+          const varName =
+            name === 'glassBorder' ? '--glass-border' : `--border-${name}`;
+          const val = opacity
+            ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
+            : `color-mix(in srgb, var(${varName}) var(--un-border-opacity, 100%), transparent)`;
+          const res: Record<string, string> = {};
+          for (const p of props) {
+            res[p] = val;
+          }
+          return res;
+        },
+      ],
     ],
     shortcuts: {
-      'bg-page': 'bg-[color:var(--bg-page)]',
-      'bg-surface': 'bg-[color:var(--bg-surface)]',
-      'bg-surface-raised': 'bg-[color:var(--bg-surface-raised)]',
-      'bg-surface-overlay': 'bg-[color:var(--bg-surface-overlay)]',
-      'bg-subtle': 'bg-[color:var(--bg-subtle)]',
-      'bg-muted': 'bg-[color:var(--bg-muted)]',
-      'bg-accent': 'bg-[color:var(--bg-accent)]',
-      'bg-overlay': 'bg-[color:var(--bg-overlay)]',
-      'bg-glass': 'bg-[color:var(--glass-bg)]',
-      'text-default': 'text-[color:var(--fg-default)]',
-      'text-subtle': 'text-[color:var(--fg-subtle)]',
-      'text-muted': 'text-[color:var(--fg-muted)]',
-      'text-accent': 'text-[color:var(--fg-accent)]',
-      'text-inverse': 'text-[color:var(--fg-inverse)]',
-      'text-disabled': 'text-[color:var(--fg-disabled)]',
-      'border-default': '[border-color:var(--border-default)]',
-      'border-strong': '[border-color:var(--border-strong)]',
-      'border-subtle': '[border-color:var(--border-subtle)]',
-      'border-hover': '[border-color:var(--border-hover)]',
-      'border-focus': '[border-color:var(--border-focus)]',
-      'border-disabled': '[border-color:var(--border-disabled)]',
-      'border-glassBorder': '[border-color:var(--glass-border)]',
       'ring-focus': 'ring-[color:var(--focus-ring)]',
       'ring-offset-surface': 'ring-offset-[color:var(--bg-surface)]',
       'ring-offset-background': 'ring-offset-[color:var(--bg-page)]',
@@ -49,43 +93,39 @@ export function nuicssPreset(): NuicssConfig {
         'primary-active': 'var(--color-primary-active)',
         'primary-fg': 'var(--color-primary-fg)',
         'primary-subtle': 'var(--color-primary-subtle)',
+        secondary: 'var(--color-secondary)',
+        'secondary-hover': 'var(--color-secondary-hover)',
+        'secondary-active': 'var(--color-secondary-active)',
+        'secondary-fg': 'var(--color-secondary-fg)',
+        'secondary-subtle': 'var(--color-secondary-subtle)',
         danger: 'var(--color-danger)',
-        'danger-subtle': 'var(--color-danger-subtle)',
+        'danger-hover': 'var(--color-danger-hover)',
+        'danger-active': 'var(--color-danger-active)',
         'danger-fg': 'var(--color-danger-fg)',
+        'danger-subtle': 'var(--color-danger-subtle)',
         success: 'var(--color-success)',
-        'success-subtle': 'var(--color-success-subtle)',
+        'success-hover': 'var(--color-success-hover)',
+        'success-active': 'var(--color-success-active)',
         'success-fg': 'var(--color-success-fg)',
+        'success-subtle': 'var(--color-success-subtle)',
         warning: 'var(--color-warning)',
-        'warning-subtle': 'var(--color-warning-subtle)',
+        'warning-hover': 'var(--color-warning-hover)',
+        'warning-active': 'var(--color-warning-active)',
         'warning-fg': 'var(--color-warning-fg)',
+        'warning-subtle': 'var(--color-warning-subtle)',
         info: 'var(--color-info)',
-        'info-subtle': 'var(--color-info-subtle)',
+        'info-hover': 'var(--color-info-hover)',
+        'info-active': 'var(--color-info-active)',
         'info-fg': 'var(--color-info-fg)',
+        'info-subtle': 'var(--color-info-subtle)',
         accent: 'var(--bg-accent)',
         'accent-fg': 'var(--fg-accent)',
+        canvas: 'var(--bg-canvas)',
+        surface: 'var(--bg-surface)',
+        card: 'var(--bg-card)',
       },
       spacing: {
-        0: 'var(--space-0)',
-        0.5: 'var(--space-0-5)',
-        1: 'var(--space-1)',
-        1.5: 'var(--space-1-5)',
-        2: 'var(--space-2)',
-        2.5: 'var(--space-2-5)',
-        3: 'var(--space-3)',
-        4: 'var(--space-4)',
-        5: 'var(--space-5)',
-        6: 'var(--space-6)',
-        8: 'var(--space-8)',
-        10: 'var(--space-10)',
-        12: 'var(--space-12)',
-        14: 'var(--space-14)',
-        16: 'var(--space-16)',
-        20: 'var(--space-20)',
-        24: 'var(--space-24)',
-        32: 'var(--space-32)',
-        40: 'var(--space-40)',
-        48: 'var(--space-48)',
-        64: 'var(--space-64)',
+        DEFAULT: 'var(--spacing, 0.25rem)',
       },
       borderRadius: {
         none: 'var(--radius-none)',
@@ -97,9 +137,25 @@ export function nuicssPreset(): NuicssConfig {
         '2xl': 'var(--radius-2xl)',
         '3xl': 'var(--radius-3xl)',
         full: 'var(--radius-full)',
+        control: 'var(--radius-control)',
+        container: 'var(--radius-container)',
+      },
+      radius: {
+        none: 'var(--radius-none)',
+        sm: 'var(--radius-sm)',
+        DEFAULT: 'var(--radius-md)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        '2xl': 'var(--radius-2xl)',
+        '3xl': 'var(--radius-3xl)',
+        full: 'var(--radius-full)',
+        control: 'var(--radius-control)',
+        container: 'var(--radius-container)',
       },
       boxShadow: {
         none: 'var(--shadow-none)',
+        xs: 'var(--shadow-xs)',
         sm: 'var(--shadow-sm)',
         DEFAULT: 'var(--shadow-md)',
         md: 'var(--shadow-md)',
@@ -107,8 +163,26 @@ export function nuicssPreset(): NuicssConfig {
         xl: 'var(--shadow-xl)',
         '2xl': 'var(--shadow-2xl)',
         inner: 'var(--shadow-inner)',
+        popover: 'var(--shadow-popover)',
+      },
+      shadow: {
+        none: 'var(--shadow-none)',
+        xs: 'var(--shadow-xs)',
+        sm: 'var(--shadow-sm)',
+        DEFAULT: 'var(--shadow-md)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        xl: 'var(--shadow-xl)',
+        '2xl': 'var(--shadow-2xl)',
+        inner: 'var(--shadow-inner)',
+        popover: 'var(--shadow-popover)',
       },
       fontFamily: {
+        sans: 'var(--font-sans)',
+        serif: 'var(--font-serif)',
+        mono: 'var(--font-mono)',
+      },
+      font: {
         sans: 'var(--font-sans)',
         serif: 'var(--font-serif)',
         mono: 'var(--font-mono)',
@@ -117,12 +191,18 @@ export function nuicssPreset(): NuicssConfig {
         keyframes: {
           'fade-in': '{ from { opacity: 0; } to { opacity: 1; } }',
           'fade-out': '{ from { opacity: 1; } to { opacity: 0; } }',
-          'zoom-in': '{ from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }',
-          'zoom-out': '{ from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }',
-          'slide-in-up': '{ from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }',
-          'slide-in-down': '{ from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }',
-          'slide-out-up': '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }',
-          'slide-out-down': '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }',
+          'zoom-in':
+            '{ from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }',
+          'zoom-out':
+            '{ from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }',
+          'slide-in-up':
+            '{ from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }',
+          'slide-in-down':
+            '{ from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }',
+          'slide-out-up':
+            '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }',
+          'slide-out-down':
+            '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }',
         },
         durations: {
           'fade-in': '200ms',
@@ -143,8 +223,8 @@ export function nuicssPreset(): NuicssConfig {
           'slide-in-down': 'cubic-bezier(0.4, 0, 0.2, 1)',
           'slide-out-up': 'cubic-bezier(0.4, 0, 1, 1)',
           'slide-out-down': 'cubic-bezier(0.4, 0, 1, 1)',
-        }
-      }
-    }
+        },
+      },
+    },
   };
 }
