@@ -86,6 +86,8 @@
     "./styles.css": "./dist/styles.css",
     "./styles.min.css": "./dist/styles.min.css",
     "./cdn": "./dist/index.global.js",
+    "./html-data.json": "./dist/nuicss.html-data.json",
+    "./css-data.json": "./dist/nuicss.css-data.json",
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"
   },

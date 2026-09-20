@@ -390,6 +390,12 @@ try {
       Buffer.byteLength(finalBundle, 'utf8') +
       ' bytes)'
   );
+
+  // ========================================================
+  // 4. Generate VS Code & Cursor Custom Data for IntelliSense
+  // ========================================================
+  const { buildCustomData } = require('./build-custom-data.js');
+  buildCustomData();
 }
 
 build().catch((err) => {
