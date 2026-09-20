@@ -172,7 +172,7 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
       var opacity = m[2];
       var varName = name === 'glass' ? '--glass-bg' : (name === 'accent' ? '--bg-accent' : '--bg-' + name);
       var val = opacity
-        ? 'color-mix(in srgb, var(' + varName + ') ' + opacity + '%, transparent)'
+        ? 'color-mix(in oklch, var(' + varName + ') ' + opacity + '%, transparent)'
         : 'var(' + varName + ')';
       return { 'background-color': val };
     }
@@ -184,7 +184,7 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
       var opacity = m[2];
       var varName = '--fg-' + name;
       var val = opacity
-        ? 'color-mix(in srgb, var(' + varName + ') ' + opacity + '%, transparent)'
+        ? 'color-mix(in oklch, var(' + varName + ') ' + opacity + '%, transparent)'
         : 'var(' + varName + ')';
       return { 'color': val };
     }
@@ -198,13 +198,61 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
       var props = borderDirectionMap[dir] || ['border-color'];
       var varName = (name === 'glass' || name === 'glassBorder') ? '--glass-border' : '--border-' + name;
       var val = opacity
-        ? 'color-mix(in srgb, var(' + varName + ') ' + opacity + '%, transparent)'
+        ? 'color-mix(in oklch, var(' + varName + ') ' + opacity + '%, transparent)'
         : 'var(' + varName + ')';
       var res = {};
       for (var i = 0; i < props.length; i++) {
         res[props[i]] = val;
       }
       return res;
+    }
+  ],
+  [
+    /^text-fluid-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|hero)$/,
+    function(m) {
+      return { 'font-size': 'var(--text-fluid-' + m[1] + ')' };
+    }
+  ],
+  [
+    /^p-fluid-(xs|sm|md|lg|xl)$/,
+    function(m) {
+      return { padding: 'var(--space-fluid-' + m[1] + ')' };
+    }
+  ],
+  [
+    /^px-fluid-(xs|sm|md|lg|xl)$/,
+    function(m) {
+      return {
+        'padding-left': 'var(--space-fluid-' + m[1] + ')',
+        'padding-right': 'var(--space-fluid-' + m[1] + ')'
+      };
+    }
+  ],
+  [
+    /^py-fluid-(xs|sm|md|lg|xl)$/,
+    function(m) {
+      return {
+        'padding-top': 'var(--space-fluid-' + m[1] + ')',
+        'padding-bottom': 'var(--space-fluid-' + m[1] + ')'
+      };
+    }
+  ],
+  [
+    /^gap-fluid-(xs|sm|md|lg|xl)$/,
+    function(m) {
+      return { gap: 'var(--space-fluid-' + m[1] + ')' };
+    }
+  ],
+  [
+    /^cq$/,
+    function() {
+      return { 'container-type': 'inline-size' };
+    }
+  ],
+  [
+    /^cq-normal$/,
+    function() {
+      return { 'container-type': 'normal' };
     }
   ],
   [

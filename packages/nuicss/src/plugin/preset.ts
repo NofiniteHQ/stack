@@ -63,7 +63,7 @@ export function nuicssPreset(): NuicssConfig {
               ? '--bg-accent'
               : `--bg-${name}`;
           const val = opacity
-            ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
+            ? `color-mix(in oklch, var(${varName}) ${opacity}%, transparent)`
             : `var(${varName})`;
           return { 'background-color': val };
         },
@@ -74,7 +74,7 @@ export function nuicssPreset(): NuicssConfig {
         ([, name, opacity]) => {
           const varName = `--fg-${name}`;
           const val = opacity
-            ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
+            ? `color-mix(in oklch, var(${varName}) ${opacity}%, transparent)`
             : `var(${varName})`;
           return { color: val };
         },
@@ -89,7 +89,7 @@ export function nuicssPreset(): NuicssConfig {
               ? '--glass-border'
               : `--border-${name}`;
           const val = opacity
-            ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
+            ? `color-mix(in oklch, var(${varName}) ${opacity}%, transparent)`
             : `var(${varName})`;
           const res: Record<string, string> = {};
           for (const p of props) {
@@ -98,6 +98,37 @@ export function nuicssPreset(): NuicssConfig {
           return res;
         },
       ],
+      // Fluid Typography (clamp scaling from 375px to 1440px)
+      [
+        /^text-fluid-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|hero)$/,
+        ([, size]) => ({ 'font-size': `var(--text-fluid-${size})` }),
+      ],
+      // Fluid Spacing Scale (clamp scaling from 375px to 1440px)
+      [
+        /^p-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({ padding: `var(--space-fluid-${size})` }),
+      ],
+      [
+        /^px-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({
+          'padding-left': `var(--space-fluid-${size})`,
+          'padding-right': `var(--space-fluid-${size})`,
+        }),
+      ],
+      [
+        /^py-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({
+          'padding-top': `var(--space-fluid-${size})`,
+          'padding-bottom': `var(--space-fluid-${size})`,
+        }),
+      ],
+      [
+        /^gap-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({ gap: `var(--space-fluid-${size})` }),
+      ],
+      // Container Query Rules
+      [/^cq$/, () => ({ 'container-type': 'inline-size' })],
+      [/^cq-normal$/, () => ({ 'container-type': 'normal' })],
       // Semantic SVG fill tokens
       [
         /^fill-(muted|default|subtle|accent|primary|danger|success|warning|info)$/,
@@ -132,6 +163,16 @@ export function nuicssPreset(): NuicssConfig {
       [
         'ring-offset-background',
         'ring-offset-[color:var(--bg-page)]',
+        { layer: 'components' },
+      ],
+      [
+        'card-responsive',
+        '@container flex flex-col @sm:flex-row @sm:items-center',
+        { layer: 'components' },
+      ],
+      [
+        'stat-card-responsive',
+        '@container flex flex-col justify-between p-5 rounded-xl border border-default bg-surface shadow-sm @sm:flex-row @sm:items-center',
         { layer: 'components' },
       ],
     ],

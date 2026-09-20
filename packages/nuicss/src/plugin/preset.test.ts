@@ -11,18 +11,35 @@ describe('nuicssPreset', () => {
 
     expect(css).toContain('var(--bg-surface)');
     expect(css).toContain(
-      'color-mix(in srgb, var(--bg-surface) 80%, transparent)'
+      'color-mix(in oklch, var(--bg-surface) 80%, transparent)'
     );
     expect(css).toContain('var(--fg-muted)');
     expect(css).toContain(
-      'color-mix(in srgb, var(--fg-subtle) 70%, transparent)'
+      'color-mix(in oklch, var(--fg-subtle) 70%, transparent)'
     );
     expect(css).toContain('var(--border-subtle)');
     expect(css).toContain('border-top-color');
     expect(css).toContain('var(--border-default)');
     expect(css).toContain(
-      'color-mix(in srgb, var(--border-strong) 60%, transparent)'
+      'color-mix(in oklch, var(--border-strong) 60%, transparent)'
     );
+  });
+
+  it('should generate correct CSS for fluid typography and fluid spacing', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate('text-fluid-lg p-fluid-md gap-fluid-sm');
+
+    expect(css).toContain('var(--text-fluid-lg)');
+    expect(css).toContain('var(--space-fluid-md)');
+    expect(css).toContain('var(--space-fluid-sm)');
+  });
+
+  it('should generate correct CSS for container query shortcuts', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate('cq card-responsive');
+
+    expect(css).toContain('container-type:inline-size');
+    expect(css).toContain('@container');
   });
 
   it('should generate correct CSS for custom theme tokens', async () => {
