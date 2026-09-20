@@ -15,12 +15,30 @@ async function build() {
   // Read the compiled base CSS (Reset + Design Tokens)
   const baseCss = fs.readFileSync('dist/index.css', 'utf8');
 
+  const { transform } = require('lightningcss');
+  function minifyCss(filename, cssContent) {
+    try {
+      const { code } = transform({
+        filename,
+        code: Buffer.from(cssContent),
+        minify: true,
+      });
+      return code.toString();
+    } catch (err) {
+      console.warn(
+        `[lightningcss] Minification warning for ${filename}:`,
+        err.message
+      );
+      return cssContent;
+    }
+  }
+
   // ========================================================
   // 1. Generate Static Superclass CSS Bundles
   // ========================================================
   const uno = await createGenerator(config);
 
-  // 1a. All Components (components.css)
+  // 1a. All Components (components.css & components.min.css)
   if (Array.isArray(rawShortcuts)) {
     const allTokens = rawShortcuts
       .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
@@ -28,25 +46,29 @@ async function build() {
     const { css: allCss } = await uno.generate(allTokens);
     const layeredAllCss = `@layer components {\n${allCss}\n}`;
     fs.writeFileSync('dist/components.css', layeredAllCss, 'utf8');
+    const minAllCss = minifyCss('components.min.css', layeredAllCss);
+    fs.writeFileSync('dist/components.min.css', minAllCss, 'utf8');
     console.log(
       `Generated dist/components.css (${Buffer.byteLength(
         layeredAllCss,
         'utf8'
-      )} bytes)`
+      )} bytes, minified: ${Buffer.byteLength(minAllCss, 'utf8')} bytes)`
     );
 
-    // 1b. Standalone All-In-One styles.css (Base + Components)
+    // 1b. Standalone All-In-One styles.css & styles.min.css (Base + Components)
     const combinedStyles = `@layer base, components, utilities;\n\n${baseCss}\n\n${layeredAllCss}`;
     fs.writeFileSync('dist/styles.css', combinedStyles, 'utf8');
+    const minStyles = minifyCss('styles.min.css', combinedStyles);
+    fs.writeFileSync('dist/styles.min.css', minStyles, 'utf8');
     console.log(
       `Generated dist/styles.css (${Buffer.byteLength(
         combinedStyles,
         'utf8'
-      )} bytes)`
+      )} bytes, minified: ${Buffer.byteLength(minStyles, 'utf8')} bytes)`
     );
   }
 
-  // 1c. Primitives Only (primitives.css)
+  // 1c. Primitives Only (primitives.css & primitives.min.css)
   if (Array.isArray(primitiveShortcuts)) {
     const primitiveTokens = primitiveShortcuts
       .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
@@ -54,15 +76,17 @@ async function build() {
     const { css: primCss } = await uno.generate(primitiveTokens);
     const layeredPrimCss = `@layer components {\n${primCss}\n}`;
     fs.writeFileSync('dist/primitives.css', layeredPrimCss, 'utf8');
+    const minPrimCss = minifyCss('primitives.min.css', layeredPrimCss);
+    fs.writeFileSync('dist/primitives.min.css', minPrimCss, 'utf8');
     console.log(
       `Generated dist/primitives.css (${Buffer.byteLength(
         layeredPrimCss,
         'utf8'
-      )} bytes)`
+      )} bytes, minified: ${Buffer.byteLength(minPrimCss, 'utf8')} bytes)`
     );
   }
 
-  // 1d. Forms Only (forms.css)
+  // 1d. Forms Only (forms.css & forms.min.css)
   if (Array.isArray(formShortcuts)) {
     const formTokens = formShortcuts
       .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
@@ -70,11 +94,13 @@ async function build() {
     const { css: fCss } = await uno.generate(formTokens);
     const layeredFormsCss = `@layer components {\n${fCss}\n}`;
     fs.writeFileSync('dist/forms.css', layeredFormsCss, 'utf8');
+    const minFormsCss = minifyCss('forms.min.css', layeredFormsCss);
+    fs.writeFileSync('dist/forms.min.css', minFormsCss, 'utf8');
     console.log(
       `Generated dist/forms.css (${Buffer.byteLength(
         layeredFormsCss,
         'utf8'
-      )} bytes)`
+      )} bytes, minified: ${Buffer.byteLength(minFormsCss, 'utf8')} bytes)`
     );
   }
 

@@ -34,11 +34,39 @@
       },
       "default": "./dist/components.js"
     },
+    "./next": {
+      "types": "./dist/plugin/next.d.ts",
+      "import": {
+        "types": "./dist/plugin/next.d.ts",
+        "default": "./dist/next.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin/next.d.ts",
+        "default": "./dist/next.js"
+      },
+      "default": "./dist/next.js"
+    },
+    "./ssr": {
+      "types": "./dist/helpers/ssr.d.ts",
+      "import": {
+        "types": "./dist/helpers/ssr.d.ts",
+        "default": "./dist/ssr.mjs"
+      },
+      "require": {
+        "types": "./dist/helpers/ssr.d.ts",
+        "default": "./dist/ssr.js"
+      },
+      "default": "./dist/ssr.js"
+    },
     "./components.css": "./dist/components.css",
+    "./components.min.css": "./dist/components.min.css",
     "./primitives.css": "./dist/primitives.css",
+    "./primitives.min.css": "./dist/primitives.min.css",
     "./forms.css": "./dist/forms.css",
+    "./forms.min.css": "./dist/forms.min.css",
     "./dist/index.css": "./dist/index.css",
     "./styles.css": "./dist/styles.css",
+    "./styles.min.css": "./dist/styles.min.css",
     "./cdn": "./dist/index.global.js",
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"
