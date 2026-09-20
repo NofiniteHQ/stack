@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect, fn } from '@storybook/test';
+import { within, userEvent, expect, fn } from 'storybook/test';
 import { Breadcrumbs } from './Breadcrumbs';
 
 const meta: Meta<typeof Breadcrumbs> = {

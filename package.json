@@ -47,7 +47,6 @@
     "@storybook/react": "10.6.0",
     "@storybook/react-dom-shim": "10.6.0",
     "@storybook/react-vite": "10.6.0",
-    "@storybook/test": "8.6.15",
     "@swc-node/register": "~1.11.1",
     "@swc/cli": "0.6.0",
     "@swc/core": "~1.15.5",

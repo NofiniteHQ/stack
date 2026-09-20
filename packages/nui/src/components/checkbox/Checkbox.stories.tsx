@@ -1,6 +1,6 @@
 // src/components/checkbox/Checkbox.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect, fn } from '@storybook/test';
+import { within, userEvent, expect, fn } from 'storybook/test';
 import { useState } from 'react';
 import { Checkbox } from './Checkbox';
 

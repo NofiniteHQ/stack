@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect, fn } from '@storybook/test';
+import { within, userEvent, expect, fn } from 'storybook/test';
 import { PinInput, PinInputProps } from './PinInput';
 
 const meta: Meta<typeof PinInput> = {

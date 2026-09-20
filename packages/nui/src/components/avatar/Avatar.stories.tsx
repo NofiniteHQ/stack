@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, expect, waitFor } from '@storybook/test';
+import { within, expect, waitFor } from 'storybook/test';
 import { Avatar } from './Avatar';
 
 const meta: Meta<typeof Avatar> = {

@@ -73,9 +73,31 @@ export function nuicssPreset(): NuicssConfig {
           return res;
         },
       ],
+      // Semantic SVG fill tokens
+      [
+        /^fill-(muted|default|subtle|accent|primary|danger|success|warning|info)$/,
+        ([, name]) => {
+          const varName =
+            name === 'muted' || name === 'default' || name === 'subtle'
+              ? `--fg-${name}`
+              : `--color-${name}`;
+          return { fill: `var(${varName})` };
+        },
+      ],
+      // Semantic SVG stroke tokens
+      [
+        /^stroke-(default|subtle|strong|muted)$/,
+        ([, name]) => {
+          const varName = name === 'muted' ? '--fg-muted' : `--border-${name}`;
+          return { stroke: `var(${varName})` };
+        },
+      ],
     ],
     shortcuts: [
       ...(Array.isArray(componentShortcuts) ? componentShortcuts : []),
+      ['animate-in', 'animate-zoom-in', { layer: 'components' }],
+      ['fade-in', 'animate-fade-in', { layer: 'components' }],
+      ['zoom-in-95', 'animate-zoom-in', { layer: 'components' }],
       ['ring-focus', 'ring-[color:var(--focus-ring)]', { layer: 'components' }],
       [
         'ring-offset-surface',
@@ -139,6 +161,10 @@ export function nuicssPreset(): NuicssConfig {
         canvas: 'var(--bg-canvas)',
         surface: 'var(--bg-surface)',
         card: 'var(--bg-card)',
+        default: 'var(--border-default)',
+        subtle: 'var(--border-subtle)',
+        strong: 'var(--border-strong)',
+        muted: 'var(--fg-muted)',
       },
       spacing: {
         DEFAULT: 'var(--spacing, 0.25rem)',

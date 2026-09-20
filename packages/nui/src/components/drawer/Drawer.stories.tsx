@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect, fn } from '@storybook/test';
+import { within, userEvent, expect, fn } from 'storybook/test';
 import { Drawer, DrawerProps } from './Drawer';
 import { Button } from '../button/Button';
 import { useState } from 'react';

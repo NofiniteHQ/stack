@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, fireEvent, expect, waitFor, fn } from '@storybook/test';
+import { within, fireEvent, expect, waitFor, fn } from 'storybook/test';
 // 1. Import VirtualListProps and VirtualListHandle
 import {
   VirtualList,

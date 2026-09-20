@@ -203,8 +203,5 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'link-preview-image-wrapper',
     'h-36 w-full overflow-hidden bg-subtle relative',
   ],
-  [
-    'link-preview-popup',
-    'fixed z-50 animate-in fade-in zoom-in-95 duration-150',
-  ],
+  ['link-preview-popup', 'fixed z-50 animate-zoom-in duration-150'],
 ];

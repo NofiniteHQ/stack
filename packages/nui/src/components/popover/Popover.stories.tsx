@@ -5,7 +5,7 @@ import {
   userEvent,
   expect,
   waitForElementToBeRemoved,
-} from '@storybook/test';
+} from 'storybook/test';
 import { Popover } from './Popover';
 import { Button } from '../button/Button';
 
