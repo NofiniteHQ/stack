@@ -52,9 +52,9 @@ export function nuicssPreset(): NuicssConfig {
     presets: [wind],
     processors: [getProcessorLightningCSS()],
     rules: [
-      // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card)
+      // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card, bg-selected)
       [
-        /^bg-(page|canvas|surface|surface-raised|surface-overlay|subtle|muted|accent|overlay|glass|inset|card)(?:\/(\d+))?$/,
+        /^bg-(page|canvas|surface|surface-raised|surface-overlay|subtle|muted|accent|overlay|glass|inset|card|selected|selected-hover)(?:\/(\d+))?$/,
         ([, name, opacity]) => {
           const varName =
             name === 'glass'

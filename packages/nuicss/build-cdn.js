@@ -144,7 +144,16 @@ var borderDirectionMap = {
   '': ['border-color'],
 };
 
-// Configure UnoCSS Runtime with Preset Wind4 & NuiCSS Rules
+// Ingest user-defined configurations (supporting both window.nuicss and window.tailwind drop-in)
+var rawUserConfig = (typeof window !== 'undefined')
+  ? ((window.nuicss && (window.nuicss.config || window.nuicss)) ||
+     (window.tailwind && (window.tailwind.config || window.tailwind)) || {})
+  : {};
+
+var userTheme = rawUserConfig.theme || {};
+var userExtend = userTheme.extend || {};
+
+// Configure Engine with Preset Wind4 & NuiCSS Rules
 window.__nuicss = window.__nuicss || window.__unocss || {};
 window.__unocss = window.__nuicss;
 
@@ -179,20 +188,30 @@ if (windPreset && windPreset.variants) {
   }
 }
 
+var defaultTheme = ${JSON.stringify(config.theme)};
+var mergedColors = Object.assign({}, defaultTheme.colors || {}, userTheme.colors || {}, userExtend.colors || {});
+var mergedFontFamily = Object.assign({}, defaultTheme.fontFamily || {}, userTheme.fontFamily || {}, userExtend.fontFamily || {});
+
 window.__unocss.presets = [windPreset];
-window.__unocss.theme = Object.assign(window.__unocss.theme || {}, ${JSON.stringify(
-    config.theme
-  )});
-window.__unocss.shortcuts = Array.isArray(${JSON.stringify(config.shortcuts)})
-  ? (window.__unocss.shortcuts || []).concat(${JSON.stringify(
-    config.shortcuts
-  )})
-  : Object.assign(window.__unocss.shortcuts || {}, ${JSON.stringify(
-    config.shortcuts
-  )});
+window.__unocss.theme = Object.assign({}, defaultTheme, userTheme);
+window.__unocss.theme.colors = mergedColors;
+window.__unocss.theme.fontFamily = mergedFontFamily;
+
+for (var extKey in userExtend) {
+  if (extKey !== 'colors' && extKey !== 'fontFamily') {
+    window.__unocss.theme[extKey] = Object.assign({}, window.__unocss.theme[extKey] || {}, userExtend[extKey]);
+  }
+}
+
+var baseShortcuts = ${JSON.stringify(config.shortcuts)};
+var userShortcuts = rawUserConfig.shortcuts || [];
+window.__unocss.shortcuts = Array.isArray(baseShortcuts)
+  ? (window.__unocss.shortcuts || []).concat(baseShortcuts).concat(userShortcuts)
+  : Object.assign(window.__unocss.shortcuts || {}, baseShortcuts);
+
 window.__unocss.rules = (window.__unocss.rules || []).concat([
   [
-    /^bg-(page|canvas|surface|surface-raised|surface-overlay|subtle|muted|accent|overlay|glass|inset|card)(?:\\/(\\d+))?$/,
+    /^bg-(page|canvas|surface|surface-raised|surface-overlay|subtle|muted|accent|overlay|glass|inset|card|selected|selected-hover)(?:\\/(\\d+))?$/,
     function(m) {
       var name = m[1];
       var opacity = m[2];
@@ -306,14 +325,72 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
     }
   ]
 ]);
+
+// Expose window.nuicss as primary API & provide 100% Tailwind CDN drop-in compatibility
+var nuicssPublicApi = {
+  version: ${JSON.stringify(require('./package.json').version)},
+  get config() {
+    return window.__unocss;
+  },
+  set config(newConfig) {
+    if (newConfig && typeof newConfig === 'object') {
+      if (newConfig.theme) {
+        if (newConfig.theme.extend) {
+          for (var k in newConfig.theme.extend) {
+            window.__unocss.theme[k] = Object.assign(window.__unocss.theme[k] || {}, newConfig.theme.extend[k]);
+          }
+        }
+        for (var tk in newConfig.theme) {
+          if (tk !== 'extend') {
+            window.__unocss.theme[tk] = Object.assign(window.__unocss.theme[tk] || {}, newConfig.theme[tk]);
+          }
+        }
+      }
+      if (window.__unocss_runtime && typeof window.__unocss_runtime.extract === 'function') {
+        window.__unocss_runtime.extract();
+      }
+    }
+  },
+  get theme() {
+    return window.__unocss.theme;
+  },
+  refresh: function() {
+    if (window.__unocss_runtime && typeof window.__unocss_runtime.extract === 'function') {
+      window.__unocss_runtime.extract();
+    }
+  }
+};
+
+window.nuicss = Object.assign(window.nuicss || {}, nuicssPublicApi);
+
+// 100% Tailwind Drop-In Compatibility
+try {
+  if (!window.tailwind) {
+    window.tailwind = window.nuicss;
+  } else {
+    Object.defineProperty(window.tailwind, 'config', {
+      get: function() { return window.__unocss; },
+      set: function(val) { window.nuicss.config = val; },
+      configurable: true
+    });
+    window.tailwind.refresh = window.nuicss.refresh;
+  }
+} catch (e) {
+  window.tailwind = window.nuicss;
+}
 `;
 
   console.log('Assembling Preset-Wind4 + Config + Core Runtime...');
+  const shieldedCoreRuntime = coreRuntimeCode.replace(
+    /data-unocss-runtime-layer/g,
+    'data-nuicss-layer'
+  );
+
   const finalBundle = [
-    '// @nofinite/nuicss CDN Bundle - UnoCSS Preset-Wind4 + NuiCSS Base + Runtime',
+    '// @nofinite/nuicss CDN Bundle - NuiCSS Base + Tailwind Compatible Runtime Engine',
     presetWind4Code,
     cdnConfigScript,
-    coreRuntimeCode,
+    shieldedCoreRuntime,
   ].join('\n');
 
   fs.writeFileSync('dist/index.global.js', finalBundle, 'utf8');

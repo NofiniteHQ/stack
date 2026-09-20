@@ -100,4 +100,52 @@ describe('nuicssPreset', () => {
     expect(css).toContain('.link-muted');
     expect(css).toContain(':hover');
   });
+
+  it('should generate correct CSS for selected background tokens with opacity support', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'bg-selected bg-selected/80 bg-selected-hover'
+    );
+
+    expect(css).toContain('var(--bg-selected)');
+    expect(css).toContain(
+      'color-mix(in oklch, var(--bg-selected) 80%, transparent)'
+    );
+    expect(css).toContain('var(--bg-selected-hover)');
+  });
+
+  it('should generate correct CSS for modern physics easing curves', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'ease-spring ease-bounce ease-smooth ease-out-expo'
+    );
+
+    expect(css).toContain('var(--ease-spring)');
+    expect(css).toContain('var(--ease-bounce)');
+    expect(css).toContain('var(--ease-smooth)');
+    expect(css).toContain('var(--ease-out-expo)');
+  });
+
+  it('should generate correct CSS for semantic SVG fill and stroke utilities', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'fill-primary fill-muted stroke-subtle stroke-strong'
+    );
+
+    expect(css).toContain('fill:var(--color-primary)');
+    expect(css).toContain('fill:var(--fg-muted)');
+    expect(css).toContain('stroke:var(--border-subtle)');
+    expect(css).toContain('stroke:var(--border-strong)');
+  });
+
+  it('should support full Tailwind drop-in parity for group, peer, and container queries', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'group-hover:opacity-100 peer-focus:border-primary @sm:grid-cols-2'
+    );
+
+    expect(css).toContain('.group:hover');
+    expect(css).toContain('.peer:focus');
+    expect(css).toContain('@container');
+  });
 });
