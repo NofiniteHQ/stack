@@ -161,10 +161,6 @@ export function nuicssPreset(): NuicssConfig {
         canvas: 'var(--bg-canvas)',
         surface: 'var(--bg-surface)',
         card: 'var(--bg-card)',
-        default: 'var(--border-default)',
-        subtle: 'var(--border-subtle)',
-        strong: 'var(--border-strong)',
-        muted: 'var(--fg-muted)',
       },
       spacing: {
         DEFAULT: 'var(--spacing, 0.25rem)',

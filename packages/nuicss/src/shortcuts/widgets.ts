@@ -6,7 +6,7 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'accordion',
-    'flex flex-col divide-y divide-default border border-default rounded-xl overflow-hidden font-sans bg-surface shadow-sm',
+    'flex flex-col divide-y divide-[var(--border-default)] border border-default rounded-xl overflow-hidden font-sans bg-surface shadow-sm',
   ],
   ['accordion-item', 'overflow-hidden'],
   [
@@ -120,7 +120,7 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'table-th',
     'px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider select-none text-left align-middle',
   ],
-  ['table-body', 'divide-y divide-default'],
+  ['table-body', 'divide-y divide-[var(--border-default)]'],
   [
     'table-row',
     'border-b border-default last:border-0 hover:bg-subtle/40 transition-colors',

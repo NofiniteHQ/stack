@@ -62,8 +62,8 @@
   --bg-surface: var(--white);
   --bg-surface-raised: var(--slate-50);
   --bg-surface-overlay: var(--white);
-  --bg-subtle: var(--slate-50);
-  --bg-muted: var(--slate-100);
+  --bg-subtle: var(--slate-100);
+  --bg-muted: var(--slate-200);
   --bg-inset: var(--slate-100);
   --bg-card: var(--white);
   --bg-accent: var(--slate-100);
@@ -95,10 +95,10 @@
   --nui-color-danger: var(--color-danger);
 
   /* Borders */
-  --border-default: var(--slate-300);
-  --border-strong: var(--slate-400);
-  --border-subtle: var(--slate-200);
-  --border-hover: var(--slate-400);
+  --border-default: var(--slate-200);
+  --border-strong: var(--slate-300);
+  --border-subtle: var(--slate-100);
+  --border-hover: var(--slate-300);
   --border-focus: var(--brand-primary);
   --border-disabled: var(--slate-200);
 
@@ -388,10 +388,10 @@
   --fg-disabled: var(--slate-600);
 
   /* Borders */
-  --border-default: var(--slate-700);
-  --border-strong: var(--slate-500);
-  --border-subtle: var(--slate-800);
-  --border-hover: var(--slate-600);
+  --border-default: var(--slate-800);
+  --border-strong: var(--slate-700);
+  --border-subtle: var(--slate-900);
+  --border-hover: var(--slate-700);
   --border-disabled: var(--slate-800);
 
   /* Brand Adjustments for Dark Mode */
