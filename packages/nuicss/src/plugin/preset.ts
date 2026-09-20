@@ -129,6 +129,11 @@ export function nuicssPreset(): NuicssConfig {
       // Container Query Rules
       [/^cq$/, () => ({ 'container-type': 'inline-size' })],
       [/^cq-normal$/, () => ({ 'container-type': 'normal' })],
+      // Physics-based Spring and Easing Utilities
+      [
+        /^ease-(spring|bounce|smooth|out-expo)$/,
+        ([, name]) => ({ 'transition-timing-function': `var(--ease-${name})` }),
+      ],
       // Semantic SVG fill tokens
       [
         /^fill-(muted|default|subtle|accent|primary|danger|success|warning|info)$/,
@@ -309,6 +314,7 @@ export function nuicssPreset(): NuicssConfig {
             '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }',
           'slide-out-down':
             '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }',
+          shimmer: '{ 100% { transform: translateX(100%); } }',
         },
         durations: {
           'fade-in': '200ms',
@@ -319,6 +325,10 @@ export function nuicssPreset(): NuicssConfig {
           'slide-in-down': '200ms',
           'slide-out-up': '150ms',
           'slide-out-down': '150ms',
+          shimmer: '1.8s',
+        },
+        counts: {
+          shimmer: 'infinite',
         },
         timingFns: {
           'fade-in': 'cubic-bezier(0.4, 0, 0.2, 1)',

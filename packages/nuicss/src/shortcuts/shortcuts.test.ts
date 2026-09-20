@@ -77,4 +77,40 @@ describe('nuicss shortcuts', () => {
     expect(css).not.toContain('table-sortable');
     expect(css).not.toContain('modal-box');
   });
+
+  it('should generate ARIA state styles for tabs, accordion, and inputs', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'tab accordion-icon input select switch'
+    );
+
+    expect(css).toContain('aria-selected');
+    expect(css).toContain('aria-expanded');
+    expect(css).toContain('aria-invalid');
+    expect(css).toContain('aria-checked');
+  });
+
+  it('should generate micro-interaction classes and physics easing', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'press-scale hover-lift focus-ring skeleton-shimmer ease-spring ease-bounce'
+    );
+
+    expect(css).toContain('var(--ease-spring)');
+    expect(css).toContain('var(--ease-bounce)');
+    expect(css).toContain('shimmer');
+    expect(css).toContain('scale');
+  });
+
+  it('should generate pure CSS charts and metric cards', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'metric-card metric-label metric-value chart-bar-horizontal chart-bar-fill'
+    );
+
+    expect(css).toContain('.metric-card');
+    expect(css).toContain('.chart-bar-horizontal');
+    expect(css).toContain('.chart-bar-fill');
+    expect(css).toContain('var(--border-default)');
+  });
 });

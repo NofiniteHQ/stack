@@ -282,6 +282,12 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
     }
   ],
   [
+    /^ease-(spring|bounce|smooth|out-expo)$/,
+    function(m) {
+      return { 'transition-timing-function': 'var(--ease-' + m[1] + ')' };
+    }
+  ],
+  [
     /^fill-(muted|default|subtle|accent|primary|danger|success|warning|info)$/,
     function(m) {
       var name = m[1];

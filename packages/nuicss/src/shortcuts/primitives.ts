@@ -141,12 +141,36 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['kbd-lg', 'text-sm px-2.5 py-1'],
 
   // ==========================================
-  // 7. Skeletons
+  // 7. Skeletons & Shimmer
   // ==========================================
   ['skeleton', 'animate-pulse bg-muted rounded-md pointer-events-none'],
   ['skeleton-text', 'h-4 w-full rounded'],
   ['skeleton-circle', 'rounded-full shrink-0'],
   ['skeleton-rect', 'w-full h-32 rounded-lg'],
+  [
+    'skeleton-shimmer',
+    'relative overflow-hidden bg-subtle rounded-md pointer-events-none after:absolute after:inset-0 after:-translate-x-full after:animate-[shimmer_1.8s_infinite] after:bg-gradient-to-r after:from-transparent after:via-surface/50 after:to-transparent',
+  ],
+
+  // ==========================================
+  // 7b. Micro-Interactions & Physics Easing
+  // ==========================================
+  [
+    'press-scale',
+    'active:scale-[0.97] transition-transform duration-150 ease-spring select-none',
+  ],
+  [
+    'hover-lift',
+    'hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-smooth',
+  ],
+  [
+    'focus-ring',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-canvas)]',
+  ],
+  [
+    'glow-brand',
+    'shadow-[0_0_20px_var(--color-primary-subtle)] transition-shadow duration-300',
+  ],
 
   // ==========================================
   // 8. Spinners

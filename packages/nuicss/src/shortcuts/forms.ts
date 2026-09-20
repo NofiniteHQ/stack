@@ -6,7 +6,7 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'input',
-    'h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 font-sans',
+    'h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans',
   ],
   ['input-sm', 'h-8 px-2.5 text-xs'],
   ['input-md', 'h-9 px-3 text-sm'],
@@ -32,7 +32,7 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'textarea',
-    'w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 font-sans min-h-[80px]',
+    'w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans min-h-[80px]',
   ],
   [
     'textarea-error',
@@ -73,11 +73,11 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'switch',
-    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] bg-subtle data-[state=checked]:bg-primary p-0.5',
+    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] bg-subtle data-[state=checked]:bg-primary aria-checked:bg-primary p-0.5',
   ],
   [
     'switch-thumb',
-    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface shadow-md ring-0 transition-transform duration-200 ease-in-out translate-x-0 data-[state=checked]:translate-x-5',
+    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface shadow-md ring-0 transition-transform duration-200 ease-in-out translate-x-0 data-[state=checked]:translate-x-5 aria-checked:translate-x-5',
   ],
   [
     'switch-label',
@@ -89,7 +89,7 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'select',
-    'h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer font-sans',
+    'h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger cursor-pointer font-sans',
   ],
   ['select-sm', 'h-8 px-2.5 text-xs'],
   ['select-lg', 'h-11 px-4 text-base'],

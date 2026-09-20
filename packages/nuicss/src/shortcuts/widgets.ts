@@ -15,11 +15,11 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'accordion-icon',
-    'w-4 h-4 text-muted transition-transform duration-200 data-[state=open]:rotate-180 shrink-0 inline-flex items-center justify-center',
+    'w-4 h-4 text-muted transition-transform duration-200 data-[state=open]:rotate-180 aria-expanded:rotate-180 group-aria-expanded:rotate-180 shrink-0 inline-flex items-center justify-center',
   ],
   [
     'accordion-content',
-    'overflow-hidden grid grid-rows-[0fr] transition-all duration-200 ease-out data-[state=open]:grid-rows-[1fr]',
+    'overflow-hidden grid grid-rows-[0fr] transition-all duration-200 ease-out data-[state=open]:grid-rows-[1fr] aria-expanded:grid-rows-[1fr]',
   ],
   [
     'accordion-body',
@@ -36,7 +36,7 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'collapsible-content',
-    'grid grid-rows-[0fr] transition-all duration-200 ease-out data-[state=open]:grid-rows-[1fr]',
+    'grid grid-rows-[0fr] transition-all duration-200 ease-out data-[state=open]:grid-rows-[1fr] aria-expanded:grid-rows-[1fr]',
   ],
   ['collapsible-body', 'overflow-hidden text-sm text-muted'],
 
@@ -54,11 +54,11 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'tab',
-    'px-4 py-2 text-sm font-medium text-muted hover:text-default transition-all cursor-pointer select-none rounded-t-md relative -mb-px data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-b-solid data-[state=active]:border-primary data-[state=active]:font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary border-none bg-transparent',
+    'px-4 py-2 text-sm font-medium text-muted hover:text-default transition-all cursor-pointer select-none rounded-t-md relative -mb-px data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-b-solid data-[state=active]:border-primary data-[state=active]:font-semibold aria-selected:text-primary aria-selected:border-b-2 aria-selected:border-b-solid aria-selected:border-primary aria-selected:font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary border-none bg-transparent',
   ],
   [
     'tab-pill',
-    'px-3 py-1.5 text-xs font-semibold text-muted hover:text-default transition-all cursor-pointer select-none rounded-md data-[state=active]:text-default data-[state=active]:bg-surface data-[state=active]:shadow-sm outline-none border-none bg-transparent',
+    'px-3 py-1.5 text-xs font-semibold text-muted hover:text-default transition-all cursor-pointer select-none rounded-md data-[state=active]:text-default data-[state=active]:bg-surface data-[state=active]:shadow-sm aria-selected:text-default aria-selected:bg-surface aria-selected:shadow-sm outline-none border-none bg-transparent',
   ],
   [
     'tab-panel',
@@ -234,12 +234,66 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
 
   // ==========================================
-  // 13. Chart & Sparklines
+  // 13. Chart, Metrics & Data Visualizations
   // ==========================================
   ['chart-container', 'relative w-full overflow-hidden font-sans'],
   ['chart-grid', 'stroke-default opacity-50'],
   ['chart-axes', 'fill-muted text-xs select-none'],
   ['sparkline', 'inline-block align-middle overflow-visible'],
+  ['sparkline-container', 'flex items-end gap-1 h-8 w-24 overflow-hidden'],
+  [
+    'sparkline-bar',
+    'flex-1 bg-primary/40 hover:bg-primary rounded-t-sm transition-all duration-150 min-h-[2px]',
+  ],
+  [
+    'chart-bar-horizontal',
+    'w-full bg-subtle rounded-full h-2.5 overflow-hidden flex',
+  ],
+  [
+    'chart-bar-fill',
+    'h-full rounded-full bg-primary transition-all duration-500 ease-out',
+  ],
+  [
+    'chart-bar-fill-success',
+    'h-full rounded-full bg-success transition-all duration-500 ease-out',
+  ],
+  [
+    'chart-bar-fill-danger',
+    'h-full rounded-full bg-danger transition-all duration-500 ease-out',
+  ],
+  [
+    'chart-bar-fill-warning',
+    'h-full rounded-full bg-warning transition-all duration-500 ease-out',
+  ],
+  [
+    'chart-bar-vertical-group',
+    'flex items-end gap-2 h-40 w-full pt-4 pb-1 border-b border-default',
+  ],
+  [
+    'chart-bar-vertical',
+    'flex-1 bg-primary/20 hover:bg-primary rounded-t transition-all duration-300 min-h-[4px]',
+  ],
+  [
+    'progress-ring-container',
+    'relative inline-flex items-center justify-center',
+  ],
+  [
+    'metric-card',
+    'flex flex-col p-5 rounded-xl bg-surface border border-default shadow-sm transition-all duration-200 hover:border-hover font-sans',
+  ],
+  ['metric-label', 'text-xs font-semibold text-muted uppercase tracking-wider'],
+  [
+    'metric-value',
+    'text-2xl lg:text-3xl font-bold text-default tracking-tight mt-1',
+  ],
+  [
+    'metric-trend-up',
+    'inline-flex items-center gap-1 text-xs font-semibold text-success mt-2',
+  ],
+  [
+    'metric-trend-down',
+    'inline-flex items-center gap-1 text-xs font-semibold text-danger mt-2',
+  ],
 
   // ==========================================
   // 14. DataGrid
