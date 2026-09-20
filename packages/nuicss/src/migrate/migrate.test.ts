@@ -47,6 +47,55 @@ describe('NUICSS Migration Codemod', () => {
     expect(result).toBe('<div class="metric-card">Metrics</div>');
   });
 
+  it('migrates responsive container clusters to card-responsive', () => {
+    const input =
+      '<div class="@container flex flex-col @sm:flex-row @sm:items-center">Content</div>';
+    const { result, replacementsCount } = migrateMarkupToNuicss(input);
+
+    expect(replacementsCount).toBe(1);
+    expect(result).toBe('<div class="card-responsive">Content</div>');
+  });
+
+  it('migrates active scale interactions to press-scale', () => {
+    const input =
+      '<button class="btn active:scale-[0.98] transition-transform duration-150 ease-out">Click</button>';
+    const { result, replacementsCount } = migrateMarkupToNuicss(input);
+
+    expect(replacementsCount).toBe(1);
+    expect(result).toBe('<button class="btn press-scale">Click</button>');
+  });
+
+  it('migrates hover lift interactions to hover-lift', () => {
+    const input =
+      '<div class="card hover:-translate-y-1 hover:shadow-lg transition-all">Card</div>';
+    const { result, replacementsCount } = migrateMarkupToNuicss(input);
+
+    expect(replacementsCount).toBe(1);
+    expect(result).toBe('<div class="card hover-lift">Card</div>');
+  });
+
+  it('migrates skeleton pulses to skeleton-shimmer rounded', () => {
+    const input =
+      '<div class="animate-pulse bg-slate-200 rounded h-6 w-24"></div>';
+    const { result, replacementsCount } = migrateMarkupToNuicss(input);
+
+    expect(replacementsCount).toBe(1);
+    expect(result).toBe(
+      '<div class="skeleton-shimmer rounded h-6 w-24"></div>'
+    );
+  });
+
+  it('migrates verbose table wrappers to table-container', () => {
+    const input =
+      '<div class="w-full overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm"><table>...</table></div>';
+    const { result, replacementsCount } = migrateMarkupToNuicss(input);
+
+    expect(replacementsCount).toBe(1);
+    expect(result).toBe(
+      '<div class="table-container"><table>...</table></div>'
+    );
+  });
+
   it('leaves clean or unmatched markup unchanged', () => {
     const input =
       '<div class="btn btn-primary flex justify-between p-4">Clean</div>';

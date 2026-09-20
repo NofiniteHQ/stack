@@ -96,6 +96,50 @@ export const DEFAULT_MIGRATION_RULES: MigrationRule[] = [
     replacement: 'card',
     description: 'Converts card wrapper utility clusters to `card`',
   },
+  // Responsive Container Card
+  {
+    name: 'card-responsive',
+    pattern:
+      /(?<=^|\s|["'])@container\s+flex\s+flex-col\s+(?:@sm:|sm:)flex-row\s+(?:@sm:|sm:)items-center\b/g,
+    replacement: 'card-responsive',
+    description:
+      'Converts responsive container flex layout clusters to `card-responsive`',
+  },
+  // Press Scale Micro-interaction
+  {
+    name: 'press-scale',
+    pattern:
+      /\bactive:scale-(?:\[0\.97\]|\[0\.98\]|95)\s+(?:transition-transform\s+)?(?:duration-150\s+)?(?:ease-spring|ease-out)\b/g,
+    replacement: 'press-scale',
+    description:
+      'Converts interactive press scale micro-interaction clusters to `press-scale`',
+  },
+  // Hover Lift Micro-interaction
+  {
+    name: 'hover-lift',
+    pattern:
+      /\bhover:-translate-y-(?:0\.5|1)\s+hover:shadow-(?:md|lg)(?:\s+transition-all)?\b/g,
+    replacement: 'hover-lift',
+    description:
+      'Converts interactive hover lift micro-interaction clusters to `hover-lift`',
+  },
+  // Skeleton Shimmer Loading
+  {
+    name: 'skeleton-shimmer',
+    pattern: /\banimate-pulse\s+bg-(?:gray|slate|zinc)-200\s+rounded\b/g,
+    replacement: 'skeleton-shimmer rounded',
+    description:
+      'Converts pulse skeleton placeholders to `skeleton-shimmer rounded`',
+  },
+  // Table Container
+  {
+    name: 'table-container',
+    pattern:
+      /\bw-full\s+overflow-x-auto\s+rounded-xl\s+border\s+border-(?:gray|slate|zinc)-200\s+bg-white\s+shadow-sm\b/g,
+    replacement: 'table-container',
+    description:
+      'Converts overflow table wrapper clusters to `table-container`',
+  },
 ];
 
 /**
