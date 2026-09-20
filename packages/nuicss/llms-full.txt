@@ -1,18 +1,29 @@
 # NUICSS (@nofinite/nuicss) - Full AI Context & Superclasses Reference
 
-Semantic CSS utility framework, runtime-less design token engine, and production-ready component superclasses built directly on top of UnoCSS.
+Semantic CSS utility framework, runtime-less design token engine, production-ready component superclasses, and modern OKLCH color system built directly on top of UnoCSS.
+
+---
 
 ## Core Architecture & Engine
-- **Engine**: UnoCSS instant atomic CSS compiler.
+- **Engine**: UnoCSS instant atomic CSS compiler (<1ms generation).
 - **Directives**:
-  - `@nuicss;` in CSS expands to preflights, design tokens, shortcuts, and utility rules.
-  - `@apply` in stylesheets for inlining atomic classes.
-- **Zero Runtime Overhead**: Compiles on-demand at build time or runs via the standalone one-link CDN bundle.
+  - `@nuicss;` in CSS expands to preflights, OKLCH design tokens, shortcuts, and utility rules.
+  - `@apply` in stylesheets for inlining atomic classes into custom components.
+- **Packaging & Delivery Modes**:
+  - **Build-Time Compiler**: PostCSS plugin (`@nofinite/nuicss/postcss`) or Vite plugin (`nuicssVitePlugin`).
+  - **Zero-Config Next.js**: `withNuicss(nextConfig)` via `@nofinite/nuicss/next`.
+  - **SSR Critical CSS**: `extractCriticalNuicss(html)` and `injectCriticalNuicss(html)` via `@nofinite/nuicss/ssr` (eliminates FOUC).
+  - **Ultra-Lightweight Static CSS CDN**: `dist/styles.min.css` (~18KB gzipped) and `dist/components.min.css` (~15KB gzipped) via jsDelivr/unpkg.
+  - **One-Link In-Browser Runtime CDN**: `dist/index.global.js` (UnoCSS runtime + preset-wind4 + NUICSS engine).
 - **Layers**: Resets live in `@layer base`, component superclasses live in `@layer components`, and atomic utilities live in `@layer utilities`.
 
 ---
 
 ## Theming & Design Tokens
+
+### OKLCH Wide-Gamut (P3) Color System
+All dynamic color mixing uses perceptual OKLCH color space (`color-mix(in oklch, ...)`) rather than sRGB, eliminating grey dead zones in gradients and hover states. Supports native Display-P3 wide color gamut when available:
+- `@supports (color: color(display-p3 1 1 1)) { ... }`
 
 ### Semantic Backgrounds
 - `bg-page`: Main background canvas (`--bg-page`)
@@ -60,6 +71,38 @@ All semantic background, text, and border utilities support opacity modifiers:
 - `text-default/90`, `text-subtle/70`
 - `border-default/50`, `border-x-strong/60`
 
+### Fluid Typography Scale (`clamp()`)
+Smooth viewport-responsive typography scaling automatically from 375px to 1440px:
+- `text-fluid-xs`, `text-fluid-sm`, `text-fluid-base`, `text-fluid-lg`, `text-fluid-xl`, `text-fluid-2xl`, `text-fluid-3xl`, `text-fluid-4xl`, `text-fluid-5xl`, `text-fluid-hero`
+
+### Fluid Spacing Scale (`clamp()`)
+- `p-fluid-xs`, `p-fluid-sm`, `p-fluid-md`, `p-fluid-lg`, `p-fluid-xl`
+- `px-fluid-*`, `py-fluid-*`, `gap-fluid-*`
+
+### Container Queries (`@container`)
+- `cq`: Marks element as a container (`container-type: inline-size`)
+- `cq-normal`: Resets container type to normal
+- Responsive shortcuts:
+  - `card-responsive`: `@container flex flex-col @sm:flex-row @sm:items-center`
+  - `stat-card-responsive`: `@container flex flex-col justify-between p-5 rounded-xl border border-default bg-surface shadow-sm @sm:flex-row @sm:items-center`
+
+### Physics-Based Cubic-Bezier Easings & Micro-Interactions
+- Tokens:
+  - `--ease-spring`: `cubic-bezier(0.175, 0.885, 0.32, 1.275)`
+  - `--ease-bounce`: `cubic-bezier(0.34, 1.56, 0.64, 1)`
+  - `--ease-smooth`: `cubic-bezier(0.4, 0, 0.2, 1)`
+  - `--ease-out-expo`: `cubic-bezier(0.16, 1, 0.3, 1)`
+- Utilities: `ease-spring`, `ease-bounce`, `ease-smooth`, `ease-out-expo`
+- Micro-interaction Superclasses:
+  - `press-scale`: `active:scale-[0.97] transition-transform duration-150 ease-spring select-none`
+  - `hover-lift`: `hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-smooth`
+  - `focus-ring`: `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-canvas)]`
+  - `glow-brand`: `shadow-[0_0_20px_var(--color-primary-subtle)]`
+  - `skeleton-shimmer`: Shimmering gradient loading animation
+
+### Accessibility (WCAG AAA & High-Contrast Mode)
+- `@media (prefers-contrast: more)` automatically boosts border contrast, elevates focus ring widths (3px solid), and enhances text readability across all superclasses.
+
 ---
 
 ## Complete Component Superclasses Dictionary
@@ -80,7 +123,7 @@ Interactive button with keyboard navigation rings and micro-scaling.
   - `btn-danger`: Error / destructive action
   - `btn-link`: Inline text hyperlink style
 - Sizes: `btn-sm`, `btn-md`, `btn-lg`, `btn-icon`
-- State: `btn-loading` (displays centered animated spinner)
+- States: `btn-loading` (displays centered animated spinner), `press-scale`, `hover-lift`
 
 #### Badge (`badge`)
 Compact status indicator.
@@ -92,8 +135,9 @@ Compact status indicator.
 #### Card (`card`)
 Content card container with shadow elevation.
 - Base: `card` / `nui-card`
-- Variants: `card-bordered` (thicker strong border)
+- Variants: `card-bordered`
 - Slots: `card-header`, `card-title`, `card-description`, `card-body`, `card-footer`
+- Responsive / Interactive: `card-responsive`, `hover-lift`
 
 #### Avatar (`avatar`)
 User profile image or initials wrapper.
@@ -119,6 +163,7 @@ Keyboard shortcut badge.
 Loading placeholder animation.
 - Base: `skeleton` / `nui-skeleton`
 - Shapes: `skeleton-text`, `skeleton-circle`, `skeleton-rect`
+- Micro-interaction: `skeleton-shimmer` (gradient animated shimmer)
 
 #### Spinner (`spinner`)
 Circular indeterminate loading animation.
@@ -128,218 +173,107 @@ Circular indeterminate loading animation.
 
 #### Empty State (`empty-state`)
 Zero-data placeholder layout.
-- Base: `empty-state` / `nui-empty-state`
 - Slots: `empty-state-icon`, `empty-state-title`, `empty-state-description`, `empty-state-actions`
 
-#### Stat Card (`stat-card`)
-Dashboard KPI / metric display card.
-- Base: `stat-card` / `nui-stat-card`
-- Slots: `stat-card-label`, `stat-card-value`, `stat-card-trend`
-- Trend states: `stat-card-trend-up`, `stat-card-trend-down`
+#### Stat Card & Metrics (`stat-card`, `metric-card`)
+- Base: `stat-card`, `stat-card-responsive`, `metric-card`
+- Slots: `stat-card-label`, `stat-card-value`, `stat-card-trend`, `stat-card-trend-up`, `stat-card-trend-down`
+- Metrics: `metric-label`, `metric-value`, `metric-trend-up`, `metric-trend-down`
 
-#### Link (`link`)
-Hyperlink text styling.
-- Base: `link` / `nui-link`
-- Modifiers: `link-muted`, `link-hover`
-
-#### Layout Helpers
-- `container-center`: Centered max-w-7xl responsive wrapper
-- `stack`, `stack-sm`, `stack-lg`: Vertical flex column stacks with gap
-- `flex-center`: Centered flexbox layout
-- `flex-between`: Space-between flexbox layout
-
-#### Breadcrumbs (`breadcrumbs`)
-Navigation path hierarchy.
-- Base: `breadcrumbs` / `nui-breadcrumbs`
-- Elements: `breadcrumb-list`, `breadcrumb-item`, `breadcrumb-separator`, `breadcrumb-active`, `breadcrumb-current`
-
-#### Timeline (`timeline`)
-Chronological activity feed.
-- Base: `timeline` / `nui-timeline`
-- Elements: `timeline-item`, `timeline-point`, `timeline-time`, `timeline-title`, `timeline-content`
-
-#### Progress (`progress`)
-Progress bar indicator.
-- Base: `progress` / `nui-progress`
-- Sizes: `progress-sm`, `progress-md`, `progress-lg`
-- Fill: `progress-bar`
-- Variants: `progress-primary`, `progress-success`, `progress-danger`, `progress-indeterminate`
-
-#### Attachment (`attachment`)
-File attachment tile with icon and action button.
-- Base: `attachment` / `nui-attachment`
-- Slots: `attachment-icon`, `attachment-details`, `attachment-name`, `attachment-size`, `attachment-action`
-
-#### Watermark & Provider
-- `watermark`, `watermark-pattern`
-- `provider`, `nui-provider`, `nuix-provider`
+#### Pure CSS Charts & Data Visualizations
+Zero-JS CSS charts that render instantly in HTML:
+- Horizontal Bar: `chart-bar-horizontal`
+  - Fills: `chart-bar-fill`, `chart-bar-fill-success`, `chart-bar-fill-danger`, `chart-bar-fill-warning`
+- Vertical Group: `chart-bar-vertical-group`, `chart-bar-vertical`
+- Sparklines: `sparkline-container`, `sparkline-bar`, `sparkline`
+- Progress Rings: `progress-ring-container`
+- Chart Canvas: `chart-container`, `chart-grid`, `chart-axes`
 
 ---
 
-### 2. Forms
+### 2. Forms & Feedback
 
-#### Text Inputs (`input`)
-- Base: `input` / `nui-input`
+#### Input (`input`)
+- Base: `input`
 - Sizes: `input-sm`, `input-md`, `input-lg`
-- Error: `input-error`
-- Addons: `input-group`, `input-addon-left`, `input-addon-right`, `input-has-addon-left`, `input-has-addon-right`
+- ARIA State: Native `aria-invalid="true"` styles error border and focus ring automatically!
+- Variants: `input-error`
+- Group: `input-group`, `input-addon-left`, `input-addon-right`, `input-has-addon-left`, `input-has-addon-right`
 
 #### Textarea (`textarea`)
-- Base: `textarea` / `nui-textarea`
-- Error: `textarea-error`
+- Base: `textarea`
+- ARIA State: Native `aria-invalid="true"`
+- Variants: `textarea-error`
 
 #### Checkbox & Radio
 - Checkbox: `checkbox`, `checkbox-sm`, `checkbox-md`, `checkbox-lg`, `checkbox-label`
-- Radio: `radio`, `radio-group`, `radio-group-horizontal`, `radio-label`
+- Radio: `radio`, `radio-sm`, `radio-md`, `radio-lg`, `radio-label`, `radio-group`
 
 #### Switch (`switch`)
-- Base: `switch` / `nui-switch`
+- Base: `switch` (responds to `aria-checked="true"` or `data-[state=checked]`)
 - Slots: `switch-thumb`, `switch-label`
 
 #### Select (`select`)
-- Base: `select` / `nui-select`
+- Base: `select`
 - Sizes: `select-sm`, `select-lg`
-
-#### Number & Pin Inputs
-- Number: `number-input`, `number-input-field`, `number-input-stepper`, `number-input-btn`
-- Pin / OTP: `pin-input`, `pin-input-field`, `pin-input-box`
-
-#### Password Input
-- `password-input`, `password-toggle-btn`
-
-#### Slider & Rating
-- Slider: `slider`
-- Rating: `rating`, `rating-star`
-
-#### Segmented Control
-- Base: `segmented-control` / `nui-segmented-control`
-- Item: `segmented-control-item`
-
-#### Alert (`alert`)
-- Base: `alert` / `nui-alert`
-- Variants: `alert-success`, `alert-danger`, `alert-warning`, `alert-info`
-- Slots: `alert-icon`, `alert-content`, `alert-title`, `alert-description`, `alert-close`
-
-#### Toast (`toast`)
-- Container: `toast-container`
-- Item: `toast`, `toast-title`, `toast-description`, `toast-close`
-
-#### Form Control Helpers
-- Structure: `form-control`
-- Labels: `form-label`, `form-label-required`
-- Messages: `form-helper-text`, `form-error-message`
-
-#### Rich Text Editor
-- Container: `editor`
-- Sections: `editor-toolbar`, `editor-content`
+- ARIA State: Native `aria-invalid="true"`
 
 ---
 
-### 3. Overlays
+### 3. Overlays & Dialogs
 
-#### Modal & Dialog
-- Modal: `modal`, `modal-sm`, `modal-md`, `modal-lg`, `modal-xl`, `modal-full`
-- Content: `modal-box`, `modal-header`, `modal-title`, `modal-description`, `modal-body`, `modal-footer`, `modal-close`
-- Dialog: `dialog`, `dialog-box`, `dialog-icon`, `dialog-icon-danger`, `dialog-icon-warning`, `dialog-icon-info`, `dialog-icon-success`
+#### Modal & Dialog (`modal`, `dialog`)
+- Base: `modal`
+- Slots: `modal-backdrop`, `modal-content`, `modal-header`, `modal-title`, `modal-description`, `modal-body`, `modal-footer`, `modal-close`
 
 #### Drawer (`drawer`)
-- Base: `drawer` / `nui-drawer`
-- Placements: `drawer-right`, `drawer-left`, `drawer-top`, `drawer-bottom`
-- Content: `drawer-box`, `drawer-header`, `drawer-title`, `drawer-body`, `drawer-footer`, `drawer-close`
+- Positions: `drawer-left`, `drawer-right`, `drawer-top`, `drawer-bottom`
+- Slots: `drawer-backdrop`, `drawer-content`, `drawer-header`, `drawer-body`, `drawer-footer`
 
-#### Dropdown & Context Menu
-- Dropdown: `dropdown`, `dropdown-menu`, `dropdown-item`, `dropdown-item-danger`, `dropdown-divider`, `dropdown-header`
-- Context Menu: `context-menu`, `context-menu-item`, `context-menu-divider`, `context-menu-header`
+#### Popover & Dropdown
+- Popover: `popover`, `popover-content`, `popover-arrow`
+- Dropdown: `dropdown`, `dropdown-menu`, `dropdown-item`, `dropdown-separator`, `dropdown-header`
+- Context Menu: `context-menu`, `context-menu-content`, `context-menu-item`
 
-#### Popover & Hover Card
-- Popover: `popover-wrapper`, `popover`, `popover-content`, `popover-header`, `popover-body`, `popover-title`, `popover-description`, `popover-close`
-- Hover Card: `hover-card`, `hover-card-content`
-
-#### Tooltip (`tooltip`)
-- Base: `tooltip` / `nui-tooltip`
-- Placements: `tooltip-top`, `tooltip-bottom`, `tooltip-left`, `tooltip-right`
-- Arrow: `tooltip-arrow`
-
-#### Command Palette & Link Preview
-- Command Palette: `command-palette`, `command-palette-box`, `command-input`, `command-item`
-- Link Preview: `link-preview-card`, `link-preview-image-wrapper`, `link-preview-popup`
+#### Tooltip & HoverCard
+- Tooltip: `tooltip`, `tooltip-content`, `tooltip-top`, `tooltip-bottom`, `tooltip-left`, `tooltip-right`
+- HoverCard: `hover-card`, `hover-card-content`
 
 ---
 
-### 4. Widgets
+### 4. Interactive Widgets
+
+#### Tabs (`tabs`)
+- Base: `tabs`
+- Slots: `tab-list`, `tab-list-pills`, `tab`, `tab-pill`, `tab-panel`
+- ARIA State: Responds automatically to `aria-selected="true"` or `data-[state=active]`!
 
 #### Accordion & Collapsible
 - Accordion: `accordion`, `accordion-item`, `accordion-header`, `accordion-icon`, `accordion-content`, `accordion-body`
+  - ARIA State: `accordion-icon` rotates automatically when `aria-expanded="true"`!
 - Collapsible: `collapsible`, `collapsible-trigger`, `collapsible-content`, `collapsible-body`
 
-#### Tabs (`tabs`)
-- Base: `tabs` / `nui-tabs`
-- Lists: `tab-list`, `tab-list-pills`
-- Items: `tab`, `tab-pill`
-- Content: `tab-panel`
-
 #### Stepper (`stepper`)
-- Base: `stepper` / `nui-stepper`
+- Base: `stepper`
 - Elements: `step`, `step-indicator`, `step-content`, `step-title`, `step-description`, `step-connector`
 
-#### Pagination (`pagination`)
-- Base: `pagination` / `nui-pagination`
-- Elements: `pagination-item`, `pagination-prev`, `pagination-next`, `pagination-ellipsis`
-
-#### Table (`table`)
-- Container: `table-container`
-- Elements: `table`, `table-head`, `table-header`, `table-th`, `table-body`, `table-row`, `table-cell`, `table-sortable`
-
-#### TreeView (`treeview`)
-- Base: `treeview` / `nui-treeview`
-- Elements: `tree-item`, `tree-node`, `tree-branch`, `tree-toggle`
-
-#### Transfer List (`transfer-list`)
-- Base: `transfer-list` / `nui-transfer-list`
-- Elements: `transfer-list-panel`, `transfer-list-header`, `transfer-list-body`, `transfer-list-item`, `transfer-list-actions`
-
-#### Dropzone & File List
-- Dropzone: `dropzone`, `dropzone-input`, `dropzone-icon`, `dropzone-title`, `dropzone-subtitle`
-- File List: `file-list`, `file-item`, `dropzone-list`, `dropzone-item`
-
-#### Resizable & ScrollArea
-- Resizable: `resizable`, `resizable-horizontal`, `resizable-vertical`, `resizable-panel`, `resizable-handle`, `resizable-handle-vertical`
-- ScrollArea: `scroll-area`, `scroll-area-viewport`
-
-#### Color Picker
-- `color-picker`, `color-picker-swatch`, `color-picker-input`, `color-picker-palette`, `color-picker-item`
-
-#### Charts, DataGrid & Kanban
-- Chart: `chart-container`, `chart-grid`, `chart-axes`, `sparkline`
+#### DataGrid & Kanban
 - DataGrid: `datagrid`, `datagrid-row`, `datagrid-pagination`
 - Kanban: `kanban-board`, `kanban-column`, `kanban-card`
 
 ---
 
-### 5. Media
+## Migration Tools
 
-#### Calendar, DatePicker & TimePicker
-- Calendar: `calendar`, `calendar-header`, `calendar-title`, `calendar-nav`, `calendar-nav-btn`, `calendar-weekdays`, `calendar-grid`, `calendar-day`
-- DatePicker: `date-picker`, `date-picker-trigger`, `date-picker-popover`, `date-range-picker`
-- TimePicker: `time-picker`, `time-picker-select`, `time-range-picker`
+### Automated CLI Codemod
+Refactor legacy Tailwind / utility clusters to clean NUICSS superclasses:
+```bash
+npx @nofinite/nuicss migrate
+npx @nofinite/nuicss migrate --dry-run
+```
 
-#### Combobox & MultiSelect
-- Combobox: `combobox`, `combobox-input`, `combobox-options`, `combobox-option`
-- MultiSelect: `multiselect`, `multiselect-tags`, `multiselect-tag`, `multiselect-tag-remove`, `multiselect-input`
-
-#### Carousel & VirtualList
-- Carousel: `carousel`, `carousel-viewport`, `carousel-slide`, `carousel-nav`, `carousel-prev`, `carousel-next`, `carousel-dots`, `carousel-dot`
-- VirtualList: `virtual-list`, `virtual-list-container`, `virtual-list-item`
-
-#### Code Block (`code-block`)
-- Base: `code-block` / `nui-code-block`
-- Slots: `code-header`, `code-lang`, `code-copy-btn`, `code-pre`
-- Token highlighting: `code-token-keyword`, `code-token-string`, `code-token-comment`, `code-token-number`, `code-token-function`
-
-#### Video Player (`video-player`)
-- Elements: `video-player`, `video-controls`, `video-play-btn`, `video-progress`, `video-progress-bar`
-
-#### MegaMenu, Chip & Image
-- MegaMenu: `mega-menu`, `mega-menu-trigger`, `mega-menu-content`, `mega-menu-column`, `mega-menu-title`, `mega-menu-link`
-- Chip: `chip`, `chip-remove`
-- Image: `image-container`, `image-blur`, `image-preview-modal`
+### Programmatic API
+```ts
+import { migrateMarkupToNuicss } from '@nofinite/nuicss/migrate';
+const { result, replacementsCount } = migrateMarkupToNuicss(htmlCode);
+```

@@ -91,7 +91,10 @@
     "bin",
     "postcss.js",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "AGENTS.md",
+    "llms-full.txt",
+    "llms-components.json"
   ],
   "engines": {
     "node": ">=18"

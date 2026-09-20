@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "@nofinite/nuicss",
+  "version": "3.0.5",
+  "description": "Production-ready component superclasses, OKLCH design tokens, and modern CSS utilities for NUICSS",
+  "components": [
+    {
+      "name": "Button",
+      "baseClass": "btn",
+      "category": "primitives",
+      "description": "Interactive action button with built-in accessibility focus rings and active press animations.",
+      "variants": [
+        "btn-default",
+        "btn-primary",
+        "btn-secondary",
+        "btn-outline",
+        "btn-ghost",
+        "btn-danger",
+        "btn-link"
+      ],
+      "sizes": ["btn-sm", "btn-md", "btn-lg", "btn-icon"],
+      "states": ["btn-loading", "press-scale", "hover-lift", "focus-ring"],
+      "htmlSnippet": "<button class=\"btn btn-primary press-scale\">Save Changes</button>"
+    },
+    {
+      "name": "Badge",
+      "baseClass": "badge",
+      "category": "primitives",
+      "description": "Compact status indicators and category tags.",
+      "variants": [
+        "badge-default",
+        "badge-primary",
+        "badge-success",
+        "badge-warning",
+        "badge-danger",
+        "badge-info",
+        "badge-outline",
+        "badge-dot"
+      ],
+      "sizes": ["badge-sm", "badge-md", "badge-lg"],
+      "htmlSnippet": "<span class=\"badge badge-primary\">Active</span>"
+    },
+    {
+      "name": "Card",
+      "baseClass": "card",
+      "category": "primitives",
+      "description": "Contained structural surface for modular content grouping.",
+      "anatomy": [
+        "card-header",
+        "card-title",
+        "card-description",
+        "card-body",
+        "card-footer"
+      ],
+      "modifiers": [
+        "card-subtle",
+        "card-interactive",
+        "hover-lift",
+        "card-responsive"
+      ],
+      "htmlSnippet": "<div class=\"card hover-lift\">\n  <div class=\"card-header\">\n    <h3 class=\"card-title\">Project Alpha</h3>\n    <p class=\"card-description\">Deployed on Cloudflare Edge</p>\n  </div>\n  <div class=\"card-body\">Content body</div>\n  <div class=\"card-footer\">Action footer</div>\n</div>"
+    },
+    {
+      "name": "Text Input",
+      "baseClass": "input",
+      "category": "forms",
+      "description": "Accessible form text input supporting native ARIA invalid states.",
+      "variants": ["input-error"],
+      "sizes": ["input-sm", "input-md", "input-lg"],
+      "anatomy": [
+        "input-group",
+        "input-addon-left",
+        "input-addon-right",
+        "input-has-addon-left",
+        "input-has-addon-right"
+      ],
+      "ariaStates": ["aria-invalid=\"true\""],
+      "htmlSnippet": "<input type=\"text\" class=\"input\" placeholder=\"Enter full name\" />"
+    },
+    {
+      "name": "Textarea",
+      "baseClass": "textarea",
+      "category": "forms",
+      "description": "Multi-line text input with auto-styled ARIA invalid state.",
+      "variants": ["textarea-error"],
+      "ariaStates": ["aria-invalid=\"true\""],
+      "htmlSnippet": "<textarea class=\"textarea\" placeholder=\"Write your message...\"></textarea>"
+    },
+    {
+      "name": "Switch",
+      "baseClass": "switch",
+      "category": "forms",
+      "description": "Toggle switch control with accessible ARIA and data-state support.",
+      "anatomy": ["switch-thumb", "switch-label"],
+      "ariaStates": ["aria-checked=\"true\""],
+      "htmlSnippet": "<button role=\"switch\" aria-checked=\"true\" class=\"switch\">\n  <span class=\"switch-thumb\"></span>\n</button>"
+    },
+    {
+      "name": "Checkbox",
+      "baseClass": "checkbox",
+      "category": "forms",
+      "description": "Form selection checkbox.",
+      "sizes": ["checkbox-sm", "checkbox-md", "checkbox-lg"],
+      "anatomy": ["checkbox-label"],
+      "htmlSnippet": "<label class=\"checkbox-label\">\n  <input type=\"checkbox\" class=\"checkbox\" />\n  <span>Accept terms</span>\n</label>"
+    },
+    {
+      "name": "Select",
+      "baseClass": "select",
+      "category": "forms",
+      "description": "Native select dropdown with custom focus rings and ARIA validation.",
+      "sizes": ["select-sm", "select-lg"],
+      "ariaStates": ["aria-invalid=\"true\""],
+      "htmlSnippet": "<select class=\"select\">\n  <option>Option 1</option>\n</select>"
+    },
+    {
+      "name": "Tabs",
+      "baseClass": "tabs",
+      "category": "widgets",
+      "description": "WAI-ARIA compliant tabbed navigation supporting data-state and aria-selected.",
+      "anatomy": ["tab-list", "tab-list-pills", "tab", "tab-pill", "tab-panel"],
+      "ariaStates": ["aria-selected=\"true\""],
+      "htmlSnippet": "<div class=\"tabs\">\n  <div class=\"tab-list\" role=\"tablist\">\n    <button role=\"tab\" aria-selected=\"true\" class=\"tab\">Account</button>\n    <button role=\"tab\" aria-selected=\"false\" class=\"tab\">Password</button>\n  </div>\n  <div class=\"tab-panel\" role=\"tabpanel\">Profile details</div>\n</div>"
+    },
+    {
+      "name": "Accordion",
+      "baseClass": "accordion",
+      "category": "widgets",
+      "description": "Collapsible disclosure items responding to aria-expanded or data-state=open.",
+      "anatomy": [
+        "accordion-item",
+        "accordion-header",
+        "accordion-icon",
+        "accordion-content",
+        "accordion-body"
+      ],
+      "ariaStates": ["aria-expanded=\"true\""],
+      "htmlSnippet": "<div class=\"accordion\">\n  <div class=\"accordion-item\">\n    <button class=\"accordion-header\" aria-expanded=\"true\">\n      <span>FAQ Question</span>\n      <span class=\"accordion-icon\">▾</span>\n    </button>\n    <div class=\"accordion-content\">\n      <div class=\"accordion-body\">Answer explanation</div>\n    </div>\n  </div>\n</div>"
+    },
+    {
+      "name": "Metric Card & Charts",
+      "baseClass": "metric-card",
+      "category": "charts",
+      "description": "Zero-JS pure CSS metric cards, horizontal bar charts, and sparklines.",
+      "anatomy": [
+        "metric-label",
+        "metric-value",
+        "metric-trend-up",
+        "metric-trend-down",
+        "chart-bar-horizontal",
+        "chart-bar-fill",
+        "chart-bar-fill-success",
+        "chart-bar-fill-danger",
+        "chart-bar-fill-warning",
+        "sparkline-container",
+        "sparkline-bar"
+      ],
+      "htmlSnippet": "<div class=\"metric-card\">\n  <span class=\"metric-label\">Monthly Revenue</span>\n  <span class=\"metric-value\">$48,290</span>\n  <span class=\"metric-trend-up\">+12.4% vs last month</span>\n  <div class=\"chart-bar-horizontal mt-3\">\n    <div class=\"chart-bar-fill\" style=\"width: 65%\"></div>\n  </div>\n</div>"
+    },
+    {
+      "name": "Skeleton & Shimmer",
+      "baseClass": "skeleton",
+      "category": "feedback",
+      "description": "Placeholder loading states with pulse or gradient shimmer animations.",
+      "variants": [
+        "skeleton-text",
+        "skeleton-circle",
+        "skeleton-rect",
+        "skeleton-shimmer"
+      ],
+      "htmlSnippet": "<div class=\"skeleton-shimmer h-10 w-full rounded-md\"></div>"
+    },
+    {
+      "name": "Container Query Layouts",
+      "baseClass": "cq",
+      "category": "layout",
+      "description": "Native CSS container queries (@container) for component-level responsiveness.",
+      "superclasses": ["card-responsive", "stat-card-responsive"],
+      "utilities": ["cq", "cq-normal", "@sm:flex-row", "@md:grid-cols-2"],
+      "htmlSnippet": "<div class=\"cq card-responsive\">\n  <div class=\"p-4\">Adapts to parent container width, not viewport</div>\n</div>"
+    }
+  ]
+}
