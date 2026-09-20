@@ -144,7 +144,7 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
       var varName = name === 'glass' ? '--glass-bg' : (name === 'accent' ? '--bg-accent' : '--bg-' + name);
       var val = opacity
         ? 'color-mix(in srgb, var(' + varName + ') ' + opacity + '%, transparent)'
-        : 'color-mix(in srgb, var(' + varName + ') var(--un-bg-opacity, 100%), transparent)';
+        : 'var(' + varName + ')';
       return { 'background-color': val };
     }
   ],
@@ -156,26 +156,44 @@ window.__unocss.rules = (window.__unocss.rules || []).concat([
       var varName = '--fg-' + name;
       var val = opacity
         ? 'color-mix(in srgb, var(' + varName + ') ' + opacity + '%, transparent)'
-        : 'color-mix(in srgb, var(' + varName + ') var(--un-text-opacity, 100%), transparent)';
+        : 'var(' + varName + ')';
       return { 'color': val };
     }
   ],
   [
-    /^border-([trblxy]-)?(default|subtle|strong|hover|focus|disabled|glassBorder)(?:\\/(\\d+))?$/,
+    /^border-([trblxy]-)?(default|subtle|strong|hover|focus|disabled|glass|glassBorder)(?:\\/(\\d+))?$/,
     function(m) {
       var dir = m[1] || '';
       var name = m[2];
       var opacity = m[3];
       var props = borderDirectionMap[dir] || ['border-color'];
-      var varName = name === 'glassBorder' ? '--glass-border' : '--border-' + name;
+      var varName = (name === 'glass' || name === 'glassBorder') ? '--glass-border' : '--border-' + name;
       var val = opacity
         ? 'color-mix(in srgb, var(' + varName + ') ' + opacity + '%, transparent)'
-        : 'color-mix(in srgb, var(' + varName + ') var(--un-border-opacity, 100%), transparent)';
+        : 'var(' + varName + ')';
       var res = {};
       for (var i = 0; i < props.length; i++) {
         res[props[i]] = val;
       }
       return res;
+    }
+  ],
+  [
+    /^fill-(muted|default|subtle|accent|primary|danger|success|warning|info)$/,
+    function(m) {
+      var name = m[1];
+      var varName = (name === 'muted' || name === 'default' || name === 'subtle')
+        ? '--fg-' + name
+        : '--color-' + name;
+      return { fill: 'var(' + varName + ')' };
+    }
+  ],
+  [
+    /^stroke-(default|subtle|strong|muted)$/,
+    function(m) {
+      var name = m[1];
+      var varName = name === 'muted' ? '--fg-muted' : '--border-' + name;
+      return { stroke: 'var(' + varName + ')' };
     }
   ]
 ]);

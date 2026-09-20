@@ -41,7 +41,7 @@ export function nuicssPreset(): NuicssConfig {
               : `--bg-${name}`;
           const val = opacity
             ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
-            : `color-mix(in srgb, var(${varName}) var(--un-bg-opacity, 100%), transparent)`;
+            : `var(${varName})`;
           return { 'background-color': val };
         },
       ],
@@ -52,20 +52,22 @@ export function nuicssPreset(): NuicssConfig {
           const varName = `--fg-${name}`;
           const val = opacity
             ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
-            : `color-mix(in srgb, var(${varName}) var(--un-text-opacity, 100%), transparent)`;
+            : `var(${varName})`;
           return { color: val };
         },
       ],
       // Semantic border tokens with directional & opacity modifier support (e.g. border-default, border-t-subtle, border-x-strong/60)
       [
-        /^border-([trblxy]-)?(default|subtle|strong|hover|focus|disabled|glassBorder)(?:\/(\d+))?$/,
+        /^border-([trblxy]-)?(default|subtle|strong|hover|focus|disabled|glass|glassBorder)(?:\/(\d+))?$/,
         ([, dir = '', name, opacity]) => {
           const props = borderDirectionMap[dir] || ['border-color'];
           const varName =
-            name === 'glassBorder' ? '--glass-border' : `--border-${name}`;
+            name === 'glass' || name === 'glassBorder'
+              ? '--glass-border'
+              : `--border-${name}`;
           const val = opacity
             ? `color-mix(in srgb, var(${varName}) ${opacity}%, transparent)`
-            : `color-mix(in srgb, var(${varName}) var(--un-border-opacity, 100%), transparent)`;
+            : `var(${varName})`;
           const res: Record<string, string> = {};
           for (const p of props) {
             res[p] = val;

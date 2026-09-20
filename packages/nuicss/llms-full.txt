@@ -1,0 +1,345 @@
+# NUICSS (@nofinite/nuicss) - Full AI Context & Superclasses Reference
+
+Semantic CSS utility framework, runtime-less design token engine, and production-ready component superclasses built directly on top of UnoCSS.
+
+## Core Architecture & Engine
+- **Engine**: UnoCSS instant atomic CSS compiler.
+- **Directives**:
+  - `@nuicss;` in CSS expands to preflights, design tokens, shortcuts, and utility rules.
+  - `@apply` in stylesheets for inlining atomic classes.
+- **Zero Runtime Overhead**: Compiles on-demand at build time or runs via the standalone one-link CDN bundle.
+- **Layers**: Resets live in `@layer base`, component superclasses live in `@layer components`, and atomic utilities live in `@layer utilities`.
+
+---
+
+## Theming & Design Tokens
+
+### Semantic Backgrounds
+- `bg-page`: Main background canvas (`--bg-page`)
+- `bg-canvas`: Viewport / app canvas background (`--bg-canvas`)
+- `bg-surface`: Card and container background (`--bg-surface`)
+- `bg-surface-raised`: Elevated card background (`--bg-surface-raised`)
+- `bg-surface-overlay`: Modal and overlay container background (`--bg-surface-overlay`)
+- `bg-subtle`: Subtle secondary surface (`--bg-subtle`)
+- `bg-muted`: Muted background fill (`--bg-muted`)
+- `bg-accent`: Accent highlight background (`--bg-accent`)
+- `bg-card`: Explicit card surface background (`--bg-card`)
+- `bg-glass`: Translucent backdrop surface (`--glass-bg`)
+- `bg-overlay`: Modal backdrop dimming (`--bg-overlay`)
+
+### Semantic Foreground / Text
+- `text-default`: Primary body text (`--fg-default`)
+- `text-subtle`: Secondary descriptive text (`--fg-subtle`)
+- `text-muted`: Muted labels and placeholder text (`--fg-muted`)
+- `text-accent`: Accent text color (`--fg-accent`)
+- `text-inverse`: Contrast text on dark/inverted surfaces (`--fg-inverse`)
+- `text-disabled`: Disabled text (`--fg-disabled`)
+- `text-card`: Card foreground text (`--fg-card`)
+
+### Action & Feedback Colors
+- `primary`: Brand primary action color (`--color-primary`, `--color-primary-hover`, `--color-primary-active`, `--color-primary-fg`, `--color-primary-subtle`)
+- `secondary`: Secondary action color (`--color-secondary`, `--color-secondary-hover`, `--color-secondary-active`, `--color-secondary-fg`, `--color-secondary-subtle`)
+- `danger`: Error and destructive actions (`--color-danger`, `--color-danger-hover`, `--color-danger-fg`, `--color-danger-subtle`)
+- `success`: Positive confirmation and status (`--color-success`, `--color-success-hover`, `--color-success-fg`, `--color-success-subtle`)
+- `warning`: Cautionary alerts (`--color-warning`, `--color-warning-hover`, `--color-warning-fg`, `--color-warning-subtle`)
+- `info`: Informational messages (`--color-info`, `--color-info-hover`, `--color-info-fg`, `--color-info-subtle`)
+
+### Semantic Borders
+- `border-default`: Standard container border (`--border-default`)
+- `border-subtle`: Low contrast divider border (`--border-subtle`)
+- `border-strong`: High contrast card / element border (`--border-strong`)
+- `border-hover`: Border hover state (`--border-hover`)
+- `border-focus`: Form element focus border (`--border-focus`)
+- `border-disabled`: Disabled element border (`--border-disabled`)
+- `border-glass`: Glassmorphism translucent border (`--glass-border`)
+- Supports directional prefixes: `border-t-default`, `border-b-subtle`, `border-x-strong`, `border-y-default`
+
+### Native Opacity Modifier Support
+All semantic background, text, and border utilities support opacity modifiers:
+- `bg-surface/80`, `bg-subtle/50`, `bg-primary/20`
+- `text-default/90`, `text-subtle/70`
+- `border-default/50`, `border-x-strong/60`
+
+---
+
+## Complete Component Superclasses Dictionary
+
+All superclasses support dual naming: concise syntax (e.g. `btn`, `card`) and namespace-isolated syntax (e.g. `nui-btn`, `nui-card`).
+
+### 1. Primitives
+
+#### Button (`btn`)
+Interactive button with keyboard navigation rings and micro-scaling.
+- Base: `btn` / `nui-btn`
+- Variants:
+  - `btn-default`: Standard border and surface fill
+  - `btn-primary`: Brand primary filled button
+  - `btn-secondary`: Neutral slate filled button
+  - `btn-outline`: Transparent background with border-strong
+  - `btn-ghost`: Borderless button with hover state
+  - `btn-danger`: Error / destructive action
+  - `btn-link`: Inline text hyperlink style
+- Sizes: `btn-sm`, `btn-md`, `btn-lg`, `btn-icon`
+- State: `btn-loading` (displays centered animated spinner)
+
+#### Badge (`badge`)
+Compact status indicator.
+- Base: `badge` / `nui-badge`
+- Variants: `badge-default`, `badge-primary`, `badge-success`, `badge-warning`, `badge-danger`, `badge-info`, `badge-subtle`
+- Sizes: `badge-sm`, `badge-md`, `badge-lg`
+- Modifiers: `badge-pill` (fully rounded), `badge-dot` (bullet dot indicator)
+
+#### Card (`card`)
+Content card container with shadow elevation.
+- Base: `card` / `nui-card`
+- Variants: `card-bordered` (thicker strong border)
+- Slots: `card-header`, `card-title`, `card-description`, `card-body`, `card-footer`
+
+#### Avatar (`avatar`)
+User profile image or initials wrapper.
+- Base: `avatar` / `nui-avatar`
+- Sizes: `avatar-sm`, `avatar-md`, `avatar-lg`, `avatar-xl`
+- Shapes: `avatar-circle`, `avatar-square`
+- Media: `avatar-image`
+- Status indicators: `avatar-online`, `avatar-busy`, `avatar-away`
+- Group: `avatar-group` (overlapping avatar stack)
+
+#### Divider (`divider`)
+Separators for layouts and lists.
+- `divider`: Horizontal border divider
+- `divider-text`: Horizontal divider with centered label text
+- `divider-vertical`: Vertical inline separator bar
+
+#### Kbd (`kbd`)
+Keyboard shortcut badge.
+- Base: `kbd` / `nui-kbd`
+- Sizes: `kbd-sm`, `kbd-md`, `kbd-lg`
+
+#### Skeleton (`skeleton`)
+Loading placeholder animation.
+- Base: `skeleton` / `nui-skeleton`
+- Shapes: `skeleton-text`, `skeleton-circle`, `skeleton-rect`
+
+#### Spinner (`spinner`)
+Circular indeterminate loading animation.
+- Base: `spinner` / `nui-spinner`
+- Sizes: `spinner-sm`, `spinner-md`, `spinner-lg`
+- Color: `spinner-primary`
+
+#### Empty State (`empty-state`)
+Zero-data placeholder layout.
+- Base: `empty-state` / `nui-empty-state`
+- Slots: `empty-state-icon`, `empty-state-title`, `empty-state-description`, `empty-state-actions`
+
+#### Stat Card (`stat-card`)
+Dashboard KPI / metric display card.
+- Base: `stat-card` / `nui-stat-card`
+- Slots: `stat-card-label`, `stat-card-value`, `stat-card-trend`
+- Trend states: `stat-card-trend-up`, `stat-card-trend-down`
+
+#### Link (`link`)
+Hyperlink text styling.
+- Base: `link` / `nui-link`
+- Modifiers: `link-muted`, `link-hover`
+
+#### Layout Helpers
+- `container-center`: Centered max-w-7xl responsive wrapper
+- `stack`, `stack-sm`, `stack-lg`: Vertical flex column stacks with gap
+- `flex-center`: Centered flexbox layout
+- `flex-between`: Space-between flexbox layout
+
+#### Breadcrumbs (`breadcrumbs`)
+Navigation path hierarchy.
+- Base: `breadcrumbs` / `nui-breadcrumbs`
+- Elements: `breadcrumb-list`, `breadcrumb-item`, `breadcrumb-separator`, `breadcrumb-active`, `breadcrumb-current`
+
+#### Timeline (`timeline`)
+Chronological activity feed.
+- Base: `timeline` / `nui-timeline`
+- Elements: `timeline-item`, `timeline-point`, `timeline-time`, `timeline-title`, `timeline-content`
+
+#### Progress (`progress`)
+Progress bar indicator.
+- Base: `progress` / `nui-progress`
+- Sizes: `progress-sm`, `progress-md`, `progress-lg`
+- Fill: `progress-bar`
+- Variants: `progress-primary`, `progress-success`, `progress-danger`, `progress-indeterminate`
+
+#### Attachment (`attachment`)
+File attachment tile with icon and action button.
+- Base: `attachment` / `nui-attachment`
+- Slots: `attachment-icon`, `attachment-details`, `attachment-name`, `attachment-size`, `attachment-action`
+
+#### Watermark & Provider
+- `watermark`, `watermark-pattern`
+- `provider`, `nui-provider`, `nuix-provider`
+
+---
+
+### 2. Forms
+
+#### Text Inputs (`input`)
+- Base: `input` / `nui-input`
+- Sizes: `input-sm`, `input-md`, `input-lg`
+- Error: `input-error`
+- Addons: `input-group`, `input-addon-left`, `input-addon-right`, `input-has-addon-left`, `input-has-addon-right`
+
+#### Textarea (`textarea`)
+- Base: `textarea` / `nui-textarea`
+- Error: `textarea-error`
+
+#### Checkbox & Radio
+- Checkbox: `checkbox`, `checkbox-sm`, `checkbox-md`, `checkbox-lg`, `checkbox-label`
+- Radio: `radio`, `radio-group`, `radio-group-horizontal`, `radio-label`
+
+#### Switch (`switch`)
+- Base: `switch` / `nui-switch`
+- Slots: `switch-thumb`, `switch-label`
+
+#### Select (`select`)
+- Base: `select` / `nui-select`
+- Sizes: `select-sm`, `select-lg`
+
+#### Number & Pin Inputs
+- Number: `number-input`, `number-input-field`, `number-input-stepper`, `number-input-btn`
+- Pin / OTP: `pin-input`, `pin-input-field`, `pin-input-box`
+
+#### Password Input
+- `password-input`, `password-toggle-btn`
+
+#### Slider & Rating
+- Slider: `slider`
+- Rating: `rating`, `rating-star`
+
+#### Segmented Control
+- Base: `segmented-control` / `nui-segmented-control`
+- Item: `segmented-control-item`
+
+#### Alert (`alert`)
+- Base: `alert` / `nui-alert`
+- Variants: `alert-success`, `alert-danger`, `alert-warning`, `alert-info`
+- Slots: `alert-icon`, `alert-content`, `alert-title`, `alert-description`, `alert-close`
+
+#### Toast (`toast`)
+- Container: `toast-container`
+- Item: `toast`, `toast-title`, `toast-description`, `toast-close`
+
+#### Form Control Helpers
+- Structure: `form-control`
+- Labels: `form-label`, `form-label-required`
+- Messages: `form-helper-text`, `form-error-message`
+
+#### Rich Text Editor
+- Container: `editor`
+- Sections: `editor-toolbar`, `editor-content`
+
+---
+
+### 3. Overlays
+
+#### Modal & Dialog
+- Modal: `modal`, `modal-sm`, `modal-md`, `modal-lg`, `modal-xl`, `modal-full`
+- Content: `modal-box`, `modal-header`, `modal-title`, `modal-description`, `modal-body`, `modal-footer`, `modal-close`
+- Dialog: `dialog`, `dialog-box`, `dialog-icon`, `dialog-icon-danger`, `dialog-icon-warning`, `dialog-icon-info`, `dialog-icon-success`
+
+#### Drawer (`drawer`)
+- Base: `drawer` / `nui-drawer`
+- Placements: `drawer-right`, `drawer-left`, `drawer-top`, `drawer-bottom`
+- Content: `drawer-box`, `drawer-header`, `drawer-title`, `drawer-body`, `drawer-footer`, `drawer-close`
+
+#### Dropdown & Context Menu
+- Dropdown: `dropdown`, `dropdown-menu`, `dropdown-item`, `dropdown-item-danger`, `dropdown-divider`, `dropdown-header`
+- Context Menu: `context-menu`, `context-menu-item`, `context-menu-divider`, `context-menu-header`
+
+#### Popover & Hover Card
+- Popover: `popover-wrapper`, `popover`, `popover-content`, `popover-header`, `popover-body`, `popover-title`, `popover-description`, `popover-close`
+- Hover Card: `hover-card`, `hover-card-content`
+
+#### Tooltip (`tooltip`)
+- Base: `tooltip` / `nui-tooltip`
+- Placements: `tooltip-top`, `tooltip-bottom`, `tooltip-left`, `tooltip-right`
+- Arrow: `tooltip-arrow`
+
+#### Command Palette & Link Preview
+- Command Palette: `command-palette`, `command-palette-box`, `command-input`, `command-item`
+- Link Preview: `link-preview-card`, `link-preview-image-wrapper`, `link-preview-popup`
+
+---
+
+### 4. Widgets
+
+#### Accordion & Collapsible
+- Accordion: `accordion`, `accordion-item`, `accordion-header`, `accordion-icon`, `accordion-content`, `accordion-body`
+- Collapsible: `collapsible`, `collapsible-trigger`, `collapsible-content`, `collapsible-body`
+
+#### Tabs (`tabs`)
+- Base: `tabs` / `nui-tabs`
+- Lists: `tab-list`, `tab-list-pills`
+- Items: `tab`, `tab-pill`
+- Content: `tab-panel`
+
+#### Stepper (`stepper`)
+- Base: `stepper` / `nui-stepper`
+- Elements: `step`, `step-indicator`, `step-content`, `step-title`, `step-description`, `step-connector`
+
+#### Pagination (`pagination`)
+- Base: `pagination` / `nui-pagination`
+- Elements: `pagination-item`, `pagination-prev`, `pagination-next`, `pagination-ellipsis`
+
+#### Table (`table`)
+- Container: `table-container`
+- Elements: `table`, `table-head`, `table-header`, `table-th`, `table-body`, `table-row`, `table-cell`, `table-sortable`
+
+#### TreeView (`treeview`)
+- Base: `treeview` / `nui-treeview`
+- Elements: `tree-item`, `tree-node`, `tree-branch`, `tree-toggle`
+
+#### Transfer List (`transfer-list`)
+- Base: `transfer-list` / `nui-transfer-list`
+- Elements: `transfer-list-panel`, `transfer-list-header`, `transfer-list-body`, `transfer-list-item`, `transfer-list-actions`
+
+#### Dropzone & File List
+- Dropzone: `dropzone`, `dropzone-input`, `dropzone-icon`, `dropzone-title`, `dropzone-subtitle`
+- File List: `file-list`, `file-item`, `dropzone-list`, `dropzone-item`
+
+#### Resizable & ScrollArea
+- Resizable: `resizable`, `resizable-horizontal`, `resizable-vertical`, `resizable-panel`, `resizable-handle`, `resizable-handle-vertical`
+- ScrollArea: `scroll-area`, `scroll-area-viewport`
+
+#### Color Picker
+- `color-picker`, `color-picker-swatch`, `color-picker-input`, `color-picker-palette`, `color-picker-item`
+
+#### Charts, DataGrid & Kanban
+- Chart: `chart-container`, `chart-grid`, `chart-axes`, `sparkline`
+- DataGrid: `datagrid`, `datagrid-row`, `datagrid-pagination`
+- Kanban: `kanban-board`, `kanban-column`, `kanban-card`
+
+---
+
+### 5. Media
+
+#### Calendar, DatePicker & TimePicker
+- Calendar: `calendar`, `calendar-header`, `calendar-title`, `calendar-nav`, `calendar-nav-btn`, `calendar-weekdays`, `calendar-grid`, `calendar-day`
+- DatePicker: `date-picker`, `date-picker-trigger`, `date-picker-popover`, `date-range-picker`
+- TimePicker: `time-picker`, `time-picker-select`, `time-range-picker`
+
+#### Combobox & MultiSelect
+- Combobox: `combobox`, `combobox-input`, `combobox-options`, `combobox-option`
+- MultiSelect: `multiselect`, `multiselect-tags`, `multiselect-tag`, `multiselect-tag-remove`, `multiselect-input`
+
+#### Carousel & VirtualList
+- Carousel: `carousel`, `carousel-viewport`, `carousel-slide`, `carousel-nav`, `carousel-prev`, `carousel-next`, `carousel-dots`, `carousel-dot`
+- VirtualList: `virtual-list`, `virtual-list-container`, `virtual-list-item`
+
+#### Code Block (`code-block`)
+- Base: `code-block` / `nui-code-block`
+- Slots: `code-header`, `code-lang`, `code-copy-btn`, `code-pre`
+- Token highlighting: `code-token-keyword`, `code-token-string`, `code-token-comment`, `code-token-number`, `code-token-function`
+
+#### Video Player (`video-player`)
+- Elements: `video-player`, `video-controls`, `video-play-btn`, `video-progress`, `video-progress-bar`
+
+#### MegaMenu, Chip & Image
+- MegaMenu: `mega-menu`, `mega-menu-trigger`, `mega-menu-content`, `mega-menu-column`, `mega-menu-title`, `mega-menu-link`
+- Chip: `chip`, `chip-remove`
+- Image: `image-container`, `image-blur`, `image-preview-modal`
