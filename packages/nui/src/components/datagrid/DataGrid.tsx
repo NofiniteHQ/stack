@@ -17,6 +17,7 @@ export type DataGridColumn<T> = {
   key: Extract<keyof T, string>;
   title: React.ReactNode;
   sortable?: boolean;
+  resizable?: boolean;
   width?: number | string;
   align?: 'left' | 'center' | 'right';
   /** Custom render function for the cell content. Useful for formatting dates or rendering JSX. */
@@ -33,6 +34,8 @@ export interface DataGridProps<T> {
   pageSize?: number;
   onPageChange?: (page: number) => void;
   selectable?: boolean;
+  /** Enable column width dragging across all columns */
+  resizable?: boolean;
   /** Controlled selection state */
   selectedRowIds?: Set<string | number>;
   onSelectionChange?: (ids: Set<string | number>) => void;
@@ -66,10 +69,37 @@ export function DataGrid<T>({
   renderRowActions,
   className,
   disablePagination = false,
+  resizable = false,
 }: DataGridProps<T>) {
   const [sort, setSort] = useState<SortState>({ key: null, dir: null });
   const [internalPage, setInternalPage] = useState(1);
   const currentPage = controlledPage ?? internalPage;
+
+  const [colWidths, setColWidths] = useState<Record<string, number>>({});
+
+  const handleResizeStart = (colKey: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const currentTh = (e.currentTarget as HTMLElement).closest('th');
+    const startWidth =
+      colWidths[colKey] ||
+      (currentTh ? currentTh.getBoundingClientRect().width : 120);
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const newWidth = Math.max(60, Math.round(startWidth + delta));
+      setColWidths((prev) => ({ ...prev, [colKey]: newWidth }));
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
 
   const [internalSelection, setInternalSelection] = useState<
     Set<string | number>
@@ -262,12 +292,18 @@ export function DataGrid<T>({
 
               {columns.map((col) => {
                 const isSorted = sort.key === col.key;
+                const isColResizable = col.resizable ?? resizable;
+                const colW = colWidths[col.key]
+                  ? `${colWidths[col.key]}px`
+                  : col.width;
+
                 return (
                   <th
                     key={col.key}
-                    className="px-4 py-3 font-medium text-subtle whitespace-nowrap select-none"
+                    className="relative px-4 py-3 font-medium text-subtle whitespace-nowrap select-none group/th"
                     style={{
-                      width: col.width,
+                      width: colW,
+                      minWidth: colW,
                       textAlign: col.align || 'left',
                     }}
                     scope="col"
@@ -314,9 +350,9 @@ export function DataGrid<T>({
                                   key="desc"
                                   initial={{ rotate: 90, opacity: 0 }}
                                   animate={{ rotate: 0, opacity: 1 }}
-                                  exit={{ opacity: 0 }}
-                                  width="14"
-                                  height="14"
+                                  exit={{ rotate: -90, opacity: 0 }}
+                                  transition={{ duration: 0.15 }}
+                                  className="w-3.5 h-3.5"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
@@ -332,9 +368,9 @@ export function DataGrid<T>({
                                   key="asc"
                                   initial={{ rotate: -90, opacity: 0 }}
                                   animate={{ rotate: 0, opacity: 1 }}
-                                  exit={{ opacity: 0 }}
-                                  width="14"
-                                  height="14"
+                                  exit={{ rotate: 90, opacity: 0 }}
+                                  transition={{ duration: 0.15 }}
+                                  className="w-3.5 h-3.5"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
@@ -348,12 +384,8 @@ export function DataGrid<T>({
                               )
                             ) : (
                               <motion.svg
-                                key="none"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                width="14"
-                                height="14"
+                                key="unsorted"
+                                className="w-3.5 h-3.5"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
@@ -370,6 +402,13 @@ export function DataGrid<T>({
                         </span>
                       )}
                     </div>
+                    {isColResizable && (
+                      <div
+                        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize select-none touch-none hover:bg-primary/50 group-hover/th:bg-primary/20"
+                        onMouseDown={(e) => handleResizeStart(col.key, e)}
+                        aria-hidden="true"
+                      />
+                    )}
                   </th>
                 );
               })}
@@ -435,18 +474,28 @@ export function DataGrid<T>({
                       </td>
                     )}
 
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        role="gridcell"
-                        className="px-4 py-3 text-default align-middle"
-                        style={{ textAlign: col.align || 'left' }}
-                      >
-                        {col.render
-                          ? col.render(row)
-                          : String(row[col.key] ?? '')}
-                      </td>
-                    ))}
+                    {columns.map((col) => {
+                      const colW = colWidths[col.key]
+                        ? `${colWidths[col.key]}px`
+                        : col.width;
+
+                      return (
+                        <td
+                          key={col.key}
+                          role="gridcell"
+                          className="px-4 py-3 text-default align-middle truncate"
+                          style={{
+                            width: colW,
+                            maxWidth: colW,
+                            textAlign: col.align || 'left',
+                          }}
+                        >
+                          {col.render
+                            ? col.render(row)
+                            : String(row[col.key] ?? '')}
+                        </td>
+                      );
+                    })}
 
                     {showActions && (
                       <td

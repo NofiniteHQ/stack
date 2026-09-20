@@ -11,6 +11,9 @@ export interface EditorProps {
   value?: string;
   onChange?: (html: string, json: any) => void;
   placeholder?: string;
+  documentId?: string;
+  /** Custom upload handler for dropped images, videos, or file attachments */
+  onUploadFile?: (file: File) => Promise<string>;
 }
 
 export const Editor: React.FC<EditorProps> = ({
@@ -18,7 +21,8 @@ export const Editor: React.FC<EditorProps> = ({
   onChange,
   placeholder,
   documentId = 'default-draft',
-}: EditorProps & { documentId?: string }) => {
+  onUploadFile,
+}: EditorProps) => {
   const { triggerSave, saveStatus, lastSaved } = useAutoSave({
     documentId,
     onSave: () => {
@@ -75,29 +79,36 @@ export const Editor: React.FC<EditorProps> = ({
           const transaction = view.state.tr.insert(pos, node);
           view.dispatch(transaction);
 
-          // Mock Upload
-          setTimeout(() => {
-            const url = URL.createObjectURL(file);
-            const { state } = view;
-            let foundPos = -1;
-            state.doc.descendants((n, p) => {
-              if (n.attrs.uploading === true && n.type.name === nodeType) {
-                // In a real app we'd match a unique upload ID, here we just take the first uploading node of this type
-                foundPos = p;
-                return false;
-              }
-            });
-
-            if (foundPos !== -1) {
-              view.dispatch(
-                view.state.tr.setNodeMarkup(foundPos, null, {
-                  ...view.state.doc.nodeAt(foundPos)?.attrs,
-                  src: url,
-                  uploading: false,
-                })
+          const resolveUrl = onUploadFile
+            ? onUploadFile(file)
+            : new Promise<string>((resolve) =>
+                setTimeout(() => resolve(URL.createObjectURL(file)), 800)
               );
-            }
-          }, 1500);
+
+          resolveUrl
+            .then((url) => {
+              const { state } = view;
+              let foundPos = -1;
+              state.doc.descendants((n, p) => {
+                if (n.attrs.uploading === true && n.type.name === nodeType) {
+                  foundPos = p;
+                  return false;
+                }
+              });
+
+              if (foundPos !== -1) {
+                view.dispatch(
+                  view.state.tr.setNodeMarkup(foundPos, null, {
+                    ...view.state.doc.nodeAt(foundPos)?.attrs,
+                    src: url,
+                    uploading: false,
+                  })
+                );
+              }
+            })
+            .catch((err) => {
+              console.error('File upload failed in editor:', err);
+            });
 
           event.preventDefault();
           return true;

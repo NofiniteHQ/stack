@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
 import katex from 'katex';
-import 'katex/dist/katex.min.css';
 import { Sigma } from 'lucide-react';
 import { cn } from '../../../utils';
 
