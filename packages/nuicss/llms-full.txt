@@ -11,18 +11,25 @@ Semantic CSS utility framework, runtime-less design token engine, production-rea
   - `@apply` in stylesheets for inlining atomic classes into custom components.
 - **Packaging & Delivery Modes**:
   - **Build-Time Compiler**: PostCSS plugin (`@nofinite/nuicss/postcss`) or Vite plugin (`nuicssVitePlugin`).
-  - **Zero-Config Next.js**: `withNuicss(nextConfig)` via `@nofinite/nuicss/next`.
-  - **SSR Critical CSS**: `extractCriticalNuicss(html)` and `injectCriticalNuicss(html)` via `@nofinite/nuicss/ssr` (eliminates FOUC).
-  - **Ultra-Lightweight Static CSS CDN**: `dist/styles.min.css` (~18KB gzipped) and `dist/components.min.css` (~15KB gzipped) via jsDelivr/unpkg.
-  - **One-Link In-Browser Runtime CDN**: `dist/index.global.js` (UnoCSS runtime + preset-wind4 + NUICSS engine).
-- **Layers**: Resets live in `@layer base`, component superclasses live in `@layer components`, and atomic utilities live in `@layer utilities`.
+  - **Zero-Config Next.js & Turbopack**: `withNuicss(nextConfig)` via `@nofinite/nuicss/next` with automatic Turbopack alias resolution (`experimental.turbo.resolveAlias`).
+  - **SSR Critical CSS Engine**: `extractCriticalNuicss(html)`, `extractCriticalCssForTokens(tokens)`, and in-memory LRU cache (`tokenCssCache`) via `@nofinite/nuicss/ssr` (<0.05ms latency, eliminates FOUC).
+  - **Modular Static CSS Bundles (LightningCSS)**:
+    - `dist/styles.min.css`: Complete bundle (all components + base + utilities).
+    - `dist/components.min.css`: All superclasses.
+    - `dist/primitives.min.css`: Buttons, Cards, Badges, Tables, Avatars.
+    - `dist/forms.min.css`: Inputs, Textareas, Switches, Checkboxes, Selects.
+    - `dist/overlays.min.css`: Modals, Drawers, Popovers, Tooltips, Context Menus.
+    - `dist/widgets.min.css`: Metric Cards, Sparklines, Progress Rings, Tabs, Accordions.
+    - `dist/media.min.css`: Carousels, Dropzones, Video Players.
+  - **Drop-In Tailwind CDN Replacement**: `dist/index.global.js` (UnoCSS runtime + preset-wind4 + NUICSS engine) with full `window.tailwind` config ingestion and reactive configuration.
+- **Layers**: Resets live in `@layer base`, component superclasses live in `@layer components`, and atomic utilities live in `@layer utilities`. DOM shielded with `data-nuicss-layer`.
 
 ---
 
 ## Theming & Design Tokens
 
-### OKLCH Wide-Gamut (P3) Color System
-All dynamic color mixing uses perceptual OKLCH color space (`color-mix(in oklch, ...)`) rather than sRGB, eliminating grey dead zones in gradients and hover states. Supports native Display-P3 wide color gamut when available:
+### OKLCH Wide-Gamut (P3) Color System with Dual Fallbacks
+All primitive neutrals and brand scales feature dual declarations: legacy sRGB hex fallbacks followed immediately by exact OKLCH values. Supports Display-P3 wide color gamut enhancements for maximum saturation on modern displays:
 - `@supports (color: color(display-p3 1 1 1)) { ... }`
 
 ### Semantic Backgrounds
@@ -100,8 +107,14 @@ Smooth viewport-responsive typography scaling automatically from 375px to 1440px
   - `glow-brand`: `shadow-[0_0_20px_var(--color-primary-subtle)]`
   - `skeleton-shimmer`: Shimmering gradient loading animation
 
-### Accessibility (WCAG AAA & High-Contrast Mode)
-- `@media (prefers-contrast: more)` automatically boosts border contrast, elevates focus ring widths (3px solid), and enhances text readability across all superclasses.
+### Accessibility (WCAG AAA, High-Contrast & Reduced Motion)
+- **Declarative ARIA State Bindings**:
+  - `btn`: Automatically binds `aria-busy="true"` (`opacity-70 cursor-wait`) and `aria-disabled="true"` (`opacity-50 cursor-not-allowed pointer-events-none`).
+  - `dropdown-item`, `context-menu-item`: Automatically bind `aria-disabled="true"`.
+  - `modal`, `dialog`, `drawer`, `popover`, `tooltip`: Automatically bind `aria-hidden="true"` (`display: none`).
+  - `checkbox`, `radio`: Automatically bind `aria-checked="true"`.
+- **WCAG AAA Guideline 2.3.3**: `@media (prefers-reduced-motion: reduce)` zeroes all transition and animation durations across all elements.
+- **High-Contrast**: `@media (prefers-contrast: more)` automatically boosts border contrast and elevates focus ring widths.
 
 ---
 
@@ -123,7 +136,7 @@ Interactive button with keyboard navigation rings and micro-scaling.
   - `btn-danger`: Error / destructive action
   - `btn-link`: Inline text hyperlink style
 - Sizes: `btn-sm`, `btn-md`, `btn-lg`, `btn-icon`
-- States: `btn-loading` (displays centered animated spinner), `press-scale`, `hover-lift`
+- States & ARIA: `aria-busy="true"`, `aria-disabled="true"`, `btn-loading`, `press-scale`, `hover-lift`
 
 #### Badge (`badge`)
 Compact status indicator.
@@ -138,6 +151,11 @@ Content card container with shadow elevation.
 - Variants: `card-bordered`
 - Slots: `card-header`, `card-title`, `card-description`, `card-body`, `card-footer`
 - Responsive / Interactive: `card-responsive`, `hover-lift`
+
+#### Table Container (`table-container`)
+Responsive container for data tables with border containment and overflow scrolling.
+- Base: `table-container`
+- Usage: `<div class="table-container"><table>...</table></div>`
 
 #### Avatar (`avatar`)
 User profile image or initials wrapper.
@@ -260,6 +278,14 @@ Zero-JS CSS charts that render instantly in HTML:
 #### DataGrid & Kanban
 - DataGrid: `datagrid`, `datagrid-row`, `datagrid-pagination`
 - Kanban: `kanban-board`, `kanban-column`, `kanban-card`
+
+#### Metric Cards, Sparklines & Data Visualizations
+Pure CSS zero-JS data visualization superclasses:
+- Metric Cards: `metric-card`, `metric-label`, `metric-value`, `metric-trend-up`, `metric-trend-down`
+- Trend Badges: `metric-badge`, `metric-badge-success`, `metric-badge-danger`
+- Sparklines: `sparkline-container`, `sparkline-bar`, `sparkline-bar-success`, `sparkline-bar-danger`
+- Circular Progress: `progress-ring-container`, `progress-ring`
+- Horizontal Bars: `chart-bar-horizontal`, `chart-bar-fill`, `chart-bar-fill-success`, `chart-bar-fill-danger`, `chart-bar-fill-warning`
 
 ---
 

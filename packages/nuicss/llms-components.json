@@ -3,6 +3,16 @@
   "name": "@nofinite/nuicss",
   "version": "3.0.5",
   "description": "Production-ready component superclasses, OKLCH design tokens, and modern CSS utilities for NUICSS",
+  "distributionBundles": {
+    "all": "@nofinite/nuicss/styles.css",
+    "components": "@nofinite/nuicss/components.css",
+    "primitives": "@nofinite/nuicss/primitives.css",
+    "forms": "@nofinite/nuicss/forms.css",
+    "overlays": "@nofinite/nuicss/overlays.css",
+    "widgets": "@nofinite/nuicss/widgets.css",
+    "media": "@nofinite/nuicss/media.css",
+    "cdn": "@nofinite/nuicss/dist/index.global.js"
+  },
   "components": [
     {
       "name": "Button",
@@ -20,6 +30,7 @@
       ],
       "sizes": ["btn-sm", "btn-md", "btn-lg", "btn-icon"],
       "states": ["btn-loading", "press-scale", "hover-lift", "focus-ring"],
+      "ariaStates": ["aria-busy=\"true\"", "aria-disabled=\"true\""],
       "htmlSnippet": "<button class=\"btn btn-primary press-scale\">Save Changes</button>"
     },
     {
@@ -178,6 +189,62 @@
       "superclasses": ["card-responsive", "stat-card-responsive"],
       "utilities": ["cq", "cq-normal", "@sm:flex-row", "@md:grid-cols-2"],
       "htmlSnippet": "<div class=\"cq card-responsive\">\n  <div class=\"p-4\">Adapts to parent container width, not viewport</div>\n</div>"
+    },
+    {
+      "name": "Table Container",
+      "baseClass": "table-container",
+      "category": "primitives",
+      "description": "Pure CSS responsive table container with border containment, rounded corners, and overflow horizontal scrolling.",
+      "htmlSnippet": "<div class=\"table-container\">\n  <table>\n    <thead><tr><th>Name</th><th>Status</th></tr></thead>\n    <tbody><tr><td>Project Alpha</td><td>Active</td></tr></tbody>\n  </table>\n</div>"
+    },
+    {
+      "name": "Modal & Dialog",
+      "baseClass": "modal",
+      "category": "overlays",
+      "description": "Accessible dialog overlays with backdrop dimming and declarative aria-hidden state support.",
+      "anatomy": [
+        "modal-backdrop",
+        "modal-panel",
+        "modal-header",
+        "modal-title",
+        "modal-body",
+        "modal-footer"
+      ],
+      "ariaStates": ["aria-hidden=\"true\""],
+      "htmlSnippet": "<div class=\"modal\" aria-hidden=\"false\">\n  <div class=\"modal-backdrop\"></div>\n  <div class=\"modal-panel\">\n    <div class=\"modal-title\">Confirm Action</div>\n  </div>\n</div>"
+    },
+    {
+      "name": "Sparklines & Circular Progress",
+      "baseClass": "sparkline-container",
+      "category": "charts",
+      "description": "Pure CSS zero-JS inline sparklines, progress rings, and metric trend badges.",
+      "anatomy": [
+        "sparkline-container",
+        "sparkline-bar",
+        "sparkline-bar-success",
+        "sparkline-bar-danger",
+        "progress-ring-container",
+        "progress-ring",
+        "metric-badge",
+        "metric-badge-success",
+        "metric-badge-danger"
+      ],
+      "htmlSnippet": "<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>"
+    },
+    {
+      "name": "Micro-Interactions & Physics",
+      "baseClass": "press-scale",
+      "category": "interactions",
+      "description": "Physics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.",
+      "superclasses": [
+        "press-scale",
+        "hover-lift",
+        "glow-brand",
+        "glow-success",
+        "glow-danger",
+        "skeleton-shimmer"
+      ],
+      "htmlSnippet": "<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>"
     }
   ]
 }
