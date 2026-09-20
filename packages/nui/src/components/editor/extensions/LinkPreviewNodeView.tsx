@@ -13,23 +13,23 @@ export const LinkPreviewNodeView: React.FC<NodeViewProps> = ({
 
   // Mock fetching OpenGraph data
   useEffect(() => {
-    if (loading && url) {
-      const timer = setTimeout(() => {
-        try {
-          const domain = new URL(url).hostname;
-          updateAttributes({
-            loading: false,
-            title: `Preview for ${domain}`,
-            description: `This is an automatically generated rich preview card for ${url}. In a real application, this would fetch OpenGraph metadata from a backend service.`,
-            image: `https://picsum.photos/seed/${domain}/600/300`, // Mock image
-          });
-        } catch {
-          setError(true);
-          updateAttributes({ loading: false });
-        }
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
+    if (!loading || !url) return;
+
+    const timer = setTimeout(() => {
+      try {
+        const domain = new URL(url).hostname;
+        updateAttributes({
+          loading: false,
+          title: `Preview for ${domain}`,
+          description: `This is an automatically generated rich preview card for ${url}. In a real application, this would fetch OpenGraph metadata from a backend service.`,
+          image: `https://picsum.photos/seed/${domain}/600/300`, // Mock image
+        });
+      } catch {
+        setError(true);
+        updateAttributes({ loading: false });
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
   }, [loading, url, updateAttributes]);
 
   return (

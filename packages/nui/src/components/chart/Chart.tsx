@@ -1,4 +1,3 @@
-import React from 'react';
 import { AreaChart, AreaChartProps } from './AreaChart';
 import { BarChart, BarChartProps } from './BarChart';
 import { DonutChart, DonutChartProps } from './DonutChart';

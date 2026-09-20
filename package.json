@@ -4,10 +4,10 @@
   "license": "Apache-2.0",
   "scripts": {
     "_nui": "### NUI ###",
-    "test:nui": "pnpm nx run nui:vite:test",
+    "test:nui": "pnpm nx run nui:test",
     "build:nui": "pnpm nx run nui:build",
     "_nuicss": "### NUI CSS ###",
-    "test:nuicss": "pnpm nx run nuicss:vite:test",
+    "test:nuicss": "pnpm nx run nuicss:test",
     "build:nuicss": "pnpm nx build nuicss",
     "_utils": "### Nofinite Utils ###",
     "test:utils": "pnpm nx run utils:vite:test",

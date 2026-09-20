@@ -94,6 +94,7 @@ export const Editor: React.FC<EditorProps> = ({
                   foundPos = p;
                   return false;
                 }
+                return true;
               });
 
               if (foundPos !== -1) {
@@ -120,7 +121,7 @@ export const Editor: React.FC<EditorProps> = ({
 
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value, false);
+      editor.commands.setContent(value, { emitUpdate: false });
     }
   }, [value, editor]);
 

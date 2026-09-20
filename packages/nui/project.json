@@ -11,6 +11,14 @@
         "outputPath": "packages/nui/dist",
         "configFile": "packages/nui/vite.config.ts"
       }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/nui"
+      }
     }
   }
 }

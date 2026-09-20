@@ -26,8 +26,9 @@ import { LinkPreview } from './extensions/LinkPreview';
 import { CollapsibleBlock } from './extensions/CollapsibleBlock';
 import { CustomCodeBlock } from './extensions/CustomCodeBlock';
 import { BlockMath } from './extensions/BlockMath';
+import type { AnyExtension } from '@tiptap/core';
 
-export const getEditorExtensions = (placeholder?: string) => [
+export const getEditorExtensions = (placeholder?: string): AnyExtension[] => [
   StarterKit.configure({
     codeBlock: false,
     link: false,

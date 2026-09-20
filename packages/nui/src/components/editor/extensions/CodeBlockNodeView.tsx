@@ -13,7 +13,7 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({
         onLanguageChange={(lang) => updateAttributes({ language: lang })}
         code={node.textContent}
       >
-        <NodeViewContent
+        <NodeViewContent<'code'>
           as="code"
           className={
             node.attrs.language ? `language-${node.attrs.language}` : ''

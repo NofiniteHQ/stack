@@ -223,11 +223,9 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
     <>
       <BubbleMenu
         editor={editor}
-        tippyOptions={{
-          duration: 150,
-          zIndex: 50,
+        options={{
           placement: 'bottom-start',
-          popperOptions: { modifiers: [{ name: 'flip', enabled: false }] },
+          flip: false,
         }}
         shouldShow={({ editor }) => editor.isActive('image')}
       >
@@ -277,11 +275,9 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
 
       <BubbleMenu
         editor={editor}
-        tippyOptions={{
-          duration: 150,
-          zIndex: 50,
+        options={{
           placement: 'bottom-start',
-          popperOptions: { modifiers: [{ name: 'flip', enabled: false }] },
+          flip: false,
         }}
         shouldShow={({ editor }) => editor.isActive('youtube')}
       >
@@ -297,12 +293,10 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
 
       <BubbleMenu
         editor={editor}
-        tippyOptions={{
-          duration: 150,
-          zIndex: 50,
-          offset: [0, 8],
+        options={{
           placement: 'bottom-start',
-          popperOptions: { modifiers: [{ name: 'flip', enabled: false }] },
+          offset: 8,
+          flip: false,
         }}
         shouldShow={({ editor, state }) => {
           const { selection } = state;
@@ -350,7 +344,9 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
 
       <BubbleMenu
         editor={editor}
-        tippyOptions={{ duration: 150, zIndex: 50 }}
+        options={{
+          placement: 'top',
+        }}
         shouldShow={({ editor }) => editor.isActive('table')}
       >
         <motion.div
