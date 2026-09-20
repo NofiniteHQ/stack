@@ -119,7 +119,8 @@ var borderDirectionMap = {
 };
 
 // Configure UnoCSS Runtime with Preset Wind4 & NuiCSS Rules
-window.__unocss = window.__unocss || {};
+window.__nuicss = window.__nuicss || window.__unocss || {};
+window.__unocss = window.__nuicss;
 window.__unocss.presets = [
   (window.__unocss_runtime && window.__unocss_runtime.presets && window.__unocss_runtime.presets.presetWind4)
     ? window.__unocss_runtime.presets.presetWind4()

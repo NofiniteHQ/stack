@@ -72,10 +72,10 @@
   --glass-border: rgba(0, 0, 0, 0.08);
 
   /* Selected */
-  --bg-selected: color-mix(in srgb, var(--brand-primary) 8%, transparent);
+  --bg-selected: color-mix(in srgb, var(--color-primary) 8%, transparent);
   --bg-selected-hover: color-mix(
     in srgb,
-    var(--brand-primary) 12%,
+    var(--color-primary) 12%,
     transparent
   );
 
@@ -99,13 +99,13 @@
   --border-strong: var(--slate-300);
   --border-subtle: var(--slate-100);
   --border-hover: var(--slate-300);
-  --border-focus: var(--brand-primary);
+  --border-focus: var(--color-primary);
   --border-disabled: var(--slate-200);
 
   /* Primary Action */
   --color-primary: var(--brand-primary);
-  --color-primary-hover: var(--brand-primary-hover);
-  --color-primary-active: var(--brand-primary-active);
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 88%, black);
+  --color-primary-active: color-mix(in srgb, var(--color-primary) 76%, black);
   --color-primary-fg: var(--brand-primary-fg);
 
   /* Secondary Action (Minimalist / Subtle Action) */
@@ -360,10 +360,10 @@
   --glass-border: rgba(255, 255, 255, 0.1);
 
   /* Selected */
-  --bg-selected: color-mix(in srgb, var(--brand-primary) 20%, transparent);
+  --bg-selected: color-mix(in srgb, var(--color-primary) 18%, transparent);
   --bg-selected-hover: color-mix(
     in srgb,
-    var(--brand-primary) 30%,
+    var(--color-primary) 26%,
     transparent
   );
 
@@ -398,6 +398,39 @@
   --brand-primary: var(--brand-500);
   --brand-primary-hover: var(--brand-400);
   --brand-primary-active: var(--brand-600);
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 88%, white);
+  --color-primary-active: color-mix(in srgb, var(--color-primary) 76%, white);
+  --color-primary-subtle: color-mix(
+    in srgb,
+    var(--color-primary) 18%,
+    transparent
+  );
+
+  /* Feedback Colors (High Contrast for Dark Surfaces - WCAG AA) */
+  --color-danger: #f87171;
+  --color-danger-hover: #ef4444;
+  --color-danger-subtle: color-mix(
+    in srgb,
+    var(--color-danger) 18%,
+    transparent
+  );
+  --color-success: #34d399;
+  --color-success-hover: #10b981;
+  --color-success-subtle: color-mix(
+    in srgb,
+    var(--color-success) 18%,
+    transparent
+  );
+  --color-warning: #fbbf24;
+  --color-warning-hover: #f59e0b;
+  --color-warning-subtle: color-mix(
+    in srgb,
+    var(--color-warning) 18%,
+    transparent
+  );
+  --color-info: #38bdf8;
+  --color-info-hover: #0ea5e9;
+  --color-info-subtle: color-mix(in srgb, var(--color-info) 18%, transparent);
 }
 
 /* ------------------------------------------------------------

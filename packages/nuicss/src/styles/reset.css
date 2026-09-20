@@ -99,7 +99,9 @@
   button {
     cursor: pointer;
     background: transparent;
-    border: none;
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border-default, #e2e8f0);
   }
 
   a {

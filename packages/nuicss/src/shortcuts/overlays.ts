@@ -59,7 +59,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'drawer',
-    'fixed m-0 p-0 bg-transparent border-none backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none z-50 transition-transform duration-300 [&:not([open])]:hidden',
+    'fixed m-0 p-0 bg-transparent border-none backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none z-50 transition-transform duration-300 [&:is(dialog):not([open])]:hidden [&:not(dialog):not([data-state=open])]:hidden',
   ],
   ['drawer-right', 'right-0 top-0 bottom-0 h-full max-h-none max-w-md w-full'],
   ['drawer-left', 'left-0 top-0 bottom-0 h-full max-h-none max-w-md w-full'],

@@ -54,7 +54,7 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'tab',
-    'px-4 py-2 text-sm font-medium text-muted hover:text-default transition-all cursor-pointer select-none rounded-t-md relative -mb-px data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary border-none bg-transparent',
+    'px-4 py-2 text-sm font-medium text-muted hover:text-default transition-all cursor-pointer select-none rounded-t-md relative -mb-px data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-b-solid data-[state=active]:border-primary data-[state=active]:font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary border-none bg-transparent',
   ],
   [
     'tab-pill',
