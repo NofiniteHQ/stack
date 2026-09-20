@@ -58,6 +58,18 @@
       },
       "default": "./dist/ssr.js"
     },
+    "./migrate": {
+      "types": "./dist/migrate/index.d.ts",
+      "import": {
+        "types": "./dist/migrate/index.d.ts",
+        "default": "./dist/migrate.mjs"
+      },
+      "require": {
+        "types": "./dist/migrate/index.d.ts",
+        "default": "./dist/migrate.js"
+      },
+      "default": "./dist/migrate.js"
+    },
     "./components.css": "./dist/components.css",
     "./components.min.css": "./dist/components.min.css",
     "./primitives.css": "./dist/primitives.css",
@@ -71,8 +83,12 @@
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"
   },
+  "bin": {
+    "nuicss": "./bin/nuicss.js"
+  },
   "files": [
     "dist",
+    "bin",
     "postcss.js",
     "README.md",
     "LICENSE"

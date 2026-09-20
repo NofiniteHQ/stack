@@ -20,6 +20,7 @@ export default defineConfig(() => ({
         components: path.resolve(__dirname, 'src/shortcuts/index.ts'),
         next: path.resolve(__dirname, 'src/plugin/next.ts'),
         ssr: path.resolve(__dirname, 'src/helpers/ssr.ts'),
+        migrate: path.resolve(__dirname, 'src/migrate/index.ts'),
       },
       name: 'Nuicss',
       cssFileName: 'index',
