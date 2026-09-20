@@ -41,6 +41,7 @@
     "@nx/web": "22.6.1",
     "@nx/workspace": "22.3.3",
     "@playwright/test": "^1.36.0",
+    "@storybook/addon-docs": "10.6.0",
     "@storybook/builder-vite": "10.6.0",
     "@storybook/csf-plugin": "10.5.10",
     "@storybook/react": "10.6.0",
@@ -120,7 +121,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@babel/core": ">=7.29.6",
+      "@babel/core": ">=7.29.6 <8.0.0",
       "body-parser": ">=1.20.6",
       "joi": ">=17.13.6",
       "postcss-selector-parser": ">=7.1.3"
