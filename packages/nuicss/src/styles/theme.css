@@ -88,6 +88,12 @@
   --fg-inverse: var(--white);
   --fg-disabled: var(--slate-400);
 
+  /* NUI Focus & State Aliases */
+  --nui-fg-default: var(--fg-default);
+  --nui-fg-subtle: var(--fg-subtle);
+  --nui-fg-muted: var(--fg-muted);
+  --nui-color-danger: var(--color-danger);
+
   /* Borders */
   --border-default: var(--slate-300);
   --border-strong: var(--slate-400);

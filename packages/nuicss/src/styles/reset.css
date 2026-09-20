@@ -1,178 +1,180 @@
 /* src/styles/reset.css */
 
-/* ------------------------------------------------------------
+@layer base {
+  /* ------------------------------------------------------------
 1. Universal Modern Box Sizing & Border Reset
 ------------------------------------------------------------ */
-*,
-*::before,
-*::after,
-::backdrop,
-::file-selector-button {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border: 0 solid var(--border-default, #e2e8f0);
-}
+  *,
+  *::before,
+  *::after,
+  ::backdrop,
+  ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid var(--border-default, #e2e8f0);
+  }
 
-/* ------------------------------------------------------------
+  /* ------------------------------------------------------------
 2. Document & Body Baseline
 ------------------------------------------------------------ */
-html,
-:host {
-  line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html,
+  :host {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-body {
-  margin: 0;
-  line-height: inherit;
-  font-family: inherit;
-  background-color: var(--bg-page);
-  color: var(--fg-default);
-  min-height: 100vh;
-}
+  body {
+    margin: 0;
+    line-height: inherit;
+    font-family: inherit;
+    background-color: var(--bg-page);
+    color: var(--fg-default);
+    min-height: 100vh;
+  }
 
-/* Legacy scoped alias for backward compatibility */
-.nui-reset {
-  background-color: var(--bg-page);
-  color: var(--fg-default);
-  font-family: var(--font-sans);
-  line-height: 1.5;
-  min-height: 100vh;
-}
+  /* Legacy scoped alias for backward compatibility */
+  .nui-reset {
+    background-color: var(--bg-page);
+    color: var(--fg-default);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
 
-/* ------------------------------------------------------------
+  /* ------------------------------------------------------------
 3. Typography Normalization
 ------------------------------------------------------------ */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-size: inherit;
-  font-weight: inherit;
-  margin: 0;
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: inherit;
+    font-weight: inherit;
+    margin: 0;
+  }
 
-p,
-blockquote,
-ul,
-ol,
-dl,
-dd,
-figure {
-  margin: 0;
-}
+  p,
+  blockquote,
+  ul,
+  ol,
+  dl,
+  dd,
+  figure {
+    margin: 0;
+  }
 
-ol,
-ul {
-  list-style: none;
-  padding: 0;
-}
+  ol,
+  ul {
+    list-style: none;
+    padding: 0;
+  }
 
-/* ------------------------------------------------------------
+  /* ------------------------------------------------------------
 4. Form Controls & Interactive Elements
 ------------------------------------------------------------ */
-button,
-input,
-optgroup,
-select,
-textarea,
-::file-selector-button {
-  font: inherit;
-  font-feature-settings: inherit;
-  font-variation-settings: inherit;
-  letter-spacing: inherit;
-  color: inherit;
-  border-radius: 0;
-  background-color: transparent;
-  margin: 0;
-  padding: 0;
-}
+  button,
+  input,
+  optgroup,
+  select,
+  textarea,
+  ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+  }
 
-button {
-  cursor: pointer;
-  background: transparent;
-  border: none;
-}
+  button {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+  }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 
-/* ------------------------------------------------------------
+  /* ------------------------------------------------------------
 5. Media Elements
 ------------------------------------------------------------ */
-img,
-svg,
-video,
-canvas,
-audio,
-iframe,
-embed,
-object {
-  display: block;
-  vertical-align: middle;
-}
+  img,
+  svg,
+  video,
+  canvas,
+  audio,
+  iframe,
+  embed,
+  object {
+    display: block;
+    vertical-align: middle;
+  }
 
-img,
-video {
-  max-width: 100%;
-  height: auto;
-}
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
 
-/* ------------------------------------------------------------
+  /* ------------------------------------------------------------
 6. Global Scrollbars
 ------------------------------------------------------------ */
-*::-webkit-scrollbar,
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+  *::-webkit-scrollbar,
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-*::-webkit-scrollbar-track,
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+  *::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-*::-webkit-scrollbar-thumb,
-::-webkit-scrollbar-thumb {
-  background-color: var(--border-default, #cbd5e1);
-  border-radius: 9999px;
-  border: 1px solid transparent;
-  background-clip: padding-box;
-}
+  *::-webkit-scrollbar-thumb,
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-default, #cbd5e1);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
 
-*::-webkit-scrollbar-thumb:hover,
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--fg-subtle, #94a3b8);
-}
+  *::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--fg-subtle, #94a3b8);
+  }
 
-/* Dark mode scrollbars (supporting both [data-theme="dark"] and .dark) */
-[data-theme='dark'] *::-webkit-scrollbar-thumb,
-.dark *::-webkit-scrollbar-thumb,
-[data-theme='dark']::-webkit-scrollbar-thumb,
-.dark::-webkit-scrollbar-thumb {
-  background-color: var(--border-default, #334155);
-}
+  /* Dark mode scrollbars (supporting both [data-theme="dark"] and .dark) */
+  [data-theme='dark'] *::-webkit-scrollbar-thumb,
+  .dark *::-webkit-scrollbar-thumb,
+  [data-theme='dark']::-webkit-scrollbar-thumb,
+  .dark::-webkit-scrollbar-thumb {
+    background-color: var(--border-default, #334155);
+  }
 
-[data-theme='dark'] *::-webkit-scrollbar-thumb:hover,
-.dark *::-webkit-scrollbar-thumb:hover,
-[data-theme='dark']::-webkit-scrollbar-thumb:hover,
-.dark::-webkit-scrollbar-thumb:hover {
-  background-color: var(--fg-subtle, #64748b);
-}
+  [data-theme='dark'] *::-webkit-scrollbar-thumb:hover,
+  .dark *::-webkit-scrollbar-thumb:hover,
+  [data-theme='dark']::-webkit-scrollbar-thumb:hover,
+  .dark::-webkit-scrollbar-thumb:hover {
+    background-color: var(--fg-subtle, #64748b);
+  }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
