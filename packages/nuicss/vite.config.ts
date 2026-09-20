@@ -41,6 +41,7 @@ export default defineConfig(() => ({
         /^@unocss\//,
         /^lightningcss/,
         /^node:/,
+        'module',
         'os',
         'crypto',
         'util',

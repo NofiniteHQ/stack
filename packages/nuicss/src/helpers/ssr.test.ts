@@ -3,6 +3,9 @@ import {
   extractClassTokens,
   extractCriticalNuicss,
   injectCriticalNuicss,
+  extractCriticalCssForTokens,
+  clearCriticalNuicssCache,
+  createCriticalStyleTag,
 } from './ssr';
 
 describe('Critical CSS SSR Helpers', () => {
@@ -60,5 +63,43 @@ describe('Critical CSS SSR Helpers', () => {
       '<style id="nuicss-critical" data-nuicss-ssr="true">'
     );
     expect(injected).toContain('</style>\n</head>');
+  });
+
+  it('extracts critical CSS directly from token arrays or sets', async () => {
+    const tokens = ['card', 'badge', 'badge-primary'];
+    const css = await extractCriticalCssForTokens(tokens);
+
+    expect(css).toContain('card');
+    expect(css).toContain('badge');
+  });
+
+  it('leverages memory cache on subsequent calls and can be cleared', async () => {
+    clearCriticalNuicssCache();
+    const html = '<div class="alert alert-info">Notice</div>';
+
+    const t1 = performance.now();
+    const res1 = await extractCriticalNuicss(html);
+    const duration1 = performance.now() - t1;
+
+    const t2 = performance.now();
+    const res2 = await extractCriticalNuicss(html);
+    const duration2 = performance.now() - t2;
+
+    expect(res1.css).toEqual(res2.css);
+    // Cached response should execute virtually instantaneously
+    expect(duration2).toBeLessThanOrEqual(duration1 + 5);
+
+    clearCriticalNuicssCache();
+  });
+
+  it('creates formatted critical style tags', () => {
+    const styleTag = createCriticalStyleTag(
+      '.test { color: red; }',
+      'custom-critical'
+    );
+    expect(styleTag).toBe(
+      '<style id="custom-critical" data-nuicss-ssr="true">.test { color: red; }</style>'
+    );
+    expect(createCriticalStyleTag('')).toBe('');
   });
 });

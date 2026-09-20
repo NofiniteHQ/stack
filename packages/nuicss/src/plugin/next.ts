@@ -24,6 +24,26 @@ export interface NuicssNextOptions {
   injectPostcss?: boolean;
 }
 
+const virtualAliases: Record<string, string> = {
+  '@nofinite/nuicss/virtual.css': '@nofinite/nuicss/styles.css',
+  'virtual:nuicss.css': '@nofinite/nuicss/styles.css',
+};
+
+function getLocalRequire(): any {
+  try {
+    if (typeof require !== 'undefined') return require;
+  } catch {
+    /* ignore */
+  }
+  try {
+    const globalReq = (globalThis as any).require;
+    if (typeof globalReq === 'function') return globalReq;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
 /**
  * Wraps your Next.js configuration to automatically configure NUICSS.
  *
@@ -50,22 +70,48 @@ export function withNuicss(
     ? Array.from(new Set([...existingTranspile, '@nofinite/nuicss']))
     : nextConfig.transpilePackages;
 
+  // Support Turbopack resolve aliases (Next.js 14 experimental.turbo and Next.js 15 turbopack)
+  const experimental = nextConfig.experimental || {};
+  const existingTurbo = experimental.turbo || {};
+  const existingTurboResolve = existingTurbo.resolveAlias || {};
+
+  const existingTurbopack = nextConfig.turbopack || {};
+  const existingTurbopackResolve = existingTurbopack.resolveAlias || {};
+
+  const patchedExperimental = {
+    ...experimental,
+    turbo: {
+      ...existingTurbo,
+      resolveAlias: {
+        ...existingTurboResolve,
+        ...virtualAliases,
+      },
+    },
+  };
+
+  const patchedTurbopack = {
+    ...existingTurbopack,
+    resolveAlias: {
+      ...existingTurbopackResolve,
+      ...virtualAliases,
+    },
+  };
+
   return {
     ...nextConfig,
     ...(transpile ? { transpilePackages } : {}),
+    experimental: patchedExperimental,
+    turbopack: patchedTurbopack,
 
     webpack(config: any, context: any) {
       config.resolve = config.resolve || {};
       config.resolve.alias = config.resolve.alias || {};
 
-      // Provide virtual css aliases
-      if (!config.resolve.alias['@nofinite/nuicss/virtual.css']) {
-        config.resolve.alias['@nofinite/nuicss/virtual.css'] =
-          '@nofinite/nuicss/styles.css';
-      }
-      if (!config.resolve.alias['virtual:nuicss.css']) {
-        config.resolve.alias['virtual:nuicss.css'] =
-          '@nofinite/nuicss/styles.css';
+      // Provide virtual css aliases for Webpack
+      for (const [aliasKey, aliasVal] of Object.entries(virtualAliases)) {
+        if (!config.resolve.alias[aliasKey]) {
+          config.resolve.alias[aliasKey] = aliasVal;
+        }
       }
 
       // Optionally patch PostCSS loader rules
@@ -101,16 +147,22 @@ function patchPostcssLoaderInRules(rules: any[], configFile?: string) {
           if (Array.isArray(po.plugins)) {
             const alreadyRegistered = po.plugins.some(
               (p: any) =>
-                (typeof p === 'string' && p.includes('nuicss')) ||
-                (p && p.postcssPlugin && p.postcssPlugin.includes('nuicss'))
+                (typeof p === 'string' &&
+                  (p.includes('nuicss') || p.includes('unocss'))) ||
+                (p &&
+                  p.postcssPlugin &&
+                  (p.postcssPlugin.includes('nuicss') ||
+                    p.postcssPlugin.includes('unocss')))
             );
             if (!alreadyRegistered) {
               try {
-                // Dynamic require to prevent bundling PostCSS prematurely
-                const nuicssPostcss =
-                  require('./postcss').default || require('./postcss');
-                po.plugins.push(nuicssPostcss({ configOrPath: configFile }));
-              } catch (_) {
+                const req = getLocalRequire();
+                if (req) {
+                  const nuicssPostcss =
+                    req('./postcss').default || req('./postcss');
+                  po.plugins.push(nuicssPostcss({ configOrPath: configFile }));
+                }
+              } catch {
                 // Ignore fallback if local require is unavailable
               }
             }

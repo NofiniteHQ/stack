@@ -8,7 +8,13 @@ export type { NuicssConfig } from './config';
 export { getThemeValue } from '../helpers/theme';
 export { DARK_MODE_SCRIPT } from '../helpers/fouc';
 export { withNuicss } from './next';
-export { extractCriticalNuicss, injectCriticalNuicss } from '../helpers/ssr';
+export {
+  extractCriticalNuicss,
+  injectCriticalNuicss,
+  extractCriticalCssForTokens,
+  clearCriticalNuicssCache,
+  createCriticalStyleTag,
+} from '../helpers/ssr';
 export type {
   CriticalNuicssOptions,
   CriticalNuicssResult,

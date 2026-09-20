@@ -56,4 +56,36 @@ describe('withNuicss Next.js integration', () => {
     expect(customWebpackCalled).toBe(true);
     expect(result.customProp).toBe(true);
   });
+
+  it('configures turbopack resolve aliases for Next.js 14 and Next.js 15', () => {
+    const config = withNuicss({
+      experimental: {
+        turbo: {
+          resolveAlias: {
+            'custom-alias': './custom.js',
+          },
+        },
+      },
+      turbopack: {
+        resolveAlias: {
+          'other-alias': './other.js',
+        },
+      },
+    });
+
+    expect(
+      config.experimental.turbo.resolveAlias['@nofinite/nuicss/virtual.css']
+    ).toBe('@nofinite/nuicss/styles.css');
+    expect(config.experimental.turbo.resolveAlias['virtual:nuicss.css']).toBe(
+      '@nofinite/nuicss/styles.css'
+    );
+    expect(config.experimental.turbo.resolveAlias['custom-alias']).toBe(
+      './custom.js'
+    );
+
+    expect(config.turbopack.resolveAlias['@nofinite/nuicss/virtual.css']).toBe(
+      '@nofinite/nuicss/styles.css'
+    );
+    expect(config.turbopack.resolveAlias['other-alias']).toBe('./other.js');
+  });
 });

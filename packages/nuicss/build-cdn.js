@@ -6,6 +6,9 @@ const {
   rawShortcuts,
   primitiveShortcuts,
   formShortcuts,
+  overlayShortcuts,
+  widgetShortcuts,
+  mediaShortcuts,
 } = require('./dist/index.js');
 
 async function build() {
@@ -38,24 +41,33 @@ async function build() {
   // ========================================================
   const uno = await createGenerator(config);
 
-  // 1a. All Components (components.css & components.min.css)
-  if (Array.isArray(rawShortcuts)) {
-    const allTokens = rawShortcuts
+  async function generateShortcutBundle(name, shortcuts) {
+    if (!Array.isArray(shortcuts)) return;
+    const tokens = shortcuts
       .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
       .join(' ');
-    const { css: allCss } = await uno.generate(allTokens);
-    const layeredAllCss = `@layer components {\n${allCss}\n}`;
-    fs.writeFileSync('dist/components.css', layeredAllCss, 'utf8');
-    const minAllCss = minifyCss('components.min.css', layeredAllCss);
-    fs.writeFileSync('dist/components.min.css', minAllCss, 'utf8');
+    const { css } = await uno.generate(tokens);
+    const layeredCss = `@layer components {\n${css}\n}`;
+    fs.writeFileSync(`dist/${name}.css`, layeredCss, 'utf8');
+    const minCss = minifyCss(`${name}.min.css`, layeredCss);
+    fs.writeFileSync(`dist/${name}.min.css`, minCss, 'utf8');
     console.log(
-      `Generated dist/components.css (${Buffer.byteLength(
-        layeredAllCss,
+      `Generated dist/${name}.css (${Buffer.byteLength(
+        layeredCss,
         'utf8'
-      )} bytes, minified: ${Buffer.byteLength(minAllCss, 'utf8')} bytes)`
+      )} bytes, minified: ${Buffer.byteLength(minCss, 'utf8')} bytes)`
     );
+    return layeredCss;
+  }
 
-    // 1b. Standalone All-In-One styles.css & styles.min.css (Base + Components)
+  // 1a. All Components (components.css & components.min.css)
+  const layeredAllCss = await generateShortcutBundle(
+    'components',
+    rawShortcuts
+  );
+
+  // 1b. Standalone All-In-One styles.css & styles.min.css (Base + Components)
+  if (layeredAllCss) {
     const combinedStyles = `@layer base, components, utilities;\n\n${baseCss}\n\n${layeredAllCss}`;
     fs.writeFileSync('dist/styles.css', combinedStyles, 'utf8');
     const minStyles = minifyCss('styles.min.css', combinedStyles);
@@ -69,40 +81,19 @@ async function build() {
   }
 
   // 1c. Primitives Only (primitives.css & primitives.min.css)
-  if (Array.isArray(primitiveShortcuts)) {
-    const primitiveTokens = primitiveShortcuts
-      .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
-      .join(' ');
-    const { css: primCss } = await uno.generate(primitiveTokens);
-    const layeredPrimCss = `@layer components {\n${primCss}\n}`;
-    fs.writeFileSync('dist/primitives.css', layeredPrimCss, 'utf8');
-    const minPrimCss = minifyCss('primitives.min.css', layeredPrimCss);
-    fs.writeFileSync('dist/primitives.min.css', minPrimCss, 'utf8');
-    console.log(
-      `Generated dist/primitives.css (${Buffer.byteLength(
-        layeredPrimCss,
-        'utf8'
-      )} bytes, minified: ${Buffer.byteLength(minPrimCss, 'utf8')} bytes)`
-    );
-  }
+  await generateShortcutBundle('primitives', primitiveShortcuts);
 
   // 1d. Forms Only (forms.css & forms.min.css)
-  if (Array.isArray(formShortcuts)) {
-    const formTokens = formShortcuts
-      .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
-      .join(' ');
-    const { css: fCss } = await uno.generate(formTokens);
-    const layeredFormsCss = `@layer components {\n${fCss}\n}`;
-    fs.writeFileSync('dist/forms.css', layeredFormsCss, 'utf8');
-    const minFormsCss = minifyCss('forms.min.css', layeredFormsCss);
-    fs.writeFileSync('dist/forms.min.css', minFormsCss, 'utf8');
-    console.log(
-      `Generated dist/forms.css (${Buffer.byteLength(
-        layeredFormsCss,
-        'utf8'
-      )} bytes, minified: ${Buffer.byteLength(minFormsCss, 'utf8')} bytes)`
-    );
-  }
+  await generateShortcutBundle('forms', formShortcuts);
+
+  // 1e. Overlays Only (overlays.css & overlays.min.css)
+  await generateShortcutBundle('overlays', overlayShortcuts);
+
+  // 1f. Widgets Only (widgets.css & widgets.min.css)
+  await generateShortcutBundle('widgets', widgetShortcuts);
+
+  // 1g. Media Only (media.css & media.min.css)
+  await generateShortcutBundle('media', mediaShortcuts);
 
   // ========================================================
   // 2. Generate One-Link Browser Runtime (dist/index.global.js)

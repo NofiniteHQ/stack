@@ -37,6 +37,26 @@ export interface CriticalNuicssResult {
 }
 
 let cachedGenerator: UnoGenerator | null = null;
+const MAX_CACHE_SIZE = 1000;
+const tokenCssCache = new Map<string, string>();
+
+/**
+ * Clears the internal SSR CSS cache (primarily used in tests or dynamic theme updates).
+ */
+export function clearCriticalNuicssCache(): void {
+  tokenCssCache.clear();
+}
+
+/**
+ * Wraps generated CSS into a standard NUICSS SSR style tag.
+ */
+export function createCriticalStyleTag(
+  css: string,
+  id = 'nuicss-critical'
+): string {
+  if (!css) return '';
+  return `<style id="${id}" data-nuicss-ssr="true">${css}</style>`;
+}
 
 export async function getNuicssGenerator(
   customConfig?: any
@@ -79,6 +99,45 @@ export function extractClassTokens(html: string): string[] {
 }
 
 /**
+ * Extracts critical NUICSS styles directly from a list or Set of class tokens.
+ * Highly optimized for JSX ASTs, template parsers, and component render trees.
+ */
+export async function extractCriticalCssForTokens(
+  tokens: string[] | Set<string>,
+  options: CriticalNuicssOptions = {}
+): Promise<string> {
+  const tokenArray = Array.isArray(tokens) ? tokens : Array.from(tokens);
+  if (tokenArray.length === 0) return '';
+
+  const cacheKey = options.config ? null : tokenArray.slice().sort().join(' ');
+  if (cacheKey) {
+    const cached = tokenCssCache.get(cacheKey);
+    if (cached !== undefined) {
+      if (options.includeBase && options.baseCss) {
+        return `${options.baseCss}\n${cached}`;
+      }
+      return cached;
+    }
+  }
+
+  const generator = await getNuicssGenerator(options.config);
+  const { css: generatedCss } = await generator.generate(tokenArray.join(' '));
+
+  if (cacheKey) {
+    if (tokenCssCache.size >= MAX_CACHE_SIZE) {
+      const firstKey = tokenCssCache.keys().next().value;
+      if (firstKey) tokenCssCache.delete(firstKey);
+    }
+    tokenCssCache.set(cacheKey, generatedCss);
+  }
+
+  if (options.includeBase && options.baseCss) {
+    return `${options.baseCss}\n${generatedCss}`;
+  }
+  return generatedCss;
+}
+
+/**
  * Extracts critical NUICSS styles used in the provided HTML string.
  *
  * @example
@@ -94,18 +153,8 @@ export async function extractCriticalNuicss(
     return { css: '', html: '', tokens: [] };
   }
 
-  const generator = await getNuicssGenerator(options.config);
-  const tokenString = tokens.join(' ');
-  const { css: generatedCss } = await generator.generate(tokenString);
-
-  let finalCss = generatedCss;
-  if (options.includeBase && options.baseCss) {
-    finalCss = `${options.baseCss}\n${finalCss}`;
-  }
-
-  const styleTag = finalCss
-    ? `<style id="nuicss-critical" data-nuicss-ssr="true">${finalCss}</style>`
-    : '';
+  const finalCss = await extractCriticalCssForTokens(tokens, options);
+  const styleTag = createCriticalStyleTag(finalCss);
 
   return {
     css: finalCss,
