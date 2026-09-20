@@ -121,11 +121,39 @@ var borderDirectionMap = {
 // Configure UnoCSS Runtime with Preset Wind4 & NuiCSS Rules
 window.__nuicss = window.__nuicss || window.__unocss || {};
 window.__unocss = window.__nuicss;
-window.__unocss.presets = [
-  (window.__unocss_runtime && window.__unocss_runtime.presets && window.__unocss_runtime.presets.presetWind4)
-    ? window.__unocss_runtime.presets.presetWind4()
-    : {}
+
+var windPreset = (window.__unocss_runtime && window.__unocss_runtime.presets && window.__unocss_runtime.presets.presetWind4)
+  ? window.__unocss_runtime.presets.presetWind4()
+  : {};
+
+var protectedShortcutPrefixes = [
+  'empty-state',
+  'link-muted',
+  'link-hover',
+  'hover-card',
+  'link-preview',
+  'file-list',
+  'file-item',
 ];
+
+if (windPreset && windPreset.variants) {
+  for (var i = 0; i < windPreset.variants.length; i++) {
+    var v = windPreset.variants[i];
+    if (v && v.name === 'pseudo') {
+      var origMatch = v.match;
+      v.match = (function(orig) {
+        return function(matcher, ctx) {
+          for (var p = 0; p < protectedShortcutPrefixes.length; p++) {
+            if (matcher.startsWith(protectedShortcutPrefixes[p])) return undefined;
+          }
+          return orig(matcher, ctx);
+        };
+      })(origMatch);
+    }
+  }
+}
+
+window.__unocss.presets = [windPreset];
 window.__unocss.theme = Object.assign(window.__unocss.theme || {}, ${JSON.stringify(
     config.theme
   )});
