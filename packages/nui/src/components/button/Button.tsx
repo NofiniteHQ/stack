@@ -17,6 +17,7 @@ export interface ButtonProps
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
+  loading?: boolean;
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
   asChild?: boolean;
@@ -51,6 +52,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'default',
       size = 'md',
       isLoading = false,
+      loading = false,
       iconLeft,
       iconRight,
       asChild = false,
@@ -61,7 +63,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const isDisabled = disabled || isLoading;
+    const isSpinnerLoading = Boolean(isLoading || loading);
+    const isDisabled = disabled || isSpinnerLoading;
     const Comp = asChild ? Slot : 'button';
 
     return (
@@ -91,7 +94,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {isLoading && (
+        {isSpinnerLoading && (
           <svg
             className="w-4 h-4 animate-spin"
             viewBox="0 0 24 24"
