@@ -24,9 +24,32 @@ const borderDirectionMap: Record<string, string[]> = {
   '': ['border-color'],
 };
 
+const protectedShortcutPrefixes = [
+  'empty-state',
+  'link-muted',
+  'link-hover',
+  'hover-card',
+  'link-preview',
+  'file-list',
+  'file-item',
+];
+
 export function nuicssPreset(): NuicssConfig {
+  const wind = getPresetWind4();
+  for (const v of (wind as any).variants || []) {
+    if (v && (v as any).name === 'pseudo') {
+      const origMatch = (v as any).match;
+      (v as any).match = (matcher: string, ctx: any) => {
+        for (const prefix of protectedShortcutPrefixes) {
+          if (matcher.startsWith(prefix)) return undefined;
+        }
+        return origMatch(matcher, ctx);
+      };
+    }
+  }
+
   return {
-    presets: [getPresetWind4()],
+    presets: [wind],
     processors: [getProcessorLightningCSS()],
     rules: [
       // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card)

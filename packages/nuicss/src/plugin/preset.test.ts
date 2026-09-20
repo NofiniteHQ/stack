@@ -70,4 +70,17 @@ describe('nuicssPreset', () => {
     expect(css).toContain('width:343px');
     expect(css).toContain('#ff0055');
   });
+
+  it('should not let pseudo variants hijack component shortcuts like hover-card and empty-state', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'empty-state hover-card file-list link-muted hover:text-primary'
+    );
+
+    expect(css).toContain('.empty-state');
+    expect(css).toContain('.hover-card');
+    expect(css).toContain('.file-list');
+    expect(css).toContain('.link-muted');
+    expect(css).toContain(':hover');
+  });
 });
