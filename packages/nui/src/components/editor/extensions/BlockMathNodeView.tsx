@@ -55,7 +55,7 @@ export const BlockMathNodeView: React.FC<NodeViewProps> = ({
 
       {isEditing && (
         <textarea
-          className="w-full min-h-[80px] p-4 bg-[#0d1117] text-gray-200 font-mono text-sm border-b border-default focus:outline-none resize-y"
+          className="w-full min-h-[80px] p-4 bg-subtle text-default font-mono text-sm border-b border-default focus:outline-none resize-y"
           value={equation}
           onChange={(e) => updateAttributes({ equation: e.target.value })}
           placeholder="\sum_{i=1}^n i = \frac{n(n+1)}{2}"

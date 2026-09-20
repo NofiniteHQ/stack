@@ -44,7 +44,7 @@ import {
 } from 'lucide-react';
 
 export const Separator = () => (
-  <div className="w-px h-5 bg-default mx-1 opacity-50" />
+  <div className="w-px h-5 bg-[var(--border-default)] mx-1 shrink-0 self-center" />
 );
 
 export const ToolbarButton = ({
@@ -537,155 +537,168 @@ export const EditorToolbar = ({ editor }: { editor: TiptapEditor | null }) => {
   if (!editor) return null;
 
   return (
-    <div className="box-border flex flex-wrap items-center gap-1 border-b border-default shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] bg-surface px-2 py-1.5 rounded-t-md sticky top-0 z-10 w-full min-w-0">
-      <ToolbarButton
-        icon={Undo2}
-        label="Undo"
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().chain().focus().undo().run()}
-      />
-      <ToolbarButton
-        icon={Redo2}
-        label="Redo"
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().chain().focus().redo().run()}
-      />
+    <div className="box-border flex flex-wrap items-center gap-1 border-b border-default shadow-sm bg-surface px-2 py-1.5 rounded-t-md sticky top-0 z-10 w-full min-w-0">
+      <div className="flex items-center gap-0.5 shrink-0">
+        <ToolbarButton
+          icon={Undo2}
+          label="Undo"
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().chain().focus().undo().run()}
+        />
+        <ToolbarButton
+          icon={Redo2}
+          label="Redo"
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().chain().focus().redo().run()}
+        />
+      </div>
 
       <Separator />
 
-      <TextTypeDropdown editor={editor} />
-      <FontFamilyDropdown editor={editor} />
-      <FontSizeDropdown editor={editor} />
+      <div className="flex items-center gap-0.5 shrink-0">
+        <TextTypeDropdown editor={editor} />
+        <FontFamilyDropdown editor={editor} />
+        <FontSizeDropdown editor={editor} />
+      </div>
 
       <Separator />
 
-      <ToolbarButton
-        icon={Bold}
-        label="Bold"
-        isActive={editor.isActive('bold')}
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-      />
-      <ToolbarButton
-        icon={Italic}
-        label="Italic"
-        isActive={editor.isActive('italic')}
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        disabled={!editor.can().chain().focus().toggleItalic().run()}
-      />
-      <ToolbarButton
-        icon={UnderlineIcon}
-        label="Underline"
-        isActive={editor.isActive('underline')}
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        disabled={!editor.can().chain().focus().toggleUnderline().run()}
-      />
-      <ToolbarButton
-        icon={Strikethrough}
-        label="Strikethrough"
-        isActive={editor.isActive('strike')}
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        disabled={!editor.can().chain().focus().toggleStrike().run()}
-      />
-      <ToolbarButton
-        icon={SubscriptIcon}
-        label="Subscript"
-        isActive={editor.isActive('subscript')}
-        onClick={() => editor.chain().focus().toggleSubscript().run()}
-        disabled={!editor.can().chain().focus().toggleSubscript().run()}
-      />
-      <ToolbarButton
-        icon={SuperscriptIcon}
-        label="Superscript"
-        isActive={editor.isActive('superscript')}
-        onClick={() => editor.chain().focus().toggleSuperscript().run()}
-        disabled={!editor.can().chain().focus().toggleSuperscript().run()}
-      />
-      <ToolbarButton
-        icon={RemoveFormatting}
-        label="Clear Formatting"
-        onClick={() =>
-          editor.chain().focus().clearNodes().unsetAllMarks().run()
-        }
-      />
+      <div className="flex items-center gap-0.5 shrink-0">
+        <ToolbarButton
+          icon={Bold}
+          label="Bold"
+          isActive={editor.isActive('bold')}
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          disabled={!editor.can().chain().focus().toggleBold().run()}
+        />
+        <ToolbarButton
+          icon={Italic}
+          label="Italic"
+          isActive={editor.isActive('italic')}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          disabled={!editor.can().chain().focus().toggleItalic().run()}
+        />
+        <ToolbarButton
+          icon={UnderlineIcon}
+          label="Underline"
+          isActive={editor.isActive('underline')}
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          disabled={!editor.can().chain().focus().toggleUnderline().run()}
+        />
+        <ToolbarButton
+          icon={Strikethrough}
+          label="Strikethrough"
+          isActive={editor.isActive('strike')}
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          disabled={!editor.can().chain().focus().toggleStrike().run()}
+        />
+        <ToolbarButton
+          icon={SubscriptIcon}
+          label="Subscript"
+          isActive={editor.isActive('subscript')}
+          onClick={() => editor.chain().focus().toggleSubscript().run()}
+          disabled={!editor.can().chain().focus().toggleSubscript().run()}
+        />
+        <ToolbarButton
+          icon={SuperscriptIcon}
+          label="Superscript"
+          isActive={editor.isActive('superscript')}
+          onClick={() => editor.chain().focus().toggleSuperscript().run()}
+          disabled={!editor.can().chain().focus().toggleSuperscript().run()}
+        />
+        <ToolbarButton
+          icon={RemoveFormatting}
+          label="Clear Formatting"
+          onClick={() =>
+            editor.chain().focus().clearNodes().unsetAllMarks().run()
+          }
+        />
+      </div>
 
       <Separator />
 
-      <ColorPickerPopover editor={editor} type="color" />
-      <ColorPickerPopover editor={editor} type="highlight" />
+      <div className="flex items-center gap-0.5 shrink-0">
+        <ColorPickerPopover editor={editor} type="color" />
+        <ColorPickerPopover editor={editor} type="highlight" />
+      </div>
 
       <Separator />
 
-      <ToolbarButton
-        icon={AlignLeft}
-        label="Align Left"
-        isActive={editor.isActive({ textAlign: 'left' })}
-        onClick={() => editor.chain().focus().setTextAlign('left').run()}
-      />
-      <ToolbarButton
-        icon={AlignCenter}
-        label="Align Center"
-        isActive={editor.isActive({ textAlign: 'center' })}
-        onClick={() => editor.chain().focus().setTextAlign('center').run()}
-      />
-      <ToolbarButton
-        icon={AlignRight}
-        label="Align Right"
-        isActive={editor.isActive({ textAlign: 'right' })}
-        onClick={() => editor.chain().focus().setTextAlign('right').run()}
-      />
-      <ToolbarButton
-        icon={AlignJustify}
-        label="Justify"
-        isActive={editor.isActive({ textAlign: 'justify' })}
-        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-      />
+      <div className="flex items-center gap-0.5 shrink-0">
+        <ToolbarButton
+          icon={AlignLeft}
+          label="Align Left"
+          isActive={editor.isActive({ textAlign: 'left' })}
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        />
+        <ToolbarButton
+          icon={AlignCenter}
+          label="Align Center"
+          isActive={editor.isActive({ textAlign: 'center' })}
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        />
+        <ToolbarButton
+          icon={AlignRight}
+          label="Align Right"
+          isActive={editor.isActive({ textAlign: 'right' })}
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        />
+        <ToolbarButton
+          icon={AlignJustify}
+          label="Justify"
+          isActive={editor.isActive({ textAlign: 'justify' })}
+          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+        />
+      </div>
 
       <Separator />
 
-      <ToolbarButton
-        icon={List}
-        label="Bullet List"
-        isActive={editor.isActive('bulletList')}
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-      />
-      <ToolbarButton
-        icon={ListOrdered}
-        label="Ordered List"
-        isActive={editor.isActive('orderedList')}
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-      />
-      <ToolbarButton
-        icon={CheckSquare}
-        label="Task List"
-        isActive={editor.isActive('taskList')}
-        onClick={() => editor.chain().focus().toggleTaskList().run()}
-      />
+      <div className="flex items-center gap-0.5 shrink-0">
+        <ToolbarButton
+          icon={List}
+          label="Bullet List"
+          isActive={editor.isActive('bulletList')}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+        />
+        <ToolbarButton
+          icon={ListOrdered}
+          label="Ordered List"
+          isActive={editor.isActive('orderedList')}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        />
+        <ToolbarButton
+          icon={CheckSquare}
+          label="Task List"
+          isActive={editor.isActive('taskList')}
+          onClick={() => editor.chain().focus().toggleTaskList().run()}
+        />
+      </div>
 
       <Separator />
 
-      <TableCreator editor={editor} />
-      <ToolbarButton
-        icon={Minus}
-        label="Divider"
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-      />
-      <ToolbarButton
-        icon={Quote}
-        label="Quote"
-        isActive={editor.isActive('blockquote')}
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-      />
-      <ToolbarButton
-        icon={Code}
-        label="Code Block"
-        isActive={editor.isActive('codeBlock')}
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-      />
-
-      <LinkButton editor={editor} />
-      <ImageButton editor={editor} />
-      <YouTubeButton editor={editor} />
+      <div className="flex items-center gap-0.5 shrink-0">
+        <TableCreator editor={editor} />
+        <ToolbarButton
+          icon={Minus}
+          label="Divider"
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+        />
+        <ToolbarButton
+          icon={Quote}
+          label="Quote"
+          isActive={editor.isActive('blockquote')}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        />
+        <ToolbarButton
+          icon={Code}
+          label="Code Block"
+          isActive={editor.isActive('codeBlock')}
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        />
+        <LinkButton editor={editor} />
+        <ImageButton editor={editor} />
+        <YouTubeButton editor={editor} />
+      </div>
     </div>
   );
 };

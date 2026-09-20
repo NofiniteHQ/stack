@@ -131,7 +131,7 @@ const YoutubeBubbleMenu = ({ editor }: { editor: TiptapEditor }) => {
       <div className="px-3 py-1.5 h-8 flex items-center justify-center text-xs font-medium text-muted uppercase tracking-wider">
         Video Options
       </div>
-      <div className="w-px h-5 bg-default mx-1 opacity-50" />
+      <div className="w-px h-5 bg-[var(--border-default)] mx-1 shrink-0" />
       <BubbleButton
         icon={Trash2}
         label="Delete Video"
@@ -236,7 +236,7 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
           className="flex flex-wrap items-center gap-1 bg-surface/90 text-default backdrop-blur-md shadow-2xl rounded-lg p-1.5 border border-default max-w-[260px] sm:max-w-[320px] md:max-w-max"
         >
           <ImageOptionsPopover editor={editor} />
-          <div className="w-px h-5 bg-default mx-1 opacity-50" />
+          <div className="w-px h-5 bg-[var(--border-default)] mx-1 shrink-0" />
           <BubbleButton
             icon={Minus}
             label="Small (25%)"
@@ -252,7 +252,7 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
             label="Full Width (100%)"
             onClick={() => setImgClass(`${baseImgClass} w-full`)}
           />
-          <div className="w-px h-5 bg-default mx-1 opacity-50" />
+          <div className="w-px h-5 bg-[var(--border-default)] mx-1 shrink-0" />
           <BubbleButton
             icon={AlignHorizontalDistributeStart}
             label="Float Left"
@@ -279,7 +279,9 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
           placement: 'bottom-start',
           flip: false,
         }}
-        shouldShow={({ editor }) => editor.isActive('youtube')}
+        shouldShow={({ editor }) =>
+          editor.isActive('customVideo') || editor.isActive('youtube')
+        }
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 5 }}
@@ -313,7 +315,7 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
           className="flex flex-wrap items-center gap-0.5 bg-surface/90 text-default backdrop-blur-md shadow-2xl rounded-lg p-1.5 border border-default max-w-[260px] sm:max-w-[320px] md:max-w-max"
         >
           <BubbleTextTypeDropdown editor={editor} />
-          <div className="w-px h-5 bg-default mx-1 opacity-50" />
+          <div className="w-px h-5 bg-[var(--border-default)] mx-1 shrink-0" />
 
           <BubbleButton
             icon={Bold}
@@ -334,7 +336,7 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
             onClick={() => editor.chain().focus().toggleUnderline().run()}
           />
 
-          <div className="w-px h-5 bg-default mx-1 opacity-50" />
+          <div className="w-px h-5 bg-[var(--border-default)] mx-1 shrink-0" />
 
           <div>
             <LinkButton editor={editor} />
@@ -381,7 +383,7 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
                 Delete Column
               </Dropdown.Item>
 
-              <div className="w-full h-px bg-default my-1" />
+              <div className="dropdown-divider" />
 
               <Dropdown.Item
                 onClick={() => editor.chain().focus().addRowBefore().run()}
@@ -399,7 +401,7 @@ export const EditorBubbleMenu: React.FC<EditorBubbleMenuProps> = ({
                 Delete Row
               </Dropdown.Item>
 
-              <div className="w-full h-px bg-default my-1" />
+              <div className="dropdown-divider" />
 
               <Dropdown.Item
                 onClick={() => editor.chain().focus().deleteTable().run()}

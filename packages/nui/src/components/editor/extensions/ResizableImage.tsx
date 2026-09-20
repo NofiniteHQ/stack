@@ -79,7 +79,7 @@ const ResizableImageNode = (props: NodeViewProps) => {
       )}
       {selected && (
         <div
-          className="absolute bottom-0 right-0 w-3 h-3 bg-primary border-2 border-white rounded-full cursor-nwse-resize transform translate-x-1/2 translate-y-1/2 shadow-sm z-10"
+          className="absolute bottom-0 right-0 w-3 h-3 bg-primary border-2 border-surface rounded-full cursor-nwse-resize transform translate-x-1/2 translate-y-1/2 shadow-sm z-10"
           onMouseDown={startResizing}
           title="Drag to resize"
         />

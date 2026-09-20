@@ -606,12 +606,22 @@ input[type='number'] {
 6. TIPTAP EDITOR COMPONENT STYLES
 ------------------------------------------------------------ */
 @layer components {
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] {
+  .tiptap-wrapper .tiptap ul[data-type='taskList'],
+  .tiptap-wrapper ul[data-type='taskList'],
+  .nui-editor ul[data-type='taskList'],
+  .tiptap-wrapper ul.task-list,
+  .nui-editor ul.task-list,
+  ul.task-list {
     list-style: none !important;
     padding: 0 !important;
   }
 
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li {
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li,
+  .tiptap-wrapper ul[data-type='taskList'] li,
+  .nui-editor ul[data-type='taskList'] li,
+  .tiptap-wrapper ul.task-list li,
+  .nui-editor ul.task-list li,
+  ul.task-list li {
     display: flex !important;
     flex-direction: row !important;
     align-items: flex-start !important;
@@ -619,18 +629,35 @@ input[type='number'] {
     margin-top: 0.25rem !important;
   }
 
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > label {
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > label,
+  .tiptap-wrapper ul[data-type='taskList'] li > label,
+  .nui-editor ul[data-type='taskList'] li > label,
+  .tiptap-wrapper ul.task-list li > label,
+  .nui-editor ul.task-list li > label,
+  ul.task-list li > label {
+    display: inline-flex !important;
+    align-items: center !important;
     margin-right: 0.5rem !important;
     user-select: none !important;
     margin-top: 0.25rem !important;
   }
 
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div {
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div,
+  .tiptap-wrapper ul[data-type='taskList'] li > div,
+  .nui-editor ul[data-type='taskList'] li > div,
+  .tiptap-wrapper ul.task-list li > div,
+  .nui-editor ul.task-list li > div,
+  ul.task-list li > div {
     flex: 1 1 auto !important;
     margin: 0 !important;
   }
 
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div > p {
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div > p,
+  .tiptap-wrapper ul[data-type='taskList'] li > div > p,
+  .nui-editor ul[data-type='taskList'] li > div > p,
+  .tiptap-wrapper ul.task-list li > div > p,
+  .nui-editor ul.task-list li > div > p,
+  ul.task-list li > div > p {
     margin: 0 !important;
   }
 
