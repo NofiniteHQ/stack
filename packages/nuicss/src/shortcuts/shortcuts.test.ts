@@ -102,15 +102,33 @@ describe('nuicss shortcuts', () => {
     expect(css).toContain('scale');
   });
 
-  it('should generate pure CSS charts and metric cards', async () => {
+  it('should generate pure CSS charts, sparklines, and metric cards', async () => {
     const uno = await createGenerator(nuicssPreset());
     const { css } = await uno.generate(
-      'metric-card metric-label metric-value chart-bar-horizontal chart-bar-fill'
+      'metric-card metric-label metric-value chart-bar-horizontal chart-bar-fill sparkline-container sparkline-bar progress-ring metric-badge-success'
     );
 
     expect(css).toContain('.metric-card');
     expect(css).toContain('.chart-bar-horizontal');
     expect(css).toContain('.chart-bar-fill');
+    expect(css).toContain('.sparkline-container');
+    expect(css).toContain('.sparkline-bar');
+    expect(css).toContain('.progress-ring');
+    expect(css).toContain('.metric-badge-success');
     expect(css).toContain('var(--border-default)');
+  });
+
+  it('should generate aria-busy, aria-disabled, and aria-hidden states', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate(
+      'btn dropdown-item modal drawer checkbox glow-brand glow-success'
+    );
+
+    expect(css).toContain('[aria-busy=true]');
+    expect(css).toContain('[aria-disabled=true]');
+    expect(css).toContain('[aria-hidden=true]');
+    expect(css).toContain('[aria-checked=true]');
+    expect(css).toContain('var(--brand-primary-hover)');
+    expect(css).toContain('var(--color-success)');
   });
 });

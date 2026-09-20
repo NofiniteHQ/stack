@@ -6,7 +6,7 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'btn',
-    'inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none rounded-md cursor-pointer select-none',
+    'inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none aria-busy:opacity-70 aria-busy:cursor-wait aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none rounded-md cursor-pointer select-none',
   ],
   [
     'btn-default',
@@ -320,4 +320,23 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['nuix-provider', 'contents font-sans text-default bg-page'],
   ['nui-provider', 'contents font-sans text-default bg-page'],
   ['provider', 'contents font-sans text-default bg-page'],
+
+  // ==========================================
+  // 19. Micro-Interactions & Physics Utilities
+  // ==========================================
+  [
+    'press-scale',
+    'active:scale-[0.97] transition-transform duration-150 ease-spring',
+  ],
+  [
+    'hover-lift',
+    'hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-smooth',
+  ],
+  ['glow-brand', 'shadow-[0_0_20px_var(--brand-primary-hover)]'],
+  ['glow-success', 'shadow-[0_0_20px_var(--color-success)]'],
+  ['glow-danger', 'shadow-[0_0_20px_var(--color-danger)]'],
+  [
+    'skeleton-shimmer',
+    'animate-shimmer bg-[linear-gradient(110deg,var(--bg-subtle)_8%,var(--bg-muted)_18%,var(--bg-subtle)_33%)] bg-[length:200%_100%]',
+  ],
 ];

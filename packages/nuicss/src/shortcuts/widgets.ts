@@ -278,6 +278,23 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'relative inline-flex items-center justify-center',
   ],
   [
+    'progress-ring',
+    'transform -rotate-90 origin-center transition-all duration-500 ease-out',
+  ],
+  ['sparkline-container', 'inline-flex items-end gap-1 h-6 px-1'],
+  [
+    'sparkline-bar',
+    'w-1 bg-primary/30 rounded-t hover:bg-primary transition-all duration-150 min-h-[2px]',
+  ],
+  [
+    'sparkline-bar-success',
+    'w-1 bg-success/30 rounded-t hover:bg-success transition-all duration-150 min-h-[2px]',
+  ],
+  [
+    'sparkline-bar-danger',
+    'w-1 bg-danger/30 rounded-t hover:bg-danger transition-all duration-150 min-h-[2px]',
+  ],
+  [
     'metric-card',
     'flex flex-col p-5 rounded-xl bg-surface border border-default shadow-sm transition-all duration-200 hover:border-hover font-sans',
   ],
@@ -293,6 +310,18 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   [
     'metric-trend-down',
     'inline-flex items-center gap-1 text-xs font-semibold text-danger mt-2',
+  ],
+  [
+    'metric-badge',
+    'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold font-sans',
+  ],
+  [
+    'metric-badge-success',
+    'bg-success-subtle text-success border border-success/20',
+  ],
+  [
+    'metric-badge-danger',
+    'bg-danger-subtle text-danger border border-danger/20',
   ],
 
   // ==========================================

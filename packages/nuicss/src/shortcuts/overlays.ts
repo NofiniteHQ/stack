@@ -6,7 +6,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'modal',
-    'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-lg w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50',
+    'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-lg w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden',
   ],
   ['modal-sm', 'max-w-sm'],
   ['modal-md', 'max-w-lg'],
@@ -39,7 +39,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // Dialog aliases & helpers
   [
     'dialog',
-    'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-md w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50',
+    'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-md w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden',
   ],
   [
     'dialog-box',
@@ -59,7 +59,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'drawer',
-    'fixed m-0 p-0 bg-transparent border-none backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none z-50 transition-transform duration-300 [&:is(dialog):not([open])]:hidden [&:not(dialog):not([data-state=open])]:hidden',
+    'fixed m-0 p-0 bg-transparent border-none backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none z-50 transition-transform duration-300 [&:is(dialog):not([open])]:hidden [&:not(dialog):not([data-state=open])]:hidden aria-hidden:hidden',
   ],
   ['drawer-right', 'right-0 top-0 bottom-0 h-full max-h-none max-w-md w-full'],
   ['drawer-left', 'left-0 top-0 bottom-0 h-full max-h-none max-w-md w-full'],
@@ -94,11 +94,11 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'dropdown-item',
-    'w-full border-none bg-transparent text-left flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-default outline-none transition-colors duration-200 hover:bg-subtle focus-visible:bg-subtle font-normal',
+    'w-full border-none bg-transparent text-left flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-default outline-none transition-colors duration-200 hover:bg-subtle focus-visible:bg-subtle aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none font-normal',
   ],
   [
     'dropdown-item-danger',
-    'w-full border-none bg-transparent text-left flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm outline-none transition-colors duration-200 text-danger hover:bg-danger/10 focus-visible:bg-danger/10 font-normal',
+    'w-full border-none bg-transparent text-left flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm outline-none transition-colors duration-200 text-danger hover:bg-danger/10 focus-visible:bg-danger/10 aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none font-normal',
   ],
   ['dropdown-divider', 'my-1 h-px bg-[var(--border-default,#cbd5e1)]'],
   [
@@ -115,7 +115,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'context-menu-item',
-    'w-full border-none bg-transparent text-left flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-default outline-none transition-colors duration-200 hover:bg-subtle focus-visible:bg-subtle font-normal',
+    'w-full border-none bg-transparent text-left flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-default outline-none transition-colors duration-200 hover:bg-subtle focus-visible:bg-subtle aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none font-normal',
   ],
   ['context-menu-divider', 'my-1 h-px bg-[var(--border-default,#cbd5e1)]'],
   [
@@ -129,11 +129,11 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['popover-wrapper', 'relative inline-block font-sans'],
   [
     'popover',
-    'z-50 min-w-[240px] max-w-sm rounded-xl border border-default bg-surface p-4 font-sans shadow-xl outline-none hidden data-[state=open]:block',
+    'z-50 min-w-[240px] max-w-sm rounded-xl border border-default bg-surface p-4 font-sans shadow-xl outline-none hidden data-[state=open]:block aria-hidden:hidden',
   ],
   [
     'popover-content',
-    'z-50 min-w-[240px] max-w-sm rounded-xl border border-default bg-surface p-4 font-sans shadow-xl outline-none hidden data-[state=open]:block',
+    'z-50 min-w-[240px] max-w-sm rounded-xl border border-default bg-surface p-4 font-sans shadow-xl outline-none hidden data-[state=open]:block aria-hidden:hidden',
   ],
   [
     'popover-header',
@@ -152,7 +152,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'tooltip',
-    'fixed z-50 rounded-md bg-[var(--fg-default,#0f172a)] px-2.5 py-1 text-xs font-medium text-[var(--bg-surface,#ffffff)] shadow-md pointer-events-none transition-opacity duration-150 font-sans',
+    'fixed z-50 rounded-md bg-[var(--fg-default,#0f172a)] px-2.5 py-1 text-xs font-medium text-[var(--bg-surface,#ffffff)] shadow-md pointer-events-none transition-opacity duration-150 font-sans aria-hidden:hidden',
   ],
   ['tooltip-top', 'bottom-full left-1/2 -translate-x-1/2 mb-2'],
   ['tooltip-bottom', 'top-full left-1/2 -translate-x-1/2 mt-2'],

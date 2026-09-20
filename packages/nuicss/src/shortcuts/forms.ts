@@ -44,7 +44,7 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'checkbox',
-    'h-4 w-4 rounded border border-solid border-strong bg-surface text-primary accent-primary cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50',
+    'h-4 w-4 rounded border border-solid border-strong bg-surface text-primary accent-primary cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-checked:bg-primary',
   ],
   ['checkbox-sm', 'h-3.5 w-3.5'],
   ['checkbox-md', 'h-4 w-4'],
@@ -59,7 +59,7 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'radio',
-    'h-4 w-4 rounded-full border border-solid border-strong bg-surface text-primary accent-primary cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50',
+    'h-4 w-4 rounded-full border border-solid border-strong bg-surface text-primary accent-primary cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-checked:border-primary',
   ],
   ['radio-group', 'flex flex-col gap-2.5 font-sans'],
   ['radio-group-horizontal', 'flex flex-row items-center gap-4 font-sans'],
