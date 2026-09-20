@@ -6,124 +6,138 @@ import { axe } from 'vitest-axe';
 import { Card } from './Card';
 
 describe('Card Component', () => {
- describe('Rendering', () => {
- it('renders children correctly', () => {
- render(
- <Card>
- <Card.Header>Title</Card.Header>
- <Card.Body>Content</Card.Body>
- </Card>
- );
+  describe('Rendering', () => {
+    it('renders children correctly', () => {
+      render(
+        <Card>
+          <Card.Header>Title</Card.Header>
+          <Card.Body>Content</Card.Body>
+        </Card>
+      );
 
- expect(screen.getByText('Title')).toBeInTheDocument();
- expect(screen.getByText('Content')).toBeInTheDocument();
- });
+      expect(screen.getByText('Title')).toBeInTheDocument();
+      expect(screen.getByText('Content')).toBeInTheDocument();
+    });
 
- it('renders sub-components correctly', () => {
- render(
- <Card>
- <Card.Header>Header</Card.Header>
- <Card.Body>Body</Card.Body>
- <Card.Footer>Footer</Card.Footer>
- </Card>
- );
+    it('renders sub-components correctly', () => {
+      render(
+        <Card>
+          <Card.Header>Header</Card.Header>
+          <Card.Body>Body</Card.Body>
+          <Card.Footer>Footer</Card.Footer>
+        </Card>
+      );
 
- expect(screen.getByText('Header')).toBeInTheDocument();
- expect(screen.getByText('Body')).toBeInTheDocument();
- expect(screen.getByText('Footer')).toBeInTheDocument();
- });
- });
+      expect(screen.getByText('Header')).toBeInTheDocument();
+      expect(screen.getByText('Body')).toBeInTheDocument();
+      expect(screen.getByText('Footer')).toBeInTheDocument();
+    });
 
- describe('Interactions (Non-Clickable)', () => {
- it('is not clickable by default', async () => {
- const user = userEvent.setup();
- const handleClick = vi.fn();
+    it('supports asChild to render a custom element', () => {
+      render(
+        <Card asChild>
+          <section data-testid="custom-section">
+            <Card.Body>Custom Section Card</Card.Body>
+          </section>
+        </Card>
+      );
 
- render(
- <Card onClick={handleClick}>
- <Card.Body>Card</Card.Body>
- </Card>
- );
+      const section = screen.getByTestId('custom-section');
+      expect(section.tagName).toBe('SECTION');
+      expect(section).toHaveClass('card');
+    });
+  });
 
- await user.click(screen.getByText('Card'));
- expect(handleClick).not.toHaveBeenCalled();
- });
- });
+  describe('Interactions (Non-Clickable)', () => {
+    it('is not clickable by default', async () => {
+      const user = userEvent.setup();
+      const handleClick = vi.fn();
 
- describe('Interactions (Clickable)', () => {
- it('calls onClick when clickable', async () => {
- const user = userEvent.setup();
- const handleClick = vi.fn();
+      render(
+        <Card onClick={handleClick}>
+          <Card.Body>Card</Card.Body>
+        </Card>
+      );
 
- render(
- <Card clickable onClick={handleClick}>
- <Card.Body>Clickable</Card.Body>
- </Card>
- );
+      await user.click(screen.getByText('Card'));
+      expect(handleClick).not.toHaveBeenCalled();
+    });
+  });
 
- await user.click(screen.getByText('Clickable'));
- expect(handleClick).toHaveBeenCalledTimes(1);
- });
+  describe('Interactions (Clickable)', () => {
+    it('calls onClick when clickable', async () => {
+      const user = userEvent.setup();
+      const handleClick = vi.fn();
 
- it('has button role and tabIndex when clickable', () => {
- render(
- <Card clickable>
- <Card.Body>Accessible</Card.Body>
- </Card>
- );
+      render(
+        <Card clickable onClick={handleClick}>
+          <Card.Body>Clickable</Card.Body>
+        </Card>
+      );
 
- const card = screen.getByRole('button');
- expect(card).toHaveAttribute('tabIndex', '0');
- });
+      await user.click(screen.getByText('Clickable'));
+      expect(handleClick).toHaveBeenCalledTimes(1);
+    });
 
- it('triggers click on Enter key', async () => {
- const user = userEvent.setup();
- const handleClick = vi.fn();
+    it('has button role and tabIndex when clickable', () => {
+      render(
+        <Card clickable>
+          <Card.Body>Accessible</Card.Body>
+        </Card>
+      );
 
- render(
- <Card clickable onClick={handleClick}>
- <Card.Body>Keyboard</Card.Body>
- </Card>
- );
+      const card = screen.getByRole('button');
+      expect(card).toHaveAttribute('tabIndex', '0');
+    });
 
- const card = screen.getByRole('button');
- 
- await user.tab();
- expect(card).toHaveFocus();
- await user.keyboard('{Enter}');
+    it('triggers click on Enter key', async () => {
+      const user = userEvent.setup();
+      const handleClick = vi.fn();
 
- expect(handleClick).toHaveBeenCalledTimes(1);
- });
+      render(
+        <Card clickable onClick={handleClick}>
+          <Card.Body>Keyboard</Card.Body>
+        </Card>
+      );
 
- it('triggers click on Space key', async () => {
- const user = userEvent.setup();
- const handleClick = vi.fn();
+      const card = screen.getByRole('button');
 
- render(
- <Card clickable onClick={handleClick}>
- <Card.Body>Keyboard</Card.Body>
- </Card>
- );
+      await user.tab();
+      expect(card).toHaveFocus();
+      await user.keyboard('{Enter}');
 
- const card = screen.getByRole('button');
- 
- await user.tab();
- expect(card).toHaveFocus();
- await user.keyboard(' ');
+      expect(handleClick).toHaveBeenCalledTimes(1);
+    });
 
- expect(handleClick).toHaveBeenCalledTimes(1);
- });
- });
+    it('triggers click on Space key', async () => {
+      const user = userEvent.setup();
+      const handleClick = vi.fn();
 
- describe('Accessibility', () => {
- it('has no accessibility violations', async () => {
- const { container } = render(
- <Card>
- <Card.Header>Title</Card.Header>
- <Card.Body>Content</Card.Body>
- </Card>
- );
- expect(await axe(container)).toHaveNoViolations();
- });
- });
+      render(
+        <Card clickable onClick={handleClick}>
+          <Card.Body>Keyboard</Card.Body>
+        </Card>
+      );
+
+      const card = screen.getByRole('button');
+
+      await user.tab();
+      expect(card).toHaveFocus();
+      await user.keyboard(' ');
+
+      expect(handleClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has no accessibility violations', async () => {
+      const { container } = render(
+        <Card>
+          <Card.Header>Title</Card.Header>
+          <Card.Body>Content</Card.Body>
+        </Card>
+      );
+      expect(await axe(container)).toHaveNoViolations();
+    });
+  });
 });

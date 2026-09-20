@@ -1,11 +1,13 @@
 import React from 'react';
-import { cn } from '../../utils';
+import { cn, Slot } from '../../utils';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** If true, makes the card interactive via mouse and keyboard (Enter/Space) */
   clickable?: boolean;
   /** If true, adds a shadow elevation effect on hover */
   hover?: boolean;
+  /** If true, delegates rendering to child element using Slot */
+  asChild?: boolean;
 }
 
 /**
@@ -21,6 +23,7 @@ const CardRoot = React.forwardRef<HTMLDivElement, CardProps>(
       className,
       clickable = false,
       hover = false,
+      asChild = false,
       onClick,
       onKeyDown,
       children,
@@ -28,8 +31,9 @@ const CardRoot = React.forwardRef<HTMLDivElement, CardProps>(
     },
     ref
   ) => {
+    const Comp = asChild ? Slot : 'div';
     return (
-      <div
+      <Comp
         ref={ref}
         className={cn(
           'card flex flex-col p-5 bg-surface text-default border border-default rounded-lg font-sans shadow-sm transition-all duration-200 ease-in-out',
@@ -61,7 +65,7 @@ const CardRoot = React.forwardRef<HTMLDivElement, CardProps>(
         {...props}
       >
         {children}
-      </div>
+      </Comp>
     );
   }
 );

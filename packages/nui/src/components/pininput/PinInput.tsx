@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import React, { useRef, useState, KeyboardEvent, ClipboardEvent } from 'react';
 import { cn } from '../../utils';
 
-
-export interface PinInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+export interface PinInputProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   length?: number;
   value?: string;
   defaultValue?: string;
@@ -17,12 +17,14 @@ export interface PinInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>
   type?: 'numeric' | 'alphanumeric' | 'alphabetic';
   otp?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  /** Name attribute for native form submission */
+  name?: string;
 }
 
 const sizeMap = {
-  sm: "w-10 h-10 text-lg",
-  md: "w-12 h-12 text-xl",
-  lg: "w-14 h-14 text-2xl",
+  sm: 'w-10 h-10 text-lg',
+  md: 'w-12 h-12 text-xl',
+  lg: 'w-14 h-14 text-2xl',
 };
 
 export function PinInput({
@@ -38,6 +40,7 @@ export function PinInput({
   type = 'numeric',
   otp = false,
   size = 'md',
+  name,
   className,
   ...props
 }: PinInputProps) {
@@ -68,7 +71,7 @@ export function PinInput({
 
   const handleInputChange = (index: number, val: string) => {
     if (disabled) return;
-    
+
     // Only take the last character typed
     const char = val.slice(-1);
 
@@ -77,7 +80,7 @@ export function PinInput({
       if (type === 'alphabetic' && !/^[a-zA-Z]+$/.test(char)) return;
       if (type === 'alphanumeric' && !/^[a-zA-Z0-9]+$/.test(char)) return;
     }
-    
+
     const newValueArray = [...valueArray];
     while (newValueArray.length < length) newValueArray.push('');
     newValueArray[index] = char;
@@ -95,10 +98,10 @@ export function PinInput({
 
     if (e.key === 'Backspace') {
       const isCurrentEmpty = !valueArray[index];
-      
+
       const newValueArray = [...valueArray];
       while (newValueArray.length < length) newValueArray.push('');
-      
+
       if (isCurrentEmpty && index > 0) {
         // Current is empty, delete previous and move focus back
         newValueArray[index - 1] = '';
@@ -123,7 +126,7 @@ export function PinInput({
     if (disabled) return;
 
     let pastedData = e.clipboardData.getData('text');
-    
+
     // Filter pasted data based on type
     if (type === 'numeric') {
       pastedData = pastedData.replace(/[^0-9]/g, '');
@@ -132,32 +135,34 @@ export function PinInput({
     } else if (type === 'alphanumeric') {
       pastedData = pastedData.replace(/[^a-zA-Z0-9]/g, '');
     }
-    
+
     pastedData = pastedData.slice(0, length);
     if (!pastedData) return;
 
     triggerChange(pastedData);
-    
+
     // Focus the next empty input or the last input
-    const nextEmptyIndex = pastedData.length < length ? pastedData.length : length - 1;
+    const nextEmptyIndex =
+      pastedData.length < length ? pastedData.length : length - 1;
     focusInput(nextEmptyIndex);
   };
 
   return (
     <div
-      className={cn("flex items-center gap-3 font-sans", className)}
+      className={cn('flex items-center gap-3 font-sans', className)}
       role="group"
       {...props}
     >
+      {name && <input type="hidden" name={name} value={value} />}
       {Array.from({ length }).map((_, index) => (
         <input
           key={index}
           ref={(el) => {
             inputRefs.current[index] = el;
           }}
-          type={mask ? "password" : type === 'numeric' ? "tel" : "text"}
-          inputMode={type === 'numeric' ? "numeric" : "text"}
-          autoComplete={otp ? "one-time-code" : "off"}
+          type={mask ? 'password' : type === 'numeric' ? 'tel' : 'text'}
+          inputMode={type === 'numeric' ? 'numeric' : 'text'}
+          autoComplete={otp ? 'one-time-code' : 'off'}
           maxLength={2}
           value={valueArray[index] || ''}
           placeholder={placeholder}
@@ -168,19 +173,19 @@ export function PinInput({
           autoFocus={autoFocus && index === 0}
           className={cn(
             // Base styles for perfect square, minimalist aesthetic
-            "text-center font-medium px-0",
+            'text-center font-medium px-0',
             sizeMap[size],
-            "bg-surface text-default border border-solid border-subtle rounded-xl",
-            "transition-all duration-200 outline-none appearance-none",
+            'bg-surface text-default border border-solid border-subtle rounded-xl',
+            'transition-all duration-200 outline-none appearance-none',
             // Placeholder hollow circle styling
-            "placeholder:text-muted placeholder:font-light",
+            'placeholder:text-muted placeholder:font-light',
             // Focus and hover states (matching standard but flat/minimalist)
-            "hover:border-strong",
-            "focus-visible:outline-none focus-visible:border-[var(--nui-fg-subtle)] focus-visible:ring-1 focus-visible:ring-[var(--nui-fg-subtle)]",
+            'hover:border-strong',
+            'focus-visible:outline-none focus-visible:border-[var(--nui-fg-subtle)] focus-visible:ring-1 focus-visible:ring-[var(--nui-fg-subtle)]',
             // Disabled state
-            "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle",
+            'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle',
             // Mask handling
-            mask && "tracking-widest"
+            mask && 'tracking-widest'
           )}
           aria-label={`Pin input ${index + 1} of ${length}`}
         />
