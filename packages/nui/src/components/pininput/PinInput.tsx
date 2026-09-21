@@ -148,11 +148,7 @@ export function PinInput({
   };
 
   return (
-    <div
-      className={cn('flex items-center gap-3 font-sans', className)}
-      role="group"
-      {...props}
-    >
+    <div className={cn('pin-input', className)} role="group" {...props}>
       {name && <input type="hidden" name={name} value={value} />}
       {Array.from({ length }).map((_, index) => (
         <input
@@ -172,19 +168,8 @@ export function PinInput({
           disabled={disabled}
           autoFocus={autoFocus && index === 0}
           className={cn(
-            // Base styles for perfect square, minimalist aesthetic
-            'text-center font-medium px-0',
+            'pin-input-field',
             sizeMap[size],
-            'bg-surface text-default border border-solid border-subtle rounded-xl',
-            'transition-all duration-200 outline-none appearance-none',
-            // Placeholder hollow circle styling
-            'placeholder:text-muted placeholder:font-light',
-            // Focus and hover states (matching standard but flat/minimalist)
-            'hover:border-strong',
-            'focus-visible:outline-none focus-visible:border-[var(--nui-fg-subtle)] focus-visible:ring-1 focus-visible:ring-[var(--nui-fg-subtle)]',
-            // Disabled state
-            'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-subtle',
-            // Mask handling
             mask && 'tracking-widest'
           )}
           aria-label={`Pin input ${index + 1} of ${length}`}

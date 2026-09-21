@@ -23,26 +23,20 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
-const buttonVariants = {
-  variant: {
-    default:
-      'bg-surface text-default border border-solid border-subtle hover:bg-subtle',
-    primary:
-      'bg-primary text-primary-fg border-solid border-transparent hover:bg-primary/90',
-    outline:
-      'bg-transparent border border-solid border-strong text-default hover:bg-subtle',
-    ghost:
-      'bg-transparent text-default border border-solid border-transparent hover:bg-subtle',
-    danger:
-      'bg-danger text-danger-fg border-solid border-transparent hover:bg-danger/90',
-    link: 'text-primary border border-solid border-transparent underline-offset-4 hover:underline',
-  },
-  size: {
-    sm: 'h-8 px-3 text-xs rounded-md',
-    md: 'h-9 px-4 text-sm rounded-md',
-    lg: 'h-11 px-8 text-sm rounded-md',
-    icon: 'h-9 w-9 p-0 rounded-md',
-  },
+const variantMap: Record<ButtonVariant, string> = {
+  default: 'btn-default',
+  primary: 'btn-primary',
+  outline: 'btn-outline',
+  ghost: 'btn-ghost',
+  danger: 'btn-danger',
+  link: 'btn-link',
+};
+
+const sizeMap: Record<ButtonSize, string> = {
+  sm: 'btn-sm',
+  md: 'btn-md',
+  lg: 'btn-lg',
+  icon: 'btn-icon',
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -82,14 +76,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         }}
         className={cn(
           'btn',
-          variant && `btn-${variant}`,
-          size && `btn-${size}`,
-          'inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98]',
-          // Ultra-minimalist native outline focus state, absolutely no blue rings or complex shadows
-          'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
-          'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
-          buttonVariants.variant[variant],
-          buttonVariants.size[size],
+          variant && (variantMap[variant] || `btn-${variant}`),
+          size && (sizeMap[size] || `btn-${size}`),
           className
         )}
         {...props}
