@@ -8,7 +8,6 @@ export * from './components/button/Button';
 export * from './components/calendar/Calendar';
 export * from './components/card/Card';
 export * from './components/carousel/Carousel';
-export * from './components/chart';
 export * from './components/checkbox/Checkbox';
 export * from './components/chip/Chip';
 export * from './components/clipboard/Clipboard';

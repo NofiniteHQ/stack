@@ -1,0 +1,86 @@
+{
+  "name": "@nofinite/charts",
+  "version": "1.0.0",
+  "description": "Universal, framework-agnostic data visualization suite powered by modular D3 and styled with @nofinite/nuicss design tokens.",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/types/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs",
+      "default": "./dist/react/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NofiniteHQ/stack.git",
+    "directory": "packages/charts"
+  },
+  "keywords": [
+    "nofinite",
+    "charts",
+    "data-visualization",
+    "d3",
+    "svg",
+    "react-charts",
+    "vanilla-charts",
+    "area-chart",
+    "bar-chart",
+    "line-chart",
+    "pie-chart",
+    "donut-chart"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.6.13",
+    "clsx": "^2.1.1",
+    "d3-array": "^3.2.4",
+    "d3-axis": "^3.0.0",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0"
+  },
+  "devDependencies": {
+    "@nofinite/nuicss": "workspace:*",
+    "@types/d3-array": "^3.2.1",
+    "@types/d3-axis": "^3.0.6",
+    "@types/d3-scale": "^4.0.8",
+    "@types/d3-shape": "^3.1.7"
+  }
+}

@@ -23,7 +23,9 @@
       "@nofinite/utils": ["./packages/utils/src/index.ts"],
       "@nofinite/locale": ["./packages/locale/src/index.ts"],
       "@nofinite/markon": ["./packages/markon/src/index.ts"],
-      "@nofinite/markon/react": ["./packages/markon/src/react/index.ts"]
+      "@nofinite/markon/react": ["./packages/markon/src/react/index.ts"],
+      "@nofinite/charts": ["./packages/charts/src/index.ts"],
+      "@nofinite/charts/react": ["./packages/charts/src/react/index.ts"]
     }
   }
 }
