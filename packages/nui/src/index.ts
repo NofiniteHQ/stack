@@ -26,7 +26,6 @@ export * from './components/dialog/dialogStore';
 export * from './components/divider/Divider';
 export * from './components/drawer/Drawer';
 export * from './components/dropdown';
-export * from './components/editor';
 export * from './components/emptystate/EmptyState';
 export * from './components/fileuploader/FileUploader';
 export * from './components/floating';

@@ -21,7 +21,9 @@
       "@nofinite/nuicss": ["./packages/nuicss/src/plugin/index.ts"],
       "@nofinite/nui": ["./packages/nui/src/index.ts"],
       "@nofinite/utils": ["./packages/utils/src/index.ts"],
-      "@nofinite/locale": ["./packages/locale/src/index.ts"]
+      "@nofinite/locale": ["./packages/locale/src/index.ts"],
+      "@nofinite/markon": ["./packages/markon/src/index.ts"],
+      "@nofinite/markon/react": ["./packages/markon/src/react/index.ts"]
     }
   }
 }
