@@ -45,7 +45,12 @@ All packages (`@nofinite/nui`, `@nofinite/nuicss`, `nofinite`, `@nofinite/utils`
   - **`patch`**: Strictly for backward-compatible bug fixes, minor layout refinements, and documentation corrections.
   - **`minor`**: For backward-compatible new features, new components, engine upgrades, or new public APIs.
   - **`major`**: For breaking changes, deprecations, or major architectural migrations.
-- **Write High-Quality Release Notes in Changesets:** The text inside the `.changeset/*.md` file is automatically consumed by GitHub Actions to generate the official GitHub Release and package `CHANGELOG.md`. Always structure it with clear headers, bullet points, and code snippets.
+- **Audited Changelogs & Zero-Fluff Release Notes:**
+  - All changelogs, changeset descriptions, and release commit messages must be produced through an explicit code audit (`git diff`) comparing proposed changes against the previous published baseline.
+  - Explicitly document concrete before-and-after differences (what changed, what was added/fixed/refactored).
+  - Language must remain strictly professional, technical, and understandable.
+  - Strictly avoid marketing fluff and emojis (no 🚀, ✨, 🔥, 🎉, 📦, etc.) in official changelogs, commit notes, and release summaries.
+- **Write High-Quality Release Notes in Changesets:** The text inside the `.changeset/*.md` file is automatically consumed by GitHub Actions to generate the official GitHub Release and package `CHANGELOG.md`. Always structure it with clear headers, technical bullet points, and code snippets where relevant. Avoid filler words.
 
 ---
 
