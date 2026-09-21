@@ -36,10 +36,10 @@ const CardRoot = React.forwardRef<HTMLDivElement, CardProps>(
       <Comp
         ref={ref}
         className={cn(
-          'card flex flex-col p-5 bg-surface text-default border border-default rounded-lg font-sans shadow-sm transition-all duration-200 ease-in-out',
+          'card',
           hover && 'hover:shadow-md',
           clickable &&
-            'cursor-pointer select-none hover:border-default active:scale-[0.98] focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
+            'cursor-pointer select-none active:scale-[0.98] focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
           className
         )}
         // Assign button role if clickable for screen readers
@@ -75,23 +75,31 @@ const Header = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('mb-3 font-bold text-lg leading-tight', className)}
-    {...props}
-  />
+  <div ref={ref} className={cn('card-header', className)} {...props} />
 ));
 Header.displayName = 'Card.Header';
+
+const Title = React.forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3 ref={ref} className={cn('card-title', className)} {...props} />
+));
+Title.displayName = 'Card.Title';
+
+const Description = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p ref={ref} className={cn('card-description', className)} {...props} />
+));
+Description.displayName = 'Card.Description';
 
 const Body = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('text-sm text-muted leading-relaxed flex-grow', className)}
-    {...props}
-  />
+  <div ref={ref} className={cn('card-body', className)} {...props} />
 ));
 Body.displayName = 'Card.Body';
 
@@ -99,11 +107,7 @@ const Footer = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('mt-5 flex items-center gap-3', className)}
-    {...props}
-  />
+  <div ref={ref} className={cn('card-footer', className)} {...props} />
 ));
 Footer.displayName = 'Card.Footer';
 
@@ -111,14 +115,7 @@ const Divider = React.forwardRef<
   HTMLHRElement,
   React.HTMLAttributes<HTMLHRElement>
 >(({ className, ...props }, ref) => (
-  <hr
-    ref={ref}
-    className={cn(
-      'border-0 border-t border-default opacity-25 my-4 -mx-5',
-      className
-    )}
-    {...props}
-  />
+  <hr ref={ref} className={cn('divider my-4 -mx-6', className)} {...props} />
 ));
 Divider.displayName = 'Card.Divider';
 
@@ -128,6 +125,8 @@ Divider.displayName = 'Card.Divider';
  */
 export const Card = Object.assign(CardRoot, {
   Header,
+  Title,
+  Description,
   Body,
   Footer,
   Divider,

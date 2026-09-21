@@ -154,7 +154,7 @@ export function Modal({
             <motion.div
               ref={dialogRef}
               className={cn(
-                'relative z-[9999] w-[calc(100%-2rem)] max-w-[500px] max-h-[90vh] m-4 flex flex-col bg-surface backdrop-blur-md text-default font-sans border border-default rounded-lg shadow-2xl outline-none will-change-[transform,opacity]',
+                'modal-box relative z-[9999] w-[calc(100%-2rem)] max-w-[500px] outline-none will-change-[transform,opacity] p-0 overflow-hidden',
                 className
               )}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -174,20 +174,13 @@ export function Modal({
                   {title && (
                     <h2
                       id={titleId}
-                      className={cn(
-                        'text-lg font-semibold tracking-tight leading-tight m-0'
-                      )}
+                      className={cn('modal-title tracking-tight')}
                     >
                       {title}
                     </h2>
                   )}
                   {description && (
-                    <p
-                      id={descId}
-                      className={cn(
-                        'mt-2 text-muted text-sm leading-relaxed mb-0'
-                      )}
-                    >
+                    <p id={descId} className={cn('modal-description')}>
                       {description}
                     </p>
                   )}
@@ -196,7 +189,7 @@ export function Modal({
 
               <div
                 className={cn(
-                  'px-5 pb-5 overflow-y-auto',
+                  'modal-body px-5 pb-5 overflow-y-auto py-0',
                   !(title || description) && 'pt-5'
                 )}
               >
@@ -209,7 +202,7 @@ export function Modal({
                   type="button"
                   aria-label="Close dialog"
                   className={cn(
-                    'absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-transparent border-none rounded text-muted cursor-pointer transition-all duration-200 hover:bg-subtle hover:text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] p-0'
+                    'modal-close absolute top-3 right-3 w-8 h-8 rounded border-none bg-transparent p-0'
                   )}
                   onClick={handleClose}
                 >
