@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { VideoPlayer } from './VideoPlayer';
 
 const meta: Meta<typeof VideoPlayer> = {
-  title: 'Components/VideoPlayer',
+  title: 'Media/VideoPlayer',
   component: VideoPlayer,
   parameters: {
     layout: 'padded',
@@ -22,7 +22,7 @@ export const YouTube: Story = {
     <div className="w-full max-w-3xl mx-auto">
       <VideoPlayer {...args} />
     </div>
-  )
+  ),
 };
 
 export const Vimeo: Story = {
@@ -33,5 +33,5 @@ export const Vimeo: Story = {
     <div className="w-full max-w-3xl mx-auto">
       <VideoPlayer {...args} />
     </div>
-  )
+  ),
 };

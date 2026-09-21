@@ -1,0 +1,305 @@
+# NUICSS (@nofinite/nuicss) - Full AI Context & Superclasses Reference
+
+Semantic CSS utility framework, runtime-less design token engine, production-ready component superclasses, and modern OKLCH color system built directly on top of UnoCSS.
+
+---
+
+## Core Architecture & Engine
+- **Engine**: UnoCSS instant atomic CSS compiler (<1ms generation).
+- **Directives**:
+  - `@nuicss;` in CSS expands to preflights, OKLCH design tokens, shortcuts, and utility rules.
+  - `@apply` in stylesheets for inlining atomic classes into custom components.
+- **Packaging & Delivery Modes**:
+  - **Build-Time Compiler**: PostCSS plugin (`@nofinite/nuicss/postcss`) or Vite plugin (`nuicssVitePlugin`).
+  - **Zero-Config Next.js & Turbopack**: `withNuicss(nextConfig)` via `@nofinite/nuicss/next` with automatic Turbopack alias resolution (`experimental.turbo.resolveAlias`).
+  - **SSR Critical CSS Engine**: `extractCriticalNuicss(html)`, `extractCriticalCssForTokens(tokens)`, and in-memory LRU cache (`tokenCssCache`) via `@nofinite/nuicss/ssr` (<0.05ms latency, eliminates FOUC).
+  - **Modular Static CSS Bundles (LightningCSS)**:
+    - `dist/styles.min.css`: Complete bundle (all components + base + utilities).
+    - `dist/components.min.css`: All superclasses.
+    - `dist/primitives.min.css`: Buttons, Cards, Badges, Tables, Avatars.
+    - `dist/forms.min.css`: Inputs, Textareas, Switches, Checkboxes, Selects.
+    - `dist/overlays.min.css`: Modals, Drawers, Popovers, Tooltips, Context Menus.
+    - `dist/widgets.min.css`: Metric Cards, Sparklines, Progress Rings, Tabs, Accordions.
+    - `dist/media.min.css`: Carousels, Dropzones, Video Players.
+  - **Drop-In Tailwind CDN Replacement**: `dist/index.global.js` (UnoCSS runtime + preset-wind4 + NUICSS engine) with full `window.tailwind` config ingestion and reactive configuration.
+- **Layers**: Resets live in `@layer base`, component superclasses live in `@layer components`, and atomic utilities live in `@layer utilities`. DOM shielded with `data-nuicss-layer`.
+
+---
+
+## Theming & Design Tokens
+
+### OKLCH Wide-Gamut (P3) Color System with Dual Fallbacks
+All primitive neutrals and brand scales feature dual declarations: legacy sRGB hex fallbacks followed immediately by exact OKLCH values. Supports Display-P3 wide color gamut enhancements for maximum saturation on modern displays:
+- `@supports (color: color(display-p3 1 1 1)) { ... }`
+
+### Semantic Backgrounds
+- `bg-page`: Main background canvas (`--bg-page`)
+- `bg-canvas`: Viewport / app canvas background (`--bg-canvas`)
+- `bg-surface`: Card and container background (`--bg-surface`)
+- `bg-surface-raised`: Elevated card background (`--bg-surface-raised`)
+- `bg-surface-overlay`: Modal and overlay container background (`--bg-surface-overlay`)
+- `bg-subtle`: Subtle secondary surface (`--bg-subtle`)
+- `bg-muted`: Muted background fill (`--bg-muted`)
+- `bg-accent`: Accent highlight background (`--bg-accent`)
+- `bg-card`: Explicit card surface background (`--bg-card`)
+- `bg-glass`: Translucent backdrop surface (`--glass-bg`)
+- `bg-overlay`: Modal backdrop dimming (`--bg-overlay`)
+
+### Semantic Foreground / Text
+- `text-default`: Primary body text (`--fg-default`)
+- `text-subtle`: Secondary descriptive text (`--fg-subtle`)
+- `text-muted`: Muted labels and placeholder text (`--fg-muted`)
+- `text-accent`: Accent text color (`--fg-accent`)
+- `text-inverse`: Contrast text on dark/inverted surfaces (`--fg-inverse`)
+- `text-disabled`: Disabled text (`--fg-disabled`)
+- `text-card`: Card foreground text (`--fg-card`)
+
+### Action & Feedback Colors
+- `primary`: Brand primary action color (`--color-primary`, `--color-primary-hover`, `--color-primary-active`, `--color-primary-fg`, `--color-primary-subtle`)
+- `secondary`: Secondary action color (`--color-secondary`, `--color-secondary-hover`, `--color-secondary-active`, `--color-secondary-fg`, `--color-secondary-subtle`)
+- `danger`: Error and destructive actions (`--color-danger`, `--color-danger-hover`, `--color-danger-fg`, `--color-danger-subtle`)
+- `success`: Positive confirmation and status (`--color-success`, `--color-success-hover`, `--color-success-fg`, `--color-success-subtle`)
+- `warning`: Cautionary alerts (`--color-warning`, `--color-warning-hover`, `--color-warning-fg`, `--color-warning-subtle`)
+- `info`: Informational messages (`--color-info`, `--color-info-hover`, `--color-info-fg`, `--color-info-subtle`)
+
+### Semantic Borders
+- `border-default`: Standard container border (`--border-default`)
+- `border-subtle`: Low contrast divider border (`--border-subtle`)
+- `border-strong`: High contrast card / element border (`--border-strong`)
+- `border-hover`: Border hover state (`--border-hover`)
+- `border-focus`: Form element focus border (`--border-focus`)
+- `border-disabled`: Disabled element border (`--border-disabled`)
+- `border-glass`: Glassmorphism translucent border (`--glass-border`)
+- Supports directional prefixes: `border-t-default`, `border-b-subtle`, `border-x-strong`, `border-y-default`
+
+### Native Opacity Modifier Support
+All semantic background, text, and border utilities support opacity modifiers:
+- `bg-surface/80`, `bg-subtle/50`, `bg-primary/20`
+- `text-default/90`, `text-subtle/70`
+- `border-default/50`, `border-x-strong/60`
+
+### Fluid Typography Scale (`clamp()`)
+Smooth viewport-responsive typography scaling automatically from 375px to 1440px:
+- `text-fluid-xs`, `text-fluid-sm`, `text-fluid-base`, `text-fluid-lg`, `text-fluid-xl`, `text-fluid-2xl`, `text-fluid-3xl`, `text-fluid-4xl`, `text-fluid-5xl`, `text-fluid-hero`
+
+### Fluid Spacing Scale (`clamp()`)
+- `p-fluid-xs`, `p-fluid-sm`, `p-fluid-md`, `p-fluid-lg`, `p-fluid-xl`
+- `px-fluid-*`, `py-fluid-*`, `gap-fluid-*`
+
+### Container Queries (`@container`)
+- `cq`: Marks element as a container (`container-type: inline-size`)
+- `cq-normal`: Resets container type to normal
+- Responsive shortcuts:
+  - `card-responsive`: `@container flex flex-col @sm:flex-row @sm:items-center`
+  - `stat-card-responsive`: `@container flex flex-col justify-between p-5 rounded-xl border border-default bg-surface shadow-sm @sm:flex-row @sm:items-center`
+
+### Physics-Based Cubic-Bezier Easings & Micro-Interactions
+- Tokens:
+  - `--ease-spring`: `cubic-bezier(0.175, 0.885, 0.32, 1.275)`
+  - `--ease-bounce`: `cubic-bezier(0.34, 1.56, 0.64, 1)`
+  - `--ease-smooth`: `cubic-bezier(0.4, 0, 0.2, 1)`
+  - `--ease-out-expo`: `cubic-bezier(0.16, 1, 0.3, 1)`
+- Utilities: `ease-spring`, `ease-bounce`, `ease-smooth`, `ease-out-expo`
+- Micro-interaction Superclasses:
+  - `press-scale`: `active:scale-[0.97] transition-transform duration-150 ease-spring select-none`
+  - `hover-lift`: `hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-smooth`
+  - `focus-ring`: `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-canvas)]`
+  - `glow-brand`: `shadow-[0_0_20px_var(--color-primary-subtle)]`
+  - `skeleton-shimmer`: Shimmering gradient loading animation
+
+### Accessibility (WCAG AAA, High-Contrast & Reduced Motion)
+- **Declarative ARIA State Bindings**:
+  - `btn`: Automatically binds `aria-busy="true"` (`opacity-70 cursor-wait`) and `aria-disabled="true"` (`opacity-50 cursor-not-allowed pointer-events-none`).
+  - `dropdown-item`, `context-menu-item`: Automatically bind `aria-disabled="true"`.
+  - `modal`, `dialog`, `drawer`, `popover`, `tooltip`: Automatically bind `aria-hidden="true"` (`display: none`).
+  - `checkbox`, `radio`: Automatically bind `aria-checked="true"`.
+- **WCAG AAA Guideline 2.3.3**: `@media (prefers-reduced-motion: reduce)` zeroes all transition and animation durations across all elements.
+- **High-Contrast**: `@media (prefers-contrast: more)` automatically boosts border contrast and elevates focus ring widths.
+
+---
+
+## Complete Component Superclasses Dictionary
+
+All superclasses support dual naming: concise syntax (e.g. `btn`, `card`) and namespace-isolated syntax (e.g. `nui-btn`, `nui-card`).
+
+### 1. Primitives
+
+#### Button (`btn`)
+Interactive button with keyboard navigation rings and micro-scaling.
+- Base: `btn` / `nui-btn`
+- Variants:
+  - `btn-default`: Standard border and surface fill
+  - `btn-primary`: Brand primary filled button
+  - `btn-secondary`: Neutral slate filled button
+  - `btn-outline`: Transparent background with border-strong
+  - `btn-ghost`: Borderless button with hover state
+  - `btn-danger`: Error / destructive action
+  - `btn-link`: Inline text hyperlink style
+- Sizes: `btn-sm`, `btn-md`, `btn-lg`, `btn-icon`
+- States & ARIA: `aria-busy="true"`, `aria-disabled="true"`, `btn-loading`, `press-scale`, `hover-lift`
+
+#### Badge (`badge`)
+Compact status indicator.
+- Base: `badge` / `nui-badge`
+- Variants: `badge-default`, `badge-primary`, `badge-success`, `badge-warning`, `badge-danger`, `badge-info`, `badge-subtle`
+- Sizes: `badge-sm`, `badge-md`, `badge-lg`
+- Modifiers: `badge-pill` (fully rounded), `badge-dot` (bullet dot indicator)
+
+#### Card (`card`)
+Content card container with shadow elevation.
+- Base: `card` / `nui-card`
+- Variants: `card-bordered`
+- Slots: `card-header`, `card-title`, `card-description`, `card-body`, `card-footer`
+- Responsive / Interactive: `card-responsive`, `hover-lift`
+
+#### Table Container (`table-container`)
+Responsive container for data tables with border containment and overflow scrolling.
+- Base: `table-container`
+- Usage: `<div class="table-container"><table>...</table></div>`
+
+#### Avatar (`avatar`)
+User profile image or initials wrapper.
+- Base: `avatar` / `nui-avatar`
+- Sizes: `avatar-sm`, `avatar-md`, `avatar-lg`, `avatar-xl`
+- Shapes: `avatar-circle`, `avatar-square`
+- Media: `avatar-image`
+- Status indicators: `avatar-online`, `avatar-busy`, `avatar-away`
+- Group: `avatar-group` (overlapping avatar stack)
+
+#### Divider (`divider`)
+Separators for layouts and lists.
+- `divider`: Horizontal border divider
+- `divider-text`: Horizontal divider with centered label text
+- `divider-vertical`: Vertical inline separator bar
+
+#### Kbd (`kbd`)
+Keyboard shortcut badge.
+- Base: `kbd` / `nui-kbd`
+- Sizes: `kbd-sm`, `kbd-md`, `kbd-lg`
+
+#### Skeleton (`skeleton`)
+Loading placeholder animation.
+- Base: `skeleton` / `nui-skeleton`
+- Shapes: `skeleton-text`, `skeleton-circle`, `skeleton-rect`
+- Micro-interaction: `skeleton-shimmer` (gradient animated shimmer)
+
+#### Spinner (`spinner`)
+Circular indeterminate loading animation.
+- Base: `spinner` / `nui-spinner`
+- Sizes: `spinner-sm`, `spinner-md`, `spinner-lg`
+- Color: `spinner-primary`
+
+#### Empty State (`empty-state`)
+Zero-data placeholder layout.
+- Slots: `empty-state-icon`, `empty-state-title`, `empty-state-description`, `empty-state-actions`
+
+#### Stat Card & Metrics (`stat-card`, `metric-card`)
+- Base: `stat-card`, `stat-card-responsive`, `metric-card`
+- Slots: `stat-card-label`, `stat-card-value`, `stat-card-trend`, `stat-card-trend-up`, `stat-card-trend-down`
+- Metrics: `metric-label`, `metric-value`, `metric-trend-up`, `metric-trend-down`
+
+#### Pure CSS Charts & Data Visualizations
+Zero-JS CSS charts that render instantly in HTML:
+- Horizontal Bar: `chart-bar-horizontal`
+  - Fills: `chart-bar-fill`, `chart-bar-fill-success`, `chart-bar-fill-danger`, `chart-bar-fill-warning`
+- Vertical Group: `chart-bar-vertical-group`, `chart-bar-vertical`
+- Sparklines: `sparkline-container`, `sparkline-bar`, `sparkline`
+- Progress Rings: `progress-ring-container`
+- Chart Canvas: `chart-container`, `chart-grid`, `chart-axes`
+
+---
+
+### 2. Forms & Feedback
+
+#### Input (`input`)
+- Base: `input`
+- Sizes: `input-sm`, `input-md`, `input-lg`
+- ARIA State: Native `aria-invalid="true"` styles error border and focus ring automatically!
+- Variants: `input-error`
+- Group: `input-group`, `input-addon-left`, `input-addon-right`, `input-has-addon-left`, `input-has-addon-right`
+
+#### Textarea (`textarea`)
+- Base: `textarea`
+- ARIA State: Native `aria-invalid="true"`
+- Variants: `textarea-error`
+
+#### Checkbox & Radio
+- Checkbox: `checkbox`, `checkbox-sm`, `checkbox-md`, `checkbox-lg`, `checkbox-label`
+- Radio: `radio`, `radio-sm`, `radio-md`, `radio-lg`, `radio-label`, `radio-group`
+
+#### Switch (`switch`)
+- Base: `switch` (responds to `aria-checked="true"` or `data-[state=checked]`)
+- Slots: `switch-thumb`, `switch-label`
+
+#### Select (`select`)
+- Base: `select`
+- Sizes: `select-sm`, `select-lg`
+- ARIA State: Native `aria-invalid="true"`
+
+---
+
+### 3. Overlays & Dialogs
+
+#### Modal & Dialog (`modal`, `dialog`)
+- Base: `modal`
+- Slots: `modal-backdrop`, `modal-content`, `modal-header`, `modal-title`, `modal-description`, `modal-body`, `modal-footer`, `modal-close`
+
+#### Drawer (`drawer`)
+- Positions: `drawer-left`, `drawer-right`, `drawer-top`, `drawer-bottom`
+- Slots: `drawer-backdrop`, `drawer-content`, `drawer-header`, `drawer-body`, `drawer-footer`
+
+#### Popover & Dropdown
+- Popover: `popover`, `popover-content`, `popover-arrow`
+- Dropdown: `dropdown`, `dropdown-menu`, `dropdown-item`, `dropdown-separator`, `dropdown-header`
+- Context Menu: `context-menu`, `context-menu-content`, `context-menu-item`
+
+#### Tooltip & HoverCard
+- Tooltip: `tooltip`, `tooltip-content`, `tooltip-top`, `tooltip-bottom`, `tooltip-left`, `tooltip-right`
+- HoverCard: `hover-card`, `hover-card-content`
+
+---
+
+### 4. Interactive Widgets
+
+#### Tabs (`tabs`)
+- Base: `tabs`
+- Slots: `tab-list`, `tab-list-pills`, `tab`, `tab-pill`, `tab-panel`
+- ARIA State: Responds automatically to `aria-selected="true"` or `data-[state=active]`!
+
+#### Accordion & Collapsible
+- Accordion: `accordion`, `accordion-item`, `accordion-header`, `accordion-icon`, `accordion-content`, `accordion-body`
+  - ARIA State: `accordion-icon` rotates automatically when `aria-expanded="true"`!
+- Collapsible: `collapsible`, `collapsible-trigger`, `collapsible-content`, `collapsible-body`
+
+#### Stepper (`stepper`)
+- Base: `stepper`
+- Elements: `step`, `step-indicator`, `step-content`, `step-title`, `step-description`, `step-connector`
+
+#### DataGrid & Kanban
+- DataGrid: `datagrid`, `datagrid-row`, `datagrid-pagination`
+- Kanban: `kanban-board`, `kanban-column`, `kanban-card`
+
+#### Metric Cards, Sparklines & Data Visualizations
+Pure CSS zero-JS data visualization superclasses:
+- Metric Cards: `metric-card`, `metric-label`, `metric-value`, `metric-trend-up`, `metric-trend-down`
+- Trend Badges: `metric-badge`, `metric-badge-success`, `metric-badge-danger`
+- Sparklines: `sparkline-container`, `sparkline-bar`, `sparkline-bar-success`, `sparkline-bar-danger`
+- Circular Progress: `progress-ring-container`, `progress-ring`
+- Horizontal Bars: `chart-bar-horizontal`, `chart-bar-fill`, `chart-bar-fill-success`, `chart-bar-fill-danger`, `chart-bar-fill-warning`
+
+---
+
+## Migration Tools
+
+### Automated CLI Codemod
+Refactor legacy Tailwind / utility clusters to clean NUICSS superclasses:
+```bash
+npx @nofinite/nuicss migrate
+npx @nofinite/nuicss migrate --dry-run
+```
+
+### Programmatic API
+```ts
+import { migrateMarkupToNuicss } from '@nofinite/nuicss/migrate';
+const { result, replacementsCount } = migrateMarkupToNuicss(htmlCode);
+```

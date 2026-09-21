@@ -1,44 +1,197 @@
 import type { NuicssConfig } from './config';
-import { presetUno, presetWind } from 'unocss';
+import * as presetWind4Module from '@unocss/preset-wind4';
+import processorLightningCSSRaw from '@unocss/processor-lightningcss';
+import { componentShortcuts } from '../shortcuts';
+
+const resolveFunction = (mod: any, fallbackKey?: string) => {
+  if (typeof mod === 'function') return mod;
+  if (fallbackKey && typeof mod?.[fallbackKey] === 'function')
+    return mod[fallbackKey];
+  if (typeof mod?.default === 'function') return mod.default;
+  return mod;
+};
+
+const getPresetWind4 = resolveFunction(presetWind4Module, 'presetWind4');
+const getProcessorLightningCSS = resolveFunction(processorLightningCSSRaw);
+
+const borderDirectionMap: Record<string, string[]> = {
+  't-': ['border-top-color'],
+  'b-': ['border-bottom-color'],
+  'l-': ['border-left-color'],
+  'r-': ['border-right-color'],
+  'x-': ['border-left-color', 'border-right-color'],
+  'y-': ['border-top-color', 'border-bottom-color'],
+  '': ['border-color'],
+};
+
+const protectedShortcutPrefixes = [
+  'empty-state',
+  'link-muted',
+  'link-hover',
+  'hover-card',
+  'link-preview',
+  'file-list',
+  'file-item',
+];
 
 export function nuicssPreset(): NuicssConfig {
+  const wind = getPresetWind4();
+  for (const v of (wind as any).variants || []) {
+    if (v && (v as any).name === 'pseudo') {
+      const origMatch = (v as any).match;
+      (v as any).match = (matcher: string, ctx: any) => {
+        for (const prefix of protectedShortcutPrefixes) {
+          if (matcher.startsWith(prefix)) return undefined;
+        }
+        return origMatch(matcher, ctx);
+      };
+    }
+  }
+
   return {
-    presets: [
-      presetUno(),
-      presetWind(),
+    presets: [wind],
+    processors: [getProcessorLightningCSS()],
+    rules: [
+      // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card, bg-selected)
+      [
+        /^bg-(page|canvas|surface|surface-raised|surface-overlay|subtle|muted|accent|overlay|glass|inset|card|selected|selected-hover)(?:\/(\d+))?$/,
+        ([, name, opacity]) => {
+          const varName =
+            name === 'glass'
+              ? '--glass-bg'
+              : name === 'accent'
+              ? '--bg-accent'
+              : `--bg-${name}`;
+          const val = opacity
+            ? `color-mix(in oklch, var(${varName}) ${opacity}%, transparent)`
+            : `var(${varName})`;
+          return { 'background-color': val };
+        },
+      ],
+      // Semantic text foreground tokens with native opacity modifier support (e.g. text-default, text-subtle/70)
+      [
+        /^text-(default|subtle|muted|accent|inverse|disabled|card)(?:\/(\d+))?$/,
+        ([, name, opacity]) => {
+          const varName = `--fg-${name}`;
+          const val = opacity
+            ? `color-mix(in oklch, var(${varName}) ${opacity}%, transparent)`
+            : `var(${varName})`;
+          return { color: val };
+        },
+      ],
+      // Semantic border tokens with directional & opacity modifier support (e.g. border-default, border-t-subtle, border-x-strong/60)
+      [
+        /^border-([trblxy]-)?(default|subtle|strong|hover|focus|disabled|glass|glassBorder)(?:\/(\d+))?$/,
+        ([, dir = '', name, opacity]) => {
+          const props = borderDirectionMap[dir] || ['border-color'];
+          const varName =
+            name === 'glass' || name === 'glassBorder'
+              ? '--glass-border'
+              : `--border-${name}`;
+          const val = opacity
+            ? `color-mix(in oklch, var(${varName}) ${opacity}%, transparent)`
+            : `var(${varName})`;
+          const res: Record<string, string> = {};
+          for (const p of props) {
+            res[p] = val;
+          }
+          return res;
+        },
+      ],
+      // Fluid Typography (clamp scaling from 375px to 1440px)
+      [
+        /^text-fluid-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|hero)$/,
+        ([, size]) => ({ 'font-size': `var(--text-fluid-${size})` }),
+      ],
+      // Fluid Spacing Scale (clamp scaling from 375px to 1440px)
+      [
+        /^p-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({ padding: `var(--space-fluid-${size})` }),
+      ],
+      [
+        /^px-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({
+          'padding-left': `var(--space-fluid-${size})`,
+          'padding-right': `var(--space-fluid-${size})`,
+        }),
+      ],
+      [
+        /^py-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({
+          'padding-top': `var(--space-fluid-${size})`,
+          'padding-bottom': `var(--space-fluid-${size})`,
+        }),
+      ],
+      [
+        /^gap-fluid-(xs|sm|md|lg|xl)$/,
+        ([, size]) => ({ gap: `var(--space-fluid-${size})` }),
+      ],
+      // Container Query Rules
+      [/^cq$/, () => ({ 'container-type': 'inline-size' })],
+      [/^cq-normal$/, () => ({ 'container-type': 'normal' })],
+      // Physics-based Spring and Easing Utilities
+      [
+        /^ease-(spring|bounce|smooth|out-expo)$/,
+        ([, name]) => ({ 'transition-timing-function': `var(--ease-${name})` }),
+      ],
+      // Semantic SVG fill tokens
+      [
+        /^fill-(muted|default|subtle|accent|primary|danger|success|warning|info)$/,
+        ([, name]) => {
+          const varName =
+            name === 'muted' || name === 'default' || name === 'subtle'
+              ? `--fg-${name}`
+              : `--color-${name}`;
+          return { fill: `var(${varName})` };
+        },
+      ],
+      // Semantic SVG stroke tokens
+      [
+        /^stroke-(default|subtle|strong|muted)$/,
+        ([, name]) => {
+          const varName = name === 'muted' ? '--fg-muted' : `--border-${name}`;
+          return { stroke: `var(${varName})` };
+        },
+      ],
     ],
-    shortcuts: {
-      'bg-page': 'bg-[color:var(--bg-page)]',
-      'bg-surface': 'bg-[color:var(--bg-surface)]',
-      'bg-surface-raised': 'bg-[color:var(--bg-surface-raised)]',
-      'bg-surface-overlay': 'bg-[color:var(--bg-surface-overlay)]',
-      'bg-subtle': 'bg-[color:var(--bg-subtle)]',
-      'bg-muted': 'bg-[color:var(--bg-muted)]',
-      'bg-accent': 'bg-[color:var(--bg-accent)]',
-      'bg-overlay': 'bg-[color:var(--bg-overlay)]',
-      'bg-glass': 'bg-[color:var(--glass-bg)]',
-      'text-default': 'text-[color:var(--fg-default)]',
-      'text-subtle': 'text-[color:var(--fg-subtle)]',
-      'text-muted': 'text-[color:var(--fg-muted)]',
-      'text-accent': 'text-[color:var(--fg-accent)]',
-      'text-inverse': 'text-[color:var(--fg-inverse)]',
-      'text-disabled': 'text-[color:var(--fg-disabled)]',
-      'border-default': '[border-color:var(--border-default)]',
-      'border-strong': '[border-color:var(--border-strong)]',
-      'border-subtle': '[border-color:var(--border-subtle)]',
-      'border-hover': '[border-color:var(--border-hover)]',
-      'border-focus': '[border-color:var(--border-focus)]',
-      'border-disabled': '[border-color:var(--border-disabled)]',
-      'border-glassBorder': '[border-color:var(--glass-border)]',
-      'ring-focus': 'ring-[color:var(--focus-ring)]',
-      'ring-offset-surface': 'ring-offset-[color:var(--bg-surface)]',
-      'ring-offset-background': 'ring-offset-[color:var(--bg-page)]',
+    shortcuts: [
+      ...(Array.isArray(componentShortcuts) ? componentShortcuts : []),
+      ['animate-in', 'animate-zoom-in', { layer: 'components' }],
+      ['fade-in', 'animate-fade-in', { layer: 'components' }],
+      ['zoom-in-95', 'animate-zoom-in', { layer: 'components' }],
+      ['ring-focus', 'ring-[color:var(--focus-ring)]', { layer: 'components' }],
+      [
+        'ring-offset-surface',
+        'ring-offset-[color:var(--bg-surface)]',
+        { layer: 'components' },
+      ],
+      [
+        'ring-offset-background',
+        'ring-offset-[color:var(--bg-page)]',
+        { layer: 'components' },
+      ],
+      [
+        'card-responsive',
+        '@container flex flex-col @sm:flex-row @sm:items-center',
+        { layer: 'components' },
+      ],
+      [
+        'stat-card-responsive',
+        '@container flex flex-col justify-between p-5 rounded-xl border border-default bg-surface shadow-sm @sm:flex-row @sm:items-center',
+        { layer: 'components' },
+      ],
+    ],
+    layers: {
+      components: 10,
+      default: 20,
+      utilities: 30,
     },
     content: {
       pipeline: {
         include: [
           /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
           'src/**/*.{js,ts,jsx,tsx}',
+          '**/node_modules/@nofinite/nui/**/*.{js,mjs,cjs,jsx,tsx}',
         ],
       },
     },
@@ -49,43 +202,40 @@ export function nuicssPreset(): NuicssConfig {
         'primary-active': 'var(--color-primary-active)',
         'primary-fg': 'var(--color-primary-fg)',
         'primary-subtle': 'var(--color-primary-subtle)',
+        secondary: 'var(--color-secondary)',
+        'secondary-hover': 'var(--color-secondary-hover)',
+        'secondary-active': 'var(--color-secondary-active)',
+        'secondary-fg': 'var(--color-secondary-fg)',
+        'secondary-subtle': 'var(--color-secondary-subtle)',
         danger: 'var(--color-danger)',
-        'danger-subtle': 'var(--color-danger-subtle)',
+        'danger-hover': 'var(--color-danger-hover)',
+        'danger-active': 'var(--color-danger-active)',
         'danger-fg': 'var(--color-danger-fg)',
+        'danger-subtle': 'var(--color-danger-subtle)',
         success: 'var(--color-success)',
-        'success-subtle': 'var(--color-success-subtle)',
+        'success-hover': 'var(--color-success-hover)',
+        'success-active': 'var(--color-success-active)',
         'success-fg': 'var(--color-success-fg)',
+        'success-subtle': 'var(--color-success-subtle)',
         warning: 'var(--color-warning)',
-        'warning-subtle': 'var(--color-warning-subtle)',
+        'warning-hover': 'var(--color-warning-hover)',
+        'warning-active': 'var(--color-warning-active)',
         'warning-fg': 'var(--color-warning-fg)',
+        'warning-subtle': 'var(--color-warning-subtle)',
         info: 'var(--color-info)',
-        'info-subtle': 'var(--color-info-subtle)',
+        'info-hover': 'var(--color-info-hover)',
+        'info-active': 'var(--color-info-active)',
         'info-fg': 'var(--color-info-fg)',
+        'info-subtle': 'var(--color-info-subtle)',
         accent: 'var(--bg-accent)',
         'accent-fg': 'var(--fg-accent)',
+        canvas: 'var(--bg-canvas)',
+        surface: 'var(--bg-surface)',
+        card: 'var(--bg-card)',
+        overlay: 'var(--bg-overlay)',
       },
       spacing: {
-        0: 'var(--space-0)',
-        0.5: 'var(--space-0-5)',
-        1: 'var(--space-1)',
-        1.5: 'var(--space-1-5)',
-        2: 'var(--space-2)',
-        2.5: 'var(--space-2-5)',
-        3: 'var(--space-3)',
-        4: 'var(--space-4)',
-        5: 'var(--space-5)',
-        6: 'var(--space-6)',
-        8: 'var(--space-8)',
-        10: 'var(--space-10)',
-        12: 'var(--space-12)',
-        14: 'var(--space-14)',
-        16: 'var(--space-16)',
-        20: 'var(--space-20)',
-        24: 'var(--space-24)',
-        32: 'var(--space-32)',
-        40: 'var(--space-40)',
-        48: 'var(--space-48)',
-        64: 'var(--space-64)',
+        DEFAULT: 'var(--spacing, 0.25rem)',
       },
       borderRadius: {
         none: 'var(--radius-none)',
@@ -97,9 +247,25 @@ export function nuicssPreset(): NuicssConfig {
         '2xl': 'var(--radius-2xl)',
         '3xl': 'var(--radius-3xl)',
         full: 'var(--radius-full)',
+        control: 'var(--radius-control)',
+        container: 'var(--radius-container)',
+      },
+      radius: {
+        none: 'var(--radius-none)',
+        sm: 'var(--radius-sm)',
+        DEFAULT: 'var(--radius-md)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        '2xl': 'var(--radius-2xl)',
+        '3xl': 'var(--radius-3xl)',
+        full: 'var(--radius-full)',
+        control: 'var(--radius-control)',
+        container: 'var(--radius-container)',
       },
       boxShadow: {
         none: 'var(--shadow-none)',
+        xs: 'var(--shadow-xs)',
         sm: 'var(--shadow-sm)',
         DEFAULT: 'var(--shadow-md)',
         md: 'var(--shadow-md)',
@@ -107,22 +273,49 @@ export function nuicssPreset(): NuicssConfig {
         xl: 'var(--shadow-xl)',
         '2xl': 'var(--shadow-2xl)',
         inner: 'var(--shadow-inner)',
+        popover: 'var(--shadow-popover)',
+      },
+      shadow: {
+        none: 'var(--shadow-none)',
+        xs: 'var(--shadow-xs)',
+        sm: 'var(--shadow-sm)',
+        DEFAULT: 'var(--shadow-md)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        xl: 'var(--shadow-xl)',
+        '2xl': 'var(--shadow-2xl)',
+        inner: 'var(--shadow-inner)',
+        popover: 'var(--shadow-popover)',
       },
       fontFamily: {
-        sans: 'var(--font-sans)',
-        serif: 'var(--font-serif)',
-        mono: 'var(--font-mono)',
+        sans: 'var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif)',
+        serif:
+          'var(--font-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif)',
+        mono: 'var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace)',
+      },
+      font: {
+        sans: 'var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif)',
+        serif:
+          'var(--font-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif)',
+        mono: 'var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace)',
       },
       animation: {
         keyframes: {
           'fade-in': '{ from { opacity: 0; } to { opacity: 1; } }',
           'fade-out': '{ from { opacity: 1; } to { opacity: 0; } }',
-          'zoom-in': '{ from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }',
-          'zoom-out': '{ from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }',
-          'slide-in-up': '{ from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }',
-          'slide-in-down': '{ from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }',
-          'slide-out-up': '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }',
-          'slide-out-down': '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }',
+          'zoom-in':
+            '{ from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }',
+          'zoom-out':
+            '{ from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }',
+          'slide-in-up':
+            '{ from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }',
+          'slide-in-down':
+            '{ from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }',
+          'slide-out-up':
+            '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }',
+          'slide-out-down':
+            '{ from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }',
+          shimmer: '{ 100% { transform: translateX(100%); } }',
         },
         durations: {
           'fade-in': '200ms',
@@ -133,6 +326,10 @@ export function nuicssPreset(): NuicssConfig {
           'slide-in-down': '200ms',
           'slide-out-up': '150ms',
           'slide-out-down': '150ms',
+          shimmer: '1.8s',
+        },
+        counts: {
+          shimmer: 'infinite',
         },
         timingFns: {
           'fade-in': 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -143,8 +340,8 @@ export function nuicssPreset(): NuicssConfig {
           'slide-in-down': 'cubic-bezier(0.4, 0, 0.2, 1)',
           'slide-out-up': 'cubic-bezier(0.4, 0, 1, 1)',
           'slide-out-down': 'cubic-bezier(0.4, 0, 1, 1)',
-        }
-      }
-    }
+        },
+      },
+    },
   };
 }

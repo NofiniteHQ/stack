@@ -1,7 +1,14 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect, useId } from 'react';
-import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
+import {
+  useFloating,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+  size,
+} from '@floating-ui/react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '../../utils';
 import { Portal, onClickOutside, restoreFocus } from '../../utils';
@@ -38,7 +45,7 @@ export interface DateRangePickerProps {
   nameFrom?: string;
   nameTo?: string;
   disabled?: boolean;
-  
+
   formatDisplay?: (date: Date) => string;
 }
 
@@ -87,11 +94,15 @@ export function DateRangePicker({
   const { refs, x, y, placement } = useFloating<HTMLElement>({
     open,
     placement: 'bottom-start',
-    whileElementsMounted: (reference, floating, update) => 
+    whileElementsMounted: (reference, floating, update) =>
       autoUpdate(reference, floating, update, { animationFrame: false }),
     middleware: [
       offset(6),
-      flip({ padding: 16, fallbackPlacements: ['top-start', 'bottom', 'top'], fallbackStrategy: 'initialPlacement' }),
+      flip({
+        padding: 16,
+        fallbackPlacements: ['top-start', 'bottom', 'top'],
+        fallbackStrategy: 'initialPlacement',
+      }),
       shift({ padding: 16 }),
       size({
         padding: 16,
@@ -110,11 +121,14 @@ export function DateRangePicker({
   ---------------------------------------------------- */
   useEffect(() => {
     if (!open) return;
-    const cleanup = onClickOutside([{ current: refs.floating.current as HTMLElement | null }, triggerRef], () => {
-      setOpen(false);
-      // Revert draft to saved value when closing without applying
-      setDraft(range);
-    });
+    const cleanup = onClickOutside(
+      [{ current: refs.floating.current as HTMLElement | null }, triggerRef],
+      () => {
+        setOpen(false);
+        // Revert draft to saved value when closing without applying
+        setDraft(range);
+      }
+    );
     return cleanup;
   }, [open, refs.floating, range]);
 
@@ -124,7 +138,22 @@ export function DateRangePicker({
       return;
     }
     const timeoutId = setTimeout(() => {
-      if (calendarRef.current) calendarRef.current.focus();
+      if (calendarRef.current) {
+        const selectedBtn =
+          calendarRef.current.querySelector<HTMLButtonElement>(
+            'button[aria-selected="true"]'
+          );
+        const dayBtn =
+          selectedBtn ||
+          calendarRef.current.querySelector<HTMLButtonElement>(
+            'div[role="grid"] button:not([disabled])'
+          );
+        if (dayBtn) {
+          dayBtn.focus();
+        } else {
+          calendarRef.current.focus();
+        }
+      }
     }, 10);
     return () => clearTimeout(timeoutId);
   }, [open]);
@@ -136,16 +165,20 @@ export function DateRangePicker({
     if (!iso) return null;
     const d = fromISO(iso);
     if (!d) return null;
-    return formatDisplay 
+    return formatDisplay
       ? formatDisplay(d)
-      : new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }).format(d);
+      : new Intl.DateTimeFormat(locale, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }).format(d);
   };
 
   const label = (): string => {
     if (!range.from && !range.to) return placeholder;
     const f = formatLabel(range.from);
     const t = formatLabel(range.to);
-    
+
     if (f && !t) return `${f} → `;
     if (!f && t) return ` → ${t}`;
     return `${f} → ${t}`;
@@ -172,8 +205,10 @@ export function DateRangePicker({
   Render
   ---------------------------------------------------- */
   return (
-    <div className={cn("inline-block font-sans", className)}>
-      {nameFrom && <input type="hidden" name={nameFrom} value={range.from ?? ''} />}
+    <div className={cn('inline-block font-sans', className)}>
+      {nameFrom && (
+        <input type="hidden" name={nameFrom} value={range.from ?? ''} />
+      )}
       {nameTo && <input type="hidden" name={nameTo} value={range.to ?? ''} />}
 
       <button
@@ -185,10 +220,10 @@ export function DateRangePicker({
         type="button"
         disabled={disabled}
         className={cn(
-          "flex items-center justify-between gap-2 w-full sm:w-[280px] px-2.5 py-1.5 bg-surface text-default text-sm border border-solid border-default rounded-md transition-colors duration-200",
-          "hover:border-default hover:bg-subtle",
-          "focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
-          "disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed disabled:border-default"
+          'flex items-center justify-between gap-2 w-full sm:w-[280px] px-2.5 py-1.5 bg-surface text-default text-sm border border-solid border-default rounded-md transition-colors duration-200',
+          'hover:border-default hover:bg-subtle',
+          'focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
+          'disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed disabled:border-default'
         )}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -198,10 +233,23 @@ export function DateRangePicker({
           setOpen((s) => !s);
         }}
       >
-        <span className={cn("truncate", (!range.from && !range.to) && "text-muted")}>
+        <span
+          className={cn('truncate', !range.from && !range.to && 'text-muted')}
+        >
           {label()}
         </span>
-        <svg className="text-muted shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          className="text-muted shrink-0"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
           <line x1="16" y1="2" x2="16" y2="6"></line>
           <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -217,26 +265,32 @@ export function DateRangePicker({
                 initial={{ opacity: 0, y: -4, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.98 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
                 ref={refs.setFloating}
                 className="z-50"
                 style={{
                   position: 'absolute',
                   top: y ?? 0,
                   left: x ?? 0,
-                  transformOrigin: placement.startsWith('top') ? 'bottom left' : 'top left',
+                  transformOrigin: placement.startsWith('top')
+                    ? 'bottom left'
+                    : 'top left',
                 }}
                 id={dialogId}
                 role="dialog"
                 aria-modal="true"
-                aria-label={placeholder || "Date range picker"}
+                aria-label={placeholder || 'Date range picker'}
               >
                 <div className="w-max bg-surface text-default border border-solid border-default rounded-lg shadow-lg overflow-hidden flex flex-col">
                   <Calendar
                     ref={calendarRef}
                     mode="range"
                     value={draft}
-                    onChange={(r) => setDraft(r)}
+                    onChange={(r) => {
+                      setDraft(r);
+                      if (!controlled) setInternal(r);
+                      onChange?.(r);
+                    }}
                     minDate={minDate}
                     maxDate={maxDate}
                     locale={locale}
@@ -244,11 +298,13 @@ export function DateRangePicker({
                     className="border-none shadow-none rounded-none"
                     style={{ outline: 'none' }}
                   />
-                  
+
                   {/* FOOTER */}
                   <div className="flex justify-between items-center px-3 pb-3 bg-surface">
                     <span className="text-xs text-muted truncate max-w-[120px]">
-                      {draft.from && draft.to ? `${draft.from} to ${draft.to}` : ''}
+                      {draft.from && draft.to
+                        ? `${draft.from} to ${draft.to}`
+                        : ''}
                     </span>
                     <div className="flex gap-2">
                       <Button

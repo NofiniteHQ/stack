@@ -4,7 +4,7 @@ import { Watermark } from './Watermark';
 import { Card } from '../card/Card';
 
 const meta: Meta<typeof Watermark> = {
-  title: 'Components/Data Display/Watermark',
+  title: 'Primitives/Watermark',
   component: Watermark,
   parameters: {
     layout: 'centered',
@@ -23,15 +23,15 @@ export const Default: Story = {
   render: (args) => (
     <Watermark {...args}>
       <Card className="w-96 min-h-[300px]">
-        <Card.Header>
-          Top Secret Document
-        </Card.Header>
+        <Card.Header>Top Secret Document</Card.Header>
         <Card.Body>
           <p className="text-muted leading-relaxed">
-            This document contains highly classified information. The watermark overlay ensures any screenshots or prints are traceable and clearly marked as confidential.
+            This document contains highly classified information. The watermark
+            overlay ensures any screenshots or prints are traceable and clearly
+            marked as confidential.
           </p>
         </Card.Body>
       </Card>
     </Watermark>
-  )
+  ),
 };

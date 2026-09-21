@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect, fn } from '@storybook/test';
+import { within, userEvent, expect, fn } from 'storybook/test';
 import { SegmentedControl, SegmentedControlProps } from './SegmentedControl';
 
 const meta: Meta<typeof SegmentedControl> = {
-  title: 'Components/Forms/SegmentedControl',
+  title: 'Forms/SegmentedControl',
   component: SegmentedControl,
   parameters: {
     layout: 'centered',
@@ -37,10 +37,13 @@ const InteractiveWrapper = (args: Partial<SegmentedControlProps>) => {
           setValue(v);
           args.onChange?.(v);
         }}
-        name={args.name || "interactive-story"}
+        name={args.name || 'interactive-story'}
       />
       <div className="text-sm text-muted mt-4">
-        Selected: <strong data-testid="selected-value" className="text-default">{value}</strong>
+        Selected:{' '}
+        <strong data-testid="selected-value" className="text-default">
+          {value}
+        </strong>
       </div>
     </div>
   );
@@ -54,7 +57,7 @@ export const Default: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Check initial state
     const selectedText = canvas.getByTestId('selected-value');
     await expect(selectedText.textContent).toBe('daily');
@@ -68,13 +71,13 @@ export const Default: Story = {
     // Focus active radio button and test keyboard navigation
     const activeRadio = canvas.getByRole('radio', { checked: true });
     await activeRadio.focus();
-    
+
     await userEvent.keyboard('{ArrowRight}');
     await expect(selectedText.textContent).toBe('monthly');
-    
+
     await userEvent.keyboard('{ArrowLeft}');
     await expect(selectedText.textContent).toBe('weekly');
-  }
+  },
 };
 
 export const Sizes: Story = {
@@ -96,7 +99,7 @@ export const FullWidth: Story = {
   args: {
     options: defaultOptions,
     fullWidth: true,
-  }
+  },
 };
 
 export const WithDisabledOptions: Story = {
@@ -107,5 +110,5 @@ export const WithDisabledOptions: Story = {
       { value: 'banana', label: 'Banana', disabled: true },
       { value: 'cherry', label: 'Cherry' },
     ],
-  }
+  },
 };

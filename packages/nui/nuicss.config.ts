@@ -3,12 +3,8 @@ import { defineConfig } from 'unocss';
 import { nuicssPreset } from '../../nuicss/src/plugin/preset';
 
 export default defineConfig({
-  presets: [
-    nuicssPreset(),
-  ],
+  presets: [nuicssPreset()],
   content: {
-    filesystem: [
-      'src/**/*.{js,ts,jsx,tsx}',
-    ],
+    filesystem: ['src/**/*.{js,ts,jsx,tsx}', '.storybook/**/*.{js,ts,jsx,tsx}'],
   },
 });
