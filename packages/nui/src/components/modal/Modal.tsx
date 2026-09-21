@@ -23,6 +23,8 @@ export interface ModalProps
   onClose: () => void;
   title?: React.ReactNode;
   description?: React.ReactNode;
+  /** Custom footer actions (rendered with modal-footer styling and border separation) */
+  footer?: React.ReactNode;
 
   labelledById?: string;
   describedById?: string;
@@ -41,11 +43,12 @@ export interface ModalProps
 /* Component */
 /* -------------------------------------------------------------------------- */
 
-export function Modal({
+function ModalRoot({
   open,
   onClose,
   title,
   description,
+  footer,
   labelledById,
   describedById,
   disableClickOutside = false,
@@ -170,7 +173,11 @@ export function Modal({
               {...(props as any)}
             >
               {(title || description) && (
-                <div className={cn('p-5 pb-3 pr-10')}>
+                <div
+                  className={cn(
+                    'modal-header px-6 pt-6 pb-2 pr-12 block border-none mb-0'
+                  )}
+                >
                   {title && (
                     <h2
                       id={titleId}
@@ -180,7 +187,7 @@ export function Modal({
                     </h2>
                   )}
                   {description && (
-                    <p id={descId} className={cn('modal-description')}>
+                    <p id={descId} className={cn('modal-description mt-1.5')}>
                       {description}
                     </p>
                   )}
@@ -189,12 +196,23 @@ export function Modal({
 
               <div
                 className={cn(
-                  'modal-body px-5 pb-5 overflow-y-auto py-0',
-                  !(title || description) && 'pt-5'
+                  'modal-body px-6 py-4 overflow-y-auto flex-1',
+                  !footer && 'pb-6',
+                  !(title || description) && 'pt-6'
                 )}
               >
                 {children}
               </div>
+
+              {footer && (
+                <div
+                  className={cn(
+                    'modal-footer px-6 py-4 border-t border-default bg-subtle/20 flex items-center justify-end gap-3 mt-0'
+                  )}
+                >
+                  {footer}
+                </div>
+              )}
 
               {/* Conditionally render the close button */}
               {!hideCloseButton && (
@@ -202,7 +220,7 @@ export function Modal({
                   type="button"
                   aria-label="Close dialog"
                   className={cn(
-                    'modal-close absolute top-3 right-3 w-8 h-8 rounded border-none bg-transparent p-0'
+                    'modal-close absolute top-4 right-4 w-8 h-8 rounded-lg border-none bg-transparent p-0 flex items-center justify-center'
                   )}
                   onClick={handleClose}
                 >
@@ -229,3 +247,78 @@ export function Modal({
     </Portal>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Compound Components */
+/* -------------------------------------------------------------------------- */
+
+const Header = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn('modal-header px-6 pt-6 pb-2', className)}
+    {...props}
+  />
+));
+Header.displayName = 'Modal.Header';
+
+const Title = React.forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h2
+    ref={ref}
+    className={cn('modal-title tracking-tight', className)}
+    {...props}
+  />
+));
+Title.displayName = 'Modal.Title';
+
+const Description = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn('modal-description mt-1.5', className)}
+    {...props}
+  />
+));
+Description.displayName = 'Modal.Description';
+
+const Body = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn('modal-body px-6 py-4 overflow-y-auto flex-1', className)}
+    {...props}
+  />
+));
+Body.displayName = 'Modal.Body';
+
+const Footer = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      'modal-footer px-6 py-4 border-t border-default bg-subtle/20 flex items-center justify-end gap-3 mt-0',
+      className
+    )}
+    {...props}
+  />
+));
+Footer.displayName = 'Modal.Footer';
+
+export const Modal = Object.assign(ModalRoot, {
+  Header,
+  Title,
+  Description,
+  Body,
+  Footer,
+});

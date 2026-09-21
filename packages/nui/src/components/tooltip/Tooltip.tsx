@@ -12,6 +12,7 @@ import {
 import { cn } from '../../utils';
 import { Portal } from '../../utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FloatingArrow } from '../floating/FloatingArrow';
 
 /* ============================================================
  * Types
@@ -61,7 +62,7 @@ export function Tooltip({
   const reactId = useId();
   const tooltipId = `tooltip-${reactId}`;
 
-  const arrowRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<SVGSVGElement>(null);
 
   const {
     refs,
@@ -209,27 +210,11 @@ export function Tooltip({
             >
               {label}
 
-              <div
+              <FloatingArrow
                 ref={arrowRef}
-                className="absolute w-2.5 h-2.5 bg-surface border border-default z-[-1] rounded-[1px]"
-                style={{
-                  left:
-                    middlewareData.arrow?.x != null
-                      ? `${middlewareData.arrow.x}px`
-                      : '',
-                  top:
-                    middlewareData.arrow?.y != null
-                      ? `${middlewareData.arrow.y}px`
-                      : '',
-                  [floatingPlacement.startsWith('top')
-                    ? 'bottom'
-                    : floatingPlacement.startsWith('bottom')
-                    ? 'top'
-                    : floatingPlacement.startsWith('left')
-                    ? 'right'
-                    : 'left']: '-5px',
-                  transform: 'rotate(45deg)',
-                }}
+                placement={floatingPlacement}
+                x={middlewareData.arrow?.x}
+                y={middlewareData.arrow?.y}
               />
             </motion.div>
           </Portal>

@@ -29,20 +29,24 @@ function ControlledTemplate(args: Partial<ModalProps>) {
         open={open}
         onClose={() => setOpen(false)}
         initialFocusRef={initialFocusRef}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              ref={initialFocusRef}
+              variant="primary"
+              onClick={() => setOpen(false)}
+            >
+              Confirm Action
+            </Button>
+          </>
+        }
       >
-        <p className="mb-4 mt-0 text-muted">Modal body content goes here.</p>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            ref={initialFocusRef}
-            variant="primary"
-            onClick={() => setOpen(false)}
-          >
-            Confirm Action
-          </Button>
-        </div>
+        <p className="my-0 text-muted leading-relaxed">
+          Modal body content goes here.
+        </p>
       </Modal>
     </>
   );
@@ -108,5 +112,38 @@ export const InteractiveTest: Story = {
         document.body.querySelector('[role="dialog"]')
       ).not.toBeInTheDocument();
     });
+  },
+};
+
+export const CompoundUsage: Story = {
+  render: () => {
+    const [open, setOpen] = useState(false);
+    return (
+      <>
+        <Button onClick={() => setOpen(true)}>Open Compound Modal</Button>
+        <Modal open={open} onClose={() => setOpen(false)}>
+          <Modal.Header>
+            <Modal.Title>Compound Modal Title</Modal.Title>
+            <Modal.Description>
+              Demonstrates subcomponent composition
+            </Modal.Description>
+          </Modal.Header>
+          <Modal.Body>
+            <p className="text-muted leading-relaxed my-0">
+              Composed using Modal.Header, Modal.Body, and Modal.Footer with
+              generous spacing.
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Dismiss
+            </Button>
+            <Button variant="primary" onClick={() => setOpen(false)}>
+              Proceed
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
   },
 };

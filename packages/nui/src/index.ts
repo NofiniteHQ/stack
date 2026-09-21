@@ -29,6 +29,7 @@ export * from './components/dropdown';
 export * from './components/editor';
 export * from './components/emptystate/EmptyState';
 export * from './components/fileuploader/FileUploader';
+export * from './components/floating';
 export * from './components/form';
 export * from './components/hovercard/HoverCard';
 export * from './components/image/Image';
