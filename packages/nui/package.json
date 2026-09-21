@@ -118,16 +118,6 @@
     "vidstack": "^1.15.6"
   },
   "devDependencies": {
-    "@hookform/resolvers": "^5.7.1",
-    "@nofinite/nuicss": "workspace:*",
-    "@storybook/test-runner": "^0.24.4",
-    "@types/katex": "^0.16.8",
-    "@unocss/vite": "^66.7.5",
-    "jest-image-snapshot": "^6.5.2",
-    "playwright": "^1.62.0",
-    "react-docgen-typescript": "^2.4.0",
-    "unocss": "^66.7.5",
-    "valibot": "^1.4.2",
-    "vitest-axe": "^0.1.0"
+    "@nofinite/nuicss": "workspace:*"
   }
 }
