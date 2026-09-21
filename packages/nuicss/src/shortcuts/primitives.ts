@@ -318,7 +318,6 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   // 18. NUI Provider
   // ==========================================
-  ['nuix-provider', 'contents font-sans text-default bg-page'],
   ['nui-provider', 'contents font-sans text-default bg-page'],
   ['provider', 'contents font-sans text-default bg-page'],
 

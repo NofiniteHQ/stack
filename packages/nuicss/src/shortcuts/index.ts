@@ -39,12 +39,8 @@ export function createLayeredShortcuts(
 
       result.push([name, template, opts] as any);
 
-      // Add dual alias if name is string and does not already start with 'nui-' or 'nuix-'
-      if (
-        typeof name === 'string' &&
-        !name.startsWith('nui-') &&
-        !name.startsWith('nuix-')
-      ) {
+      // Add dual alias if name is string and does not already start with 'nui-'
+      if (typeof name === 'string' && !name.startsWith('nui-')) {
         result.push([`nui-${name}`, template, opts] as any);
       }
     } else {
