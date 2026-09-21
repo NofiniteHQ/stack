@@ -59,6 +59,7 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['badge-danger', 'bg-danger-subtle text-danger border border-danger/20'],
   ['badge-info', 'bg-info-subtle text-info border border-info/20'],
   ['badge-subtle', 'bg-muted text-muted'],
+  ['badge-outline', 'bg-transparent text-default border border-default'],
   ['badge-sm', 'text-[10px] px-2 py-0.2'],
   ['badge-md', 'text-xs px-2.5 py-0.5'],
   ['badge-lg', 'text-sm px-3 py-1'],

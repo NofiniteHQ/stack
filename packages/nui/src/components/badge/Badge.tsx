@@ -67,32 +67,28 @@ export function Badge({
     }
   }
 
-  // 2. Compute Classes
-  const variantStyles = {
-    default: 'bg-subtle text-default border border-default',
-    primary: 'bg-primary text-white border border-transparent',
-    success: 'bg-success-subtle text-success border border-success',
-    warning: 'bg-warning-subtle text-warning border border-warning',
-    danger: 'bg-danger-subtle text-danger border border-danger',
-    outline: 'bg-surface text-default border border-default',
+  // 2. Compute Classes via Canonical NUICSS Superclasses
+  const variantMap: Record<BadgeVariant, string> = {
+    default: 'badge-default',
+    primary: 'badge-primary',
+    success: 'badge-success',
+    warning: 'badge-warning',
+    danger: 'badge-danger',
+    outline: 'badge-outline',
   };
-  const sizeStyles = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-0.5',
-    lg: 'text-base px-3 py-1',
+
+  const sizeMap: Record<BadgeSize, string> = {
+    sm: 'badge-sm',
+    md: 'badge-md',
+    lg: 'badge-lg',
   };
 
   const classes = cn(
     'badge',
-    variant && `badge-${variant}`,
-    !dot && size && `badge-${size}`,
+    variant && (variantMap[variant] || `badge-${variant}`),
+    !dot && size && (sizeMap[size] || `badge-${size}`),
     pill && 'badge-pill',
     dot && 'badge-dot',
-    'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
-    pill ? 'rounded-full' : 'rounded-md',
-    variantStyles[variant],
-    !dot && sizeStyles[size],
-    dot && 'h-2 w-2 p-0 rounded-full',
     (href || onClick) && 'cursor-pointer hover:opacity-80',
     className
   );
