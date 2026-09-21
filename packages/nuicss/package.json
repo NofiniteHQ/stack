@@ -54,18 +54,18 @@
     "access": "public"
   },
   "dependencies": {
-    "@unocss/config": "^66.7.5",
-    "@unocss/postcss": "^66.7.5",
-    "@unocss/vite": "^66.7.5",
+    "@unocss/config": "^66.10.5",
+    "@unocss/postcss": "^66.10.5",
+    "@unocss/vite": "^66.10.5",
     "glob": "^13.0.6",
-    "unocss": "^66.7.5",
-    "valibot": "^1.4.2"
+    "unocss": "^66.10.5",
+    "valibot": "^1.5.0"
   },
   "devDependencies": {
-    "@unocss/runtime": "^66.8.1",
-    "esbuild": "^0.19.11",
+    "@unocss/runtime": "^66.10.5",
+    "esbuild": "^0.28.2",
     "jiti": "^2.7.0",
-    "postcss": "^8.5.15"
+    "postcss": "^8.5.28"
   },
   "scripts": {
     "build": "nx run nuicss:build && npm run build:cdn",
