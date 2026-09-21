@@ -1,279 +1,172 @@
-# Nofinite Stack Architecture & Engineering Standards
+# Stack Architecture & Engineering Standards
 
 ## `@nofinite/nuicss` and `@nofinite/nui`
 
-This document serves as the authoritative, deep-dive architectural specification, design system contract, and engineering guide for the **Stack** monorepo, covering:
-
-1. **`@nofinite/nuicss`**: The token-first, semantic design engine, UnoCSS preset, and CSS architecture.
-2. **`@nofinite/nui`**: The production-grade, headless-augmented React component library.
-
-All contributing engineers and AI agents must strictly uphold the architectural invariants, engineering patterns, and verification standards documented here.
+This document defines the systemic architectural foundations, design system contracts, component paradigms, and engineering standards for the **Stack** monorepo (`@nofinite/nuicss` and `@nofinite/nui`).
 
 ---
 
 ## 1. System Topology & Dual-Layer Architecture
 
-The Stack monorepo operates on a clean separation of concerns: styling primitives and design tokens are completely decoupled from UI runtime logic.
+The Stack architecture strictly decouples design tokens and visual style generation from UI component logic:
 
 ```mermaid
 flowchart TD
-    subgraph NUICSS_ENGINE["@nofinite/nuicss (Design Engine & Token Authority)"]
-        TOKENS["OKLCH Design Tokens (theme.css)
-        • Raw Neutral (Slate) & Brand (Blue) Primitives
-        • Semantic Surfaces: bg-page, bg-surface, bg-subtle, bg-muted
-        • Semantic Foregrounds: text-default, text-muted, text-accent
-        • Semantic Borders: border-default, border-subtle, border-strong
-        • Chart Tokens: var(--chart-1) .. var(--chart-8)"]
+    subgraph NUICSS_ENGINE["Design Engine: @nofinite/nuicss"]
+        TOKENS["OKLCH Design Token System
+        • Tier 1: Raw Primitives (Slate, Brand scales)
+        • Tier 2: Semantic System Colors (primary, danger, success)
+        • Tier 3: Contextual Variables (bg-surface, fg-default, border-default)
+        • Visual Data: 8-color chart tokens"]
 
-        PRESET["UnoCSS Preset & LightningCSS Bundler (preset.ts)
-        • presetWind4 Integration
-        • color-mix(in oklch, ...) Opacity Modifiers
-        • Directional Border Mappings
-        • Protected Shortcut Prefixes Shielding"]
+        PRESET["Compiler & AST Processor
+        • UnoCSS presetWind4 core
+        • color-mix(in oklch, ...) dynamic opacity engine
+        • Directional border token resolver
+        • Protected prefix shielding"]
 
-        SHORTCUTS["Layered Superclasses (shortcuts/)
-        • Primitives (.btn, .card, .badge, .avatar, .chip)
-        • Forms (.input, .select, .switch, .pin-input-field)
-        • Overlays (.modal-box, .drawer-box, .tooltip, .popover)
-        • Widgets (.table, .accordion, .stepper, .tabs)
-        • Media (.carousel, .code-block, .video-player)
-        • Dual Aliasing: 'btn' + 'nui-btn' in @layer components"]
+        SHORTCUTS["Semantic Superclasses
+        • Pre-composed component classes (.btn, .card, .input)
+        • Layered via W3C @layer components
+        • Automatic dual aliasing: unprefixed + 'nui-' prefixed"]
 
-        BUNDLES["Static Distributions & Tooling
-        • Standalone styles.css (Reset + Tokens + Components)
-        • Modular CSS Bundles (primitives.css, forms.css, overlays.css)
-        • CDN Runtime (index.global.js)
-        • IDE Custom Data: nuicss.html-data.json, nuicss.css-data.json
-        • SSR Extraction Engine & Next.js Plugin (withNuicss)"]
+        OUTPUTS["Distribution & Tooling
+        • Standalone styles.css with layer preamble
+        • Modular CSS bundles (primitives, forms, overlays, widgets)
+        • Zero-FOUC inline scripts & SSR critical extractors
+        • IDE custom data manifests for HTML/CSS autocomplete"]
     end
 
-    subgraph NUI_REACT["@nofinite/nui (React Component System)"]
-        CORE_HOOKS["Headless & Accessibility Utilities (src/utils/)
-        • Slot & Slottable (Radix-style asChild composition, React 18/19 ref merging)
-        • trapFocus, inertManager, scrollLock, restoreFocus
-        • keyboardNav (Roving tabindex), onClickOutside, generateId"]
+    subgraph NUI_REACT["UI Framework: @nofinite/nui"]
+        COMP_MODEL["Component Model
+        • Polymorphic composition via Slot (asChild)
+        • Compound subcomponents pattern (Header, Body, Footer)
+        • Declarative convenience props with compound fallback
+        • Ref merging across React 18 & 19"]
 
-        FLOATING_PRIMITIVE["Contoured Overlay Geometry (src/components/floating/)
-        • FloatingArrow (14x14 symmetric Bézier curvature, base border mask)
-        • Floating UI Integration (@floating-ui/react-dom)"]
+        A11Y_HEADLESS["Accessibility & Headless Utilities
+        • Focus management (trapFocus, restoreFocus, roving tabindex)
+        • DOM isolation (inertManager, scrollLock, portal)
+        • Headless integrations (rich text, video, charts, drag-and-drop)"]
 
-        COMPONENTS["React Components (src/components/)
-        • Compound Subcomponents (Modal.Header, Card.Title, Tabs.List)
-        • Headless Rich Integrations:
-          - TipTap: Rich Text Editor
-          - Vidstack: Video Player
-          - Visx: Data Visualizations
-          - Hello-Pangea DnD: Kanban Board"]
-
-        BUILD_PIPELINE["Production Build Pipeline (vite.config.ts)
-        • Vite + LightningCSS Minification
-        • preserveModules: true (Full Tree-Shaking down to individual files)
-        • 'use client' Directive Injection on Client Chunks
-        • CSS Wrap in @layer base, components, utilities;"]
+        BUILD_SYS["Packaging & Distribution
+        • preserveModules: true for tree-shaking
+        • Automatic 'use client' chunk header injection
+        • CSS layer isolation (@layer base, components, utilities;)"]
     end
 
     TOKENS --> PRESET
     PRESET --> SHORTCUTS
-    SHORTCUTS --> BUNDLES
+    SHORTCUTS --> OUTPUTS
     SHORTCUTS -->|UnoCSS Compile-Time Extraction| NUI_REACT
-    CORE_HOOKS --> COMPONENTS
-    FLOATING_PRIMITIVE --> COMPONENTS
-    COMPONENTS --> BUILD_PIPELINE
+    COMP_MODEL --> BUILD_SYS
+    A11Y_HEADLESS --> COMP_MODEL
 ```
 
 ---
 
-## 2. Deep Dive: `@nofinite/nuicss`
+## 2. Design System Architecture: `@nofinite/nuicss`
 
-`@nofinite/nuicss` is the sole source of truth for all visual presentation across the ecosystem. It replaces traditional atomic CSS utility chaos with a structured, three-tier token hierarchy and semantic superclasses.
+`@nofinite/nuicss` is the sole source of truth for all visual presentation across the ecosystem. It replaces ad-hoc atomic utility styling with a structured token hierarchy and semantic superclasses.
 
-### 2.1. The Three-Tier OKLCH Token Hierarchy
+### 2.1. The Three-Tier OKLCH Token Model
 
-Tokens are defined in [`src/styles/theme.css`](file:///d:/stack/packages/nuicss/src/styles/theme.css) using progressive enhancement: standard hex fallbacks paired with high-gamut `oklch()` values:
+1. **Tier 1 — Raw Primitives:** High-gamut OKLCH values paired with sRGB hex fallbacks. Primitives are never used directly in component templates.
+2. **Tier 2 — System Semantics:** Functional variables representing intent (`--color-primary`, `--color-danger`, `--color-success`, `--color-warning`).
+3. **Tier 3 — Contextual Surfaces, Foregrounds & Borders:** Theme-reactive variables (`--bg-page`, `--bg-surface`, `--bg-subtle`, `--fg-default`, `--fg-muted`, `--border-default`, `--border-strong`).
+4. **Data Visualization Tokens:** Strict 8-color chart tokens (`--chart-1` through `--chart-8`).
 
-```css
-/* Tier 1: Raw Primitives (Never used directly in component markup) */
---slate-50: #f8fafc;
---slate-50: oklch(0.984 0.006 247.858);
---brand-500: #3b82f6;
---brand-500: oklch(0.623 0.214 259.815);
+### 2.2. CSS Engine & AST Processing
 
-/* Tier 2: Brand & Semantic System Tokens */
---brand-primary: var(--brand-600);
---color-primary: var(--brand-primary);
---color-danger: var(--red-600);
---color-success: var(--green-600);
---color-warning: var(--amber-500);
+- **Dynamic Opacity Generator:** Uses CSS `color-mix(in oklch, var(...) ${opacity}%, transparent)` instead of fragile alpha hexes or opacity classes that degrade text rendering.
+- **Directional Property Mapping:** Resolves directional modifiers (`border-t-subtle`, `border-x-strong`) directly to discrete CSS properties without utility bloat.
+- **Protected Prefix Shielding:** Prevents pseudo-variant processors from corrupting compound class names.
 
-/* Tier 3: Contextual Surface, Foreground & Border Tokens */
---bg-page: var(--slate-50);
---bg-surface: #ffffff;
---bg-subtle: var(--slate-100);
---fg-default: var(--slate-900);
---fg-muted: var(--slate-500);
---border-default: var(--slate-200);
---border-strong: var(--slate-300);
+### 2.3. Layered Superclasses & Dual Aliasing
 
-/* Chart Tokens (Strict 8-Color Palette) */
---chart-1: oklch(0.623 0.214 259.815);
---chart-2: oklch(0.685 0.169 237.323);
-/* ... through --chart-8 */
-```
+- **Layer Encapsulation:** Every shortcut is injected into the W3C `@layer components` cascade.
+- **Dual-Namespace Aliasing:** Automatically generates concise (`.btn`, `.card`) and namespace-safe (`.nui-btn`, `.nui-card`) selectors, preventing collisions in mixed-library environments.
 
-### 2.2. UnoCSS Preset & LightningCSS Integration (`src/plugin/preset.ts`)
+### 2.4. Tooling & Platform Integrations
 
-`nuicssPreset()` configures UnoCSS with unique architectural capabilities:
-
-1. **Native Opacity Modifiers via `color-mix`:**
-   Instead of fragile hex alpha hacks or opacity classes that affect child text, NUICSS generates pure OKLCH color mixes:
-   ```ts
-   // Example rule from preset.ts:
-   // matches bg-surface/80, bg-primary/20, text-muted/60
-   const val = opacity
-     ? `color-mix(in oklch, var(${varName}) ${opacity}%, transparent)`
-     : `var(${varName})`;
-   ```
-2. **Directional Border Rules:**
-   Supports `border-t-subtle`, `border-b-strong`, `border-x-default/50` mapping accurately to directional CSS properties (`border-top-color`, etc.).
-3. **Protected Shortcut Prefixes Shielding:**
-   Prevents `@unocss/preset-wind4` pseudo-variants from incorrectly intercepting compound class names such as `empty-state`, `link-muted`, `hover-card`, and `link-preview`.
-
-### 2.3. Layered Shortcuts & Dual Namespace Aliasing (`src/shortcuts/index.ts`)
-
-Every component superclass is processed through `createLayeredShortcuts()`:
-
-1. Assigned strictly to the W3C `@layer components` stylesheet layer.
-2. Automatically generates dual aliases: concise names (e.g. `btn`, `card`, `modal-box`) alongside namespace-safe names (`nui-btn`, `nui-card`, `nui-modal-box`).
-   This allows developers in collision-prone environments to use prefixed classes without separate builds.
-
-### 2.4. Build Pipelines & Tooling Outputs (`build-cdn.js`)
-
-Running the NUICSS build generates:
-
-- **`dist/styles.css`:** Complete standalone stylesheet wrapping `@layer base, components, utilities;` with design tokens, reset, and all superclasses minified via LightningCSS.
-- **`dist/components.css` / `dist/{primitives,forms,overlays,widgets,media}.css`:** Granular modular stylesheets for targeted inclusion.
-- **`dist/index.global.js`:** Single-script CDN browser runtime that compiles UnoCSS on the fly for rapid prototyping.
-- **`dist/nuicss.html-data.json` & `dist/nuicss.css-data.json`:** Official VS Code and Cursor Custom Data manifests providing rich HTML/CSS IntelliSense autocomplete for all 819+ classes and 246+ tokens.
-
-### 2.5. Framework Adapters: Next.js, Turbopack, and SSR
-
-- **`withNuicss` ([`src/plugin/next.ts`](file:///d:/stack/packages/nuicss/src/plugin/next.ts)):** Wraps Next.js configurations. Configures `transpilePackages: ['@nofinite/nuicss']`, injects PostCSS plugins, and maps Turbopack `resolveAlias` for `@nofinite/nuicss/virtual.css` across both Next.js 14 and Next.js 15.
-- **Critical CSS SSR Extractor ([`src/helpers/ssr.ts`](file:///d:/stack/packages/nuicss/src/helpers/ssr.ts)):** Extracts critical CSS from HTML strings during SSR with zero-FOUC output and an in-memory generator cache.
-- **Anti-FOUC Script ([`src/helpers/fouc.ts`](file:///d:/stack/packages/nuicss/src/helpers/fouc.ts)):** Inlines an ultra-lightweight inline `<script>` into document `<head>` to synchronize dark mode (`class="dark"` and `data-theme="dark"`) prior to first paint.
+- **Layer Preamble:** Standalone stylesheets enforce `@layer base, components, utilities;`, guaranteeing that user styles override components without `!important`.
+- **SSR & Anti-FOUC Engine:** Critical CSS extraction during SSR and inline dark-mode synchronization scripts to ensure zero flash of unstyled content.
+- **IDE IntelliSense Custom Data:** Automated generation of `nuicss.html-data.json` and `nuicss.css-data.json` for IDE autocomplete across HTML and CSS.
 
 ---
 
-## 3. Deep Dive: `@nofinite/nui`
+## 3. Component Architecture: `@nofinite/nui`
 
-`@nofinite/nui` is a modern React component library designed for tree-shaking, strict accessibility, and seamless integration with `@nofinite/nuicss`.
+`@nofinite/nui` implements accessible, tree-shakable React components that strictly consume `@nofinite/nuicss` tokens and superclasses.
 
-### 3.1. Build System & Module Architecture ([`vite.config.ts`](file:///d:/stack/packages/nui/vite.config.ts))
+### 3.1. Component Model & Composition
 
-The NUI build pipeline is engineered with three essential Rollup/Vite features:
+- **Polymorphism via `Slot` (`asChild`):** Enables swapping the underlying HTML element while merging props, styles, class names, and forwarded refs across React 18 and React 19.
+- **Compound Component Ergonomics:** Complex components provide compound subcomponents (`.Header`, `.Body`, `.Footer`, `.Title`, `.Description`) while maintaining backwards-compatible declarative convenience props.
+- **Ref Composition:** Safely chains forwarded refs and child refs without memory leaks or unnecessary re-renders.
 
-1. **`preserveModules: true` & `preserveModulesRoot: 'src'`:**
-   Instead of bundling everything into monolithic chunks, Vite emits a 1:1 file mirror in `dist/`. Consumers can import `@nofinite/nui/components/button` and bundle only 1.5 kB of code with zero dead-code leakage.
-2. **`add-use-client` Rollup Plugin:**
-   Scans every emitted chunk in `dist/components/` and `index.js/cjs`. Injects `"use client";` banners at the very top of each client chunk, ensuring flawless compatibility with the Next.js App Router and React Server Components (RSC).
-3. **`wrap-styles-in-layer` Plugin:**
-   Post-processes `dist/styles.css`. Enforces the standard preamble:
-   ```css
-   @layer base, components, utilities;
-   ```
-   Injects base tokens and wraps extracted classes into `@layer components`. This guarantees that user utilities can always override component styles without resorting to `!important`.
+### 3.2. Headless Accessibility Architecture
 
-### 3.2. Polymorphism & Composition: Radix-Grade `Slot` ([`src/utils/slot/slot.tsx`](file:///d:/stack/packages/nui/src/utils/slot/slot.tsx))
+- Components avoid heavy external UI runtime dependencies. Instead, they consume modular, focused internal utilities:
+  - **Focus Management:** Focus trapping inside active overlays, automatic return-of-focus upon dismissal, and roving `tabindex` for lists and menus.
+  - **DOM State Isolation:** Body scroll locking without layout shift, `inert` attribute management on inactive background trees, and portal rendering.
 
-NUI components support `asChild` composition via an internal `Slot` primitive:
+### 3.3. Build, Packaging & Module Tree-Shaking
 
-- **Ref Composition (`composeRefs`):** Safely merges forwarded refs and child element refs without memory leaks.
-- **Cross-Version React Support (`getElementRef`):** Extracts refs accurately across both React 18 (`element.ref`) and React 19 (`element.props.ref`) without TypeScript `any` escapes.
-- **Prop Merging (`mergeProps`):** Chains event handlers so that both the parent slot handler and the child handler fire sequentially; combines style objects; and merges class names through `cn()`.
-
-### 3.3. Headless Accessibility Primitives (`src/utils/`)
-
-NUI components do not rely on bulky external runtime accessibility libraries. They utilize focused, lightweight internal primitives:
-
-- **`trapFocus` (`src/utils/trapfocus/`):** Listens to Tab and Shift+Tab to trap keyboard focus within active dialogs and modals.
-- **`inertManager` (`src/utils/inertmanager/`):** Manages the HTML `inert` attribute on outside DOM trees while overlays are active.
-- **`scrollLock` (`src/utils/scrolllock/`):** Safely locks body scroll without page jumping by accounting for scrollbar width.
-- **`restoreFocus` (`src/utils/restorefocus/`):** Automatically returns focus to the trigger element upon overlay dismissal.
-- **`keyboardNav` (`src/utils/keyboardnav/`):** Implements roving tabindex for dropdowns, listboxes, menus, and tabs.
-
-### 3.4. High-Precision Overlay Architecture: `FloatingArrow` ([`src/components/floating/`](file:///d:/stack/packages/nui/src/components/floating/FloatingArrow.tsx))
-
-Floating overlays (`Tooltip`, `HoverCard`, `Popover`) strictly forbid crude 45°-rotated square `div`s. Rotated boxes produce harsh 90° right isosceles triangles with visible internal border artifacts and clipped shadows.
-
-NUI implements a contoured, mathematical SVG primitive:
-
-- **Symmetric ViewBox (`0 0 14 14`):** Arrow vertex coordinates curve gently via quadratic Bézier paths (`Q 7 14 8.5 12.5`).
-- **Midpoint Rotation:** Centering the geometry at `(7, 7)` allows pure CSS rotation (`0deg`, `90deg`, `180deg`, `270deg`) across all 4 axes (`top`, `bottom`, `left`, `right`) with exact geometric alignment and zero asymmetric offset calculation.
-- **Open-Base Masking:** The SVG base is open (`M 0 7 L 5.5 12.5 ... L 14 7 Z`), ensuring the arrow seamlessly merges into the card border without cutting across the card background.
-
-### 3.5. Compound Component Architecture
-
-Complex UI elements (`Modal`, `Card`, `Drawer`, `Tabs`) offer dual ergonomics:
-
-1. **Declarative Flat Props:** `<Modal title="Settings" footer={<Button>Save</Button>}>...</Modal>` for rapid implementation.
-2. **Compound Subcomponents:** `<Modal.Header>`, `<Modal.Title>`, `<Modal.Description>`, `<Modal.Body>`, `<Modal.Footer>` for fine-grained structural control.
+- **Preserved Modules:** The build pipeline maintains the source directory structure (`preserveModules: true`), enabling direct single-component imports with zero unused bundle weight.
+- **React Server Components (RSC) Readiness:** A Rollup post-processor scans component chunks and injects `"use client";` headers at the top of client boundary modules.
 
 ---
 
-## 4. Core Design System Invariants
+## 4. Architectural Invariants (Non-Negotiables)
 
 1. **Single Source of Truth Rule:**
-   - **Zero Hardcoded Colors:** Never write `#ffffff`, `#3b82f6`, `rgb(...)`, or raw Tailwind palette clusters (`bg-blue-600 dark:bg-blue-500`, `text-slate-900`).
-   - **Always Use Semantic Tokens:** Use `var(--color-primary)`, `var(--bg-surface)`, `var(--fg-default)`, `var(--border-default)`.
-   - **Charts:** Exclusively use `var(--chart-1)` through `var(--chart-8)`.
+   - **Zero Raw Color Literals:** Never write hardcoded hex/sRGB color literals (`#3b82f6`, `rgb(...)`) or raw Tailwind color palettes (`bg-blue-600`, `text-slate-900`) in component code.
+   - **Semantic Variables Only:** Always use semantic tokens (`var(--color-primary)`, `var(--bg-surface)`, `var(--fg-default)`).
+   - **Charts:** Exclusively consume `var(--chart-1)` through `var(--chart-8)`.
 2. **Superclass Enforcement:**
-   - Standard UI components must declare official NUICSS superclasses (`btn`, `card`, `modal-box`, `input`, `badge`, `table-container`, `tooltip`) rather than stacking 10–15 atomic Tailwind utilities.
-3. **Automatic ARIA State Driven Styling:**
-   - State styling belongs in native WAI-ARIA attributes:
-     - `aria-invalid="true"`: Danger border and focus ring.
-     - `aria-selected="true"`: Active tab indicator.
-     - `aria-expanded="true"`: Accordion chevron rotation and popover visibility.
-     - `aria-checked="true"`: Switch toggle activation.
+   - UI components must declare official NUICSS superclasses (`btn`, `card`, `input`, `badge`, `table-container`) rather than assembling verbose clusters of 10–15 atomic classes.
+3. **Automatic ARIA-Driven State Styling:**
+   - Visual states bind directly to native WAI-ARIA attributes (`aria-invalid`, `aria-selected`, `aria-expanded`, `aria-checked`). Avoid custom JS toggle classes.
 4. **CSS Cascade Safety & Container Hierarchies:**
-   - Never combine conflicting utility classes (e.g. combining `py-0` with `pb-5` wipes out bottom padding).
-   - Maintain structural separation with dedicated containers (`.modal-box`, `.modal-body`, `.modal-footer`).
-   - Dedicated footers must provide explicit top dividers (`border-t border-default`), subtle background tints (`bg-subtle/20`), and generous padding (`px-6 py-4`). Action buttons must never sit against outer container edges.
+   - Avoid utility collision traps (such as overlapping padding/margin resets).
+   - Maintain structural separation between header, content, and action containers.
 
 ---
 
-## 5. Agent & Developer Engineering Standards
+## 5. Developer & Agent Operating Protocol
 
-All engineers and AI agents working in this repository must strictly adhere to this 6-pillar operational standard:
+All engineers and AI agents working in this repository must strictly adhere to this 6-pillar operational protocol:
 
 ### Pillar 1: Implementation Plans (`implementation_plan.md`)
 
-- Mandatory for any architectural changes, major bug fixes, or modifications spanning multiple components or files.
-- Document user review requirements, proposed file changes (`[NEW]`, `[MODIFY]`, `[DELETE]`), and verification steps.
-- Obtain user approval before writing production code.
+- Mandatory for any architectural changes, major refactors, or modifications spanning multiple files.
+- Document user review requirements, proposed changes, and verification steps; obtain approval before modifying code.
 
-### Pillar 2: Industry Standards & Tool Evaluation
+### Pillar 2: Industry Standards & Dependency Evaluation
 
 - Never introduce dependencies on whim.
-- Evaluate performance, bundle size, license, and architectural compatibility. Document the justification.
+- Evaluate performance, bundle footprint, license, and architectural fit; explicitly document rationale.
 
 ### Pillar 3: Scratch File Quarantine (`/temp/`)
 
-- ALL temporary scripts, debug files, Playwright scripts, and screenshots MUST be stored in `/temp/`.
-- The `/temp/` directory is gitignored to ensure zero garbage is committed to the repository root.
+- ALL temporary scripts, test runners, diagnostic tools, and screenshots MUST reside in `/temp/`.
+- The `/temp/` directory is gitignored to ensure zero clutter in repository roots.
 
 ### Pillar 4: Multi-Tier Verification
 
-- **Automated Unit Tests:** Execute Vitest test suites (`pnpm nx test nui -- --testFile=...`).
-- **Visual Playwright Verification:** Run headless Playwright scripts in `/temp/` to generate visual snapshots, and inspect rendered artifacts using `view_file` to verify spacing and layout.
-- **Production Builds:** Verify that `pnpm nx build nui` succeeds with zero errors.
+- **Automated Unit Tests:** Execute Vitest test suites (`pnpm nx test nui`).
+- **Visual Verification:** Run headless Playwright scripts in `/temp/` and inspect screenshots using `view_file`.
+- **Production Builds:** Verify package builds succeed with zero errors (`pnpm nx build nui`).
 
 ### Pillar 5: NPM Package Verification (`npm pack`)
 
-- Before finalizing any release or build pipeline change, run `npm pack --dry-run` in `packages/nui` and `packages/nuicss`.
-- Verify the tarball manifest: confirm `dist/`, TypeScript definitions (`dist/types/`), and stylesheets are present.
+- Always execute `npm pack --dry-run` before finalizing releases.
+- Verify tarball manifests: confirm `dist/`, TypeScript declarations (`dist/types/`), and stylesheets are physically present.
 - Never publish empty or null directories.
 
 ### Pillar 6: Compulsory Local Git Commits
 
-- Immediately commit changes locally using Git after completing every phase or fix.
-- Local commits serve as immutable save points for rollback and auditability.
+- Immediately commit changes locally after completing and verifying each phase or fix.
+- Local commits serve as immutable checkpoints for auditability and rollback.
 - Follow Conventional Commits format (`refactor(nui): ...`, `feat(nuicss): ...`, `fix(nui): ...`).
