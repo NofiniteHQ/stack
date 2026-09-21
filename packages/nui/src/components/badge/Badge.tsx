@@ -70,7 +70,7 @@ export function Badge({
   // 2. Compute Classes
   const variantStyles = {
     default: 'bg-subtle text-default border border-default',
-    primary: 'bg-primary text-inverse border border-transparent',
+    primary: 'bg-primary text-white border border-transparent',
     success: 'bg-success-subtle text-success border border-success',
     warning: 'bg-warning-subtle text-warning border border-warning',
     danger: 'bg-danger-subtle text-danger border border-danger',
