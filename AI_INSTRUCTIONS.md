@@ -50,6 +50,8 @@ All packages (`@nofinite/nui`, `@nofinite/nuicss`, `nofinite`, `@nofinite/utils`
   - Explicitly document concrete before-and-after differences (what changed, what was added/fixed/refactored).
   - Language must remain strictly professional, technical, and understandable.
   - Strictly avoid marketing fluff and emojis (no 🚀, ✨, 🔥, 🎉, 📦, etc.) in official changelogs, commit notes, and release summaries.
+  - **No AI Meta-Talk or Robotic Boilerplates:** NEVER write internal process declarations, prompt echoes, or artificial robotic intros (e.g., strictly avoid phrases like _"Comprehensive release notes based on code diff audit comparing version X against published baseline..."_ or _"Here is the changelog..."_). Write directly for external developers and consumers. Start immediately with an executive highlight or categorized headings (`### New Components`, `### Bug Fixes`, `### Architecture & Design Tokens`).
+  - **Clean Changeset Heading Formatting:** Changesets automatically prepends the commit hash bullet (`- <hash>: `) to the first line of the changeset file. Never start a changeset body with `# Release X.Y.Z` or `# @nofinite/pkg`, as this generates malformed nested header syntax (`- <hash>: # Release X.Y.Z`) in consumer PRs and changelogs. Use clean subheadings (`### New Features`) or direct paragraphs.
 - **Write High-Quality Release Notes in Changesets:** The text inside the `.changeset/*.md` file is automatically consumed by GitHub Actions to generate the official GitHub Release and package `CHANGELOG.md`. Always structure it with clear headers, technical bullet points, and code snippets where relevant. Avoid filler words.
 
 ---
