@@ -69,7 +69,6 @@ export * from './components/toast/Toast';
 export * from './components/tooltip/Tooltip';
 export * from './components/transferlist/TransferList';
 export * from './components/treeview';
-export * from './components/video/VideoPlayer';
 export * from './components/virtuallist/VirtualList';
 export * from './components/watermark/Watermark';
 

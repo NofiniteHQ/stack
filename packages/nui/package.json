@@ -67,14 +67,12 @@
   "dependencies": {
     "@floating-ui/react-dom": "^2.1.9",
     "@hello-pangea/dnd": "^18.0.1",
-    "@vidstack/react": "^1.15.6",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.553.0",
     "react-hook-form": "^7.84.0",
-    "tailwind-merge": "^3.6.0",
-    "vidstack": "^1.15.6"
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@nofinite/nuicss": "workspace:*"

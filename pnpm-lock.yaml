@@ -482,6 +482,28 @@ importers:
         specifier: workspace:*
         version: link:../nuicss
 
+  packages/media:
+    dependencies:
+      '@vidstack/react':
+        specifier: ^1.15.6
+        version: 1.15.6(@types/react@19.2.14)(react@19.2.0)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      react:
+        specifier: '>=18.0.0'
+        version: 19.2.0
+      react-dom:
+        specifier: '>=18.0.0'
+        version: 19.2.0(react@19.2.0)
+      vidstack:
+        specifier: ^1.15.6
+        version: 1.15.6
+    devDependencies:
+      '@nofinite/nuicss':
+        specifier: workspace:*
+        version: link:../nuicss
+
   packages/nui:
     dependencies:
       '@floating-ui/react-dom':
@@ -490,9 +512,6 @@ importers:
       '@hello-pangea/dnd':
         specifier: ^18.0.1
         version: 18.0.1(@types/react@19.2.14)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      '@vidstack/react':
-        specifier: ^1.15.6
-        version: 1.15.6(@types/react@19.2.14)(react@19.2.0)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -517,9 +536,6 @@ importers:
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
-      vidstack:
-        specifier: ^1.15.6
-        version: 1.15.6
     devDependencies:
       '@nofinite/nuicss':
         specifier: workspace:*

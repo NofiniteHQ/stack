@@ -1,0 +1,77 @@
+{
+  "name": "@nofinite/media",
+  "version": "1.0.0",
+  "description": "Universal, framework-agnostic audio and video streaming media player suite powered by Vidstack and styled with @nofinite/nuicss design tokens.",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/types/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs",
+      "default": "./dist/react/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NofiniteHQ/stack.git",
+    "directory": "packages/media"
+  },
+  "keywords": [
+    "nofinite",
+    "media",
+    "video-player",
+    "audio-player",
+    "hls",
+    "dash",
+    "vidstack",
+    "streaming",
+    "react-video",
+    "vanilla-media"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@vidstack/react": "^1.15.6",
+    "clsx": "^2.1.1",
+    "vidstack": "^1.15.6"
+  },
+  "devDependencies": {
+    "@nofinite/nuicss": "workspace:*"
+  }
+}
