@@ -238,6 +238,16 @@ const ImageButton = ({ editor }: { editor: TiptapEditor }) => {
   );
 };
 
+const HIGHLIGHT_PRESETS = [
+  'transparent',
+  '#fef08a',
+  '#bbf7d0',
+  '#bae6fd',
+  '#fbcfe8',
+  '#fed7aa',
+  '#e9d5ff',
+];
+
 const ColorPickerPopover = ({
   editor,
   type,
@@ -247,14 +257,22 @@ const ColorPickerPopover = ({
 }) => {
   const currentColor =
     type === 'color'
-      ? editor.getAttributes('textStyle').color || 'currentColor'
+      ? editor.getAttributes('textStyle').color || ''
       : editor.getAttributes('highlight').color || 'transparent';
 
   const setFormatColor = (color: string) => {
     if (type === 'color') {
-      editor.chain().focus().setColor(color).run();
+      if (color === 'transparent' || !color) {
+        editor.chain().focus().unsetColor().run();
+      } else {
+        editor.chain().focus().setColor(color).run();
+      }
     } else {
-      editor.chain().focus().toggleHighlight({ color }).run();
+      if (color === 'transparent' || !color) {
+        editor.chain().focus().unsetHighlight().run();
+      } else {
+        editor.chain().focus().toggleHighlight({ color }).run();
+      }
     }
   };
 
@@ -264,6 +282,7 @@ const ColorPickerPopover = ({
       onChange={setFormatColor}
       icon={type === 'color' ? Palette : Highlighter}
       title={type === 'color' ? 'Text Color' : 'Highlight Color'}
+      presets={type === 'highlight' ? HIGHLIGHT_PRESETS : undefined}
       variant="icon"
     />
   );

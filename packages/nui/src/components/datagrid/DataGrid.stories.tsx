@@ -20,8 +20,7 @@ const rows: User[] = [
 const columns: DataGridColumn<User>[] = [
   {
     key: 'name',
-    title: 'Widgets/DataGrid',
-    tags: ['autodocs'],
+    title: 'Name',
     sortable: true,
   },
   { key: 'age', title: 'Age', sortable: true, align: 'right' },

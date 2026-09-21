@@ -265,7 +265,7 @@ export function DataGrid<T>({
       )}
     >
       <div
-        className="w-full overflow-x-auto outline-none focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default)] rounded-lg"
+        className="w-full overflow-x-auto outline-none focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] rounded-lg"
         onKeyDown={onKeyDownTable}
         tabIndex={0}
       >
