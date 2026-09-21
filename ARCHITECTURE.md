@@ -131,12 +131,21 @@ flowchart TD
 4. **CSS Cascade Safety & Container Hierarchies:**
    - Avoid utility collision traps (such as overlapping padding/margin resets).
    - Maintain structural separation between header, content, and action containers.
+5. **Root-Cause Upstream Fix Rule (Zero Downstream Monkey-Patching):**
+   - NEVER add quick-fix CSS classes, utility overrides, or manual style monkey-patches in consumer applications (`oss-docs`, demo apps, or `globals.css`) to patch component styling, colors, or token bugs.
+   - If a component looks broken or unstyled downstream, the bug is 100% in `@nofinite/nui` or `@nofinite/nuicss`. All fixes must be implemented at the root library source, built, verified, and consumed cleanly.
+6. **Strict Compound Component & Hierarchy Contracts:**
+   - Wrapper components (e.g. `DialogProvider`, `ToastProvider`, `DropdownMenu`) must explicitly configure subcomponent defaults.
+   - Modals designed for binary confirmation or destructive decisions must enforce `hideCloseButton={true}`; never present an ambiguous corner '✕' close button alongside explicit "Cancel" and "Confirm" action buttons.
+   - Overlays and modal backdrops must combine `bg-overlay` with `backdrop-blur-sm` to guarantee modern glassmorphic visual separation rather than flat, muddy dimming.
+7. **Strict Package Isolation:**
+   - Public packages in this repository must NEVER mention or reference internal packages (`nuix`). Public packages must remain 100% self-contained and free of internal aliases.
 
 ---
 
 ## 5. Developer & Agent Operating Protocol
 
-All engineers and AI agents working in this repository must strictly adhere to this 6-pillar operational protocol:
+All engineers and AI agents working in this repository must strictly adhere to this 7-pillar operational protocol:
 
 ### Pillar 1: Implementation Plans (`implementation_plan.md`)
 
@@ -153,19 +162,24 @@ All engineers and AI agents working in this repository must strictly adhere to t
 - ALL temporary scripts, test runners, diagnostic tools, and screenshots MUST reside in `/temp/`.
 - The `/temp/` directory is gitignored to ensure zero clutter in repository roots.
 
-### Pillar 4: Multi-Tier Verification
+### Pillar 4: Multi-Tier Verification & The "Green Test" Fallacy
 
-- **Automated Unit Tests:** Execute Vitest test suites (`pnpm nx test nui`).
-- **Visual Verification:** Run headless Playwright scripts in `/temp/` and inspect screenshots using `view_file`.
+- **The "Green Test" Fallacy:** Passing unit tests (`vitest`, `happy-dom`) only proves state logic and DOM presence; it NEVER proves visual aesthetics, spatial harmony, or layout correctness. Tests will happily pass when a modal has redundant buttons, missing borders, or flat muddy backdrops.
+- **Mandatory Visual Inspection:** For ANY UI, styling, or interactive component change, you MUST perform visual verification (Playwright screenshot in `/temp/` or live browser inspection). Never declare a UI task complete purely based on green unit test passes.
 - **Production Builds:** Verify package builds succeed with zero errors (`pnpm nx build nui`).
 
-### Pillar 5: NPM Package Verification (`npm pack`)
+### Pillar 5: Ground Truth Verification Before Diagnosis
+
+- Never diagnose an issue or claim a token or class "does not exist" or "was never generated" based on surface grepping of source files.
+- You MUST inspect compiled artifacts (`dist/styles.css`, build chunks) and runtime computed styles before making diagnostic claims.
+
+### Pillar 6: NPM Package Verification (`npm pack`)
 
 - Always execute `npm pack --dry-run` before finalizing releases.
 - Verify tarball manifests: confirm `dist/`, TypeScript declarations (`dist/types/`), and stylesheets are physically present.
 - Never publish empty or null directories.
 
-### Pillar 6: Compulsory Local Git Commits
+### Pillar 7: Compulsory Local Git Commits
 
 - Immediately commit changes locally after completing and verifying each phase or fix.
 - Local commits serve as immutable checkpoints for auditability and rollback.
