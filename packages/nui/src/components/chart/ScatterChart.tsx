@@ -19,15 +19,15 @@ export type ScatterChartProps<T> = {
   margin?: { top: number; right: number; bottom: number; left: number };
 };
 
-const accentColor = 'var(--color-primary, #3b82f6)';
+const accentColor = 'var(--chart-1, var(--color-primary))';
 const tooltipStyles = {
   ...defaultStyles,
   border: '1px solid var(--border-default)',
   color: 'inherit',
   backgroundColor: 'transparent',
-  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  boxShadow: 'var(--shadow-md)',
   padding: '8px 12px',
-  borderRadius: '8px',
+  borderRadius: 'var(--radius-lg, 0.5rem)',
 };
 
 function BaseScatterChart<T>({
@@ -185,7 +185,7 @@ function BaseScatterChart<T>({
                 r={r}
                 fill={accentColor}
                 fillOpacity={0.8}
-                stroke="var(--bg-surface, #ffffff)"
+                stroke="var(--bg-surface)"
                 strokeWidth={1}
                 onMouseOver={(e) => handleMouseOver(e, d)}
                 onMouseOut={hideTooltip}

@@ -17,14 +17,14 @@ export type PieChartProps<T> = {
 };
 
 const defaultColors = [
-  'var(--chart-1, var(--color-primary, #3b82f6))',
-  'var(--chart-2, var(--color-info, #0ea5e9))',
-  'var(--chart-3, var(--color-success, #22c55e))',
-  'var(--chart-4, var(--color-warning, #eab308))',
-  'var(--chart-5, var(--color-danger, #ef4444))',
-  'var(--chart-6, #8b5cf6)',
-  'var(--chart-7, #ec4899)',
-  'var(--chart-8, #f97316)',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  'var(--chart-6)',
+  'var(--chart-7)',
+  'var(--chart-8)',
 ];
 
 const tooltipStyles = {
@@ -32,9 +32,9 @@ const tooltipStyles = {
   border: '1px solid var(--border-default)',
   color: 'inherit',
   backgroundColor: 'transparent',
-  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  boxShadow: 'var(--shadow-md)',
   padding: '8px 12px',
-  borderRadius: '8px',
+  borderRadius: 'var(--radius-lg, 0.5rem)',
 };
 
 function BasePieChart<T>({
