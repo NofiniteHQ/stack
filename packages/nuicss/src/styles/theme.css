@@ -179,6 +179,16 @@
     transparent
   );
 
+  /* Chart Tokens */
+  --chart-1: var(--color-primary);
+  --chart-2: var(--color-info);
+  --chart-3: var(--color-success);
+  --chart-4: var(--color-warning);
+  --chart-5: var(--color-danger);
+  --chart-6: oklch(0.65 0.22 300);
+  --chart-7: oklch(0.7 0.2 350);
+  --chart-8: oklch(0.72 0.19 50);
+
   /* Focus */
   --focus-ring: var(--fg-default);
   --focus-ring-offset: var(--bg-page);
@@ -483,6 +493,16 @@
   --color-info: #38bdf8;
   --color-info-hover: #0ea5e9;
   --color-info-subtle: color-mix(in oklch, var(--color-info) 18%, transparent);
+
+  /* Chart Tokens (Dark Mode) */
+  --chart-1: var(--color-primary);
+  --chart-2: var(--color-info);
+  --chart-3: var(--color-success);
+  --chart-4: var(--color-warning);
+  --chart-5: var(--color-danger);
+  --chart-6: oklch(0.75 0.2 300);
+  --chart-7: oklch(0.78 0.18 350);
+  --chart-8: oklch(0.8 0.17 50);
 }
 
 /* ------------------------------------------------------------

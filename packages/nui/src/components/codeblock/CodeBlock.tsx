@@ -29,25 +29,25 @@ const LANG_OPTIONS = [
 ];
 
 const tokenColorMap: Record<string, string> = {
-  'hljs-keyword': 'text-purple-600 dark:text-purple-400 font-semibold',
-  'hljs-built_in': 'text-purple-600 dark:text-purple-400',
-  'hljs-type': 'text-purple-600 dark:text-purple-400',
-  'hljs-literal': 'text-purple-600 dark:text-purple-400',
-  'hljs-number': 'text-orange-600 dark:text-orange-400',
-  'hljs-string': 'text-green-600 dark:text-green-400',
-  'hljs-regexp': 'text-green-600 dark:text-green-400',
-  'hljs-symbol': 'text-orange-600 dark:text-orange-400',
-  'hljs-class': 'text-primary dark:text-primary font-semibold',
-  'hljs-title': 'text-primary dark:text-primary font-semibold',
-  'hljs-function': 'text-primary dark:text-primary font-semibold',
+  'hljs-keyword': 'text-primary font-semibold',
+  'hljs-built_in': 'text-secondary font-medium',
+  'hljs-type': 'text-primary font-medium',
+  'hljs-literal': 'text-warning font-medium',
+  'hljs-number': 'text-warning',
+  'hljs-string': 'text-success',
+  'hljs-regexp': 'text-success',
+  'hljs-symbol': 'text-warning',
+  'hljs-class': 'text-info font-semibold',
+  'hljs-title': 'text-info font-semibold',
+  'hljs-function': 'text-info font-medium',
   'hljs-params': 'text-default',
-  'hljs-comment': 'text-gray-500 italic',
-  'hljs-doctag': 'text-gray-500 italic',
-  'hljs-meta': 'text-gray-500',
-  'hljs-attr': 'text-cyan-600 dark:text-cyan-400',
-  'hljs-attribute': 'text-cyan-600 dark:text-cyan-400',
-  'hljs-variable': 'text-red-600 dark:text-red-400',
-  'hljs-name': 'text-primary dark:text-primary font-semibold',
+  'hljs-comment': 'text-muted italic',
+  'hljs-doctag': 'text-muted italic',
+  'hljs-meta': 'text-muted',
+  'hljs-attr': 'text-info',
+  'hljs-attribute': 'text-info',
+  'hljs-variable': 'text-danger',
+  'hljs-name': 'text-primary font-semibold',
   'hljs-tag': 'text-default',
 };
 
@@ -55,7 +55,10 @@ function renderAst(node: any, i: number): React.ReactNode {
   if (node.type === 'text') return node.value;
   if (node.type === 'element') {
     const classes = node.properties?.className || [];
-    const colorClass = classes.map((c: string) => tokenColorMap[c] || '').join(' ').trim();
+    const colorClass = classes
+      .map((c: string) => tokenColorMap[c] || '')
+      .join(' ')
+      .trim();
     return React.createElement(
       node.tagName,
       { key: i, className: colorClass || undefined },
@@ -86,9 +89,12 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     // If they pass something else in `children`, we render that.
     if (children && typeof children !== 'string') return children;
     const codeToHighlight = typeof children === 'string' ? children : code;
-    
+
     try {
-      const ast = lowlight.highlight(language === 'text' ? 'plaintext' : language || 'plaintext', codeToHighlight);
+      const ast = lowlight.highlight(
+        language === 'text' ? 'plaintext' : language || 'plaintext',
+        codeToHighlight
+      );
       return ast.children.map(renderAst);
     } catch (e) {
       // Fallback if language is missing
@@ -97,13 +103,20 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   }, [code, children, language]);
 
   return (
-    <div className={cn("relative rounded-lg bg-surface-raised border border-default shadow-sm overflow-hidden group font-mono text-sm", className)}>
+    <div
+      className={cn(
+        'relative rounded-lg bg-surface-raised border border-default shadow-sm overflow-hidden group font-mono text-sm',
+        className
+      )}
+    >
       <div className="flex items-center justify-between px-3 py-2 bg-surface border-b border-default select-none">
         <div className="flex items-center">
           {readOnlyLanguage ? (
-            <span className="text-xs font-semibold uppercase text-muted tracking-wider px-2 py-1">{language || 'text'}</span>
+            <span className="text-xs font-semibold uppercase text-muted tracking-wider px-2 py-1">
+              {language || 'text'}
+            </span>
           ) : (
-            <Select 
+            <Select
               data={LANG_OPTIONS}
               value={language || 'text'}
               onChange={onLanguageChange}
@@ -111,12 +124,16 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
             />
           )}
         </div>
-        <button 
+        <button
           onClick={copyToClipboard}
           className="text-muted hover:text-default bg-transparent border border-transparent rounded-md transition-all flex items-center justify-center p-1.5"
           title="Copy code"
         >
-          {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
+          {copied ? (
+            <Check size={14} className="text-success" />
+          ) : (
+            <Copy size={14} />
+          )}
         </button>
       </div>
       <pre className="p-4 overflow-x-auto m-0 text-default bg-subtle leading-relaxed">

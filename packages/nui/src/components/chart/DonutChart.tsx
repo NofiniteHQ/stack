@@ -18,14 +18,14 @@ export type DonutChartProps<T> = {
 };
 
 const defaultColors = [
-  'var(--color-primary, #3b82f6)',
-  'var(--color-info, #0ea5e9)',
-  'var(--color-success, #22c55e)',
-  'var(--color-warning, #eab308)',
-  'var(--color-danger, #ef4444)',
-  '#8b5cf6', // violet-500
-  '#ec4899', // pink-500
-  '#f97316', // orange-500
+  'var(--chart-1, var(--color-primary, #3b82f6))',
+  'var(--chart-2, var(--color-info, #0ea5e9))',
+  'var(--chart-3, var(--color-success, #22c55e))',
+  'var(--chart-4, var(--color-warning, #eab308))',
+  'var(--chart-5, var(--color-danger, #ef4444))',
+  'var(--chart-6, #8b5cf6)',
+  'var(--chart-7, #ec4899)',
+  'var(--chart-8, #f97316)',
 ];
 
 const tooltipStyles = {
