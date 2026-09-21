@@ -146,7 +146,7 @@ function ModalRoot({
             ref={overlayRef}
             data-testid="modal-overlay"
             className={cn(
-              'fixed inset-0 flex items-center justify-center z-[9998] bg-overlay',
+              'fixed inset-0 flex items-center justify-center z-[9998] bg-overlay backdrop-blur-sm',
               overlayClassName
             )}
             initial={{ opacity: 0 }}

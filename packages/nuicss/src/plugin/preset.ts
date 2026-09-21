@@ -232,6 +232,7 @@ export function nuicssPreset(): NuicssConfig {
         canvas: 'var(--bg-canvas)',
         surface: 'var(--bg-surface)',
         card: 'var(--bg-card)',
+        overlay: 'var(--bg-overlay)',
       },
       spacing: {
         DEFAULT: 'var(--spacing, 0.25rem)',

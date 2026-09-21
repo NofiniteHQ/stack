@@ -46,6 +46,7 @@ export const DialogProvider = () => {
       onClose={handleModalClose}
       title={state.title}
       disableClickOutside={state.type === 'confirm'}
+      hideCloseButton={true}
       className="max-w-md"
       footer={
         <div className="flex items-center justify-end gap-2.5 w-full">
