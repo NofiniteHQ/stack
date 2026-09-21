@@ -1,7 +1,14 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect, useId } from 'react';
-import { useFloating, autoUpdate, offset, flip, shift, size } from '@floating-ui/react-dom';
+import {
+  useFloating,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+  size,
+} from '@floating-ui/react-dom';
 import { cn } from '../../utils';
 import { Portal, onClickOutside, restoreFocus } from '../../utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -11,7 +18,6 @@ import { Calendar } from '../calendar/Calendar';
 /* ------------------------------------------
  Helpers
 ------------------------------------------- */
-
 
 function fromISO(s?: string | null): Date | null {
   if (!s) return null;
@@ -24,7 +30,7 @@ function fromISO(s?: string | null): Date | null {
  Component Props
 ------------------------------------------- */
 export interface DatePickerProps {
-  value?: string; 
+  value?: string;
   defaultValue?: string;
   onChange?: (v: string) => void;
   minDate?: string;
@@ -80,11 +86,15 @@ export function DatePicker({
   const { refs, x, y, placement } = useFloating<HTMLElement>({
     open,
     placement: 'bottom-start',
-    whileElementsMounted: (reference, floating, update) => 
+    whileElementsMounted: (reference, floating, update) =>
       autoUpdate(reference, floating, update, { animationFrame: false }),
     middleware: [
       offset(4),
-      flip({ padding: 16, fallbackPlacements: ['top-start', 'bottom', 'top'], fallbackStrategy: 'initialPlacement' }),
+      flip({
+        padding: 16,
+        fallbackPlacements: ['top-start', 'bottom', 'top'],
+        fallbackStrategy: 'initialPlacement',
+      }),
       shift({ padding: 16 }),
       size({
         padding: 16,
@@ -103,9 +113,12 @@ export function DatePicker({
   ------------------------------------------- */
   useEffect(() => {
     if (!open) return;
-    const cleanup = onClickOutside([{ current: refs.floating.current as HTMLElement | null }, triggerRef], () => {
-      setOpen(false);
-    });
+    const cleanup = onClickOutside(
+      [{ current: refs.floating.current as HTMLElement | null }, triggerRef],
+      () => {
+        setOpen(false);
+      }
+    );
     return cleanup;
   }, [open, refs.floating]);
 
@@ -114,13 +127,24 @@ export function DatePicker({
       restoreFocus(triggerRef.current);
       return;
     }
-    
-    // Auto-focus calendar wrapper when opened for quick keyboard access
+
+    // Auto-focus selected day button or first available day button when opened
     const timeoutId = setTimeout(() => {
       if (calendarRef.current) {
-        // Find the first selected day or today's button to focus if needed,
-        // but focusing the wrapper is a solid fallback for screen readers.
-        calendarRef.current.focus();
+        const selectedBtn =
+          calendarRef.current.querySelector<HTMLButtonElement>(
+            'button[aria-selected="true"]'
+          );
+        const dayBtn =
+          selectedBtn ||
+          calendarRef.current.querySelector<HTMLButtonElement>(
+            'div[role="grid"] button:not([disabled])'
+          );
+        if (dayBtn) {
+          dayBtn.focus();
+        } else {
+          calendarRef.current.focus();
+        }
       }
     }, 10);
 
@@ -137,7 +161,7 @@ export function DatePicker({
    Render
   ------------------------------------------- */
   return (
-    <div className={cn("inline-block font-sans", className)}>
+    <div className={cn('inline-block font-sans', className)}>
       {name && <input type="hidden" name={name} value={selected ?? ''} />}
 
       <Button
@@ -150,7 +174,7 @@ export function DatePicker({
         type="button"
         disabled={disabled}
         className={cn(
-          "flex items-center justify-between w-full sm:w-[240px] px-2.5 py-1.5 h-auto font-normal text-sm"
+          'flex items-center justify-between w-full sm:w-[240px] px-2.5 py-1.5 h-auto font-normal text-sm'
         )}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -159,7 +183,18 @@ export function DatePicker({
           setOpen((s) => !s);
         }}
         iconRight={
-          <svg className="text-muted shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            className="text-muted shrink-0"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="16" y1="2" x2="16" y2="6"></line>
             <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -167,10 +202,24 @@ export function DatePicker({
           </svg>
         }
       >
-        <span className={cn("block w-full text-left truncate", !selected && "text-muted")}>
-          {selected 
-            ? (formatDisplay ? formatDisplay(fromISO(selected)!) : fromISO(selected)!.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' }))
-            : placeholder}
+        <span
+          className={cn(
+            'block w-full text-left truncate',
+            !selected && 'text-muted'
+          )}
+        >
+          {(() => {
+            if (!selected) return placeholder;
+            const parsedDate = fromISO(selected);
+            if (!parsedDate) return placeholder;
+            return formatDisplay
+              ? formatDisplay(parsedDate)
+              : parsedDate.toLocaleDateString(locale, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                });
+          })()}
         </span>
       </Button>
 
@@ -190,11 +239,13 @@ export function DatePicker({
                   position: 'absolute',
                   top: y ?? 0,
                   left: x ?? 0,
-                  transformOrigin: placement.startsWith('top') ? 'bottom left' : 'top left',
+                  transformOrigin: placement.startsWith('top')
+                    ? 'bottom left'
+                    : 'top left',
                 }}
                 role="dialog"
                 aria-modal="true"
-                aria-label={placeholder || "Date picker"}
+                aria-label={placeholder || 'Date picker'}
                 id={dialogId}
               >
                 {/* The Calendar component completely replaces the old internal grid code */}

@@ -1,0 +1,20 @@
+# NUICSS (@nofinite/nuicss) AI Overview
+
+Semantic CSS utility framework, runtime-less design token engine, and precompiled component superclasses powered by UnoCSS.
+
+## Strict Guidelines
+1. **Semantic Styling**: ALWAYS use nuicss semantic design tokens:
+   - Backgrounds: `bg-page`, `bg-surface`, `bg-subtle`, `bg-muted`, `bg-accent`, `bg-card`, `bg-primary`, `bg-primary-subtle`
+   - Foreground: `text-default`, `text-subtle`, `text-muted`, `text-accent`, `text-inverse`, `text-primary`, `text-danger`
+   - Borders: `border-default`, `border-subtle`, `border-strong`, `border-focus`, `border-primary`
+2. **Dual Superclass Naming**: All component shortcuts support both short (`btn`, `card`, `input`, `badge`) and namespaced (`nui-btn`, `nui-card`, `nui-input`, `nui-badge`) syntax.
+3. **W3C Cascade Layers**: Component superclasses are placed in `@layer components` and can be overridden with atomic utilities (`p-4`, `rounded-xl`, `opacity-90`).
+
+## Component Categories
+- **Primitives**: Button, Badge, Card, Avatar, Divider, Kbd, Skeleton, Spinner, Empty State, Stat Card, Link, Breadcrumbs, Timeline, Progress, Attachment, Watermark, Provider
+- **Forms**: Input, Textarea, Checkbox, Radio, Switch, Select, Number Input, Pin Input, Password Input, Slider, Rating, Segmented Control, Alert, Toast, Form Control, Rich Text Editor
+- **Overlays**: Modal, Dialog, Drawer, Dropdown, Context Menu, Popover, Tooltip, Hover Card, Command Palette, Link Preview
+- **Widgets**: Accordion, Collapsible, Tabs, Stepper, Pagination, Table, TreeView, Transfer List, Dropzone / File List, Resizable, ScrollArea, Color Picker, Charts, DataGrid, Kanban
+- **Media**: Calendar, DatePicker, TimePicker, Combobox, MultiSelect, VirtualList, Carousel, CodeBlock, VideoPlayer, MegaMenu, Chip, Image
+
+For the full dictionary and API reference, see `llms-full.txt`.

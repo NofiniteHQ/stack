@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -31,12 +31,16 @@ export function Carousel({
   ...props
 }: CarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   const originalLength = children.length;
   const isLooping = loop && originalLength > 1;
-  const virtualChildren = isLooping ? [...children, ...children, ...children] : children;
-  
-  const [virtualIndex, setVirtualIndex] = useState(isLooping ? originalLength : 0);
+  const virtualChildren = isLooping
+    ? [...children, ...children, ...children]
+    : children;
+
+  const [virtualIndex, setVirtualIndex] = useState(
+    isLooping ? originalLength : 0
+  );
   const activeIndex = isLooping ? virtualIndex % originalLength : virtualIndex;
 
   const [isAtStart, setIsAtStart] = useState(!isLooping);
@@ -49,46 +53,53 @@ export function Carousel({
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
-  
+
   const isScrollingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const teleportTo = useCallback((targetVirtualIndex: number, currentVirtualIndex: number) => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const currentSlide = container.children[currentVirtualIndex] as HTMLElement;
-    const targetSlide = container.children[targetVirtualIndex] as HTMLElement;
-    
-    if (currentSlide && targetSlide) {
-      const diff = targetSlide.offsetLeft - currentSlide.offsetLeft;
-      
-      const originalSnap = container.style.scrollSnapType;
-      const originalBehavior = container.style.scrollBehavior;
-      container.style.scrollSnapType = 'none';
-      container.style.scrollBehavior = 'auto';
-      
-      container.scrollLeft += diff;
-      setVirtualIndex(targetVirtualIndex);
-      
-      requestAnimationFrame(() => {
-        container.style.scrollSnapType = originalSnap;
-        container.style.scrollBehavior = originalBehavior;
-      });
-    }
-  }, []);
+  const teleportTo = useCallback(
+    (targetVirtualIndex: number, currentVirtualIndex: number) => {
+      const container = scrollRef.current;
+      if (!container) return;
+      const currentSlide = container.children[
+        currentVirtualIndex
+      ] as HTMLElement;
+      const targetSlide = container.children[targetVirtualIndex] as HTMLElement;
+
+      if (currentSlide && targetSlide) {
+        const diff = targetSlide.offsetLeft - currentSlide.offsetLeft;
+
+        const originalSnap = container.style.scrollSnapType;
+        const originalBehavior = container.style.scrollBehavior;
+        container.style.scrollSnapType = 'none';
+        container.style.scrollBehavior = 'auto';
+
+        container.scrollLeft += diff;
+        setVirtualIndex(targetVirtualIndex);
+
+        requestAnimationFrame(() => {
+          container.style.scrollSnapType = originalSnap;
+          container.style.scrollBehavior = originalBehavior;
+        });
+      }
+    },
+    []
+  );
 
   const checkBoundaries = useCallback(() => {
     if (!scrollRef.current) return;
     if (isLooping) return; // Infinite scroll has no visual boundaries
-    
+
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    setIsAtStart(scrollLeft <= 1);
-    setIsAtEnd(Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 1);
+    if (scrollWidth > 0 && clientWidth > 0) {
+      setIsAtStart(scrollLeft <= 1);
+      setIsAtEnd(Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 1);
+    }
   }, [isLooping]);
 
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
     checkBoundaries();
-    
+
     const container = scrollRef.current;
     const scrollLeft = container.scrollLeft;
     const scrollCenter = scrollLeft + container.clientWidth / 2;
@@ -96,9 +107,11 @@ export function Carousel({
 
     let closestIndex = 0;
     let minDiff = Infinity;
+    let hasLayout = false;
 
     Array.from(container.children).forEach((child, index) => {
       const el = child as HTMLElement;
+      if (el.offsetLeft !== 0 || el.offsetWidth !== 0) hasLayout = true;
       let diff = Infinity;
       if (align === 'start') {
         diff = Math.abs(el.offsetLeft - scrollLeft);
@@ -115,7 +128,9 @@ export function Carousel({
       }
     });
 
-    setVirtualIndex(closestIndex);
+    if (hasLayout) {
+      setVirtualIndex(closestIndex);
+    }
 
     // Triple Buffer Teleportation for Infinite Loop
     if (isLooping && !isDragging.current) {
@@ -130,19 +145,26 @@ export function Carousel({
     }
   }, [align, checkBoundaries, isLooping, originalLength, teleportTo]);
 
-  const scrollToIndex = useCallback((targetIndex: number) => {
-    if (!scrollRef.current) return;
-    setVirtualIndex(targetIndex);
-    const container = scrollRef.current;
-    const slide = container.children[targetIndex] as HTMLElement;
-    
-    if (slide) {
-      container.scrollTo({
-        left: slide.offsetLeft,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
+  const scrollToIndex = useCallback(
+    (targetIndex: number) => {
+      if (!scrollRef.current) return;
+      setVirtualIndex(targetIndex);
+      if (!isLooping) {
+        setIsAtStart(targetIndex <= 0);
+        setIsAtEnd(targetIndex >= originalLength - 1);
+      }
+      const container = scrollRef.current;
+      const slide = container.children[targetIndex] as HTMLElement;
+
+      if (slide && typeof container.scrollTo === 'function') {
+        container.scrollTo({
+          left: slide.offsetLeft,
+          behavior: 'smooth',
+        });
+      }
+    },
+    [isLooping, originalLength]
+  );
 
   const next = useCallback(() => {
     if (isAtEnd && (autoPlay || isLooping)) {
@@ -150,7 +172,15 @@ export function Carousel({
     } else {
       scrollToIndex(Math.min(virtualIndex + 1, virtualChildren.length - 1));
     }
-  }, [virtualIndex, virtualChildren.length, isAtEnd, autoPlay, isLooping, originalLength, scrollToIndex]);
+  }, [
+    virtualIndex,
+    virtualChildren.length,
+    isAtEnd,
+    autoPlay,
+    isLooping,
+    originalLength,
+    scrollToIndex,
+  ]);
 
   const prev = useCallback(() => {
     scrollToIndex(Math.max(virtualIndex - 1, 0));
@@ -174,37 +204,42 @@ export function Carousel({
   useEffect(() => {
     if (!autoPlay || !isInitialized) return;
     if (isHovered || isDragging.current) return;
-    
+
     const timer = setInterval(() => {
       next();
     }, interval);
-    
+
     return () => clearInterval(timer);
   }, [autoPlay, interval, isHovered, next, isInitialized]);
 
   // Intersection Observer for `aria-hidden` multi-item support
   useEffect(() => {
     if (!scrollRef.current) return;
-    
-    const observer = new IntersectionObserver((entries) => {
-      setVisibleSlides(prev => {
-        const nextSet = new Set(prev);
-        entries.forEach(entry => {
-          const index = Number(entry.target.getAttribute('data-original-index'));
-          if (entry.isIntersecting) {
-            nextSet.add(index);
-          } else {
-            nextSet.delete(index);
-          }
-        });
-        return nextSet;
-      });
-    }, {
-      root: scrollRef.current,
-      threshold: 0.1
-    });
 
-    Array.from(scrollRef.current.children).forEach(child => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setVisibleSlides((prev) => {
+          const nextSet = new Set(prev);
+          entries.forEach((entry) => {
+            const index = Number(
+              entry.target.getAttribute('data-original-index')
+            );
+            if (entry.isIntersecting) {
+              nextSet.add(index);
+            } else {
+              nextSet.delete(index);
+            }
+          });
+          return nextSet;
+        });
+      },
+      {
+        root: scrollRef.current,
+        threshold: 0.1,
+      }
+    );
+
+    Array.from(scrollRef.current.children).forEach((child) => {
       observer.observe(child);
     });
 
@@ -259,9 +294,15 @@ export function Carousel({
   };
 
   return (
-    <div 
-      className={cn("relative w-full group font-sans nui-carousel", !isInitialized && isLooping ? "opacity-0" : "opacity-100 transition-opacity duration-300", className)} 
-      role="region" 
+    <div
+      className={cn(
+        'relative w-full group font-sans nui-carousel',
+        !isInitialized && isLooping
+          ? 'opacity-0'
+          : 'opacity-100 transition-opacity duration-300',
+        className
+      )}
+      role="region"
       aria-roledescription="carousel"
       aria-label="Image Carousel"
       onKeyDown={handleKeyDown}
@@ -272,8 +313,6 @@ export function Carousel({
       }}
       {...props}
     >
-
-
       {/* ARIA Live Region */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {`Slide ${activeIndex + 1} of ${originalLength}`}
@@ -297,10 +336,10 @@ export function Carousel({
               data-index={index}
               data-original-index={originalIndex}
               className={cn(
-                "shrink-0 select-none",
-                align === 'start' && "snap-start",
-                align === 'center' && "snap-center",
-                align === 'end' && "snap-end"
+                'shrink-0 select-none',
+                align === 'start' && 'snap-start',
+                align === 'center' && 'snap-center',
+                align === 'end' && 'snap-end'
               )}
               style={{ width: itemWidth }}
               role="group"
@@ -322,8 +361,8 @@ export function Carousel({
               variant="outline"
               size="icon"
               className={cn(
-                "rounded-full shadow-sm bg-glass backdrop-blur-md border border-subtle text-default hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] pointer-events-auto transition-all",
-                isAtStart && !isLooping && "opacity-50 cursor-not-allowed"
+                'rounded-full shadow-sm bg-glass backdrop-blur-md border border-subtle text-default hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] pointer-events-auto transition-all',
+                isAtStart && !isLooping && 'opacity-50 cursor-not-allowed'
               )}
               onClick={prev}
               disabled={isAtStart && !isLooping}
@@ -337,8 +376,8 @@ export function Carousel({
               variant="outline"
               size="icon"
               className={cn(
-                "rounded-full shadow-sm bg-glass backdrop-blur-md border border-subtle text-default hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] pointer-events-auto transition-all",
-                isAtEnd && !isLooping && "opacity-50 cursor-not-allowed"
+                'rounded-full shadow-sm bg-glass backdrop-blur-md border border-subtle text-default hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] pointer-events-auto transition-all',
+                isAtEnd && !isLooping && 'opacity-50 cursor-not-allowed'
               )}
               onClick={next}
               disabled={isAtEnd && !isLooping}
@@ -359,10 +398,10 @@ export function Carousel({
               <button
                 key={originalIndex}
                 className={cn(
-                  "h-2 rounded-full transition-all focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:ring-offset-2 focus-visible:ring-offset-surface bg-current",
-                  isActive 
-                    ? "w-4 text-default" 
-                    : "w-2 text-muted opacity-40 hover:opacity-100 hover:text-default"
+                  'h-2 rounded-full transition-all focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)] focus-visible:ring-offset-2 focus-visible:ring-offset-surface bg-current',
+                  isActive
+                    ? 'w-4 text-default'
+                    : 'w-2 text-muted opacity-40 hover:opacity-100 hover:text-default'
                 )}
                 onClick={() => {
                   if (isLooping) {

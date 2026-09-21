@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { CodeBlock } from './CodeBlock';
 
 const meta: Meta<typeof CodeBlock> = {
-  title: 'Components/Data Display/CodeBlock',
+  title: 'Media/CodeBlock',
   component: CodeBlock,
   tags: ['autodocs'],
   parameters: { layout: 'padded' },
@@ -13,10 +13,10 @@ type Story = StoryObj<typeof CodeBlock>;
 
 export const Default: Story = {
   args: {
-    language: "javascript",
-    code: "console.log(\"Hello World\");\nconst x = 42;",
+    language: 'javascript',
+    code: 'console.log("Hello World");\nconst x = 42;',
     children: 'console.log("Hello World");\nconst x = 42;',
-    className: ""
+    className: '',
   },
 };
 

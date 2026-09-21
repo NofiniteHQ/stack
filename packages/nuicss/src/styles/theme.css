@@ -1,4 +1,4 @@
-:root {
+:where(:root) {
   /* ------------------------------------------------------------
   1. PRIMITIVE TOKENS (RAW VALUES)
   ------------------------------------------------------------ */
@@ -8,40 +8,69 @@
   --black: #000000;
   --transparent: transparent;
 
-  /* Neutral Scale (Slate) */
+  /* Neutral Scale (Slate) - Dual fallback & OKLCH */
   --slate-50: #f8fafc;
+  --slate-50: oklch(0.984 0.006 247.858);
   --slate-100: #f1f5f9;
+  --slate-100: oklch(0.968 0.007 247.896);
   --slate-200: #e2e8f0;
+  --slate-200: oklch(0.929 0.013 255.508);
   --slate-300: #cbd5e1;
+  --slate-300: oklch(0.869 0.022 252.894);
   --slate-400: #94a3b8;
+  --slate-400: oklch(0.704 0.04 256.788);
   --slate-500: #64748b;
+  --slate-500: oklch(0.554 0.046 257.417);
   --slate-600: #475569;
+  --slate-600: oklch(0.446 0.043 257.281);
   --slate-700: #334155;
+  --slate-700: oklch(0.372 0.044 257.287);
   --slate-800: #1e293b;
+  --slate-800: oklch(0.279 0.041 260.031);
   --slate-900: #0f172a;
+  --slate-900: oklch(0.208 0.042 265.755);
   --slate-950: #020617;
+  --slate-950: oklch(0.129 0.042 264.695);
 
-  /* Brand Primitive (Completed Blue Scale) */
+  /* Brand Primitive (Completed Blue Scale) - Dual fallback & OKLCH */
   --brand-50: #eff6ff;
+  --brand-50: oklch(0.97 0.014 254.604);
   --brand-100: #dbeafe;
+  --brand-100: oklch(0.932 0.032 255.585);
   --brand-200: #bfdbfe;
+  --brand-200: oklch(0.882 0.059 254.128);
   --brand-300: #93c5fd;
+  --brand-300: oklch(0.809 0.105 251.813);
   --brand-400: #60a5fa;
+  --brand-400: oklch(0.707 0.165 254.624);
   --brand-500: #3b82f6;
+  --brand-500: oklch(0.623 0.214 259.815);
   --brand-600: #2563eb;
+  --brand-600: oklch(0.546 0.245 262.881);
   --brand-700: #1d4ed8;
+  --brand-700: oklch(0.488 0.243 264.376);
   --brand-800: #1e40af;
+  --brand-800: oklch(0.424 0.199 265.638);
   --brand-900: #1e3a8a;
+  --brand-900: oklch(0.379 0.146 265.522);
   --brand-950: #172554;
+  --brand-950: oklch(0.282 0.091 267.935);
 
-  /* State Colors */
+  /* State Colors - Dual fallback & OKLCH */
   --red-500: #ef4444;
+  --red-500: oklch(0.637 0.237 25.331);
   --red-600: #dc2626;
+  --red-600: oklch(0.577 0.245 27.325);
   --green-500: #10b981;
+  --green-500: oklch(0.696 0.17 162.48);
   --green-600: #059669;
+  --green-600: oklch(0.6 0.118 184.704);
   --amber-500: #f59e0b;
+  --amber-500: oklch(0.769 0.188 70.08);
   --amber-600: #d97706;
-  --blue-500: #0ea5e9; /* For Info states */
+  --amber-600: oklch(0.666 0.179 58.318);
+  --blue-500: #0ea5e9;
+  --blue-500: oklch(0.685 0.169 237.323);
 
   /* ------------------------------------------------------------
   2. BRAND TOKENS
@@ -58,73 +87,117 @@
 
   /* Backgrounds */
   --bg-page: var(--slate-50);
+  --bg-canvas: var(--slate-50);
   --bg-surface: var(--white);
   --bg-surface-raised: var(--slate-50);
   --bg-surface-overlay: var(--white);
-  --bg-subtle: var(--slate-50);
-  --bg-muted: var(--slate-100);
+  --bg-subtle: var(--slate-100);
+  --bg-muted: var(--slate-200);
+  --bg-inset: var(--slate-100);
+  --bg-card: var(--white);
   --bg-accent: var(--slate-100);
   --bg-overlay: rgba(0, 0, 0, 0.4);
   --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border: rgba(0, 0, 0, 0.08);
 
   /* Selected */
-  --bg-selected: color-mix(
-    in srgb,
-    var(--brand-primary) 8%,
-    transparent
-  );
+  --bg-selected: color-mix(in oklch, var(--color-primary) 8%, transparent);
   --bg-selected-hover: color-mix(
-    in srgb,
-    var(--brand-primary) 12%,
+    in oklch,
+    var(--color-primary) 12%,
     transparent
   );
 
   /* Foreground */
   --fg-default: var(--slate-900);
+  --fg-card: var(--slate-900);
   --fg-subtle: var(--slate-600);
   --fg-muted: var(--slate-500);
   --fg-accent: var(--slate-900);
   --fg-inverse: var(--white);
   --fg-disabled: var(--slate-400);
 
+  /* NUI Focus & State Aliases */
+  --nui-fg-default: var(--fg-default);
+  --nui-fg-subtle: var(--fg-subtle);
+  --nui-fg-muted: var(--fg-muted);
+  --nui-color-danger: var(--color-danger);
+
   /* Borders */
-  --border-default: var(--slate-300);
-  --border-strong: var(--slate-400);
-  --border-subtle: var(--slate-200);
-  --border-hover: var(--slate-400);
-  --border-focus: var(--brand-primary);
+  --border-default: var(--slate-200);
+  --border-strong: var(--slate-300);
+  --border-subtle: var(--slate-100);
+  --border-hover: var(--slate-300);
+  --border-focus: var(--color-primary);
   --border-disabled: var(--slate-200);
 
   /* Primary Action */
   --color-primary: var(--brand-primary);
-  --color-primary-hover: var(--brand-primary-hover);
-  --color-primary-active: var(--brand-primary-active);
+  --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, black);
+  --color-primary-active: color-mix(in oklch, var(--color-primary) 76%, black);
   --color-primary-fg: var(--brand-primary-fg);
+
+  /* Secondary Action (Minimalist / Subtle Action) */
+  --color-secondary: var(--slate-100);
+  --color-secondary-hover: var(--slate-200);
+  --color-secondary-active: var(--slate-300);
+  --color-secondary-fg: var(--slate-900);
+  --color-secondary-subtle: color-mix(
+    in oklch,
+    var(--color-secondary) 15%,
+    transparent
+  );
 
   /* Feedback */
   --color-danger: var(--red-500);
-  --color-danger-subtle: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  --color-danger-subtle: color-mix(
+    in oklch,
+    var(--color-danger) 10%,
+    transparent
+  );
   --color-danger-fg: var(--white);
   --color-success: var(--green-500);
-  --color-success-subtle: color-mix(in srgb, var(--color-success) 10%, transparent);
+  --color-success-subtle: color-mix(
+    in oklch,
+    var(--color-success) 10%,
+    transparent
+  );
   --color-success-fg: var(--white);
   --color-warning: var(--amber-500);
-  --color-warning-subtle: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  --color-warning-subtle: color-mix(
+    in oklch,
+    var(--color-warning) 10%,
+    transparent
+  );
   --color-warning-fg: var(--white);
   --color-info: var(--blue-500);
-  --color-info-subtle: color-mix(in srgb, var(--color-info) 10%, transparent);
+  --color-info-subtle: color-mix(in oklch, var(--color-info) 10%, transparent);
   --color-info-fg: var(--white);
-  --color-primary-subtle: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  --color-primary-subtle: color-mix(
+    in oklch,
+    var(--color-primary) 10%,
+    transparent
+  );
+
+  /* Chart Tokens */
+  --chart-1: var(--color-primary);
+  --chart-2: var(--color-info);
+  --chart-3: var(--color-success);
+  --chart-4: var(--color-warning);
+  --chart-5: var(--color-danger);
+  --chart-6: oklch(0.65 0.22 300);
+  --chart-7: oklch(0.7 0.2 350);
+  --chart-8: oklch(0.72 0.19 50);
 
   /* Focus */
   --focus-ring: var(--fg-default);
   --focus-ring-offset: var(--bg-page);
 
   /* ------------------------------------------------------------
-  4. SPACING SCALE (4px BASE)
+  4. SPACING SCALE (4px BASE + TAILWIND PARITY)
   ------------------------------------------------------------ */
 
+  --spacing: 0.25rem;
   --space-0: 0px;
   --space-0-5: 0.125rem; /* 2px */
   --space-1: 0.25rem; /* 4px */
@@ -135,18 +208,35 @@
   --space-4: 1rem; /* 16px */
   --space-5: 1.25rem; /* 20px */
   --space-6: 1.5rem; /* 24px */
+  --space-7: 1.75rem; /* 28px */
   --space-8: 2rem; /* 32px */
+  --space-9: 2.25rem; /* 36px */
   --space-10: 2.5rem; /* 40px */
+  --space-11: 2.75rem; /* 44px */
   --space-12: 3rem; /* 48px */
   --space-14: 3.5rem; /* 56px */
   --space-16: 4rem; /* 64px */
   --space-20: 5rem; /* 80px */
   --space-24: 6rem; /* 96px */
+  --space-28: 7rem; /* 112px */
   --space-32: 8rem; /* 128px */
+  --space-36: 9rem; /* 144px */
   --space-40: 10rem; /* 160px */
+  --space-44: 11rem; /* 176px */
   --space-48: 12rem; /* 192px */
+  --space-52: 13rem; /* 208px */
   --space-64: 16rem; /* 256px */
+  --space-72: 18rem; /* 288px */
+  --space-80: 20rem; /* 320px */
+  --space-96: 24rem; /* 384px */
   --space-auto: auto;
+
+  /* Fluid Spacing Scale (Smooth clamp scaling from 375px to 1440px viewport) */
+  --space-fluid-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+  --space-fluid-sm: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);
+  --space-fluid-md: clamp(1rem, 0.75rem + 1vw, 2rem);
+  --space-fluid-lg: clamp(1.5rem, 1rem + 2vw, 3.5rem);
+  --space-fluid-xl: clamp(2.5rem, 1.5rem + 4vw, 6rem);
 
   /* ------------------------------------------------------------
   5. RADII
@@ -154,8 +244,10 @@
 
   --radius-none: 0px;
   --radius-sm: 0.25rem; /* 4px */
+  --radius-control: 0.375rem; /* 6px - buttons & inputs */
   --radius-md: 0.375rem; /* 6px */
   --radius-lg: 0.5rem; /* 8px */
+  --radius-container: 0.75rem; /* 12px - cards & dialogs */
   --radius-xl: 0.75rem; /* 12px */
   --radius-2xl: 1rem; /* 16px */
   --radius-3xl: 1.5rem; /* 24px */
@@ -168,8 +260,7 @@
   /* Fonts */
   --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Font Sizes */
   --text-xs: 0.75rem; /* 12px */
@@ -185,6 +276,18 @@
   --text-7xl: 4.5rem; /* 72px */
   --text-8xl: 6rem; /* 96px */
   --text-9xl: 8rem; /* 128px */
+
+  /* Fluid Typography Scale (Smooth clamp scaling from 375px to 1440px viewport) */
+  --text-fluid-xs: clamp(0.7rem, 0.65rem + 0.25vw, 0.8rem);
+  --text-fluid-sm: clamp(0.8rem, 0.75rem + 0.3vw, 0.95rem);
+  --text-fluid-base: clamp(0.95rem, 0.9rem + 0.35vw, 1.125rem);
+  --text-fluid-lg: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+  --text-fluid-xl: clamp(1.25rem, 1.1rem + 0.8vw, 1.75rem);
+  --text-fluid-2xl: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+  --text-fluid-3xl: clamp(1.875rem, 1.5rem + 1.8vw, 3rem);
+  --text-fluid-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 4rem);
+  --text-fluid-5xl: clamp(3rem, 2.25rem + 3.5vw, 5rem);
+  --text-fluid-hero: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
 
   /* Font Weight */
   --weight-light: 300;
@@ -211,16 +314,22 @@
   --leading-loose: 2;
 
   /* ------------------------------------------------------------
-  7. SHADOWS (Modern Smooth Optical)
+  7. SHADOWS (Modern Dual-Layer Optical)
   ------------------------------------------------------------ */
 
   --shadow-none: 0 0 #0000;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 2px 4px rgba(0,0,0,0.04), 0 4px 6px rgba(0,0,0,0.08);
-  --shadow-lg: 0 4px 6px rgba(0,0,0,0.04), 0 10px 15px rgba(0,0,0,0.08);
-  --shadow-xl: 0 10px 15px rgba(0,0,0,0.04), 0 20px 25px rgba(0,0,0,0.08);
-  --shadow-2xl: 0 20px 25px rgba(0,0,0,0.04), 0 40px 50px rgba(0,0,0,0.1);
-  --shadow-inner: inset 0 2px 4px 0 rgba(0,0,0,0.06);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06),
+    0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06),
+    0 4px 6px -4px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-popover: 0 10px 38px -10px rgba(22, 23, 24, 0.12),
+    0 10px 20px -15px rgba(22, 23, 24, 0.08);
 
   /* ------------------------------------------------------------
   8. TRANSITIONS & ANIMATIONS
@@ -237,6 +346,10 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ------------------------------------------------------------
   9. CONTAINERS
@@ -292,33 +405,44 @@
 13. DARK MODE
 ------------------------------------------------------------ */
 
-[data-theme='dark'], .dark {
+:where([data-theme='dark'], .dark) {
   /* Backgrounds */
   --bg-page: var(--slate-950);
+  --bg-canvas: var(--slate-950);
   --bg-surface: var(--slate-900);
   --bg-surface-raised: var(--slate-800);
   --bg-surface-overlay: var(--slate-900);
   --bg-subtle: var(--slate-800);
   --bg-muted: var(--slate-800);
+  --bg-inset: #090d16;
+  --bg-card: var(--slate-900);
   --bg-accent: var(--slate-800);
   --bg-overlay: rgba(0, 0, 0, 0.7);
-  --glass-bg: rgba(15, 23, 42, 0.7);
+  --glass-bg: rgba(15, 23, 42, 0.75);
   --glass-border: rgba(255, 255, 255, 0.1);
 
   /* Selected */
-  --bg-selected: color-mix(
-    in srgb,
-    var(--brand-primary) 20%,
+  --bg-selected: color-mix(in oklch, var(--color-primary) 18%, transparent);
+  --bg-selected-hover: color-mix(
+    in oklch,
+    var(--color-primary) 26%,
     transparent
   );
-  --bg-selected-hover: color-mix(
-    in srgb,
-    var(--brand-primary) 30%,
+
+  /* Secondary Action */
+  --color-secondary: var(--slate-800);
+  --color-secondary-hover: var(--slate-700);
+  --color-secondary-active: var(--slate-600);
+  --color-secondary-fg: var(--slate-50);
+  --color-secondary-subtle: color-mix(
+    in oklch,
+    var(--color-secondary) 25%,
     transparent
   );
 
   /* Foreground */
   --fg-default: var(--slate-50);
+  --fg-card: var(--slate-50);
   --fg-subtle: var(--slate-300);
   --fg-muted: var(--slate-400);
   --fg-accent: var(--slate-50);
@@ -326,204 +450,136 @@
   --fg-disabled: var(--slate-600);
 
   /* Borders */
-  --border-default: var(--slate-700);
-  --border-strong: var(--slate-500);
-  --border-subtle: var(--slate-800);
-  --border-hover: var(--slate-600);
+  --border-default: var(--slate-800);
+  --border-strong: var(--slate-700);
+  --border-subtle: var(--slate-900);
+  --border-hover: var(--slate-700);
   --border-disabled: var(--slate-800);
 
   /* Brand Adjustments for Dark Mode */
   --brand-primary: var(--brand-500);
   --brand-primary-hover: var(--brand-400);
   --brand-primary-active: var(--brand-600);
+  --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, white);
+  --color-primary-active: color-mix(in oklch, var(--color-primary) 76%, white);
+  --color-primary-subtle: color-mix(
+    in oklch,
+    var(--color-primary) 18%,
+    transparent
+  );
+
+  /* Feedback Colors (High Contrast for Dark Surfaces - WCAG AA) */
+  --color-danger: #f87171;
+  --color-danger-hover: #ef4444;
+  --color-danger-subtle: color-mix(
+    in oklch,
+    var(--color-danger) 18%,
+    transparent
+  );
+  --color-success: #34d399;
+  --color-success-hover: #10b981;
+  --color-success-subtle: color-mix(
+    in oklch,
+    var(--color-success) 18%,
+    transparent
+  );
+  --color-warning: #fbbf24;
+  --color-warning-hover: #f59e0b;
+  --color-warning-subtle: color-mix(
+    in oklch,
+    var(--color-warning) 18%,
+    transparent
+  );
+  --color-info: #38bdf8;
+  --color-info-hover: #0ea5e9;
+  --color-info-subtle: color-mix(in oklch, var(--color-info) 18%, transparent);
+
+  /* Chart Tokens (Dark Mode) */
+  --chart-1: var(--color-primary);
+  --chart-2: var(--color-info);
+  --chart-3: var(--color-success);
+  --chart-4: var(--color-warning);
+  --chart-5: var(--color-danger);
+  --chart-6: oklch(0.75 0.2 300);
+  --chart-7: oklch(0.78 0.18 350);
+  --chart-8: oklch(0.8 0.17 50);
 }
 
 /* ------------------------------------------------------------
-14. EDITOR OVERRIDES (Force UI integrity over tailwind prose)
+14. WIDE COLOR GAMUT (DISPLAY P3) ENHANCEMENTS
 ------------------------------------------------------------ */
+@supports (color: color(display-p3 1 1 1)) {
+  :where(:root) {
+    --brand-500: oklch(0.623 0.255 259.815);
+    --brand-600: oklch(0.546 0.285 262.881);
+    --green-500: oklch(0.696 0.215 162.48);
+    --red-500: oklch(0.628 0.265 25.72);
+    --amber-500: oklch(0.769 0.22 70.08);
+    --blue-500: oklch(0.685 0.21 237.323);
+  }
 
-.tiptap-wrapper .tiptap ul[data-type="taskList"] {
-  list-style: none !important;
-  padding: 0 !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-start !important;
-  margin-bottom: 0.25rem !important;
-  margin-top: 0.25rem !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li > label {
-  margin-right: 0.5rem !important;
-  user-select: none !important;
-  margin-top: 0.25rem !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li > div {
-  flex: 1 1 auto !important;
-  margin: 0 !important;
-}
-
-.tiptap-wrapper .tiptap ul[data-type="taskList"] li > div > p {
-  margin: 0 !important;
+  :where([data-theme='dark'], .dark) {
+    --brand-primary: oklch(0.623 0.255 259.815);
+    --color-danger: oklch(0.704 0.22 22.216);
+    --color-success: oklch(0.792 0.21 162.48);
+    --color-warning: oklch(0.828 0.22 84.429);
+    --color-info: oklch(0.789 0.19 211.53);
+  }
 }
 
 /* ------------------------------------------------------------
-15. TIPTAP TYPOGRAPHY & STRUCTURAL RESETS
+15. ACCESSIBILITY & HIGH CONTRAST MODE (WCAG AAA)
 ------------------------------------------------------------ */
+@media (prefers-contrast: more) {
+  :where(:root) {
+    --border-default: #000000;
+    --border-strong: #000000;
+    --border-subtle: #334155;
+    --fg-default: #000000;
+    --fg-subtle: #0f172a;
+    --fg-muted: #1e293b;
+    --color-primary: #1d4ed8;
+    --color-primary-hover: #1e40af;
+    --color-danger: #b91c1c;
+    --color-success: #047857;
+    --color-warning: #b45309;
+    --color-info: #0369a1;
+    --focus-ring: #000000;
+  }
 
-/* Base Typography */
-.tiptap-wrapper .tiptap p {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  line-height: var(--leading-normal);
-}
+  :where([data-theme='dark'], .dark) {
+    --border-default: #ffffff;
+    --border-strong: #ffffff;
+    --border-subtle: #94a3b8;
+    --fg-default: #ffffff;
+    --fg-subtle: #f8fafc;
+    --fg-muted: #f1f5f9;
+    --color-primary: #60a5fa;
+    --color-primary-hover: #93c5fd;
+    --color-danger: #fca5a5;
+    --color-success: #6ee7b7;
+    --color-warning: #fde047;
+    --color-info: #7dd3fc;
+    --focus-ring: #ffffff;
+  }
 
-.tiptap-wrapper .tiptap h1,
-.tiptap-wrapper .tiptap h2,
-.tiptap-wrapper .tiptap h3,
-.tiptap-wrapper .tiptap h4 {
-  font-weight: var(--weight-bold);
-  color: var(--fg-default);
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  line-height: var(--leading-tight);
-}
+  .btn,
+  .input,
+  .select,
+  .textarea,
+  .card,
+  .badge {
+    border-width: 2px !important;
+  }
 
-.tiptap-wrapper .tiptap h1 { font-size: var(--text-3xl); }
-.tiptap-wrapper .tiptap h2 { font-size: var(--text-2xl); }
-.tiptap-wrapper .tiptap h3 { font-size: var(--text-xl); }
-
-/* Links */
-.tiptap-wrapper .tiptap a {
-  color: var(--color-primary);
-  text-decoration: underline;
-  cursor: pointer;
-  text-underline-offset: 2px;
-}
-
-/* Lists */
-.tiptap-wrapper .tiptap ul,
-.tiptap-wrapper .tiptap ol {
-  padding-left: 1.5rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.tiptap-wrapper .tiptap ul { list-style-type: disc; }
-.tiptap-wrapper .tiptap ol { list-style-type: decimal; }
-
-.tiptap-wrapper .tiptap li p {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
-}
-
-/* Blockquotes */
-.tiptap-wrapper .tiptap blockquote {
-  border-left: 3px solid var(--border-strong);
-  padding-left: 1rem;
-  margin-left: 0;
-  margin-right: 0;
-  color: var(--fg-muted);
-  font-style: italic;
-}
-
-/* Code & Preformatted */
-.tiptap-wrapper .tiptap pre {
-  background-color: var(--slate-900);
-  color: var(--slate-50);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
-.tiptap-wrapper .tiptap code {
-  background-color: var(--bg-subtle);
-  color: var(--color-primary);
-  padding: 0.2rem 0.4rem;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 0.875em;
-}
-
-.tiptap-wrapper .tiptap pre code {
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
-  border-radius: 0;
-  font-size: inherit;
+  :focus-visible {
+    outline-width: 3px !important;
+    outline-offset: 3px !important;
+  }
 }
 
 /* ------------------------------------------------------------
-16. TIPTAP TABLES & PLACEHOLDERS
------------------------------------------------------------- */
-
-/* Invisible Placeholder Fix */
-.tiptap-wrapper .tiptap p.is-editor-empty:first-child::before {
-  color: var(--fg-muted);
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-  font-style: italic;
-}
-
-/* Table Structural Fix */
-.tiptap-wrapper .tiptap table {
-  border-collapse: collapse;
-  table-layout: fixed;
-  width: 100%;
-  margin: 1rem 0;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-}
-
-.tiptap-wrapper .tiptap table td,
-.tiptap-wrapper .tiptap table th {
-  min-width: 1em;
-  border: 1px solid var(--border-default);
-  padding: 0.5rem 0.75rem;
-  vertical-align: top;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.tiptap-wrapper .tiptap table th {
-  font-weight: var(--weight-bold);
-  text-align: left;
-  background-color: var(--bg-subtle);
-}
-
-.tiptap-wrapper .tiptap table .selectedCell:after {
-  z-index: 2;
-  position: absolute;
-  content: "";
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: var(--bg-selected);
-  pointer-events: none;
-}
-
-.tiptap-wrapper .tiptap table .column-resize-handle {
-  position: absolute;
-  right: -2px;
-  top: 0;
-  bottom: -2px;
-  width: 4px;
-  background-color: var(--color-primary);
-  pointer-events: none;
-}
-
-/* ------------------------------------------------------------
-17. SCROLLBARS & BROWSER OVERRIDES
+16. SCROLLBARS & BROWSER OVERRIDES
 ------------------------------------------------------------ */
 
 /* Modern Custom Scrollbar */
@@ -556,12 +612,240 @@
 }
 
 /* Hide Number Input Spinners */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
+input[type='number'] {
   -moz-appearance: textfield;
+}
+
+/* ------------------------------------------------------------
+6. TIPTAP EDITOR COMPONENT STYLES
+------------------------------------------------------------ */
+@layer components {
+  .tiptap-wrapper .tiptap ul[data-type='taskList'],
+  .tiptap-wrapper ul[data-type='taskList'],
+  .nui-editor ul[data-type='taskList'],
+  .tiptap-wrapper ul.task-list,
+  .nui-editor ul.task-list,
+  ul.task-list {
+    list-style: none !important;
+    padding: 0 !important;
+  }
+
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li,
+  .tiptap-wrapper ul[data-type='taskList'] li,
+  .nui-editor ul[data-type='taskList'] li,
+  .tiptap-wrapper ul.task-list li,
+  .nui-editor ul.task-list li,
+  ul.task-list li {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    margin-bottom: 0.25rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > label,
+  .tiptap-wrapper ul[data-type='taskList'] li > label,
+  .nui-editor ul[data-type='taskList'] li > label,
+  .tiptap-wrapper ul.task-list li > label,
+  .nui-editor ul.task-list li > label,
+  ul.task-list li > label {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-right: 0.5rem !important;
+    user-select: none !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div,
+  .tiptap-wrapper ul[data-type='taskList'] li > div,
+  .nui-editor ul[data-type='taskList'] li > div,
+  .tiptap-wrapper ul.task-list li > div,
+  .nui-editor ul.task-list li > div,
+  ul.task-list li > div {
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+  }
+
+  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div > p,
+  .tiptap-wrapper ul[data-type='taskList'] li > div > p,
+  .nui-editor ul[data-type='taskList'] li > div > p,
+  .tiptap-wrapper ul.task-list li > div > p,
+  .nui-editor ul.task-list li > div > p,
+  ul.task-list li > div > p {
+    margin: 0 !important;
+  }
+
+  .tiptap-wrapper .tiptap p {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    line-height: var(--leading-normal, 1.5);
+  }
+
+  .tiptap-wrapper .tiptap h1,
+  .tiptap-wrapper .tiptap h2,
+  .tiptap-wrapper .tiptap h3,
+  .tiptap-wrapper .tiptap h4 {
+    font-weight: var(--weight-bold, 700);
+    color: var(--fg-default);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: var(--leading-tight, 1.25);
+  }
+
+  .tiptap-wrapper .tiptap h1 {
+    font-size: var(--text-3xl, 1.875rem);
+  }
+  .tiptap-wrapper .tiptap h2 {
+    font-size: var(--text-2xl, 1.5rem);
+  }
+  .tiptap-wrapper .tiptap h3 {
+    font-size: var(--text-xl, 1.25rem);
+  }
+
+  .tiptap-wrapper .tiptap a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    cursor: pointer;
+    text-underline-offset: 2px;
+  }
+
+  .tiptap-wrapper .tiptap ul,
+  .tiptap-wrapper .tiptap ol {
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .tiptap-wrapper .tiptap ul {
+    list-style-type: disc;
+  }
+  .tiptap-wrapper .tiptap ol {
+    list-style-type: decimal;
+  }
+
+  .tiptap-wrapper .tiptap li p {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .tiptap-wrapper .tiptap blockquote {
+    border-left: 3px solid var(--border-strong);
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-right: 0;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+
+  .tiptap-wrapper .tiptap pre {
+    background-color: var(--slate-900);
+    color: var(--slate-50);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm, 0.875rem);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .tiptap-wrapper .tiptap code {
+    background-color: var(--bg-subtle);
+    color: var(--color-primary);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  .tiptap-wrapper .tiptap pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+  }
+
+  .tiptap-wrapper .tiptap p.is-editor-empty:first-child::before {
+    color: var(--fg-muted);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    font-style: italic;
+  }
+
+  .tiptap-wrapper .tiptap table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+    margin: 1rem 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+  }
+
+  .tiptap-wrapper .tiptap table td,
+  .tiptap-wrapper .tiptap table th {
+    min-width: 1em;
+    border: 1px solid var(--border-default);
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .tiptap-wrapper .tiptap table th {
+    font-weight: var(--weight-bold, 700);
+    text-align: left;
+    background-color: var(--bg-subtle);
+  }
+
+  .tiptap-wrapper .tiptap table .selectedCell:after {
+    z-index: 2;
+    position: absolute;
+    content: '';
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--bg-selected, var(--color-primary-subtle));
+    pointer-events: none;
+  }
+
+  .tiptap-wrapper .tiptap table .column-resize-handle {
+    position: absolute;
+    right: -2px;
+    top: 0;
+    bottom: -2px;
+    width: 4px;
+    background-color: var(--color-primary);
+    pointer-events: none;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ------------------------------------------------------------
+16. WCAG AAA REDUCED MOTION & ACCESSIBILITY
+------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

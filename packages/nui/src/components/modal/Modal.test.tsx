@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { axe } from 'vitest-axe';
@@ -7,159 +7,164 @@ import { useState } from 'react';
 import { Modal } from './Modal';
 
 vi.mock('../../utils', async (importOriginal) => {
- const actual = await importOriginal();
- return actual as typeof import('../../utils');
+  const actual = await importOriginal();
+  return actual as typeof import('../../utils');
 });
 
 describe('Modal Component', () => {
- afterEach(() => {
- vi.restoreAllMocks();
- });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
- function setup(initialOpen = true, props = {}) {
- const onCloseSpy = vi.fn();
+  function setup(initialOpen = true, props = {}) {
+    const onCloseSpy = vi.fn();
 
- function TestWrapper() {
- const [open, setOpen] = useState(initialOpen);
- return (
- <Modal
- open={open}
- onClose={() => {
- setOpen(false);
- onCloseSpy();
- }}
- title="Test Title"
- description="Test Description"
- {...props}
- >
- <button>Action</button>
- </Modal>
- );
- }
+    function TestWrapper() {
+      const [open, setOpen] = useState(initialOpen);
+      return (
+        <Modal
+          open={open}
+          onClose={() => {
+            setOpen(false);
+            onCloseSpy();
+          }}
+          title="Test Title"
+          description="Test Description"
+          {...props}
+        >
+          <button>Action</button>
+        </Modal>
+      );
+    }
 
- render(<TestWrapper />);
+    render(<TestWrapper />);
 
- return { onCloseSpy };
- }
+    return { onCloseSpy };
+  }
 
- it('renders when open', async () => {
- setup(true);
- const dialog = screen.getByRole('dialog', { hidden: true });
- expect(dialog).toBeInTheDocument();
- 
- expect(dialog).toBeInTheDocument();
+  it('renders when open', async () => {
+    setup(true);
+    const dialog = screen.getByRole('dialog', { hidden: true });
+    expect(dialog).toBeInTheDocument();
 
- expect(screen.getByText('Test Title')).toBeInTheDocument();
- });
+    expect(dialog).toBeInTheDocument();
 
- it('does not render when closed', () => {
- setup(false);
- expect(screen.queryByRole('dialog', { hidden: true })).not.toBeInTheDocument();
- });
+    expect(screen.getByText('Test Title')).toBeInTheDocument();
+  });
 
- it('calls onClose when close button clicked', async () => {
- const user = userEvent.setup();
- const { onCloseSpy } = setup(true);
+  it('does not render when closed', () => {
+    setup(false);
+    expect(
+      screen.queryByRole('dialog', { hidden: true })
+    ).not.toBeInTheDocument();
+  });
 
- const dialog = screen.getByRole('dialog', { hidden: true });
+  it('calls onClose when close button clicked', async () => {
+    const user = userEvent.setup();
+    const { onCloseSpy } = setup(true);
 
- const closeBtn = screen.getByRole('button', { name: /Close dialog/i, hidden: true });
- await user.click(closeBtn);
- 
- expect(onCloseSpy).toHaveBeenCalledTimes(1);
- });
+    expect(screen.getByRole('dialog', { hidden: true })).toBeInTheDocument();
 
- it('closes on Escape key', async () => {
- const user = userEvent.setup();
- const { onCloseSpy } = setup(true);
+    const closeBtn = screen.getByRole('button', {
+      name: /Close dialog/i,
+      hidden: true,
+    });
+    await user.click(closeBtn);
 
- const dialog = screen.getByRole('dialog', { hidden: true });
+    expect(onCloseSpy).toHaveBeenCalledTimes(1);
+  });
 
- await user.keyboard('{Escape}');
- expect(onCloseSpy).toHaveBeenCalledTimes(1);
- });
+  it('closes on Escape key', async () => {
+    const user = userEvent.setup();
+    const { onCloseSpy } = setup(true);
 
- it('does not close on Escape if disabled', async () => {
- const user = userEvent.setup();
- const { onCloseSpy } = setup(true, { disableEsc: true });
+    expect(screen.getByRole('dialog', { hidden: true })).toBeInTheDocument();
 
- const dialog = screen.getByRole('dialog', { hidden: true });
+    await user.keyboard('{Escape}');
+    expect(onCloseSpy).toHaveBeenCalledTimes(1);
+  });
 
- await user.keyboard('{Escape}');
- expect(onCloseSpy).not.toHaveBeenCalled();
- });
+  it('does not close on Escape if disabled', async () => {
+    const user = userEvent.setup();
+    const { onCloseSpy } = setup(true, { disableEsc: true });
 
- it.skip('closes on click outside', async () => {
- const user = userEvent.setup();
- const onCloseSpy = vi.fn();
- 
- render(
- <>
- <button data-testid="outside">outside</button>
- <Modal open onClose={onCloseSpy} title="Test">Content</Modal>
- </>
- );
+    expect(screen.getByRole('dialog', { hidden: true })).toBeInTheDocument();
 
- const dialog = screen.getByRole('dialog', { hidden: true });
+    await user.keyboard('{Escape}');
+    expect(onCloseSpy).not.toHaveBeenCalled();
+  });
 
- await user.click(document.body);
- expect(onCloseSpy).toHaveBeenCalledTimes(1);
- });
+  it('closes on click outside', async () => {
+    const user = userEvent.setup();
+    const onCloseSpy = vi.fn();
 
- it('does not close on click outside if disabled', async () => {
- const user = userEvent.setup();
- const onCloseSpy = vi.fn();
- 
- render(
- <>
- <button data-testid="outside">outside</button>
- <Modal open disableClickOutside onClose={onCloseSpy} title="Test">Content</Modal>
- </>
- );
+    render(
+      <Modal open onClose={onCloseSpy} title="Test">
+        Content
+      </Modal>
+    );
 
- const dialog = screen.getByRole('dialog', { hidden: true });
+    const overlay = await screen.findByTestId('modal-overlay');
+    await user.click(overlay);
+    expect(onCloseSpy).toHaveBeenCalledTimes(1);
+  });
 
- await user.click(document.body);
- expect(onCloseSpy).not.toHaveBeenCalled();
- });
+  it('does not close on click outside if disabled', async () => {
+    const user = userEvent.setup();
+    const onCloseSpy = vi.fn();
 
- it('applies aria attributes correctly', async () => {
- setup(true);
+    render(
+      <>
+        <button data-testid="outside">outside</button>
+        <Modal open disableClickOutside onClose={onCloseSpy} title="Test">
+          Content
+        </Modal>
+      </>
+    );
 
- const dialog = screen.getByRole('dialog', { hidden: true });
+    await user.click(document.body);
+    expect(onCloseSpy).not.toHaveBeenCalled();
+  });
 
- expect(dialog).toHaveAttribute('aria-modal', 'true');
- expect(dialog).toHaveAttribute('aria-labelledby');
- expect(dialog).toHaveAttribute('aria-describedby');
- });
+  it('applies aria attributes correctly', async () => {
+    setup(true);
 
- it.skip('restores focus on close', async () => {
- const user = userEvent.setup();
- 
- const button = document.createElement('button');
- document.body.appendChild(button);
- button.focus();
+    const dialog = screen.getByRole('dialog', { hidden: true });
 
- const { onCloseSpy } = setup(true);
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(dialog).toHaveAttribute('aria-labelledby');
+    expect(dialog).toHaveAttribute('aria-describedby');
+  });
 
- const dialog = screen.getByRole('dialog', { hidden: true });
+  it('restores focus on close', async () => {
+    const user = userEvent.setup();
 
- expect(document.activeElement).not.toBe(button);
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    button.focus();
 
- await user.keyboard('{Escape}');
- expect(onCloseSpy).toHaveBeenCalledTimes(1);
- 
- await waitFor(() => {
- expect(screen.queryByRole('dialog', { hidden: true })).not.toBeInTheDocument();
- });
- });
+    const { onCloseSpy } = setup(true);
 
- it('has no accessibility violations', async () => {
- const { container } = render(
- <Modal open={true} onClose={() => {}} title="Test Title">
- <button>Action</button>
- </Modal>
- );
- expect(await axe(container)).toHaveNoViolations();
- });
+    await screen.findByRole('dialog');
+
+    expect(document.activeElement).not.toBe(button);
+
+    await user.keyboard('{Escape}');
+    expect(onCloseSpy).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('dialog', { hidden: true })
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('has no accessibility violations', async () => {
+    const { container } = render(
+      <Modal open={true} onClose={() => {}} title="Test Title">
+        <button>Action</button>
+      </Modal>
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
 });

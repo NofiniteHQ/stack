@@ -1,3 +1,4 @@
-@import "./theme.css";
-@import "./reset.css";
-@unocss;
+@layer base, components, utilities;
+
+@import './theme.css';
+@import './reset.css';

@@ -1,6 +1,6 @@
 /**
  * Anti-FOUC (Flash of Unstyled Content) Script for NUI CSS
- * 
+ *
  * Inject this string into a <script> tag in the <head> of your HTML
  * to perfectly synchronize the document's dark mode state before the body paints.
  */
@@ -11,8 +11,14 @@ export const DARK_MODE_SCRIPT = `
     var isDark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
     if (isDark) {
       document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      if (saved && saved !== 'system') {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
     }
   } catch (e) {}
 })();

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Clipboard } from './Clipboard';
 
 const meta: Meta<typeof Clipboard> = {
-  title: 'Components/Data Display/Clipboard',
+  title: 'Feedback/Clipboard',
   component: Clipboard,
   parameters: {
     layout: 'centered',
@@ -22,7 +22,7 @@ export const Default: Story = {
     <div className="w-80">
       <Clipboard {...args} />
     </div>
-  )
+  ),
 };
 
 export const CustomContent: Story = {
@@ -32,8 +32,9 @@ export const CustomContent: Story = {
   render: (args) => (
     <div className="w-80">
       <Clipboard {...args}>
-        <span className="text-muted">API Key:</span> <span className="text-default font-mono">sk_live_123456789</span>
+        <span className="text-muted">API Key:</span>{' '}
+        <span className="text-default font-mono">sk_live_123456789</span>
       </Clipboard>
     </div>
-  )
+  ),
 };

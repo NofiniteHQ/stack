@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Divider } from './Divider';
 
 const meta: Meta<typeof Divider> = {
-  title: 'Components/Layout/Divider',
+  title: 'Primitives/Divider',
   component: Divider,
   parameters: {
     layout: 'padded',
@@ -22,7 +22,7 @@ export const Horizontal: Story = {
       <Divider {...args} />
       <div className="text-sm text-muted mt-4">Content Below</div>
     </div>
-  )
+  ),
 };
 
 export const WithText: Story = {
@@ -33,7 +33,7 @@ export const WithText: Story = {
     <div className="w-full max-w-md h-32 flex flex-col justify-center">
       <Divider {...args} />
     </div>
-  )
+  ),
 };
 
 export const Vertical: Story = {
@@ -46,7 +46,7 @@ export const Vertical: Story = {
       <Divider {...args} />
       <div className="text-sm text-muted">Right Side</div>
     </div>
-  )
+  ),
 };
 
 export const VerticalWithText: Story = {
@@ -60,5 +60,5 @@ export const VerticalWithText: Story = {
       <Divider {...args} />
       <div className="text-sm text-muted">Item 2</div>
     </div>
-  )
+  ),
 };

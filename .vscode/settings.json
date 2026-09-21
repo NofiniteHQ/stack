@@ -1,0 +1,4 @@
+{
+  "html.customData": ["./packages/nuicss/dist/nuicss.html-data.json"],
+  "css.customData": ["./packages/nuicss/dist/nuicss.css-data.json"]
+}

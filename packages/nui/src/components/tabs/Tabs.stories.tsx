@@ -1,58 +1,62 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from '@storybook/test';
+import { within, userEvent, expect } from 'storybook/test';
 import { Tabs } from './Tabs';
 
 const meta: Meta<typeof Tabs> = {
- title: 'Components/Navigation/Tabs',
- component: Tabs,
- parameters: { layout: 'padded' },
- tags: ['autodocs'],
+  title: 'Widgets/Tabs',
+  component: Tabs,
+  parameters: { layout: 'padded' },
+  tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof Tabs>;
 
 export const Default: Story = {
- render: () => (
- <Tabs defaultValue="profile">
- <Tabs.List>
- <Tabs.Trigger value="profile">Profile</Tabs.Trigger>
- <Tabs.Trigger value="password">Password</Tabs.Trigger>
- <Tabs.Trigger value="notifications">Notifications</Tabs.Trigger>
- </Tabs.List>
- <Tabs.Content value="profile" className="text-subtle pt-4">
- Manage your public profile and bio.
- </Tabs.Content>
- <Tabs.Content value="password" className="text-subtle pt-4">
- Update your password and security settings.
- </Tabs.Content>
- <Tabs.Content value="notifications" className="text-subtle pt-4">
- Configure how you receive alerts.
- </Tabs.Content>
- </Tabs>
- ),
+  render: () => (
+    <Tabs defaultValue="profile">
+      <Tabs.List>
+        <Tabs.Trigger value="profile">Profile</Tabs.Trigger>
+        <Tabs.Trigger value="password">Password</Tabs.Trigger>
+        <Tabs.Trigger value="notifications">Notifications</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="profile" className="text-subtle pt-4">
+        Manage your public profile and bio.
+      </Tabs.Content>
+      <Tabs.Content value="password" className="text-subtle pt-4">
+        Update your password and security settings.
+      </Tabs.Content>
+      <Tabs.Content value="notifications" className="text-subtle pt-4">
+        Configure how you receive alerts.
+      </Tabs.Content>
+    </Tabs>
+  ),
 };
 
 export const Controlled: Story = {
- render: function ControlledExample() {
- const [tab, setTab] = useState('one');
- return (
- <div className="flex flex-col gap-4">
- <p className="m-0 font-mono text-sm text-muted">
- Active Tab State: <strong className="text-default">{tab}</strong>
- </p>
- <Tabs value={tab} onChange={setTab}>
- <Tabs.List>
- <Tabs.Trigger value="one">Step 1</Tabs.Trigger>
- <Tabs.Trigger value="two">Step 2</Tabs.Trigger>
- </Tabs.List>
- <Tabs.Content value="one" className="text-subtle pt-4">First Step Content</Tabs.Content>
- <Tabs.Content value="two" className="text-subtle pt-4">Second Step Content</Tabs.Content>
- </Tabs>
- </div>
- );
- },
+  render: function ControlledExample() {
+    const [tab, setTab] = useState('one');
+    return (
+      <div className="flex flex-col gap-4">
+        <p className="m-0 font-mono text-sm text-muted">
+          Active Tab State: <strong className="text-default">{tab}</strong>
+        </p>
+        <Tabs value={tab} onChange={setTab}>
+          <Tabs.List>
+            <Tabs.Trigger value="one">Step 1</Tabs.Trigger>
+            <Tabs.Trigger value="two">Step 2</Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value="one" className="text-subtle pt-4">
+            First Step Content
+          </Tabs.Content>
+          <Tabs.Content value="two" className="text-subtle pt-4">
+            Second Step Content
+          </Tabs.Content>
+        </Tabs>
+      </div>
+    );
+  },
 };
 
 /**
@@ -60,46 +64,72 @@ export const Controlled: Story = {
  * Verifies that roving tabindex keyboard navigation works correctly.
  */
 export const InteractiveTest: Story = {
- render: () => (
- <Tabs defaultValue="first">
- <Tabs.List>
- <Tabs.Trigger value="first">First</Tabs.Trigger>
- <Tabs.Trigger value="second">Second</Tabs.Trigger>
- <Tabs.Trigger value="third" disabled>Third</Tabs.Trigger>
- </Tabs.List>
- <Tabs.Content value="first">Panel 1</Tabs.Content>
- <Tabs.Content value="second">Panel 2</Tabs.Content>
- </Tabs>
- ),
- play: async ({ canvasElement }) => {
- const canvas = within(canvasElement);
+  render: () => (
+    <Tabs defaultValue="first">
+      <Tabs.List>
+        <Tabs.Trigger value="first">First</Tabs.Trigger>
+        <Tabs.Trigger value="second">Second</Tabs.Trigger>
+        <Tabs.Trigger value="third" disabled>
+          Third
+        </Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="first">Panel 1</Tabs.Content>
+      <Tabs.Content value="second">Panel 2</Tabs.Content>
+    </Tabs>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
 
- const firstTab = canvas.getByRole('tab', { name: 'First' });
- const secondTab = canvas.getByRole('tab', { name: 'Second' });
+    const firstTab = canvas.getByRole('tab', { name: 'First' });
+    const secondTab = canvas.getByRole('tab', { name: 'Second' });
 
- // Initial assertions
- await expect(firstTab).toHaveAttribute('aria-selected', 'true');
- await expect(canvas.getByText('Panel 1')).toBeInTheDocument();
+    // Initial assertions
+    await expect(firstTab).toHaveAttribute('aria-selected', 'true');
+    await expect(canvas.getByText('Panel 1')).toBeInTheDocument();
 
- // Roving Tabindex Test
- firstTab.focus();
- await userEvent.keyboard('{ArrowRight}');
+    // Roving Tabindex Test
+    firstTab.focus();
+    await userEvent.keyboard('{ArrowRight}');
 
- // Second tab should now be active
- await expect(secondTab).toHaveFocus();
- await expect(secondTab).toHaveAttribute('aria-selected', 'true');
- await expect(canvas.getByText('Panel 2')).toBeInTheDocument();
- }
+    // Second tab should now be active
+    await expect(secondTab).toHaveFocus();
+    await expect(secondTab).toHaveAttribute('aria-selected', 'true');
+    await expect(canvas.getByText('Panel 2')).toBeInTheDocument();
+  },
 };
 
 export const DataDriven: Story = {
- render: () => {
-  const tabsData = [
-   { value: 'account', label: 'Account', content: <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>Manage your account settings.</div> },
-   { value: 'billing', label: 'Billing', content: <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>View billing history and payment methods.</div> },
-   { value: 'integrations', label: 'Integrations', content: <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>Connect third-party services.</div> },
-  ];
+  render: () => {
+    const tabsData = [
+      {
+        value: 'account',
+        label: 'Account',
+        content: (
+          <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>
+            Manage your account settings.
+          </div>
+        ),
+      },
+      {
+        value: 'billing',
+        label: 'Billing',
+        content: (
+          <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>
+            View billing history and payment methods.
+          </div>
+        ),
+      },
+      {
+        value: 'integrations',
+        label: 'Integrations',
+        content: (
+          <div style={{ color: '#475569', fontFamily: 'sans-serif' }}>
+            Connect third-party services.
+          </div>
+        ),
+      },
+    ];
 
-  return <Tabs defaultValue="account" data={tabsData} />;
- }
+    return <Tabs defaultValue="account" data={tabsData} />;
+  },
 };

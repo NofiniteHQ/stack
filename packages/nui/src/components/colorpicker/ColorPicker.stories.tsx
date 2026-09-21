@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ColorPicker } from './ColorPicker';
 
 const meta = {
-  title: 'Components/ColorPicker',
+  title: 'Widgets/ColorPicker',
   component: ColorPicker,
   parameters: {
     layout: 'centered',
@@ -20,14 +20,21 @@ export const Default: Story = {
   },
   render: (args) => {
     const [color, setColor] = useState(args.value as string);
-    
+
     useEffect(() => {
       setColor(args.value as string);
     }, [args.value]);
 
     return (
       <div className="flex gap-4 items-center">
-        <ColorPicker {...args} value={color} onChange={(v) => { setColor(v); args.onChange?.(v); }} />
+        <ColorPicker
+          {...args}
+          value={color}
+          onChange={(v) => {
+            setColor(v);
+            args.onChange?.(v);
+          }}
+        />
       </div>
     );
   },
@@ -45,9 +52,9 @@ export const CustomPresets: Story = {
     const [color, setColor] = useState('#000000');
     return (
       <div className="flex gap-4 items-center">
-        <ColorPicker 
-          value={color} 
-          onChange={setColor} 
+        <ColorPicker
+          value={color}
+          onChange={setColor}
           presets={['#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff']}
         />
       </div>
@@ -62,14 +69,21 @@ export const IconVariant: Story = {
   },
   render: (args) => {
     const [color, setColor] = useState(args.value as string);
-    
+
     useEffect(() => {
       setColor(args.value as string);
     }, [args.value]);
 
     return (
       <div className="flex gap-4 items-center p-4 bg-subtle rounded-md">
-        <ColorPicker {...args} value={color} onChange={(v) => { setColor(v); args.onChange?.(v); }} />
+        <ColorPicker
+          {...args}
+          value={color}
+          onChange={(v) => {
+            setColor(v);
+            args.onChange?.(v);
+          }}
+        />
         <span className="text-sm font-medium">Toolbar Picker</span>
       </div>
     );
@@ -87,6 +101,15 @@ export const CustomDefaultVariant: Story = {
   render: (args) => {
     const [color, setColor] = useState(args.value as string);
     useEffect(() => setColor(args.value as string), [args.value]);
-    return <ColorPicker {...args} value={color} onChange={(v) => { setColor(v); args.onChange?.(v); }} />;
+    return (
+      <ColorPicker
+        {...args}
+        value={color}
+        onChange={(v) => {
+          setColor(v);
+          args.onChange?.(v);
+        }}
+      />
+    );
   },
 };

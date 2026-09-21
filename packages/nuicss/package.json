@@ -22,17 +22,87 @@
       },
       "default": "./dist/index.js"
     },
+    "./components": {
+      "types": "./dist/shortcuts/index.d.ts",
+      "import": {
+        "types": "./dist/shortcuts/index.d.ts",
+        "default": "./dist/components.mjs"
+      },
+      "require": {
+        "types": "./dist/shortcuts/index.d.ts",
+        "default": "./dist/components.js"
+      },
+      "default": "./dist/components.js"
+    },
+    "./next": {
+      "types": "./dist/plugin/next.d.ts",
+      "import": {
+        "types": "./dist/plugin/next.d.ts",
+        "default": "./dist/next.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin/next.d.ts",
+        "default": "./dist/next.js"
+      },
+      "default": "./dist/next.js"
+    },
+    "./ssr": {
+      "types": "./dist/helpers/ssr.d.ts",
+      "import": {
+        "types": "./dist/helpers/ssr.d.ts",
+        "default": "./dist/ssr.mjs"
+      },
+      "require": {
+        "types": "./dist/helpers/ssr.d.ts",
+        "default": "./dist/ssr.js"
+      },
+      "default": "./dist/ssr.js"
+    },
+    "./migrate": {
+      "types": "./dist/migrate/index.d.ts",
+      "import": {
+        "types": "./dist/migrate/index.d.ts",
+        "default": "./dist/migrate.mjs"
+      },
+      "require": {
+        "types": "./dist/migrate/index.d.ts",
+        "default": "./dist/migrate.js"
+      },
+      "default": "./dist/migrate.js"
+    },
+    "./components.css": "./dist/components.css",
+    "./components.min.css": "./dist/components.min.css",
+    "./primitives.css": "./dist/primitives.css",
+    "./primitives.min.css": "./dist/primitives.min.css",
+    "./forms.css": "./dist/forms.css",
+    "./forms.min.css": "./dist/forms.min.css",
+    "./overlays.css": "./dist/overlays.css",
+    "./overlays.min.css": "./dist/overlays.min.css",
+    "./widgets.css": "./dist/widgets.css",
+    "./widgets.min.css": "./dist/widgets.min.css",
+    "./media.css": "./dist/media.css",
+    "./media.min.css": "./dist/media.min.css",
     "./dist/index.css": "./dist/index.css",
-    "./styles.css": "./dist/index.css",
+    "./styles.css": "./dist/styles.css",
+    "./styles.min.css": "./dist/styles.min.css",
     "./cdn": "./dist/index.global.js",
+    "./html-data.json": "./dist/nuicss.html-data.json",
+    "./css-data.json": "./dist/nuicss.css-data.json",
     "./package.json": "./package.json",
     "./postcss": "./postcss.js"
   },
+  "bin": {
+    "nuicss": "./bin/nuicss.js"
+  },
   "files": [
     "dist",
+    "bin",
     "postcss.js",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "AGENTS.md",
+    "llms-full.txt",
+    "llms-components.json"
   ],
   "engines": {
     "node": ">=18"
@@ -54,15 +124,18 @@
     "access": "public"
   },
   "dependencies": {
-    "@unocss/config": "^66.7.5",
-    "@unocss/postcss": "^66.7.5",
-    "@unocss/vite": "^66.7.5",
+    "@unocss/config": "^66.10.5",
+    "@unocss/core": "^66.10.5",
+    "@unocss/postcss": "^66.10.5",
+    "@unocss/preset-wind4": "^66.10.5",
+    "@unocss/processor-lightningcss": "^66.10.5",
+    "@unocss/vite": "^66.10.5",
     "glob": "^13.0.6",
-    "unocss": "^66.7.5",
+    "unocss": "^66.10.5",
     "valibot": "^1.4.2"
   },
   "devDependencies": {
-    "@unocss/runtime": "^66.8.1",
+    "@unocss/runtime": "^66.10.5",
     "esbuild": "^0.19.11",
     "jiti": "^2.7.0",
     "postcss": "^8.5.15"

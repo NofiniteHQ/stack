@@ -1,63 +1,63 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect, fn } from '@storybook/test';
+import { within, userEvent, expect, fn } from 'storybook/test';
 import { Alert } from './Alert';
 
 const meta: Meta<typeof Alert> = {
- title: 'Components/Feedback/Alert',
- component: Alert,
- parameters: {
- layout: 'padded',
- },
- tags: ['autodocs'],
- // Automatically spy on onClose to show it in the Storybook Actions tab
- args: {
- onClose: fn(),
- },
- argTypes: {
- variant: {
- control: 'select',
- options: ['info', 'success', 'warning', 'error'],
- },
- title: { control: 'text' },
- children: { control: 'text' },
- closable: { control: 'boolean' },
- className: { control: 'text' },
- },
+  title: 'Feedback/Alert',
+  component: Alert,
+  parameters: {
+    layout: 'padded',
+  },
+  tags: ['autodocs'],
+  // Automatically spy on onClose to show it in the Storybook Actions tab
+  args: {
+    onClose: fn(),
+  },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['info', 'success', 'warning', 'error'],
+    },
+    title: { control: 'text' },
+    children: { control: 'text' },
+    closable: { control: 'boolean' },
+    className: { control: 'text' },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof Alert>;
 
 export const Default: Story = {
- args: {
- title: 'Information',
- children: 'This is an informational alert.',
- },
+  args: {
+    title: 'Information',
+    children: 'This is an informational alert.',
+  },
 };
 
 export const Success: Story = {
- args: {
- variant: 'success',
- title: 'Success',
- children: 'Your changes have been saved successfully.',
- },
+  args: {
+    variant: 'success',
+    title: 'Success',
+    children: 'Your changes have been saved successfully.',
+  },
 };
 
 export const Warning: Story = {
- args: {
- variant: 'warning',
- title: 'Warning',
- children: 'Please review the required fields before continuing.',
- },
+  args: {
+    variant: 'warning',
+    title: 'Warning',
+    children: 'Please review the required fields before continuing.',
+  },
 };
 
 export const Error: Story = {
- args: {
- variant: 'error',
- title: 'Error',
- children: 'Something went wrong. Please try again.',
- },
+  args: {
+    variant: 'error',
+    title: 'Error',
+    children: 'Something went wrong. Please try again.',
+  },
 };
 
 export const Closable: Story = {
@@ -71,7 +71,7 @@ export const Closable: Story = {
     const [isVisible, setIsVisible] = useState(true);
     if (!isVisible) {
       return (
-        <button 
+        <button
           onClick={() => setIsVisible(true)}
           className="px-4 py-2 bg-surface border border-default rounded-md hover:bg-subtle text-sm text-default focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]"
         >
@@ -79,20 +79,28 @@ export const Closable: Story = {
         </button>
       );
     }
-    return <Alert {...args} onClose={() => { setIsVisible(false); args.onClose?.(); }} />;
+    return (
+      <Alert
+        {...args}
+        onClose={() => {
+          setIsVisible(false);
+          args.onClose?.();
+        }}
+      />
+    );
   },
 };
 
 export const RichTitle: Story = {
- args: {
- variant: 'info',
- title: (
- <span>
- <strong>Heads up:</strong> Custom JSX title
- </span>
- ),
- children: 'Titles can accept React nodes.',
- },
+  args: {
+    variant: 'info',
+    title: (
+      <span>
+        <strong>Heads up:</strong> Custom JSX title
+      </span>
+    ),
+    children: 'Titles can accept React nodes.',
+  },
 };
 
 /**
@@ -109,15 +117,23 @@ export const InteractiveTest: Story = {
   render: function Render(args) {
     const [isVisible, setIsVisible] = useState(true);
     if (!isVisible) return <div>Alert closed successfully!</div>;
-    return <Alert {...args} onClose={() => { setIsVisible(false); args.onClose?.(); }} />;
+    return (
+      <Alert
+        {...args}
+        onClose={() => {
+          setIsVisible(false);
+          args.onClose?.();
+        }}
+      />
+    );
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const closeButton = canvas.getByRole('button', { name: /close alert/i });
-    
+
     // Simulate user click
     await userEvent.click(closeButton);
-    
+
     // Verify the mock function was called
     await expect(args.onClose).toHaveBeenCalled();
     // Verify it disappeared from DOM

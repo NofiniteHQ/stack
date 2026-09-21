@@ -6,14 +6,13 @@ import type { StorybookConfig } from '@storybook/react-vite';
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))'],
-  addons: [],
+  addons: [getAbsolutePath('@storybook/addon-docs')],
   framework: {
     name: getAbsolutePath('@storybook/react-vite'),
-    options: {
-      builder: {
-        viteConfigPath: 'vite.config.ts',
-      },
-    },
+    options: {},
+  },
+  docs: {
+    autodocs: 'tag',
   },
 };
 
@@ -34,8 +33,6 @@ config.viteFinal = async (viteConfig) => {
     css: {
       transformer: 'postcss',
     },
-    plugins: [
-      nuicssVitePlugin({ configFile: './nuicss.config.ts' })
-    ]
+    plugins: [nuicssVitePlugin({ configFile: './nuicss.config.ts' })],
   });
 };

@@ -5,7 +5,7 @@ import { FolderSearch, Inbox, Search, Plus } from 'lucide-react';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof EmptyState> = {
-  title: 'Components/Data Display/EmptyState',
+  title: 'Primitives/EmptyState',
   component: EmptyState,
   parameters: {
     layout: 'centered',
@@ -20,7 +20,8 @@ export const Default: Story = {
   args: {
     icon: <FolderSearch size={48} strokeWidth={1.5} />,
     title: 'No projects found',
-    description: 'Get started by creating a new project or importing an existing one from GitHub.',
+    description:
+      'Get started by creating a new project or importing an existing one from GitHub.',
     actions: <Button variant="primary">Create Project</Button>,
   },
 };
@@ -34,7 +35,8 @@ export const InsideContainer: Story = {
   args: {
     icon: <Inbox size={48} strokeWidth={1.5} />,
     title: 'Your inbox is empty',
-    description: 'You have read all your messages. Check back later for new updates from your team.',
+    description:
+      'You have read all your messages. Check back later for new updates from your team.',
   },
 };
 
@@ -49,7 +51,8 @@ export const WithMultipleActions: Story = {
   args: {
     icon: <Search size={48} strokeWidth={1.5} />,
     title: 'No data matching filters',
-    description: 'We couldn\'t find any records that match your current filter configuration.',
+    description:
+      "We couldn't find any records that match your current filter configuration.",
     actions: (
       <>
         <Button variant="outline">Clear Filters</Button>

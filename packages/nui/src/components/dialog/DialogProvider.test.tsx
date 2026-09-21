@@ -1,5 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { axe } from 'vitest-axe';
 import { DialogProvider } from './DialogProvider';
@@ -12,29 +18,31 @@ import type { ToastOptions } from '../toast/Toast';
 /* -------------------------------------------------------------------------- */
 
 vi.mock('../toast/Toast', () => ({
- useToast: vi.fn(),
+  useToast: vi.fn(),
 }));
 
 interface MockModalProps {
- open: boolean;
- children: React.ReactNode;
- title?: React.ReactNode;
- onClose: () => void;
+  open: boolean;
+  children: React.ReactNode;
+  title?: React.ReactNode;
+  onClose: () => void;
+  footer?: React.ReactNode;
 }
 
 vi.mock('../modal/Modal', () => ({
- Modal: ({ open, children, title, onClose }: MockModalProps) => {
- if (!open) return null;
- return (
- <div data-testid="mock-modal">
- {title && <h2>{title}</h2>}
- <button data-testid="mock-close" onClick={onClose}>
- X
- </button>
- {children}
- </div>
- );
- },
+  Modal: ({ open, children, title, onClose, footer }: MockModalProps) => {
+    if (!open) return null;
+    return (
+      <div data-testid="mock-modal">
+        {title && <h2>{title}</h2>}
+        <button data-testid="mock-close" onClick={onClose}>
+          X
+        </button>
+        {children}
+        {footer}
+      </div>
+    );
+  },
 }));
 
 /* -------------------------------------------------------------------------- */
@@ -42,132 +50,132 @@ vi.mock('../modal/Modal', () => ({
 /* -------------------------------------------------------------------------- */
 
 describe('DialogProvider', () => {
- // Define a strictly-typed mock function for the toast integration
- const mockShowToast = vi.fn<
- (message: React.ReactNode, options?: ToastOptions) => string
- >(() => {
- return 'mock-toast-id';
- });
+  // Define a strictly-typed mock function for the toast integration
+  const mockShowToast = vi.fn<
+    (message: React.ReactNode, options?: ToastOptions) => string
+  >(() => {
+    return 'mock-toast-id';
+  });
 
- beforeEach(() => {
- // Ensure a clean store state before each test execution
- dialogStore.setState({ isOpen: false, resolve: null });
- mockShowToast.mockClear();
+  beforeEach(() => {
+    // Ensure a clean store state before each test execution
+    dialogStore.setState({ isOpen: false, resolve: null });
+    mockShowToast.mockClear();
 
- vi.mocked(ToastModule.useToast).mockReturnValue({
- show: mockShowToast,
- dismiss: vi.fn(),
- });
- });
+    vi.mocked(ToastModule.useToast).mockReturnValue({
+      show: mockShowToast,
+      dismiss: vi.fn(),
+    });
+  });
 
- afterEach(() => {
- vi.clearAllMocks();
- });
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
-describe('nui.alert()', () => {
- it('renders the alert dialog and resolves the promise to true upon dismissal', async () => {
- render(<DialogProvider />);
+  describe('nui.alert()', () => {
+    it('renders the alert dialog and resolves the promise to true upon dismissal', async () => {
+      render(<DialogProvider />);
 
- let alertPromise!: Promise<boolean>;
+      let alertPromise!: Promise<boolean>;
 
- // 1. Wrap the trigger in act() so React synchronously finishes rendering the Modal
- act(() => {
- alertPromise = nui.alert('System update required', { title: 'Alert' });
- });
+      // 1. Wrap the trigger in act() so React synchronously finishes rendering the Modal
+      act(() => {
+        alertPromise = nui.alert('System update required', { title: 'Alert' });
+      });
 
- // Now the DOM is guaranteed to have the modal!
- expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
- expect(screen.getByText('Alert')).toBeInTheDocument();
- expect(screen.getByText('System update required')).toBeInTheDocument();
+      // Now the DOM is guaranteed to have the modal!
+      expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
+      expect(screen.getByText('Alert')).toBeInTheDocument();
+      expect(screen.getByText('System update required')).toBeInTheDocument();
 
- // 2. Wrap the close action in act() because it updates the state to { isOpen: false }
- act(() => {
- fireEvent.click(screen.getByRole('button', { name: 'OK' }));
- });
+      // 2. Wrap the close action in act() because it updates the state to { isOpen: false }
+      act(() => {
+        fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+      });
 
- const result = await alertPromise;
- expect(result).toBe(true);
- expect(screen.queryByTestId('mock-modal')).not.toBeInTheDocument();
- });
- });
+      const result = await alertPromise;
+      expect(result).toBe(true);
+      expect(screen.queryByTestId('mock-modal')).not.toBeInTheDocument();
+    });
+  });
 
- describe('nui.confirm()', () => {
- it('resolves the promise to false when the user clicks Cancel', async () => {
- render(<DialogProvider />);
+  describe('nui.confirm()', () => {
+    it('resolves the promise to false when the user clicks Cancel', async () => {
+      render(<DialogProvider />);
 
- let confirmPromise!: Promise<boolean>;
+      let confirmPromise!: Promise<boolean>;
 
- act(() => {
- confirmPromise = nui.confirm('Delete file?');
- });
+      act(() => {
+        confirmPromise = nui.confirm('Delete file?');
+      });
 
- act(() => {
- fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
- });
+      act(() => {
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      });
 
- const result = await confirmPromise;
- expect(result).toBe(false);
- });
+      const result = await confirmPromise;
+      expect(result).toBe(false);
+    });
 
- it('resolves the promise to true when the user clicks Confirm', async () => {
- render(<DialogProvider />);
+    it('resolves the promise to true when the user clicks Confirm', async () => {
+      render(<DialogProvider />);
 
- let confirmPromise!: Promise<boolean>;
+      let confirmPromise!: Promise<boolean>;
 
- act(() => {
- confirmPromise = nui.confirm('Delete file?');
- });
+      act(() => {
+        confirmPromise = nui.confirm('Delete file?');
+      });
 
- act(() => {
- fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
- });
+      act(() => {
+        fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      });
 
- const result = await confirmPromise;
- expect(result).toBe(true);
- });
- });
- 
- describe('Toast Event Bridge', () => {
- it('intercepts vanilla nui.toast() events and proxies them to the React useToast hook', () => {
- render(<DialogProvider />);
+      const result = await confirmPromise;
+      expect(result).toBe(true);
+    });
+  });
 
- nui.success('Profile updated', { duration: 5000 });
+  describe('Toast Event Bridge', () => {
+    it('intercepts vanilla nui.toast() events and proxies them to the React useToast hook', () => {
+      render(<DialogProvider />);
 
- expect(mockShowToast).toHaveBeenCalledTimes(1);
- expect(mockShowToast).toHaveBeenCalledWith('Profile updated', {
- variant: 'success',
- duration: 5000,
- });
- });
+      nui.success('Profile updated', { duration: 5000 });
 
- it('correctly maps all nui toast variants to the appropriate configuration objects', () => {
- render(<DialogProvider />);
+      expect(mockShowToast).toHaveBeenCalledTimes(1);
+      expect(mockShowToast).toHaveBeenCalledWith('Profile updated', {
+        variant: 'success',
+        duration: 5000,
+      });
+    });
 
- nui.toast('Default message');
- nui.error('Error message');
- nui.warn('Warning message');
+    it('correctly maps all nui toast variants to the appropriate configuration objects', () => {
+      render(<DialogProvider />);
 
- expect(mockShowToast).toHaveBeenCalledTimes(3);
- expect(mockShowToast).toHaveBeenNthCalledWith(
- 1,
- 'Default message',
- expect.objectContaining({ variant: 'default' })
- );
- expect(mockShowToast).toHaveBeenNthCalledWith(
- 2,
- 'Error message',
- expect.objectContaining({ variant: 'error' })
- );
- expect(mockShowToast).toHaveBeenNthCalledWith(
- 3,
- 'Warning message',
- expect.objectContaining({ variant: 'warning' })
- );
- });
- });
+      nui.toast('Default message');
+      nui.error('Error message');
+      nui.warn('Warning message');
 
- it('has no accessibility violations', async () => {
- const { container } = render(<DialogProvider />);
- expect(await axe(container)).toHaveNoViolations();
- });
+      expect(mockShowToast).toHaveBeenCalledTimes(3);
+      expect(mockShowToast).toHaveBeenNthCalledWith(
+        1,
+        'Default message',
+        expect.objectContaining({ variant: 'default' })
+      );
+      expect(mockShowToast).toHaveBeenNthCalledWith(
+        2,
+        'Error message',
+        expect.objectContaining({ variant: 'error' })
+      );
+      expect(mockShowToast).toHaveBeenNthCalledWith(
+        3,
+        'Warning message',
+        expect.objectContaining({ variant: 'warning' })
+      );
+    });
+  });
+
+  it('has no accessibility violations', async () => {
+    const { container } = render(<DialogProvider />);
+    expect(await axe(container)).toHaveNoViolations();
+  });
 });
