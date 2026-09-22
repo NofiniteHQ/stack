@@ -16,7 +16,9 @@
     "dev:locale": "nx build locale --watch",
     "test:locale": "pnpm nx run locale:vite:test",
     "build:locale": "pnpm nx run locale:build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "storybook dev -p 6006 -c packages/nui/.storybook",
+    "build:storybook": "storybook build -c packages/nui/.storybook -o dist/storybook"
   },
   "private": true,
   "packageManager": "pnpm@10.24.0",

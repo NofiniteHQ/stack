@@ -51,5 +51,6 @@ vitest.config.*.timestamp*
 .nx/polygraph
 
 storybook-static
+*.tsbuildinfo
 # AI Temporary Files
 /temp/
