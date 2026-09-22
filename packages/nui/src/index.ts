@@ -32,7 +32,6 @@ export * from './components/form';
 export * from './components/hovercard/HoverCard';
 export * from './components/image/Image';
 export * from './components/input/Input';
-export * from './components/kanban';
 export * from './components/kbd';
 export * from './components/layout/Container';
 export * from './components/link/Link';

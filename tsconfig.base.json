@@ -27,7 +27,9 @@
       "@nofinite/charts": ["./packages/charts/src/index.ts"],
       "@nofinite/charts/react": ["./packages/charts/src/react/index.ts"],
       "@nofinite/media": ["./packages/media/src/index.ts"],
-      "@nofinite/media/react": ["./packages/media/src/react/index.ts"]
+      "@nofinite/media/react": ["./packages/media/src/react/index.ts"],
+      "@nofinite/kanban": ["./packages/kanban/src/index.ts"],
+      "@nofinite/kanban/react": ["./packages/kanban/src/react/index.ts"]
     }
   }
 }
