@@ -99,7 +99,7 @@
     "clsx": "^2.1.1",
     "katex": "^0.18.4",
     "lowlight": "^3.3.0",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@nofinite/nuicss": "workspace:*"

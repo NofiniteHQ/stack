@@ -132,13 +132,13 @@
     "@unocss/vite": "^66.10.5",
     "glob": "^13.0.6",
     "unocss": "^66.10.5",
-    "valibot": "^1.4.2"
+    "valibot": "^1.5.0"
   },
   "devDependencies": {
     "@unocss/runtime": "^66.10.5",
     "esbuild": "^0.19.11",
     "jiti": "^2.7.0",
-    "postcss": "^8.5.15"
+    "postcss": "^8.5.28"
   },
   "scripts": {
     "build": "nx run nuicss:build && npm run build:cdn",
