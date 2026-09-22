@@ -9,7 +9,7 @@ import {
 } from './index';
 
 const meta: Meta = {
-  title: 'Charts/DataVisualization',
+  title: 'Chart',
   parameters: {
     layout: 'padded',
   },

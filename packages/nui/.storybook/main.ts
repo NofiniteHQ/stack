@@ -12,11 +12,31 @@ const __dirname = dirname(__filename);
 
 const config: StorybookConfig = {
   stories: [
-    '../src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
-    '../../charts/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
-    '../../markon/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
-    '../../media/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
-    '../../kanban/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    {
+      directory: '../src',
+      titlePrefix: '@nofinite/nui',
+      files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    },
+    {
+      directory: '../../charts/src',
+      titlePrefix: '@nofinite/charts',
+      files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    },
+    {
+      directory: '../../markon/src',
+      titlePrefix: '@nofinite/markon',
+      files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    },
+    {
+      directory: '../../media/src',
+      titlePrefix: '@nofinite/media',
+      files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    },
+    {
+      directory: '../../kanban/src',
+      titlePrefix: '@nofinite/kanban',
+      files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    },
   ],
   addons: [getAbsolutePath('@storybook/addon-docs')],
   framework: {

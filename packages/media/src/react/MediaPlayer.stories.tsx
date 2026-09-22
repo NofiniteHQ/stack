@@ -6,7 +6,7 @@ import '@vidstack/react/player/styles/default/layouts/audio.css';
 import { VideoPlayer, AudioPlayer } from './index';
 
 const meta: Meta = {
-  title: 'Media/StreamingPlayer',
+  title: 'MediaPlayer',
   parameters: {
     layout: 'centered',
   },

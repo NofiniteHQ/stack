@@ -4,7 +4,7 @@ import 'katex/dist/katex.min.css';
 import { MarkonEditor } from './index';
 
 const meta: Meta = {
-  title: 'Markon/RichTextEditor',
+  title: 'MarkonEditor',
   parameters: {
     layout: 'padded',
   },

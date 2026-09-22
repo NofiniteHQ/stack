@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Kanban, type KanbanColumnProps } from './Kanban';
 
 const meta: Meta<typeof Kanban> = {
-  title: 'Workflows/Kanban',
+  title: 'Kanban',
   component: Kanban,
   parameters: {
     layout: 'fullscreen',

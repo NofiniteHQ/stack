@@ -6,22 +6,48 @@ import { NUIProvider } from '../src/components/nuiprovider/NUIProvider';
 
 const preview = {
   parameters: {
-    actions: { argTypesRegex: "^on[A-Z].*" },
+    actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/,
       },
     },
+    options: {
+      storySort: {
+        order: [
+          '@nofinite/nui',
+          [
+            'Primitives',
+            'Forms',
+            'Pickers',
+            'Data Display',
+            'Feedback',
+            'Overlays',
+            'Navigation',
+            'Media',
+            'Widgets',
+            '*',
+          ],
+          '@nofinite/charts',
+          '@nofinite/markon',
+          '@nofinite/media',
+          '@nofinite/kanban',
+        ],
+      },
+    },
   },
   decorators: [
     (Story: any, context: any) => {
       // Detect if Storybook's background or theme is set to 'dark'
-      const isDark = context.globals.theme === 'dark' || 
-                     context.globals.backgrounds?.value === '#333333' || 
-                     context.globals.backgrounds?.name === 'dark' ||
-                     (context.globals.backgrounds?.value && context.globals.backgrounds?.value.toLowerCase() !== '#f8f8f8' && context.globals.backgrounds?.value.toLowerCase() !== '#ffffff');
-      
+      const isDark =
+        context.globals.theme === 'dark' ||
+        context.globals.backgrounds?.value === '#333333' ||
+        context.globals.backgrounds?.name === 'dark' ||
+        (context.globals.backgrounds?.value &&
+          context.globals.backgrounds?.value.toLowerCase() !== '#f8f8f8' &&
+          context.globals.backgrounds?.value.toLowerCase() !== '#ffffff');
+
       React.useEffect(() => {
         const root = document.documentElement;
         if (isDark) {
@@ -37,15 +63,21 @@ const preview = {
       window.localStorage.setItem('nui-theme', isDark ? 'dark' : 'light');
 
       return React.createElement(
-        NUIProvider, 
-        { defaultTheme: isDark ? 'dark' : 'light', key: isDark ? 'dark' : 'light' }, 
+        NUIProvider,
+        {
+          defaultTheme: isDark ? 'dark' : 'light',
+          key: isDark ? 'dark' : 'light',
+        },
         React.createElement(
           'div',
-          { className: 'bg-page text-default min-h-screen p-8 transition-colors duration-300' },
+          {
+            className:
+              'bg-page text-default min-h-screen p-8 transition-colors duration-300',
+          },
           React.createElement(Story, null)
         )
       );
-    }
+    },
   ],
 };
 
