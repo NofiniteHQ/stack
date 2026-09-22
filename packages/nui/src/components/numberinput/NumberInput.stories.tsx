@@ -4,7 +4,7 @@ import { within, userEvent, expect } from 'storybook/test';
 import { NumberInput, NumberInputProps } from './NumberInput';
 
 const meta: Meta<typeof NumberInput> = {
-  title: 'Forms/NumberInput',
+  title: 'NumberInput',
   component: NumberInput,
   parameters: {
     layout: 'centered',

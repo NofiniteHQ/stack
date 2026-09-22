@@ -15,25 +15,7 @@ const preview = {
     },
     options: {
       storySort: {
-        order: [
-          '@nofinite/nui',
-          [
-            'Primitives',
-            'Forms',
-            'Pickers',
-            'Data Display',
-            'Feedback',
-            'Overlays',
-            'Navigation',
-            'Media',
-            'Widgets',
-            '*',
-          ],
-          '@nofinite/charts',
-          '@nofinite/markon',
-          '@nofinite/media',
-          '@nofinite/kanban',
-        ],
+        order: ['NUI', 'Charts', 'Markon', 'Media', 'Kanban'],
       },
     },
   },

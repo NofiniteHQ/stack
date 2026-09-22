@@ -3,7 +3,7 @@ import { within, userEvent, expect } from 'storybook/test';
 import { Accordion } from './Accordion';
 
 const meta: Meta<typeof Accordion> = {
-  title: 'Widgets/Accordion',
+  title: 'Accordion',
   component: Accordion,
   tags: ['autodocs'],
   parameters: {

@@ -3,7 +3,7 @@ import { within, expect, waitFor } from 'storybook/test';
 import { Avatar } from './Avatar';
 
 const meta: Meta<typeof Avatar> = {
-  title: 'Primitives/Avatar',
+  title: 'Avatar',
   component: Avatar,
   tags: ['autodocs'],
   parameters: {

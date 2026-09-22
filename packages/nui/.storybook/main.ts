@@ -14,27 +14,27 @@ const config: StorybookConfig = {
   stories: [
     {
       directory: '../src',
-      titlePrefix: '@nofinite/nui',
+      titlePrefix: 'NUI',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
       directory: '../../charts/src',
-      titlePrefix: '@nofinite/charts',
+      titlePrefix: 'Charts',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
       directory: '../../markon/src',
-      titlePrefix: '@nofinite/markon',
+      titlePrefix: 'Markon',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
       directory: '../../media/src',
-      titlePrefix: '@nofinite/media',
+      titlePrefix: 'Media',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
       directory: '../../kanban/src',
-      titlePrefix: '@nofinite/kanban',
+      titlePrefix: 'Kanban',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
   ],

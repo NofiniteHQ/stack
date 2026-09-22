@@ -4,7 +4,7 @@ import { Combobox } from './Combobox';
 import { MapPin, Globe } from 'lucide-react';
 
 const meta: Meta<typeof Combobox> = {
-  title: 'Pickers/Combobox',
+  title: 'Combobox',
   tags: ['autodocs'],
   component: Combobox,
   parameters: { layout: 'centered' },

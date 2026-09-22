@@ -58,7 +58,7 @@ const mockSections: CommandSection[] = [
 ========================================================= */
 
 const meta: Meta<typeof CommandPalette> = {
-  title: 'Overlay/CommandPalette',
+  title: 'CommandPalette',
   component: CommandPalette,
   tags: ['autodocs'],
   parameters: {

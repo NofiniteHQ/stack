@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Rating } from './Rating';
 
 const meta: Meta<typeof Rating> = {
-  title: 'Forms/Rating',
+  title: 'Rating',
   component: Rating,
   parameters: {
     layout: 'centered',

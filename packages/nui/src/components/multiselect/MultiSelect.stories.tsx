@@ -12,7 +12,7 @@ const options = [
 ];
 
 const meta: Meta<typeof MultiSelect> = {
-  title: 'Pickers/MultiSelect',
+  title: 'MultiSelect',
   component: MultiSelect,
   tags: ['autodocs'],
   parameters: {

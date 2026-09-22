@@ -4,7 +4,7 @@ import { within, userEvent, expect, fn } from 'storybook/test';
 import { TreeView } from './TreeView';
 
 const meta: Meta<typeof TreeView> = {
-  title: 'Widgets/TreeView',
+  title: 'TreeView',
   component: TreeView,
   tags: ['autodocs'],
 };

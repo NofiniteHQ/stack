@@ -4,7 +4,7 @@ import { Dropdown } from './Dropdown';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof Dropdown> = {
-  title: 'Overlays/Dropdown',
+  title: 'Dropdown',
   component: Dropdown,
   tags: ['autodocs'],
   parameters: {

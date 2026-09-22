@@ -17,7 +17,7 @@ interface MockItem {
 }
 
 const meta: Meta<typeof VirtualList> = {
-  title: 'Widgets/VirtualList',
+  title: 'VirtualList',
   component: VirtualList,
   tags: ['autodocs'],
   parameters: {

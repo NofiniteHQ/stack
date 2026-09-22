@@ -4,7 +4,7 @@ import React from 'react';
 import { MegaMenu } from './MegaMenu';
 
 const meta: Meta<typeof MegaMenu> = {
-  title: 'Overlays/MegaMenu',
+  title: 'MegaMenu',
   component: MegaMenu,
   tags: ['autodocs'],
   parameters: {

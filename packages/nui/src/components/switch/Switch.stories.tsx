@@ -5,7 +5,7 @@ import { Switch } from './Switch';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof Switch> = {
-  title: 'Forms/Switch',
+  title: 'Switch',
   component: Switch,
   parameters: { layout: 'centered' },
   tags: ['autodocs'],

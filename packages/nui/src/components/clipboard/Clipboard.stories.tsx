@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Clipboard } from './Clipboard';
 
 const meta: Meta<typeof Clipboard> = {
-  title: 'Feedback/Clipboard',
+  title: 'Clipboard',
   component: Clipboard,
   parameters: {
     layout: 'centered',

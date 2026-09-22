@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ColorPicker } from './ColorPicker';
 
 const meta = {
-  title: 'Widgets/ColorPicker',
+  title: 'ColorPicker',
   component: ColorPicker,
   parameters: {
     layout: 'centered',

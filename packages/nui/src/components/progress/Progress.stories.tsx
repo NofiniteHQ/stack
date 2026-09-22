@@ -4,7 +4,7 @@ import { within, expect } from 'storybook/test';
 import { Progress } from './Progress';
 
 const meta: Meta<typeof Progress> = {
-  title: 'Feedback/Progress',
+  title: 'Progress',
   component: Progress,
   parameters: {
     layout: 'padded',

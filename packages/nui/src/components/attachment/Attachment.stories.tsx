@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Attachment } from './Attachment';
 
 const meta: Meta<typeof Attachment> = {
-  title: 'Primitives/Attachment',
+  title: 'Attachment',
   component: Attachment,
   tags: ['autodocs'],
   parameters: { layout: 'centered' },

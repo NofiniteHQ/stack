@@ -6,7 +6,7 @@ import { Link } from './Link';
  * Use these for inline navigation, breadcrumbs, and standard web links.
  */
 const meta: Meta<typeof Link> = {
-  title: 'Primitives/Link',
+  title: 'Link',
   component: Link,
   tags: ['autodocs'],
   args: {

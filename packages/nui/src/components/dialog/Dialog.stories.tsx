@@ -9,7 +9,7 @@ import { Button } from '../button/Button';
 const GlobalApiDemo = () => {
   const handleAlert = async () => {
     await nui.alert('Your session is about to expire.', {
-      title: 'Overlays/Dialog',
+      title: 'Dialog',
     });
     nui.toast('Alert dismissed.');
   };
@@ -98,7 +98,7 @@ const GlobalApiDemo = () => {
 
 // 2. Storybook Meta Configuration
 const meta: Meta = {
-  title: 'Global API/nui',
+  title: 'Dialog',
   tags: ['autodocs'],
   parameters: {
     docs: {
