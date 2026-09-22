@@ -99,7 +99,6 @@
     "clsx": "^2.1.1",
     "katex": "^0.18.4",
     "lowlight": "^3.3.0",
-    "lucide-react": "^0.553.0",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
