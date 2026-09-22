@@ -136,7 +136,6 @@
   },
   "devDependencies": {
     "@unocss/runtime": "^66.10.5",
-    "esbuild": "^0.19.11",
     "jiti": "^2.7.0",
     "postcss": "^8.5.28"
   },
