@@ -1,180 +1,166 @@
-# Implementation Plan - Markon Deep Audit & Complete Feature Parity Restoration
+# Comprehensive Phased Implementation Plan: Production-Grade `@nofinite/markon`
 
 ## Objective
 
-Restore 100% functional reliability, styling integrity, and complete feature parity between the original editor (`@nofinite/nui/src/components/editor`) and `@nofinite/markon` v2.0.0. Resolve all bugs where formatting commands fail, text does not display formatted on the UI, highlights are unstyled or ineffective, toolbar buttons blur editor selections, and extensions present in the TipTap schema lack toolbar controls.
+Elevate `@nofinite/markon` into an enterprise-grade, framework-agnostic content authoring engine that strictly adheres to the Nofinite ecosystem constitution ([`@nofinite/nuicss`](file:///d:/stack/packages/nuicss) design tokens & [`@nofinite/nuix`](file:///d:/nuix) headless architecture), fixes all subtle vanilla DOM selection and event lifecycle bugs, restores 100% of the rich features originally present in the React version, and provides a flawless React wrapper without cursor jumping or stale props.
 
 ---
 
-## Current Behavior & Root-Cause Diagnosis
+## Phased Execution Roadmap
 
-### 1. Heading Formatting Not Applied When Selected & Typed
+Execution is structured into 6 sequential, fully focused phases. Each phase will be executed independently and will only proceed upon explicit user confirmation ("next").
 
-- **Current Behavior:** Selecting H1 or H2 on an empty line or block and typing text often results in plain unstyled paragraph text or lost typing.
-- **Root Cause:**
-  1. `typographyMenu.ts` chained `.lift('blockquote').setHeading(...)`. When the selection is not inside a blockquote, `can().lift('blockquote')` returns `false`, causing the entire TipTap command chain to abort without executing `setHeading()`.
-  2. When the typography menu closes, the menu button is removed from the DOM, causing the browser to reset active DOM focus to `document.body`. Because the editor is blurred, keystrokes are lost or caret position is disrupted.
-  3. Safe chaining requires using TipTap's standard `clearNodes()` (or checking `editor.isActive('blockquote')` before lifting) and explicitly refocusing the editor with `editor.commands.focus()` upon menu selection.
-
-### 2. Highlights Option Not Working Properly
-
-- **Current Behavior:** Clicking the Highlight button either does nothing, blurs the selection, or creates `<mark>` tags in JSON that render invisibly or with harsh unstyled browser default `#ffff00` in the UI.
-- **Root Cause:**
-  1. `@nofinite/nuicss` (`theme.css`) contains **zero CSS rules** for `mark`. Under CSS resets, `<mark>` has `background-color: transparent; color: inherit;`.
-  2. The toolbar only calls `toggleHighlight()` with no color option. The original editor had a dedicated popover with 6 pastel presets (`#fef08a` yellow, `#bbf7d0` green, `#bae6fd` blue, `#fbcfe8` pink, `#fed7aa` orange, `#e9d5ff` purple) plus `transparent` (clear highlight).
-  3. Clicking the highlight button fires `mousedown` without `e.preventDefault()`, blurring ProseMirror and collapsing the text selection before the highlight command executes.
-
-### 3. Missing Buttons & "In JSON but Not on UI" Discrepancy
-
-- **Current Behavior:** Multiple features exist in TipTap schemas or were present in the original NUI Editor, but have disappeared from Markon:
-  1. **Text Color Picker (`Color` / `TextStyle`):** Extension is active in `extensions.ts`, generating `color` in JSON, but there is no Text Color button on the toolbar.
-  2. **Font Size (`FontSize`):** Removed during migration. Users cannot choose font sizes (12px, 14px, 16px, 18px, 20px, 24px, 30px, 36px).
-  3. **Font Family (`FontFamily`):** Removed during migration (Inter, Arial, Georgia, Times New Roman, Monospace).
-  4. **Subscript & Superscript:** Extensions are active in `extensions.ts`, generating JSON attributes, but have no buttons on the toolbar.
-  5. **Clear Formatting (`RemoveFormatting`):** Missing from toolbar (`editor.chain().focus().clearNodes().unsetAllMarks().run()`).
-  6. **Align Justify:** Only Left, Center, and Right buttons exist; Justify was omitted.
-  7. **YouTube Video Embed:** Extension and toolbar button were removed.
-  8. **Image Upload:** Original editor supported both URL input and local file upload; Markon only has a URL modal.
-
-### 4. Interactive Deficiencies in Menus & Slash Commands
-
-- **Slash Commands (`slashCommand.ts`):** The slash menu renders buttons with `mousedown` prevention but **lacks a `click` event listener**. Clicking with a mouse does nothing; only keyboard `Enter` worked.
-- **Bubble Menu (`bubbleMenu.ts`):** Link button used native `window.prompt` instead of the centered modal; lacked highlight and text color shortcuts.
+```mermaid
+graph TD
+    P1["Phase 1: Standards, Design Tokens & Upstream NUIX Alignment"] --> P2["Phase 2: Core Selection, Focus & Popover Stability"]
+    P2 --> P3["Phase 3: Functional Block Drag-and-Drop Engine"]
+    P3 --> P4["Phase 4: Production Feature Parity Restoration"]
+    P4 --> P5["Phase 5: React & Hook Integration Hardening"]
+    P5 --> P6["Phase 6: Draft Auto-Save, Formats & Visual Verification"]
+```
 
 ---
 
-## Proposed Solution
+### Phase 1: Standards, Design Tokens & Upstream NUIX Alignment
 
-### Area 1: Upstream Design System Styling (`@nofinite/nuicss`)
+**Focus:** Purge hardcoded styles, eliminate design system violations, enforce the modal contract, and align with `@nofinite/nuix` and `@nofinite/nuicss`.
 
-Add semantic NUICSS token-backed styling for text formatting marks in `packages/nuicss/src/styles/theme.css`:
-
-- **`mark`:**
-  ```css
-  .editor-content mark,
-  .markon-editor mark,
-  .tiptap-wrapper .tiptap mark {
-    background-color: var(--color-warning-subtle, #fef08a);
-    color: var(--fg-default);
-    padding: 0.125rem 0.25rem;
-    border-radius: var(--radius-xs, 0.25rem);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-  }
-  .editor-content mark[data-color],
-  .markon-editor mark[data-color],
-  .tiptap-wrapper .tiptap mark[data-color] {
-    background-color: var(
-      --highlight-color,
-      var(--color-warning-subtle, #fef08a)
-    );
-  }
-  ```
-- **`sub` & `sup`:**
-  ```css
-  .editor-content sub,
-  .markon-editor sub {
-    vertical-align: sub;
-    font-size: 0.75em;
-  }
-  .editor-content sup,
-  .markon-editor sup {
-    vertical-align: super;
-    font-size: 0.75em;
-  }
-  ```
-
-### Area 2: Core Extensions & Formatting Robustness (`@nofinite/markon`)
-
-1. **Restore `FontSize` Extension:**
-   - Create `packages/markon/src/core/fontSize.ts` providing `setFontSize` and `unsetFontSize` commands on `textStyle`.
-   - Register `FontSize` and `FontFamily` in `getMarkonExtensions()`.
-2. **Typography Menu Chaining & Focus Preservation:**
-   - Update `packages/markon/src/core/typographyMenu.ts` to use `clearNodes()` before setting block types:
-     ```ts
-     command: (editor) =>
-       editor.chain().focus().clearNodes().setHeading({ level }).run();
-     ```
-   - In `btn.addEventListener('click')`, call `this.close()` and ensure `this.editor.commands.focus()` is called immediately so typing continues seamlessly in the new block.
-3. **Preserve Selection on Toolbar Mousedown:**
-   - In `MarkonEditor.ts`, attach `toolbar.addEventListener('mousedown', (e) => { e.preventDefault(); })`. This guarantees the browser never steals focus or blurs the text selection when clicking any toolbar control.
-
-### Area 3: Full Toolbar Controls & Color Pickers
-
-1. **Highlight Color Popover:**
-   - Replace the plain toggle with a sleek NUICSS popover menu offering:
-     - 6 pastel color presets: `#fef08a` (Yellow), `#bbf7d0` (Green), `#bae6fd` (Blue), `#fbcfe8` (Pink), `#fed7aa` (Orange), `#e9d5ff` (Purple).
-     - Clear Highlight (`unsetHighlight()`).
-2. **Text Color Popover:**
-   - Add Text Color button (`Palette` icon) with palette presets and clear color (`unsetColor()`).
-3. **Font Size & Font Family Dropdowns:**
-   - Add Font Size trigger (`12px` to `36px`) and Font Family trigger (Inter, Arial, Georgia, Times New Roman, Monospace).
-4. **Restore Subscript, Superscript, Clear Formatting & Justify:**
-   - Add `subscript` (`X₂`), `superscript` (`X²`), `clearFormatting` (`Tx`), and `justify` buttons to the toolbar with active states.
-5. **Image URL & File Upload Support:**
-   - Add file upload trigger to Image dialog so users can either paste a URL or pick a local image file.
-6. **YouTube Embed Support:**
-   - Add YouTube embed node/dialog support.
-
-### Area 4: Slash Commands & Bubble Menu Fixes
-
-1. **Slash Commands:**
-   - Attach `click` handler to each item in `slashCommand.ts` so mouse clicking immediately executes the command and closes the menu.
-   - Add Highlight and Text Color commands to the slash list.
-2. **Bubble Menu:**
-   - Integrate custom modal dialog for links instead of `window.prompt`.
-   - Add Highlight and Text Color buttons to the floating bubble menu.
+- **1.1 Design Token & CSS Cleanup:**
+  - Replace all hardcoded hex literals in `packages/markon/src/core/toolbarMenus.ts` (`HIGHLIGHT_PRESETS` and `TEXT_COLOR_PRESETS`) with semantic NUICSS design tokens (`var(--color-primary)`, `var(--color-warning)`, `var(--color-danger)`, `var(--color-success)`, `var(--color-neutral)`, etc.) and OKLCH palettes.
+  - Eliminate hardcoded theme classes in `packages/markon/src/core/extensions.ts` line 193 (`bg-slate-900 text-slate-50`). Replace with theme-adaptive NUICSS tokens (`bg-subtle text-default border border-default`).
+  - Purge arbitrary Tailwind bracket utilities (`text-[10px]`, `text-[11px]`) across `bubbleMenu.ts`, `slashCommand.ts`, and `toolbarMenus.ts`, replacing them with semantic typography scales (`text-xs`).
+- **1.2 Strict Modal Hierarchy & Backdrop Contract (`dialog.ts`):**
+  - Comply with the constitution rule: Remove the ambiguous corner `✕` close button from confirmation/edit modals containing explicit "Cancel" and "Save" action buttons.
+  - Enforce glassmorphic backdrop styling (`backdrop:bg-overlay backdrop:backdrop-blur-sm`) on native `<dialog class="modal">` elements instead of inline transparent workarounds.
+- **1.3 Upstream NUIX Component Integration:**
+  - Introduce `@nofinite/nuix` as a dependency in `packages/markon/package.json`.
+  - Harmonize modal and popover DOM structures with NUIX superclasses (`modal-box`, `modal-footer`, `dropdown`, `popover`).
 
 ---
 
-## Affected Files & Modules
+### Phase 2: Core Selection, Focus & Popover Stability (Subtle Bug Remediation)
 
-- `packages/nuicss/src/styles/theme.css`: Add styles for `mark`, `sub`, and `sup`.
-- `packages/markon/src/core/fontSize.ts`: New framework-agnostic font size extension.
-- `packages/markon/src/core/extensions.ts`: Register `FontSize`, `FontFamily`, `Color`, `TextStyle`.
-- `packages/markon/src/core/typographyMenu.ts`: Robust block switching with `clearNodes()` and post-selection focus restoration.
-- `packages/markon/src/core/MarkonEditor.ts`: Toolbar markup, color popovers, font size/family, subscript, superscript, clear formatting, justify, image upload, toolbar mousedown prevention.
-- `packages/markon/src/core/slashCommand.ts`: Mouse click event listener and additional formatting items.
-- `packages/markon/src/core/bubbleMenu.ts`: Modern link modal integration and highlight button.
+**Focus:** Eliminate ProseMirror selection loss, scroll disconnects, popover race conditions, and module singleton leaks.
+
+- **2.1 Modal Selection & Focus Preservation:**
+  - In `MarkonEditor.ts` and `dialog.ts`, capture the active ProseMirror selection range (`editor.state.selection`) _prior_ to displaying any modal input (Link, Image, Math).
+  - When the modal confirms, restore the exact selection range before dispatching TipTap command transactions (`setLink`, `setImage`, `insertContent`), preventing collapsed or misplaced formatting.
+- **2.2 Bubble Menu Floating UI Auto-Update:**
+  - In `packages/markon/src/core/bubbleMenu.ts`, connect `@floating-ui/dom`'s `autoUpdate` to track window scrolling and container scrolling (`.editor-content`).
+  - Safely unregister `autoUpdate` on selection collapse and editor destruction.
+  - Replace raw emoji icons (e.g. `🔗`) with crisp SVG icons matching NUIX design standards.
+- **2.3 Slash Command Instance Encapsulation:**
+  - Refactor `packages/markon/src/core/slashCommand.ts` to remove module-level singleton state (`popupEl`, `selectedIndex`, `currentItems`).
+  - Encapsulate popup state per extension/editor instance so multiple editors on the same page operate without collision or cross-contamination.
+- **2.4 Unified Popover Manager & Outside Click Safety:**
+  - Consolidate the 5 popover menu classes (`Typography`, `FontFamily`, `FontSize`, `Highlight`, `TextColor`) to use a shared popover lifecycle helper.
+  - Automatically close any open popover when a new one opens, eliminating concurrent z-index fights and document event listener leaks.
 
 ---
 
-## Dependencies & Tools
+### Phase 3: Functional Block Drag-and-Drop Engine
 
-- No new external dependencies needed (TipTap core extensions and `@floating-ui/dom` already present).
-- `@nofinite/nuicss` compiled styles.
+**Focus:** Transform the cosmetic drag handle into a true Notion-style block reordering and manipulation system.
+
+- **3.1 Safe ProseMirror Node Resolution:**
+  - In `packages/markon/src/core/dragHandle.ts`, fix the `resolved.before(1)` crash when resolving positions at root depth 0 or inside nested nodes.
+- **3.2 Complete Drag-and-Drop Lifecycle:**
+  - Implement `dragover`, `dragenter`, `dragleave`, and `drop` event listeners on the editor container.
+  - Calculate target block drop coordinates accurately using ProseMirror's `posAtCoords`.
+- **3.3 Visual Drop Indicator:**
+  - Render an animated drop insertion indicator line between blocks showing precisely where the dropped block will land.
+- **3.4 Atomic Node Movement Transaction:**
+  - On `drop`, execute a clean atomic ProseMirror transaction (`tr.delete(sourcePos, sourcePos + nodeSize).insert(targetPos, node)`), preserving selection and node attributes.
 
 ---
 
-## Alternatives Considered
+### Phase 4: Production Feature Parity Restoration
 
-- _Alternative:_ Keep toolbar minimal and relegate extra features to extensions only.
-  _Rejected:_ The user explicitly noted that features show in JSON but do not display on the UI, and highlighted the loss of functionality from the pre-migration baseline. Full parity ensures Markon is a premier universal rich text engine.
+**Focus:** Port back and modernize all rich content authoring features from the previous React implementation (`packages/nui/src/components/editor/`).
+
+- **4.1 Interactive Table Dimension Picker:**
+  - Replace the rigid "3x3 Table" button with an interactive grid picker (hover over rows/columns up to 10x10 to choose table size dynamically before inserting).
+- **4.2 Video & Media Embed Engine:**
+  - Implement a framework-agnostic `CustomVideo` TipTap extension supporting YouTube, Vimeo, and direct video URLs (`.mp4`, `.webm`) with responsive aspect ratios.
+- **4.3 Resizable & Alignable Image NodeView:**
+  - Create a custom DOM NodeView for images featuring corner drag resize handles, width percentage controls, and alignment tools (left, center, right).
+- **4.4 Enhanced Code Block NodeView:**
+  - Create an interactive Code Block NodeView equipped with syntax language selector dropdown (TypeScript, JavaScript, Python, HTML, CSS, JSON, etc.) and a one-click "Copy Code" button with toast notification.
+- **4.5 Collapsible / Accordion Sections:**
+  - Re-introduce toggle headings / collapsible accordion blocks (Notion-style `<details>` / `<summary>` blocks).
+- **4.6 File Attachments & Drag-and-Drop File Upload:**
+  - Add file attachment block with icon, filename, filesize, and download action.
+  - Support `onUploadFile?: (file: File) => Promise<string>` hook to upload dropped images and files asynchronously rather than forcing multi-megabyte Base64 strings.
+
+---
+
+### Phase 5: React & Hook Integration Hardening (`MarkonEditor.tsx` & `useMarkon.ts`)
+
+**Focus:** Guarantee seamless, flicker-free, and cursor-stable integration in modern React / Next.js environments.
+
+- **5.1 Dynamic Props Reactivity (No Stale Closures):**
+  - Update `packages/markon/src/react/MarkonEditor.tsx` to reactively synchronize updates to `readOnly`, `placeholder`, `minHeight`, and toolbar flags without tearing down and re-instantiating the editor.
+- **5.2 Non-Destructive Controlled Content Sync (Eliminate Cursor Jumping):**
+  - Prevent caret jumping to index 0 on parent re-renders by performing diff-checks before dispatching transactions and preserving ProseMirror cursor coordinates when syncing incoming `value`.
+- **5.3 Reactive `useMarkon` Hook Statistics:**
+  - Ensure `wordCount`, `charCount`, and `isEmpty` update on both user input and programmatic `setContent()` calls.
+
+---
+
+### Phase 6: Draft Auto-Save, Bidirectional Formats & Visual Verification
+
+**Focus:** Enterprise persistence, export formats, automated testing, and Playwright visual validation.
+
+- **6.1 Real Auto-Save & Crash Recovery:**
+  - Implement local storage / IndexedDB draft manager with active save states: `saving`, `saved`, `error`, and last-saved timestamp.
+  - Wire the status footer to show live saving indicators.
+- **6.2 Serialization & Clean Output:**
+  - Add bidirectional Markdown parsing and export utilities.
+- **6.3 Comprehensive Verification & Playwright Visual Testing:**
+  - Expand `packages/markon/src/markon.test.ts` to cover all new extensions, commands, and selection restoration.
+  - Run Playwright visual tests capturing screenshots in `/temp/screenshots/` to verify spatial layout, popover alignments, and modal backdrop blur.
+  - Run `npm pack` in `packages/markon` to verify compiled distribution tarball integrity.
+
+---
+
+## Dependencies & Affected Files
+
+### Modified Packages:
+
+- `packages/markon`: Primary engine refactor and extension enhancements.
+- `packages/nuicss`: Upstream token and mark/sub/sup style definitions.
+
+### Key Files Affected:
+
+- `packages/markon/package.json`
+- `packages/markon/src/core/MarkonEditor.ts`
+- `packages/markon/src/core/dialog.ts`
+- `packages/markon/src/core/bubbleMenu.ts`
+- `packages/markon/src/core/slashCommand.ts`
+- `packages/markon/src/core/dragHandle.ts`
+- `packages/markon/src/core/toolbarMenus.ts`
+- `packages/markon/src/core/typographyMenu.ts`
+- `packages/markon/src/core/extensions.ts`
+- `packages/markon/src/react/MarkonEditor.tsx`
+- `packages/markon/src/react/useMarkon.ts`
+- `packages/nuicss/src/styles/theme.css`
 
 ---
 
 ## Risks & Mitigations
 
-- **Risk:** Toolbar clutter from additional buttons.
-  _Mitigation:_ Organize into logical semantic groups with vertical dividers (`Separators`) and responsive wrapping, exactly matching the clean layout of the original editor.
-- **Risk:** Selection loss during color picker or dropdown interaction.
-  _Mitigation:_ Enforce `mousedown` `preventDefault()` across all toolbar buttons and dropdown items.
+| Risk                                                    | Mitigation                                                                                                             |
+| :------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------- |
+| **Selection loss during modal or popover interactions** | Explicitly cache `editor.state.selection` before opening overlays, and restore it before dispatching commands.         |
+| **Cursor jumping in controlled React forms**            | Perform DOM/JSON equality checks and use transaction mapping instead of full `setContent` resets.                      |
+| **DOM bloat from multiple Floating UI instances**       | Implement a shared popover manager that enforces a single active popover and registers `autoUpdate` only when visible. |
+| **CSS token divergence**                                | Strictly bind all colors and surfaces to `@nofinite/nuicss` variables; zero hardcoded hex literals.                    |
 
 ---
 
 ## Verification Strategy
 
-1. **Unit & Integration Tests:** Run `pnpm nx run-many -t test -p markon nuicss` with Vitest.
-2. **Automated Playwright Reproduction & Visual Audit:**
-   - Test H1/H2 selection on empty line and typing verification (confirm DOM tag is `H1` and computed font size is `30px`/`700`).
-   - Test Highlight with presets and verify `<mark>` background color and contrast in light and dark mode.
-   - Test Font Size, Font Family, Subscript, Superscript, and Clear Formatting.
-   - Test Slash Commands mouse click execution.
-   - Capture visual screenshots in `temp/screenshots/` and inspect them.
-3. **Build & Tarball Verification:** Run `pnpm nx run markon:build` and `npm pack --dry-run` to ensure clean distribution.
-
----
-
-## Rollback Plan
-
-All changes can be reverted cleanly via `git checkout dev` or by reverting specific commits if needed.
+1. **Unit & Integration Tests:** Vitest test suite covering node creation, selection state, and command execution.
+2. **Visual Verification:** Playwright screenshots saved to `/temp/screenshots/` to verify aesthetics, drop indicators, and glassmorphic backdrops.
+3. **NPM Output Verification:** Run `npm pack` to inspect tarball contents and ensure all type declarations and bundles are present.
+4. **Local Git Commits:** Compulsory logical commit following successful verification of each phase.

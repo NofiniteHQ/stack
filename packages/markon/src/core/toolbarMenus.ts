@@ -282,12 +282,24 @@ export interface HighlightPreset {
 }
 
 export const HIGHLIGHT_PRESETS: HighlightPreset[] = [
-  { label: 'Yellow', color: '#fef08a' },
-  { label: 'Green', color: '#bbf7d0' },
-  { label: 'Blue', color: '#bae6fd' },
-  { label: 'Pink', color: '#fbcfe8' },
-  { label: 'Orange', color: '#fed7aa' },
-  { label: 'Purple', color: '#e9d5ff' },
+  {
+    label: 'Yellow',
+    color: 'var(--color-warning-subtle, oklch(0.96 0.08 95))',
+  },
+  {
+    label: 'Green',
+    color: 'var(--color-success-subtle, oklch(0.95 0.06 150))',
+  },
+  { label: 'Blue', color: 'var(--color-info-subtle, oklch(0.94 0.06 240))' },
+  { label: 'Pink', color: 'var(--color-danger-subtle, oklch(0.95 0.06 25))' },
+  {
+    label: 'Orange',
+    color: 'var(--color-warning-subtle, oklch(0.94 0.07 65))',
+  },
+  {
+    label: 'Purple',
+    color: 'var(--color-accent-subtle, oklch(0.94 0.07 310))',
+  },
 ];
 
 export class MarkonHighlightMenu {
@@ -332,7 +344,7 @@ export class MarkonHighlightMenu {
 
     const header = document.createElement('div');
     header.className =
-      'text-[11px] font-semibold text-muted px-1 uppercase tracking-wider';
+      'text-xs font-semibold text-muted px-1 uppercase tracking-wider';
     header.textContent = 'Highlight Color';
     menu.appendChild(header);
 
@@ -458,13 +470,13 @@ export interface TextColorPreset {
 
 export const TEXT_COLOR_PRESETS: TextColorPreset[] = [
   { label: 'Default', color: 'inherit' },
-  { label: 'Primary Blue', color: '#2563eb' },
-  { label: 'Indigo', color: '#6366f1' },
-  { label: 'Emerald Green', color: '#059669' },
-  { label: 'Red', color: '#dc2626' },
-  { label: 'Amber Orange', color: '#d97706' },
-  { label: 'Purple', color: '#9333ea' },
-  { label: 'Muted Gray', color: '#64748b' },
+  { label: 'Primary', color: 'var(--color-primary)' },
+  { label: 'Indigo', color: 'var(--brand-700, #1d4ed8)' },
+  { label: 'Success', color: 'var(--color-success)' },
+  { label: 'Danger', color: 'var(--color-danger)' },
+  { label: 'Warning', color: 'var(--color-warning)' },
+  { label: 'Info', color: 'var(--color-info)' },
+  { label: 'Muted', color: 'var(--fg-muted)' },
 ];
 
 export class MarkonTextColorMenu {
@@ -509,7 +521,7 @@ export class MarkonTextColorMenu {
 
     const header = document.createElement('div');
     header.className =
-      'text-[11px] font-semibold text-muted px-1 uppercase tracking-wider';
+      'text-xs font-semibold text-muted px-1 uppercase tracking-wider';
     header.textContent = 'Text Color';
     menu.appendChild(header);
 

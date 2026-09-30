@@ -190,7 +190,7 @@ export function getMarkonExtensions(placeholder?: string): AnyExtension[] {
       lowlight,
       HTMLAttributes: {
         class:
-          'rounded-lg p-3 my-2 font-mono text-xs overflow-x-auto bg-slate-900 text-slate-50',
+          'rounded-lg p-3 my-2 font-mono text-xs overflow-x-auto bg-subtle border border-default text-default',
       },
     }),
     MathBlock,

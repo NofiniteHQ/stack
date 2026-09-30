@@ -146,7 +146,7 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
           ? 'bg-primary/10 text-primary font-medium'
           : 'text-default hover:bg-subtle'
       }`;
-      btn.innerHTML = `<span class="font-semibold">${item.title}</span><span class="text-[11px] text-muted">${item.description}</span>`;
+      btn.innerHTML = `<span class="font-semibold">${item.title}</span><span class="text-xs text-muted">${item.description}</span>`;
       btn.addEventListener('mousedown', (e) => {
         e.preventDefault();
       });
