@@ -15,6 +15,8 @@ export interface MarkonEditorRef {
   getHTML: () => string;
   getJSON: () => any;
   getText: () => string;
+  getMarkdown: () => string;
+  setMarkdown: (md: string, emitUpdate?: boolean) => void;
   setContent: (
     content: string,
     emitUpdate?: boolean,
@@ -65,6 +67,9 @@ export const MarkonEditor = forwardRef<MarkonEditorRef, MarkonEditorProps>(
         getHTML: () => editorRef.current?.getHTML() || '',
         getJSON: () => editorRef.current?.getJSON() || {},
         getText: () => editorRef.current?.getText() || '',
+        getMarkdown: () => editorRef.current?.getMarkdown() || '',
+        setMarkdown: (md: string, emitUpdate = false) =>
+          editorRef.current?.setMarkdown(md, emitUpdate),
         setContent: (c: string, emitUpdate = false, preserveCursor = false) =>
           editorRef.current?.setContent(c, emitUpdate, preserveCursor),
         setReadOnly: (ro: boolean) => editorRef.current?.setReadOnly(ro),

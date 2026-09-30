@@ -82,29 +82,52 @@ export const FileAttachment = Node.create({
           'data-size': size,
           class:
             'markon-file-attachment flex items-center justify-between p-3 my-2 rounded-xl border border-default bg-subtle/60 hover:bg-subtle transition-colors select-none',
+          style:
+            'display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; margin: 0.5rem 0; border-radius: 0.75rem; border: 1px solid var(--border-default); background-color: var(--bg-surface);',
         },
         HTMLAttributes
       ),
       [
         'div',
-        { class: 'flex items-center gap-3 overflow-hidden' },
+        {
+          class: 'flex items-center gap-3 overflow-hidden',
+          style:
+            'display: flex; align-items: center; gap: 0.75rem; overflow: hidden; min-width: 0;',
+        },
         [
           'span',
           {
             class:
               'p-2 rounded-lg bg-surface border border-default text-primary shrink-0 flex items-center justify-center',
+            style:
+              'width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 0.5rem; background-color: var(--bg-subtle); border: 1px solid var(--border-default); color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;',
           },
           '📎',
         ],
         [
           'div',
-          { class: 'flex flex-col min-w-0' },
+          {
+            class: 'flex flex-col min-w-0',
+            style:
+              'display: flex; flex-direction: column; min-width: 0; overflow: hidden;',
+          },
           [
             'span',
-            { class: 'text-xs font-semibold text-default truncate' },
+            {
+              class: 'text-xs font-semibold text-default truncate',
+              style:
+                'font-size: 0.75rem; font-weight: 600; color: var(--text-default); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;',
+            },
             name,
           ],
-          ['span', { class: 'text-[11px] text-muted' }, size || 'Attachment'],
+          [
+            'span',
+            {
+              class: 'text-[11px] text-muted',
+              style: 'font-size: 11px; color: var(--text-muted);',
+            },
+            size || 'Attachment',
+          ],
         ],
       ],
       [
@@ -116,6 +139,8 @@ export const FileAttachment = Node.create({
           rel: 'noopener noreferrer',
           class:
             'btn btn-ghost btn-sm text-xs text-primary shrink-0 hover:underline',
+          style:
+            'font-size: 0.75rem; color: var(--color-primary); flex-shrink: 0;',
         },
         'Download',
       ],
@@ -142,6 +167,8 @@ export const FileAttachment = Node.create({
       const container = document.createElement('div');
       container.className =
         'markon-file-attachment group/file relative flex items-center justify-between p-3 my-2 rounded-xl border border-default bg-subtle/60 hover:bg-subtle transition-colors select-none';
+      container.style.cssText =
+        'display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; margin: 0.5rem 0; border-radius: 0.75rem; border: 1px solid var(--border-default); background-color: var(--bg-surface);';
       container.setAttribute('data-file-attachment', '');
       container.setAttribute('data-src', node.attrs.src);
       container.setAttribute('data-name', node.attrs.name);
@@ -150,12 +177,16 @@ export const FileAttachment = Node.create({
       // Left info
       const left = document.createElement('div');
       left.className = 'flex items-center gap-3 overflow-hidden min-w-0';
+      left.style.cssText =
+        'display: flex; align-items: center; gap: 0.75rem; overflow: hidden; min-width: 0;';
 
       const iconBox = document.createElement('div');
       iconBox.className =
         'w-8 h-8 rounded-lg bg-surface border border-default text-primary flex items-center justify-center shrink-0';
+      iconBox.style.cssText =
+        'width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 0.5rem; background-color: var(--bg-subtle); border: 1px solid var(--border-default); color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;';
       iconBox.innerHTML = `
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" style="width: 16px; height: 16px; display: block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -167,14 +198,19 @@ export const FileAttachment = Node.create({
 
       const textCol = document.createElement('div');
       textCol.className = 'flex flex-col min-w-0';
+      textCol.style.cssText =
+        'display: flex; flex-direction: column; min-width: 0; overflow: hidden;';
 
       const nameEl = document.createElement('span');
       nameEl.className = 'text-xs font-semibold text-default truncate';
+      nameEl.style.cssText =
+        'font-size: 0.75rem; font-weight: 600; color: var(--text-default); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
       nameEl.textContent = node.attrs.name || 'Attachment';
       textCol.appendChild(nameEl);
 
       const sizeEl = document.createElement('span');
       sizeEl.className = 'text-[11px] text-muted';
+      sizeEl.style.cssText = 'font-size: 11px; color: var(--text-muted);';
       sizeEl.textContent = node.attrs.size || 'Attachment';
       textCol.appendChild(sizeEl);
 
@@ -184,6 +220,8 @@ export const FileAttachment = Node.create({
       // Right actions
       const right = document.createElement('div');
       right.className = 'flex items-center gap-2 shrink-0';
+      right.style.cssText =
+        'display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;';
 
       const downloadLink = document.createElement('a');
       downloadLink.href = node.attrs.src;
@@ -192,8 +230,10 @@ export const FileAttachment = Node.create({
       downloadLink.rel = 'noopener noreferrer';
       downloadLink.className =
         'btn btn-ghost btn-sm text-xs text-primary font-medium hover:underline flex items-center gap-1';
+      downloadLink.style.cssText =
+        'display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: var(--color-primary);';
       downloadLink.innerHTML = `
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="14" height="14" style="width: 14px; height: 14px; display: inline-block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="7 10 12 15 17 10"></polyline>
           <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -209,7 +249,7 @@ export const FileAttachment = Node.create({
           'btn btn-ghost btn-xs btn-icon text-muted hover:text-danger opacity-0 group-hover/file:opacity-100 transition-opacity';
         deleteBtn.title = 'Remove attachment';
         deleteBtn.innerHTML = `
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="14" height="14" style="width: 14px; height: 14px; display: inline-block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>

@@ -14,3 +14,5 @@ export * from './codeBlock';
 export * from './details';
 export * from './fileAttachment';
 export * from './popoverManager';
+export * from './markdown';
+export * from './draftManager';

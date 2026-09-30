@@ -20,6 +20,14 @@ import {
 import { MarkonTableMenu } from './tableMenu';
 import { formatFileSize } from './fileAttachment';
 import { closeAllPopovers } from './popoverManager';
+import {
+  MarkonDraftManager,
+  type AutoSaveConfig,
+  type SaveStatusState,
+} from './draftManager';
+import { htmlToMarkdown, markdownToHtml } from './markdown';
+
+export type { AutoSaveConfig, SaveStatusState };
 
 export interface MarkonEditorOptions {
   element?: HTMLElement;
@@ -32,6 +40,7 @@ export interface MarkonEditorOptions {
   showSaveStatus?: boolean;
   showBubbleMenu?: boolean;
   showSlashCommands?: boolean;
+  autoSave?: boolean | AutoSaveConfig;
   onUploadFile?: (
     file: File
   ) => Promise<string | { url: string; name?: string; size?: number | string }>;
@@ -266,7 +275,7 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
         </button>
 
         <!-- Table Operations Group (Hidden when not in table) -->
-        <span class="editor-table-tools hidden items-center gap-0.5 px-1 py-0.5 rounded-lg bg-subtle/80 border border-default/60">
+        <span class="editor-table-tools hidden items-center gap-0.5 px-1 py-0.5 rounded-lg bg-subtle/80 border border-default/60" style="display: none;">
           <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="addRowAfter" title="Add Row Below">+Row</button>
           <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="deleteRow" title="Delete Row">-Row</button>
           <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="addColumnAfter" title="Add Column Right">+Col</button>
@@ -274,8 +283,8 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
         </span>
 
-        <input type="file" class="editor-image-file-input hidden" accept="image/*" />
-        <input type="file" class="editor-generic-file-input hidden" />
+        <input type="file" class="editor-image-file-input hidden" accept="image/*" hidden style="display: none;" />
+        <input type="file" class="editor-generic-file-input hidden" hidden style="display: none;" />
       </div>
 
       <!-- Editable Canvas -->
@@ -288,8 +297,8 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           ${
             showSaveStatus
               ? `
-            <div class="editor-save-status flex items-center gap-1.5 text-xs text-muted">
-              <span class="w-2 h-2 rounded-full bg-primary inline-block shrink-0"></span>
+            <div class="editor-save-status flex items-center gap-1.5 text-xs text-muted" aria-live="polite">
+              <span class="editor-save-indicator w-2 h-2 rounded-full bg-primary inline-block shrink-0 transition-colors"></span>
               <span class="editor-save-text">Saved</span>
             </div>
           `
@@ -323,6 +332,7 @@ export class MarkonEditor {
   public textColorMenu?: MarkonTextColorMenu;
   public tableMenu?: MarkonTableMenu;
   public dragHandle?: MarkonDragHandle;
+  public draftManager?: MarkonDraftManager;
 
   constructor(options: MarkonEditorOptions = {}) {
     this.options = options;
@@ -349,7 +359,23 @@ export class MarkonEditor {
 
     const placeholder =
       options.placeholder || 'Write something amazing… (type / for commands)';
-    const initialContent = options.initialValue || '';
+    let initialContent = options.initialValue || '';
+
+    // Recover draft if autoSave is active and initialValue is empty
+    if (
+      options.autoSave &&
+      !initialContent &&
+      typeof window !== 'undefined' &&
+      window.localStorage
+    ) {
+      const storageKey =
+        (typeof options.autoSave === 'object' && options.autoSave.key) ||
+        `markon_draft_${options.name || 'default'}`;
+      const saved = window.localStorage.getItem(storageKey);
+      if (saved) {
+        initialContent = saved;
+      }
+    }
 
     const extensions = getMarkonExtensions(placeholder);
     if (options.showSlashCommands !== false) {
@@ -384,6 +410,7 @@ export class MarkonEditor {
         const text = editor.getText();
 
         this.updateFooter(text);
+        this.draftManager?.handleUpdate();
         options.onChange?.(html, json, text);
 
         this.element.dispatchEvent(
@@ -463,6 +490,13 @@ export class MarkonEditor {
       });
     }
 
+    if (options.autoSave) {
+      this.draftManager = new MarkonDraftManager(
+        this,
+        typeof options.autoSave === 'object' ? options.autoSave : {}
+      );
+    }
+
     this.updateToolbarState();
     this.updateFooter(this.tiptap.getText());
   }
@@ -519,9 +553,11 @@ export class MarkonEditor {
     );
     if (tableTools) {
       if (this.tiptap.isActive('table')) {
+        tableTools.style.display = 'inline-flex';
         tableTools.classList.remove('hidden');
         tableTools.classList.add('flex');
       } else {
+        tableTools.style.display = 'none';
         tableTools.classList.add('hidden');
         tableTools.classList.remove('flex');
       }
@@ -1014,6 +1050,67 @@ export class MarkonEditor {
     reader.readAsDataURL(file);
   }
 
+  public setSaveStatus(status: SaveStatusState, message?: string): void {
+    const statusEl = this.element.querySelector<HTMLElement>(
+      '.editor-save-status'
+    );
+    if (!statusEl) return;
+    const dot = statusEl.querySelector<HTMLElement>('.editor-save-indicator');
+    const text = statusEl.querySelector<HTMLElement>('.editor-save-text');
+
+    if (dot) {
+      dot.classList.remove(
+        'bg-primary',
+        'bg-warning',
+        'bg-danger',
+        'animate-pulse'
+      );
+      if (status === 'saving') {
+        dot.classList.add('bg-warning', 'animate-pulse');
+      } else if (status === 'error') {
+        dot.classList.add('bg-danger');
+      } else {
+        dot.classList.add('bg-primary');
+      }
+    }
+
+    if (text) {
+      if (message) {
+        text.textContent = message;
+      } else if (status === 'saving') {
+        text.textContent = 'Saving…';
+      } else if (status === 'saved') {
+        text.textContent = 'Saved just now';
+      } else if (status === 'error') {
+        text.textContent = 'Save failed';
+      } else {
+        text.textContent = 'Saved';
+      }
+    }
+  }
+
+  public getMarkdown(): string {
+    return htmlToMarkdown(this.getHTML());
+  }
+
+  public setMarkdown(md: string, emitUpdate = false): void {
+    this.setContent(markdownToHtml(md), emitUpdate);
+  }
+
+  public async saveDraft(): Promise<void> {
+    if (this.draftManager) {
+      await this.draftManager.saveNow();
+    }
+  }
+
+  public clearDraft(): void {
+    this.draftManager?.clearDraft();
+  }
+
+  public getSavedDraft(): string | null {
+    return this.draftManager?.getSavedDraft() || null;
+  }
+
   public destroy(): void {
     closeAllPopovers();
     this.fontFamilyMenu?.destroy();
@@ -1023,6 +1120,7 @@ export class MarkonEditor {
     this.typographyMenu?.destroy();
     this.tableMenu?.destroy();
     this.dragHandle?.destroy();
+    this.draftManager?.destroy();
     this.tiptap.destroy();
   }
 }

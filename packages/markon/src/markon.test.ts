@@ -6,6 +6,8 @@ import {
   getCounts,
   parseVideoUrl,
   formatFileSize,
+  htmlToMarkdown,
+  markdownToHtml,
 } from './index';
 
 describe('@nofinite/markon', () => {
@@ -363,6 +365,102 @@ describe('@nofinite/markon', () => {
       expect(eventText).toBe('Programmatic update');
 
       editor.destroy();
+    });
+
+    it('converts HTML to Markdown and Markdown to HTML accurately', () => {
+      const md =
+        '# Heading 1\n\n**Bold text** and *italic text*\n\n> Blockquote\n\n```typescript\nconst x = 1;\n```';
+      const html = markdownToHtml(md);
+      expect(html).toContain('<h1>Heading 1</h1>');
+      expect(html).toContain('<strong>Bold text</strong>');
+      expect(html).toContain('<em>italic text</em>');
+      expect(html).toContain('<blockquote><p>Blockquote</p></blockquote>');
+      expect(html).toContain('language-typescript');
+
+      const convertedMd = htmlToMarkdown(html);
+      expect(convertedMd).toContain('# Heading 1');
+      expect(convertedMd).toContain('**Bold text**');
+      expect(convertedMd).toContain('*italic text*');
+      expect(convertedMd).toContain('> Blockquote');
+      expect(convertedMd).toContain('```typescript');
+    });
+
+    it('sets and retrieves content in Markdown format', () => {
+      const editor = new MarkonEditor({
+        element: container,
+      });
+
+      editor.setMarkdown('## Secondary Title\n\nThis is a test paragraph.');
+      expect(editor.getHTML()).toContain('<h2>Secondary Title</h2>');
+      expect(editor.getHTML()).toContain('<p>This is a test paragraph.</p>');
+
+      const md = editor.getMarkdown();
+      expect(md).toContain('## Secondary Title');
+      expect(md).toContain('This is a test paragraph.');
+
+      editor.destroy();
+    });
+
+    it('manages auto-save drafts, recovery, and UI save states', async () => {
+      const storageKey = 'markon_draft_test_spec';
+      window.localStorage.removeItem(storageKey);
+
+      const onSaveMock = vi.fn();
+
+      const editor = new MarkonEditor({
+        element: container,
+        name: 'test_spec',
+        autoSave: {
+          key: storageKey,
+          debounceMs: 50,
+          onSave: onSaveMock,
+        },
+      });
+
+      expect(editor.draftManager).toBeDefined();
+
+      // Trigger update and immediate save
+      editor.setContent('<p>Draft content to persist</p>');
+      await editor.saveDraft();
+
+      expect(onSaveMock).toHaveBeenCalled();
+      expect(window.localStorage.getItem(storageKey)).toContain(
+        'Draft content to persist'
+      );
+      expect(editor.getSavedDraft()).toContain('Draft content to persist');
+
+      // Test save status indicator
+      editor.setSaveStatus('saving');
+      const dot = container.querySelector('.editor-save-indicator');
+      const text = container.querySelector('.editor-save-text');
+      expect(dot?.classList.contains('bg-warning')).toBe(true);
+      expect(text?.textContent).toBe('Saving…');
+
+      editor.setSaveStatus('saved', 'Saved at 12:00:00');
+      expect(dot?.classList.contains('bg-primary')).toBe(true);
+      expect(text?.textContent).toBe('Saved at 12:00:00');
+
+      editor.setSaveStatus('error');
+      expect(dot?.classList.contains('bg-danger')).toBe(true);
+      expect(text?.textContent).toBe('Save failed');
+
+      editor.destroy();
+
+      // Test draft recovery on new editor initialization
+      const recoveredEditor = new MarkonEditor({
+        element: container,
+        name: 'test_spec',
+        autoSave: {
+          key: storageKey,
+        },
+      });
+
+      expect(recoveredEditor.getHTML()).toContain('Draft content to persist');
+
+      recoveredEditor.clearDraft();
+      expect(window.localStorage.getItem(storageKey)).toBeNull();
+
+      recoveredEditor.destroy();
     });
   });
 });

@@ -21,6 +21,8 @@ export interface UseMarkonReturn {
   getHTML: () => string;
   getText: () => string;
   getJSON: () => any;
+  getMarkdown: () => string;
+  setMarkdown: (md: string, emitUpdate?: boolean) => void;
 }
 
 export function useMarkon(
@@ -137,6 +139,20 @@ export function useMarkon(
     return editor?.getJSON() || {};
   }, [editor]);
 
+  const getMarkdown = useCallback(() => {
+    return editor?.getMarkdown() || '';
+  }, [editor]);
+
+  const setMarkdown = useCallback(
+    (md: string, emitUpdate = false) => {
+      if (editor) {
+        editor.setMarkdown(md, emitUpdate);
+        updateStatsFromText(editor.getText());
+      }
+    },
+    [editor, updateStatsFromText]
+  );
+
   return {
     containerRef,
     editor,
@@ -149,5 +165,7 @@ export function useMarkon(
     getHTML,
     getText,
     getJSON,
+    getMarkdown,
+    setMarkdown,
   };
 }
