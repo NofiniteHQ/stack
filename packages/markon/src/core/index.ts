@@ -5,3 +5,5 @@ export * from './bubbleMenu';
 export * from './dialog';
 export * from './typographyMenu';
 export * from './dragHandle';
+export * from './fontSize';
+export * from './toolbarMenus';

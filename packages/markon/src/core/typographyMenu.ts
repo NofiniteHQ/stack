@@ -27,7 +27,7 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     label: 'Paragraph',
     icon: '¶',
     command: (editor) =>
-      editor.chain().focus().lift('blockquote').setParagraph().run(),
+      editor.chain().focus().clearNodes().setParagraph().run(),
     isActive: (editor) =>
       !editor.isActive('heading') &&
       !editor.isActive('blockquote') &&
@@ -38,7 +38,7 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     label: 'Heading 1',
     icon: 'H1',
     command: (editor) =>
-      editor.chain().focus().lift('blockquote').setHeading({ level: 1 }).run(),
+      editor.chain().focus().clearNodes().setHeading({ level: 1 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 1 }),
   },
   {
@@ -46,7 +46,7 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     label: 'Heading 2',
     icon: 'H2',
     command: (editor) =>
-      editor.chain().focus().lift('blockquote').setHeading({ level: 2 }).run(),
+      editor.chain().focus().clearNodes().setHeading({ level: 2 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 2 }),
   },
   {
@@ -54,7 +54,7 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     label: 'Heading 3',
     icon: 'H3',
     command: (editor) =>
-      editor.chain().focus().lift('blockquote').setHeading({ level: 3 }).run(),
+      editor.chain().focus().clearNodes().setHeading({ level: 3 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 3 }),
   },
   {
@@ -69,7 +69,7 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     label: 'Code Block',
     icon: '</>',
     command: (editor) =>
-      editor.chain().focus().lift('blockquote').toggleCodeBlock().run(),
+      editor.chain().focus().clearNodes().toggleCodeBlock().run(),
     isActive: (editor) => editor.isActive('codeBlock'),
   },
 ];
@@ -158,6 +158,7 @@ export class MarkonTypographyMenu {
         item.command(this.editor);
         this.updateTriggerState();
         this.close();
+        this.editor.commands.focus();
       });
 
       menu.appendChild(btn);

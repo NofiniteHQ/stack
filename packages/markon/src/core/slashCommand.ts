@@ -111,6 +111,13 @@ export const defaultSlashCommands: SlashCommandItem[] = [
       editor.chain().focus().deleteRange(range).setHorizontalRule().run();
     },
   },
+  {
+    title: 'Highlight',
+    description: 'Highlight text with pastel color',
+    command: (editor, range) => {
+      editor.chain().focus().deleteRange(range).toggleHighlight().run();
+    },
+  },
 ];
 
 export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
@@ -120,11 +127,9 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
   let selectedIndex = 0;
   let currentItems: SlashCommandItem[] = [];
 
-  const updatePopup = (
-    itemsList: SlashCommandItem[],
-    clientRect: () => DOMRect | null
-  ) => {
+  const updatePopup = (props: any) => {
     if (!popupEl) return;
+    const itemsList: SlashCommandItem[] = props.items || [];
     currentItems = itemsList;
     if (itemsList.length === 0) {
       popupEl.style.display = 'none';
@@ -145,10 +150,17 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
       btn.addEventListener('mousedown', (e) => {
         e.preventDefault();
       });
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        item.command(props.editor, props.range);
+        if (popupEl) popupEl.style.display = 'none';
+      });
       popupEl?.appendChild(btn);
     });
 
-    const rect = clientRect();
+    const rect =
+      typeof props.clientRect === 'function' ? props.clientRect() : null;
     if (!rect) return;
 
     const virtualRef = {
@@ -192,25 +204,25 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
                   document.body.appendChild(popupEl);
                 }
                 selectedIndex = 0;
-                updatePopup(props.items, props.clientRect);
+                updatePopup(props);
               },
               onUpdate: (props: any) => {
                 if (selectedIndex >= props.items.length) {
                   selectedIndex = 0;
                 }
-                updatePopup(props.items, props.clientRect);
+                updatePopup(props);
               },
               onKeyDown: ({ event, props }: any) => {
                 if (event.key === 'ArrowUp') {
                   selectedIndex =
                     (selectedIndex - 1 + currentItems.length) %
                     currentItems.length;
-                  updatePopup(currentItems, props.clientRect);
+                  updatePopup(props);
                   return true;
                 }
                 if (event.key === 'ArrowDown') {
                   selectedIndex = (selectedIndex + 1) % currentItems.length;
-                  updatePopup(currentItems, props.clientRect);
+                  updatePopup(props);
                   return true;
                 }
                 if (event.key === 'Enter') {

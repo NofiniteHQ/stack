@@ -11,6 +11,12 @@ import { createSlashCommandExtension } from './slashCommand';
 import { openMarkonModal } from './dialog';
 import { MarkonTypographyMenu } from './typographyMenu';
 import { MarkonDragHandle } from './dragHandle';
+import {
+  MarkonFontFamilyMenu,
+  MarkonFontSizeMenu,
+  MarkonHighlightMenu,
+  MarkonTextColorMenu,
+} from './toolbarMenus';
 
 export interface MarkonEditorOptions {
   element?: HTMLElement;
@@ -65,10 +71,26 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
 
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
-        <!-- Custom Typography Selector (Icon-only, fixed 32x32px square) -->
+        <!-- Typography / Headings (Icon-only) -->
         <button type="button" class="editor-typography-trigger editor-btn btn btn-ghost btn-sm btn-icon"
                 title="Text Style" aria-haspopup="true" aria-expanded="false">
           <span class="editor-typography-icon font-mono font-bold text-xs text-primary shrink-0">¶</span>
+        </button>
+
+        <!-- Font Family Selector -->
+        <button type="button" class="editor-font-family-trigger editor-btn btn btn-ghost btn-sm btn-icon"
+                title="Font Family" aria-haspopup="true" aria-expanded="false">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 7 4 4 20 4 20 7"></polyline>
+            <line x1="9" y1="20" x2="15" y2="20"></line>
+            <line x1="12" y1="4" x2="12" y2="20"></line>
+          </svg>
+        </button>
+
+        <!-- Font Size Selector -->
+        <button type="button" class="editor-font-size-trigger editor-btn btn btn-ghost btn-sm btn-icon"
+                title="Font Size" aria-haspopup="true" aria-expanded="false">
+          <span class="font-sans font-bold text-xs leading-none">A↕</span>
         </button>
 
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
@@ -86,10 +108,32 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="strikeThrough" title="Strikethrough">
           <span class="line-through text-sm">S</span>
         </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="subscript" title="Subscript">
+          <span class="text-xs font-semibold">X₂</span>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="superscript" title="Superscript">
+          <span class="text-xs font-semibold">X²</span>
+        </button>
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="code" title="Inline Code">
           <span class="font-mono text-xs">&lt;/&gt;</span>
         </button>
-        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="highlight" title="Highlight">
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="clearFormatting" title="Clear Formatting">
+          <span class="text-xs font-semibold text-muted hover:text-danger">T⃠</span>
+        </button>
+
+        <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
+
+        <!-- Colors: Text Color & Highlight -->
+        <button type="button" class="editor-color-trigger editor-btn btn btn-ghost btn-sm btn-icon" title="Text Color" aria-haspopup="true" aria-expanded="false">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+          </svg>
+        </button>
+        <button type="button" class="editor-highlight-trigger editor-btn btn btn-ghost btn-sm btn-icon" title="Highlight Color" aria-haspopup="true" aria-expanded="false">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m9 11-6 6v3h3l6-6"></path>
             <path d="m22 2-2.7 2.7a2.4 2.4 0 0 0 0 3.4l1.6 1.6a2.4 2.4 0 0 1 0 3.4L18 16"></path>
@@ -118,6 +162,13 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
             <line x1="21" y1="6" x2="3" y2="6"></line>
             <line x1="21" y1="12" x2="9" y2="12"></line>
             <line x1="21" y1="18" x2="7" y2="18"></line>
+          </svg>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="justifyFull" title="Justify">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="21" y1="6" x2="3" y2="6"></line>
+            <line x1="21" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="18" x2="3" y2="18"></line>
           </svg>
         </button>
 
@@ -199,6 +250,8 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="deleteColumn" title="Delete Column">-Col</button>
           <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
         </span>
+
+        <input type="file" class="editor-image-file-input hidden" accept="image/*" />
       </div>
 
       <!-- Editable Canvas -->
@@ -240,6 +293,10 @@ export class MarkonEditor {
   public tiptap: Editor;
   public options: MarkonEditorOptions;
   public typographyMenu?: MarkonTypographyMenu;
+  public fontFamilyMenu?: MarkonFontFamilyMenu;
+  public fontSizeMenu?: MarkonFontSizeMenu;
+  public highlightMenu?: MarkonHighlightMenu;
+  public textColorMenu?: MarkonTextColorMenu;
   public dragHandle?: MarkonDragHandle;
 
   constructor(options: MarkonEditorOptions = {}) {
@@ -317,6 +374,40 @@ export class MarkonEditor {
       );
     }
 
+    const fontFamilyTrigger = this.element.querySelector<HTMLElement>(
+      '.editor-font-family-trigger'
+    );
+    if (fontFamilyTrigger) {
+      this.fontFamilyMenu = new MarkonFontFamilyMenu(
+        this.tiptap,
+        fontFamilyTrigger
+      );
+    }
+
+    const fontSizeTrigger = this.element.querySelector<HTMLElement>(
+      '.editor-font-size-trigger'
+    );
+    if (fontSizeTrigger) {
+      this.fontSizeMenu = new MarkonFontSizeMenu(this.tiptap, fontSizeTrigger);
+    }
+
+    const colorTrigger = this.element.querySelector<HTMLElement>(
+      '.editor-color-trigger'
+    );
+    if (colorTrigger) {
+      this.textColorMenu = new MarkonTextColorMenu(this.tiptap, colorTrigger);
+    }
+
+    const highlightTrigger = this.element.querySelector<HTMLElement>(
+      '.editor-highlight-trigger'
+    );
+    if (highlightTrigger) {
+      this.highlightMenu = new MarkonHighlightMenu(
+        this.tiptap,
+        highlightTrigger
+      );
+    }
+
     if (!options.readOnly) {
       this.dragHandle = new MarkonDragHandle({
         editor: this.tiptap,
@@ -351,6 +442,8 @@ export class MarkonEditor {
     setBtnActive('italic', this.tiptap.isActive('italic'));
     setBtnActive('underline', this.tiptap.isActive('underline'));
     setBtnActive('strikeThrough', this.tiptap.isActive('strike'));
+    setBtnActive('subscript', this.tiptap.isActive('subscript'));
+    setBtnActive('superscript', this.tiptap.isActive('superscript'));
     setBtnActive('code', this.tiptap.isActive('code'));
     setBtnActive('highlight', this.tiptap.isActive('highlight'));
     setBtnActive('justifyLeft', this.tiptap.isActive({ textAlign: 'left' }));
@@ -359,6 +452,7 @@ export class MarkonEditor {
       this.tiptap.isActive({ textAlign: 'center' })
     );
     setBtnActive('justifyRight', this.tiptap.isActive({ textAlign: 'right' }));
+    setBtnActive('justifyFull', this.tiptap.isActive({ textAlign: 'justify' }));
     setBtnActive('insertUnorderedList', this.tiptap.isActive('bulletList'));
     setBtnActive('insertOrderedList', this.tiptap.isActive('orderedList'));
     setBtnActive('insertTaskList', this.tiptap.isActive('taskList'));
@@ -405,6 +499,13 @@ export class MarkonEditor {
     const toolbar = this.element.querySelector<HTMLElement>('.editor-toolbar');
     if (!toolbar) return;
 
+    // Prevent focus loss from editor when clicking ANY toolbar button
+    toolbar.addEventListener('mousedown', (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      e.preventDefault();
+    });
+
     toolbar.addEventListener('click', (e: MouseEvent) => {
       const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
         '.editor-btn'
@@ -417,6 +518,26 @@ export class MarkonEditor {
         this.execCommand(cmd);
       }
     });
+
+    const fileInput = toolbar.querySelector<HTMLInputElement>(
+      '.editor-image-file-input'
+    );
+    if (fileInput) {
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (readerEvent) => {
+            const dataUrl = readerEvent.target?.result as string;
+            if (dataUrl) {
+              this.tiptap.chain().focus().setImage({ src: dataUrl }).run();
+            }
+          };
+          reader.readAsDataURL(file);
+          fileInput.value = '';
+        }
+      });
+    }
   }
 
   public execCommand(cmd: string, _val: any = null): void {
@@ -440,8 +561,17 @@ export class MarkonEditor {
       case 'strikeThrough':
         chain.toggleStrike().run();
         break;
+      case 'subscript':
+        chain.toggleSubscript().run();
+        break;
+      case 'superscript':
+        chain.toggleSuperscript().run();
+        break;
       case 'code':
         chain.toggleCode().run();
+        break;
+      case 'clearFormatting':
+        chain.clearNodes().unsetAllMarks().run();
         break;
       case 'highlight':
         chain.toggleHighlight().run();
@@ -454,6 +584,9 @@ export class MarkonEditor {
         break;
       case 'justifyRight':
         chain.setTextAlign('right').run();
+        break;
+      case 'justifyFull':
+        chain.setTextAlign('justify').run();
         break;
       case 'insertUnorderedList':
         chain.toggleBulletList().run();
@@ -561,13 +694,18 @@ export class MarkonEditor {
         }
         openMarkonModal({
           title: 'Insert Image',
-          label: 'Image URL',
+          label: 'Image URL (or leave blank to pick a file)',
           initialValue: 'https://',
           placeholder: 'https://example.com/photo.jpg',
           confirmText: 'Insert Image',
           onConfirm: (src) => {
-            if (src && src.trim()) {
+            if (src && src.trim() && src !== 'https://') {
               this.tiptap.chain().focus().setImage({ src: src.trim() }).run();
+            } else {
+              const fileInput = this.element.querySelector<HTMLInputElement>(
+                '.editor-image-file-input'
+              );
+              fileInput?.click();
             }
             this.updateToolbarState();
           },
@@ -604,6 +742,10 @@ export class MarkonEditor {
   }
 
   public destroy(): void {
+    this.fontFamilyMenu?.destroy();
+    this.fontSizeMenu?.destroy();
+    this.highlightMenu?.destroy();
+    this.textColorMenu?.destroy();
     this.typographyMenu?.destroy();
     this.dragHandle?.destroy();
     this.tiptap.destroy();

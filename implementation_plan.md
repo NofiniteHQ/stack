@@ -1,181 +1,180 @@
-# Implementation Plan
+# Implementation Plan - Markon Deep Audit & Complete Feature Parity Restoration
 
-## Status
+## Objective
 
-**Status:** Approved by User (Proceeding to Implementation)
-
----
-
-## 1. Objective
-
-Resolve user-reported regressions and polish `@nofinite/markon`:
-
-1. Make the Paragraph / Typography toolbar button **icon-only** (`btn-icon`, 32x32px) so it never resizes or jiggles the toolbar.
-2. Ensure the custom modal is strictly collision-proof and 100% vertically & horizontally centered across all viewports using NUIX / NUICSS `<dialog class="modal">` standards.
-3. Fix typography menu options (`H1`, `H2`, `H3`, `Quote`, `Code Block`, `Paragraph`) by preventing focus loss on click, handling clean block conversions (avoiding invalid nesting), and fixing raw HTML escaping of `</>`.
+Restore 100% functional reliability, styling integrity, and complete feature parity between the original editor (`@nofinite/nui/src/components/editor`) and `@nofinite/markon` v2.0.0. Resolve all bugs where formatting commands fail, text does not display formatted on the UI, highlights are unstyled or ineffective, toolbar buttons blur editor selections, and extensions present in the TipTap schema lack toolbar controls.
 
 ---
 
-## 2. Current State
+## Current Behavior & Root-Cause Diagnosis
 
-1. **Toolbar Resizing Bug:**
-   - The typography trigger currently renders `<span class="editor-typography-label">Paragraph</span>`, expanding and shrinking dynamically whenever different headings are selected, disrupting toolbar alignment.
-2. **Modal Centering & Collision Issues:**
-   - `<dialog class="modal">` in `dialog.ts` was missing explicit `h-fit` and viewport constraint rules, causing vertical positioning drift when the editor or document is scrolled.
-3. **Typography Commands Failing:**
-   - Clicking options in the typography dropdown currently causes the ProseMirror editor to blur because menu buttons lack `mousedown` `e.preventDefault()`, which drops text selection in browsers.
-   - Block conversions used `toggleHeading` and `toggleBlockquote` without lifting parent nodes, causing nested structures (`<blockquote><h3><pre>...`).
-   - The icon string `'</>'` was injected into `innerHTML` unescaped, causing the browser to swallow it as an invalid HTML tag.
+### 1. Heading Formatting Not Applied When Selected & Typed
+
+- **Current Behavior:** Selecting H1 or H2 on an empty line or block and typing text often results in plain unstyled paragraph text or lost typing.
+- **Root Cause:**
+  1. `typographyMenu.ts` chained `.lift('blockquote').setHeading(...)`. When the selection is not inside a blockquote, `can().lift('blockquote')` returns `false`, causing the entire TipTap command chain to abort without executing `setHeading()`.
+  2. When the typography menu closes, the menu button is removed from the DOM, causing the browser to reset active DOM focus to `document.body`. Because the editor is blurred, keystrokes are lost or caret position is disrupted.
+  3. Safe chaining requires using TipTap's standard `clearNodes()` (or checking `editor.isActive('blockquote')` before lifting) and explicitly refocusing the editor with `editor.commands.focus()` upon menu selection.
+
+### 2. Highlights Option Not Working Properly
+
+- **Current Behavior:** Clicking the Highlight button either does nothing, blurs the selection, or creates `<mark>` tags in JSON that render invisibly or with harsh unstyled browser default `#ffff00` in the UI.
+- **Root Cause:**
+  1. `@nofinite/nuicss` (`theme.css`) contains **zero CSS rules** for `mark`. Under CSS resets, `<mark>` has `background-color: transparent; color: inherit;`.
+  2. The toolbar only calls `toggleHighlight()` with no color option. The original editor had a dedicated popover with 6 pastel presets (`#fef08a` yellow, `#bbf7d0` green, `#bae6fd` blue, `#fbcfe8` pink, `#fed7aa` orange, `#e9d5ff` purple) plus `transparent` (clear highlight).
+  3. Clicking the highlight button fires `mousedown` without `e.preventDefault()`, blurring ProseMirror and collapsing the text selection before the highlight command executes.
+
+### 3. Missing Buttons & "In JSON but Not on UI" Discrepancy
+
+- **Current Behavior:** Multiple features exist in TipTap schemas or were present in the original NUI Editor, but have disappeared from Markon:
+  1. **Text Color Picker (`Color` / `TextStyle`):** Extension is active in `extensions.ts`, generating `color` in JSON, but there is no Text Color button on the toolbar.
+  2. **Font Size (`FontSize`):** Removed during migration. Users cannot choose font sizes (12px, 14px, 16px, 18px, 20px, 24px, 30px, 36px).
+  3. **Font Family (`FontFamily`):** Removed during migration (Inter, Arial, Georgia, Times New Roman, Monospace).
+  4. **Subscript & Superscript:** Extensions are active in `extensions.ts`, generating JSON attributes, but have no buttons on the toolbar.
+  5. **Clear Formatting (`RemoveFormatting`):** Missing from toolbar (`editor.chain().focus().clearNodes().unsetAllMarks().run()`).
+  6. **Align Justify:** Only Left, Center, and Right buttons exist; Justify was omitted.
+  7. **YouTube Video Embed:** Extension and toolbar button were removed.
+  8. **Image Upload:** Original editor supported both URL input and local file upload; Markon only has a URL modal.
+
+### 4. Interactive Deficiencies in Menus & Slash Commands
+
+- **Slash Commands (`slashCommand.ts`):** The slash menu renders buttons with `mousedown` prevention but **lacks a `click` event listener**. Clicking with a mouse does nothing; only keyboard `Enter` worked.
+- **Bubble Menu (`bubbleMenu.ts`):** Link button used native `window.prompt` instead of the centered modal; lacked highlight and text color shortcuts.
 
 ---
 
-## 3. Problem
+## Proposed Solution
 
-- User experience is degraded when toolbar buttons shift in width.
-- Modal dialogs appear off-center and risk clipping or collision on varied viewports.
-- Typography formatting commands fail or behave unpredictably for users authoring content.
+### Area 1: Upstream Design System Styling (`@nofinite/nuicss`)
 
----
+Add semantic NUICSS token-backed styling for text formatting marks in `packages/nuicss/src/styles/theme.css`:
 
-## 4. Proposed Solution
-
-### 4.1 Icon-Only Typography Trigger (`btn-icon`)
-
-- Update `MarkonEditor.ts`:
-  ```html
-  <button
-    type="button"
-    class="editor-typography-trigger editor-btn btn btn-ghost btn-sm btn-icon"
-    title="Text Style"
-    aria-haspopup="true"
-    aria-expanded="false"
-  >
-    <span
-      class="editor-typography-icon font-mono font-bold text-xs text-primary shrink-0"
-      >¶</span
-    >
-  </button>
+- **`mark`:**
+  ```css
+  .editor-content mark,
+  .markon-editor mark,
+  .tiptap-wrapper .tiptap mark {
+    background-color: var(--color-warning-subtle, #fef08a);
+    color: var(--fg-default);
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--radius-xs, 0.25rem);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .editor-content mark[data-color],
+  .markon-editor mark[data-color],
+  .tiptap-wrapper .tiptap mark[data-color] {
+    background-color: var(
+      --highlight-color,
+      var(--color-warning-subtle, #fef08a)
+    );
+  }
   ```
-- Remove text labels entirely from the trigger. The button retains a fixed square size (`32px x 32px`) at all times.
-- Update `typographyMenu.ts` so `updateTriggerState()` only updates the centered icon (`¶`, `H1`, `H2`, `H3`, `“`, `</>`).
+- **`sub` & `sup`:**
+  ```css
+  .editor-content sub,
+  .markon-editor sub {
+    vertical-align: sub;
+    font-size: 0.75em;
+  }
+  .editor-content sup,
+  .markon-editor sup {
+    vertical-align: super;
+    font-size: 0.75em;
+  }
+  ```
 
-### 4.2 100% Centered & Collision-Proof Modal (`openMarkonModal`)
+### Area 2: Core Extensions & Formatting Robustness (`@nofinite/markon`)
 
-- Refactor `packages/markon/src/core/dialog.ts` to strictly mirror the `@nofinite/nuix` dialog contract:
-  - Add explicit centering and collision constraints to `<dialog class="modal">`:
-    ```css
-    position: fixed;
-    inset: 0px;
-    margin: auto;
-    height: fit-content;
-    max-height: 90vh;
-    max-width: 28rem;
-    width: calc(100% - 2rem);
-    z-index: 50;
-    ```
-  - Use `modal-box w-full max-w-md bg-surface border border-default rounded-2xl shadow-2xl p-6 overflow-y-auto` with native `::backdrop` blur.
-  - Implement outside-click backdrop dismissal checking `if (e.target === dialog) closeDialog();`.
+1. **Restore `FontSize` Extension:**
+   - Create `packages/markon/src/core/fontSize.ts` providing `setFontSize` and `unsetFontSize` commands on `textStyle`.
+   - Register `FontSize` and `FontFamily` in `getMarkonExtensions()`.
+2. **Typography Menu Chaining & Focus Preservation:**
+   - Update `packages/markon/src/core/typographyMenu.ts` to use `clearNodes()` before setting block types:
+     ```ts
+     command: (editor) =>
+       editor.chain().focus().clearNodes().setHeading({ level }).run();
+     ```
+   - In `btn.addEventListener('click')`, call `this.close()` and ensure `this.editor.commands.focus()` is called immediately so typing continues seamlessly in the new block.
+3. **Preserve Selection on Toolbar Mousedown:**
+   - In `MarkonEditor.ts`, attach `toolbar.addEventListener('mousedown', (e) => { e.preventDefault(); })`. This guarantees the browser never steals focus or blurs the text selection when clicking any toolbar control.
 
-### 4.3 Robust Typography Command Execution
+### Area 3: Full Toolbar Controls & Color Pickers
 
-- In `packages/markon/src/core/typographyMenu.ts`:
-  - Add `btn.addEventListener('mousedown', (e) => e.preventDefault())` so clicking menu items **never** causes the editor to lose focus or drop selection.
-  - Clean block conversions:
-    - **Paragraph:** `editor.chain().focus().lift('blockquote').setParagraph().run()`
-    - **Heading 1:** `editor.chain().focus().lift('blockquote').setHeading({ level: 1 }).run()`
-    - **Heading 2:** `editor.chain().focus().lift('blockquote').setHeading({ level: 2 }).run()`
-    - **Heading 3:** `editor.chain().focus().lift('blockquote').setHeading({ level: 3 }).run()`
-    - **Quote:** `editor.chain().focus().toggleBlockquote().run()`
-    - **Code Block:** `editor.chain().focus().lift('blockquote').toggleCodeBlock().run()`
-  - Properly escape icon characters: replace unescaped `'</>'` with `&lt;/&gt;` so the browser renders `</>` cleanly.
-  - Equip Floating UI with `autoUpdate` and `shift({ padding: 8 })` to ensure the dropdown menu is collision-proof.
+1. **Highlight Color Popover:**
+   - Replace the plain toggle with a sleek NUICSS popover menu offering:
+     - 6 pastel color presets: `#fef08a` (Yellow), `#bbf7d0` (Green), `#bae6fd` (Blue), `#fbcfe8` (Pink), `#fed7aa` (Orange), `#e9d5ff` (Purple).
+     - Clear Highlight (`unsetHighlight()`).
+2. **Text Color Popover:**
+   - Add Text Color button (`Palette` icon) with palette presets and clear color (`unsetColor()`).
+3. **Font Size & Font Family Dropdowns:**
+   - Add Font Size trigger (`12px` to `36px`) and Font Family trigger (Inter, Arial, Georgia, Times New Roman, Monospace).
+4. **Restore Subscript, Superscript, Clear Formatting & Justify:**
+   - Add `subscript` (`X₂`), `superscript` (`X²`), `clearFormatting` (`Tx`), and `justify` buttons to the toolbar with active states.
+5. **Image URL & File Upload Support:**
+   - Add file upload trigger to Image dialog so users can either paste a URL or pick a local image file.
+6. **YouTube Embed Support:**
+   - Add YouTube embed node/dialog support.
 
----
+### Area 4: Slash Commands & Bubble Menu Fixes
 
-## 5. Affected Areas
-
-### Libraries
-
-- `packages/markon`:
-  - `src/core/MarkonEditor.ts`: Update typography trigger markup to icon-only `btn-icon`.
-  - `src/core/typographyMenu.ts`: Fix `mousedown` focus retention, block lifting, HTML escaping, and autoUpdate.
-  - `src/core/dialog.ts`: Fix dialog viewport centering and collision constraints.
-
----
-
-## 6. Implementation Steps
-
-1. **Update Typography Trigger in `MarkonEditor.ts`:**
-   - Remove `<span class="editor-typography-label">` and chevron SVG.
-   - Apply `btn-icon` so the button is a fixed 32x32px square.
-2. **Refactor `typographyMenu.ts`:**
-   - Fix block command chains with proper `lift()` calls.
-   - Add `mousedown` `preventDefault` on each dropdown button.
-   - Escape icon HTML in options.
-   - Implement `autoUpdate` from `@floating-ui/dom`.
-3. **Refactor `dialog.ts`:**
-   - Ensure `<dialog class="modal">` has `h-fit`, `margin: auto`, `inset: 0`, and collision limits.
-   - Verify backdrop click dismissal.
-4. **Verify:**
-   - Run Vitest tests (`pnpm vitest run packages/markon/src/markon.test.ts`).
-   - Run Playwright visual test script verifying:
-     - Button width remains invariant when switching between Paragraph, H1, H2, H3.
-     - Modal opens at dead-center of the viewport on all viewports.
-     - All 6 typography options successfully convert the active block.
-   - Inspect resulting Playwright screenshots in `/temp/screenshots/`.
-5. **Review & Git Commit:**
-   - Review diff and create local commit.
+1. **Slash Commands:**
+   - Attach `click` handler to each item in `slashCommand.ts` so mouse clicking immediately executes the command and closes the menu.
+   - Add Highlight and Text Color commands to the slash list.
+2. **Bubble Menu:**
+   - Integrate custom modal dialog for links instead of `window.prompt`.
+   - Add Highlight and Text Color buttons to the floating bubble menu.
 
 ---
 
-## 7. Dependencies / Tools
+## Affected Files & Modules
 
-- None. Uses existing `@tiptap/core`, `@floating-ui/dom`, and `@nofinite/nuicss`.
-
----
-
-## 8. Alternatives Considered
-
-- **Keep dropdown with text:** Rejected because variable-width text causes toolbar layout shifts whenever formatting changes.
-- **Floating inline toolbar instead of top toolbar:** Outside current scope; icon-only trigger solves the problem cleanly within the existing toolbar architecture.
-
----
-
-## 9. Risks
-
-- Text selection loss during menu interaction: mitigated by `e.preventDefault()` on `mousedown`.
+- `packages/nuicss/src/styles/theme.css`: Add styles for `mark`, `sub`, and `sup`.
+- `packages/markon/src/core/fontSize.ts`: New framework-agnostic font size extension.
+- `packages/markon/src/core/extensions.ts`: Register `FontSize`, `FontFamily`, `Color`, `TextStyle`.
+- `packages/markon/src/core/typographyMenu.ts`: Robust block switching with `clearNodes()` and post-selection focus restoration.
+- `packages/markon/src/core/MarkonEditor.ts`: Toolbar markup, color popovers, font size/family, subscript, superscript, clear formatting, justify, image upload, toolbar mousedown prevention.
+- `packages/markon/src/core/slashCommand.ts`: Mouse click event listener and additional formatting items.
+- `packages/markon/src/core/bubbleMenu.ts`: Modern link modal integration and highlight button.
 
 ---
 
-## 10. Breaking Changes
+## Dependencies & Tools
 
-- None.
-
----
-
-## 11. Security Considerations
-
-- Proper HTML escaping in menu item rendering prevents any XSS injection.
+- No new external dependencies needed (TipTap core extensions and `@floating-ui/dom` already present).
+- `@nofinite/nuicss` compiled styles.
 
 ---
 
-## 12. Verification Plan
+## Alternatives Considered
 
-- [ ] Vitest unit tests pass.
-- [ ] Playwright test confirms:
-  - [ ] Typography button size is fixed (`32px x 32px`) across all styles.
-  - [ ] Modal dialog is centered horizontally and vertically (`y ≈ 50%`).
-  - [ ] Conversion to Paragraph, H1, H2, H3, Blockquote, and Code Block succeeds without failures or invalid nesting.
-- [ ] Review screenshots in `temp/screenshots/`.
+- _Alternative:_ Keep toolbar minimal and relegate extra features to extensions only.
+  _Rejected:_ The user explicitly noted that features show in JSON but do not display on the UI, and highlighted the loss of functionality from the pre-migration baseline. Full parity ensures Markon is a premier universal rich text engine.
 
 ---
 
-## 13. Rollback
+## Risks & Mitigations
 
-- `git revert HEAD`.
+- **Risk:** Toolbar clutter from additional buttons.
+  _Mitigation:_ Organize into logical semantic groups with vertical dividers (`Separators`) and responsive wrapping, exactly matching the clean layout of the original editor.
+- **Risk:** Selection loss during color picker or dropdown interaction.
+  _Mitigation:_ Enforce `mousedown` `preventDefault()` across all toolbar buttons and dropdown items.
 
 ---
 
-## 14. Approval
+## Verification Strategy
 
-**Awaiting explicit user approval before implementation.**
+1. **Unit & Integration Tests:** Run `pnpm nx run-many -t test -p markon nuicss` with Vitest.
+2. **Automated Playwright Reproduction & Visual Audit:**
+   - Test H1/H2 selection on empty line and typing verification (confirm DOM tag is `H1` and computed font size is `30px`/`700`).
+   - Test Highlight with presets and verify `<mark>` background color and contrast in light and dark mode.
+   - Test Font Size, Font Family, Subscript, Superscript, and Clear Formatting.
+   - Test Slash Commands mouse click execution.
+   - Capture visual screenshots in `temp/screenshots/` and inspect them.
+3. **Build & Tarball Verification:** Run `pnpm nx run markon:build` and `npm pack --dry-run` to ensure clean distribution.
+
+---
+
+## Rollback Plan
+
+All changes can be reverted cleanly via `git checkout dev` or by reverting specific commits if needed.

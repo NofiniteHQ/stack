@@ -16,6 +16,8 @@ import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
+import FontFamily from '@tiptap/extension-font-family';
+import { FontSize } from './fontSize';
 import Image from '@tiptap/extension-image';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
@@ -154,6 +156,8 @@ export function getMarkonExtensions(placeholder?: string): AnyExtension[] {
     Underline,
     TextStyle,
     Color,
+    FontSize,
+    FontFamily,
     Highlight.configure({ multicolor: true }),
     TextAlign.configure({
       types: ['heading', 'paragraph'],

@@ -22,6 +22,14 @@ describe('@nofinite/markon', () => {
     expect(html).toContain('editor-footer');
     expect(html).toContain('data-command="bold"');
     expect(html).toContain('data-command="italic"');
+    expect(html).toContain('data-command="subscript"');
+    expect(html).toContain('data-command="superscript"');
+    expect(html).toContain('data-command="clearFormatting"');
+    expect(html).toContain('data-command="justifyFull"');
+    expect(html).toContain('editor-font-family-trigger');
+    expect(html).toContain('editor-font-size-trigger');
+    expect(html).toContain('editor-color-trigger');
+    expect(html).toContain('editor-highlight-trigger');
     expect(html).toContain('data-command="insertTable"');
     expect(html).toContain('data-command="insertCodeBlock"');
     expect(html).toContain('data-command="insertMath"');
@@ -118,10 +126,22 @@ describe('@nofinite/markon', () => {
       });
 
       expect(editor.typographyMenu).toBeDefined();
+      expect(editor.fontFamilyMenu).toBeDefined();
+      expect(editor.fontSizeMenu).toBeDefined();
+      expect(editor.textColorMenu).toBeDefined();
+      expect(editor.highlightMenu).toBeDefined();
       expect(editor.dragHandle).toBeDefined();
 
       const trigger = container.querySelector('.editor-typography-trigger');
       expect(trigger).toBeTruthy();
+
+      // Test subscript and clearFormatting
+      editor.tiptap.commands.selectAll();
+      editor.execCommand('subscript');
+      expect(editor.tiptap.isActive('subscript')).toBe(true);
+
+      editor.execCommand('clearFormatting');
+      expect(editor.tiptap.isActive('subscript')).toBe(false);
 
       editor.destroy();
     });

@@ -1,6 +1,7 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { computePosition, flip, shift, offset } from '@floating-ui/dom';
+import { openMarkonModal } from './dialog';
 
 export function createBubbleMenuExtension() {
   let menuEl: HTMLElement | null = null;
@@ -34,6 +35,7 @@ export function createBubbleMenuExtension() {
                     <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="italic" title="Italic"><em>I</em></button>
                     <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="underline" title="Underline"><span class="underline">U</span></button>
                     <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="strike" title="Strikethrough"><span class="line-through">S</span></button>
+                    <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="highlight" title="Highlight"><span class="px-1 rounded text-[10px] font-bold bg-warning/30 text-warning">H</span></button>
                     <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="code" title="Code">&lt;/&gt;</button>
                     <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="link" title="Link">🔗</button>
                   `;
@@ -55,18 +57,24 @@ export function createBubbleMenuExtension() {
                       editor.chain().focus().toggleUnderline().run();
                     else if (cmd === 'strike')
                       editor.chain().focus().toggleStrike().run();
+                    else if (cmd === 'highlight')
+                      editor.chain().focus().toggleHighlight().run();
                     else if (cmd === 'code')
                       editor.chain().focus().toggleCode().run();
                     else if (cmd === 'link') {
-                      const prevUrl = editor.getAttributes('link').href;
-                      const url = window.prompt(
-                        'Enter URL:',
-                        prevUrl || 'https://'
-                      );
-                      if (url)
-                        editor.chain().focus().setLink({ href: url }).run();
-                      else if (url === '')
-                        editor.chain().focus().unsetLink().run();
+                      const prevUrl = editor.getAttributes('link').href || '';
+                      openMarkonModal({
+                        title: 'Insert / Edit Link',
+                        label: 'Link URL',
+                        initialValue: prevUrl,
+                        placeholder: 'https://...',
+                        confirmText: 'Save Link',
+                        onConfirm: (url) => {
+                          if (url)
+                            editor.chain().focus().setLink({ href: url }).run();
+                          else editor.chain().focus().unsetLink().run();
+                        },
+                      });
                     }
                   });
 
@@ -86,6 +94,7 @@ export function createBubbleMenuExtension() {
                 updateActive('italic', editor.isActive('italic'));
                 updateActive('underline', editor.isActive('underline'));
                 updateActive('strike', editor.isActive('strike'));
+                updateActive('highlight', editor.isActive('highlight'));
                 updateActive('code', editor.isActive('code'));
                 updateActive('link', editor.isActive('link'));
 

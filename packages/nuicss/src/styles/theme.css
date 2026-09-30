@@ -873,6 +873,52 @@ input[type='number'] {
     font-size: inherit;
   }
 
+  .editor-content mark,
+  .editor .editor-content mark,
+  .markon-editor mark,
+  .tiptap-wrapper .tiptap mark {
+    background-color: var(
+      --color-warning-subtle,
+      color-mix(in oklch, var(--color-warning) 25%, transparent)
+    );
+    color: var(--fg-default);
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--radius-xs, 0.25rem);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .editor-content mark[data-color],
+  .editor .editor-content mark[data-color],
+  .markon-editor mark[data-color],
+  .tiptap-wrapper .tiptap mark[data-color] {
+    background-color: var(
+      --highlight-color,
+      var(
+        --color-warning-subtle,
+        color-mix(in oklch, var(--color-warning) 25%, transparent)
+      )
+    );
+  }
+
+  .editor-content sub,
+  .editor .editor-content sub,
+  .markon-editor sub,
+  .tiptap-wrapper .tiptap sub {
+    vertical-align: sub;
+    font-size: 0.75em;
+    line-height: 0;
+  }
+
+  .editor-content sup,
+  .editor .editor-content sup,
+  .markon-editor sup,
+  .tiptap-wrapper .tiptap sup {
+    vertical-align: super;
+    font-size: 0.75em;
+    line-height: 0;
+  }
+
   .editor-content p.is-editor-empty:first-child::before,
   .editor .editor-content p.is-editor-empty:first-child::before,
   .markon-editor p.is-editor-empty:first-child::before,
