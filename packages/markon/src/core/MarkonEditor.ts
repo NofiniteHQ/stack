@@ -1,28 +1,13 @@
 /**
  * @nofinite/markon - Universal Content & Rich Text Authoring Engine
- * Framework-agnostic Vanilla DOM class powered by @tiptap/core and ProseMirror.
- * 100% styled with @nofinite/nuicss design tokens.
+ * Framework-agnostic Vanilla DOM class powered by TipTap and ProseMirror.
+ * 100% styled with @nofinite/nuicss design tokens and semantic superclasses.
  */
 
-import { Editor, type AnyExtension } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import Link from '@tiptap/extension-link';
-import Underline from '@tiptap/extension-underline';
-import TextAlign from '@tiptap/extension-text-align';
-import { TextStyle } from '@tiptap/extension-text-style';
-import Color from '@tiptap/extension-color';
-import Highlight from '@tiptap/extension-highlight';
-import TaskList from '@tiptap/extension-task-list';
-import TaskItem from '@tiptap/extension-task-item';
-import CharacterCount from '@tiptap/extension-character-count';
-import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
-import { TableHeader } from '@tiptap/extension-table-header';
-import { TableCell } from '@tiptap/extension-table-cell';
-import Subscript from '@tiptap/extension-subscript';
-import Superscript from '@tiptap/extension-superscript';
-import Image from '@tiptap/extension-image';
+import { Editor } from '@tiptap/core';
+import { getMarkonExtensions } from './extensions';
+import { createBubbleMenuExtension } from './bubbleMenu';
+import { createSlashCommandExtension } from './slashCommand';
 
 export interface MarkonEditorOptions {
   element?: HTMLElement;
@@ -46,78 +31,21 @@ export function getCounts(text: string): { words: number; characters: number } {
   return { words, characters };
 }
 
-export function getMarkonExtensions(placeholder?: string): AnyExtension[] {
-  return [
-    StarterKit.configure({
-      heading: { levels: [1, 2, 3] },
-      codeBlock: false,
-      link: false,
-      underline: false,
-    }),
-    Placeholder.configure({
-      placeholder:
-        placeholder || 'Write something amazing… (type / for commands)',
-    }),
-    Link.configure({
-      openOnClick: false,
-      HTMLAttributes: { class: 'link' },
-    }),
-    Underline,
-    TextStyle,
-    Color,
-    Highlight.configure({ multicolor: true }),
-    TextAlign.configure({
-      types: ['heading', 'paragraph'],
-    }),
-    TaskList.configure({
-      HTMLAttributes: { class: 'task-list list-none p-0 my-2 space-y-1' },
-    }),
-    TaskItem.configure({
-      nested: true,
-      HTMLAttributes: { class: 'task-item flex items-center gap-2' },
-    }),
-    CharacterCount,
-    Table.configure({
-      resizable: true,
-      HTMLAttributes: {
-        class:
-          'table border border-default w-full my-3 rounded-lg overflow-hidden text-sm',
-      },
-    }),
-    TableRow,
-    TableHeader.configure({
-      HTMLAttributes: {
-        class: 'border border-default p-2 text-left bg-subtle/50 font-semibold',
-      },
-    }),
-    TableCell.configure({
-      HTMLAttributes: { class: 'border border-default p-2' },
-    }),
-    Subscript,
-    Superscript,
-    Image.configure({
-      inline: true,
-      HTMLAttributes: { class: 'rounded-lg max-w-full my-2' },
-    }),
-  ];
-}
-
 export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
   const name = options.name || 'content';
-  const placeholder =
-    options.placeholder || 'Write something amazing… (type / for commands)';
-  const initialValue = options.initialValue || '';
   const minHeight = options.minHeight || '220px';
   const showWordCount = options.showWordCount !== false;
   const showSaveStatus = options.showSaveStatus !== false;
 
-  const initialCounts = getCounts(initialValue.replace(/<[^>]*>/g, ''));
+  const initialCounts = getCounts(
+    (options.initialValue || '').replace(/<[^>]*>/g, '')
+  );
 
   return `
-    <div class="editor markon-editor tiptap-wrapper w-full rounded-xl border border-default bg-surface shadow-sm overflow-hidden font-sans focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+    <div class="editor markon-editor w-full rounded-xl border border-default bg-surface shadow-sm overflow-hidden font-sans focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all"
          data-editor-name="${name}">
       <!-- Formatting Toolbar -->
-      <div class="editor-toolbar flex flex-wrap items-center gap-1 p-2 border-b border-default bg-surface select-none sticky top-0 z-10">
+      <div class="editor-toolbar flex flex-wrap items-center gap-1 p-2 border-b border-default bg-subtle/40 select-none sticky top-0 z-10" role="toolbar" aria-label="Editor Toolbar">
         <!-- History -->
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="undo" title="Undo (Ctrl+Z)">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -132,7 +60,7 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           </svg>
         </button>
 
-        <span class="w-px h-5 bg-[var(--border-default)] mx-1 self-center shrink-0"></span>
+        <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
         <!-- Text Type Selector -->
         <select class="editor-select text-xs font-medium bg-transparent border border-default rounded-md px-2 py-1 text-default cursor-pointer outline-none hover:bg-subtle focus:border-primary"
@@ -142,9 +70,10 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           <option value="h2">Heading 2</option>
           <option value="h3">Heading 3</option>
           <option value="blockquote">Quote</option>
+          <option value="codeBlock">Code Block</option>
         </select>
 
-        <span class="w-px h-5 bg-[var(--border-default)] mx-1 self-center shrink-0"></span>
+        <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
         <!-- Basic Marks -->
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="bold" title="Bold (Ctrl+B)">
@@ -159,8 +88,17 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="strikeThrough" title="Strikethrough">
           <span class="line-through text-sm">S</span>
         </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="code" title="Inline Code">
+          <span class="font-mono text-xs">&lt;/&gt;</span>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="highlight" title="Highlight">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 11-6 6v3h3l6-6"></path>
+            <path d="m22 2-2.7 2.7a2.4 2.4 0 0 0 0 3.4l1.6 1.6a2.4 2.4 0 0 1 0 3.4L18 16"></path>
+          </svg>
+        </button>
 
-        <span class="w-px h-5 bg-[var(--border-default)] mx-1 self-center shrink-0"></span>
+        <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
         <!-- Alignment -->
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="justifyLeft" title="Align Left">
@@ -177,10 +115,17 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
             <line x1="18" y1="18" x2="6" y2="18"></line>
           </svg>
         </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="justifyRight" title="Align Right">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="21" y1="6" x2="3" y2="6"></line>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+            <line x1="21" y1="18" x2="7" y2="18"></line>
+          </svg>
+        </button>
 
-        <span class="w-px h-5 bg-[var(--border-default)] mx-1 self-center shrink-0"></span>
+        <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
-        <!-- Lists & Blocks -->
+        <!-- Lists -->
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertUnorderedList" title="Bullet List">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="9" y1="6" x2="20" y2="6"></line>
@@ -207,6 +152,10 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
           </svg>
         </button>
+
+        <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
+
+        <!-- Blocks & Inserts -->
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertTable" title="Insert Table (3x3)">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2"></rect>
@@ -216,22 +165,41 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
             <path d="M15 3v18"></path>
           </svg>
         </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertMath" title="Insert Math Formula (LaTeX)">
+          <span class="font-serif font-bold text-sm italic">Σ</span>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertCodeBlock" title="Code Block">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="horizontalRule" title="Horizontal Divider">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+          </svg>
+        </button>
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="createLink" title="Insert Link">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
         </button>
+
+        <!-- Table Operations Group (Hidden when not in table) -->
+        <span class="editor-table-tools hidden flex items-center gap-1 ml-auto">
+          <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="addRowAfter" title="Add Row Below">+Row</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="deleteRow" title="Delete Row">-Row</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="addColumnAfter" title="Add Column Right">+Col</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="deleteColumn" title="Delete Column">-Col</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
+        </span>
       </div>
 
-      <!-- Editable Canvas -->
-      <div class="editor-content markon-content tiptap p-4 outline-none text-default leading-relaxed text-sm overflow-y-auto"
-           contenteditable="${options.readOnly ? 'false' : 'true'}"
-           spellcheck="true"
-           data-placeholder="${placeholder}"
-           style="min-height: ${minHeight}">
-        ${initialValue}
-      </div>
+      <!-- Editable Canvas (Empty container: TipTap mounts cleanly inside without duplicating initialValue) -->
+      <div class="editor-content markon-content p-4 outline-none text-default leading-relaxed text-sm overflow-y-auto"
+           style="min-height: ${minHeight}"></div>
 
       <!-- Status Footer -->
       <div class="editor-footer flex items-center justify-between px-3 py-2 border-t border-default text-xs text-muted bg-subtle select-none">
@@ -258,9 +226,7 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           }
         </div>
       </div>
-      <input type="hidden" name="${name}" class="editor-hidden-input" value="${encodeURIComponent(
-    initialValue
-  )}" />
+      <input type="hidden" name="${name}" class="editor-hidden-input" value="" />
     </div>
   `.trim();
 }
@@ -289,14 +255,25 @@ export class MarkonEditor {
     const contentEl =
       this.element.querySelector<HTMLElement>('.editor-content') ||
       this.element;
+
+    // Crucial: Clear any accidental static children to prevent double-rendering
+    contentEl.innerHTML = '';
+
     const placeholder =
       options.placeholder || 'Write something amazing… (type / for commands)';
-    const initialContent =
-      options.initialValue || contentEl.innerHTML.trim() || '';
+    const initialContent = options.initialValue || '';
+
+    const extensions = getMarkonExtensions(placeholder);
+    if (options.showSlashCommands !== false) {
+      extensions.push(createSlashCommandExtension());
+    }
+    if (options.showBubbleMenu !== false) {
+      extensions.push(createBubbleMenuExtension());
+    }
 
     this.tiptap = new Editor({
       element: contentEl,
-      extensions: getMarkonExtensions(placeholder),
+      extensions,
       content: initialContent,
       editable: !options.readOnly,
       onUpdate: ({ editor }) => {
@@ -314,9 +291,81 @@ export class MarkonEditor {
           })
         );
       },
+      onSelectionUpdate: () => {
+        this.updateToolbarState();
+      },
+      onTransaction: () => {
+        this.updateToolbarState();
+      },
     });
 
     this.attachEvents();
+    this.updateToolbarState();
+    this.updateFooter(this.tiptap.getText());
+  }
+
+  public updateToolbarState(): void {
+    const toolbar = this.element.querySelector<HTMLElement>('.editor-toolbar');
+    if (!toolbar) return;
+
+    const setBtnActive = (cmd: string, isActive: boolean) => {
+      const btn = toolbar.querySelector<HTMLButtonElement>(
+        `.editor-btn[data-command="${cmd}"]`
+      );
+      if (btn) {
+        if (isActive) {
+          btn.classList.add('btn-active');
+          btn.setAttribute('aria-pressed', 'true');
+        } else {
+          btn.classList.remove('btn-active');
+          btn.setAttribute('aria-pressed', 'false');
+        }
+      }
+    };
+
+    setBtnActive('bold', this.tiptap.isActive('bold'));
+    setBtnActive('italic', this.tiptap.isActive('italic'));
+    setBtnActive('underline', this.tiptap.isActive('underline'));
+    setBtnActive('strikeThrough', this.tiptap.isActive('strike'));
+    setBtnActive('code', this.tiptap.isActive('code'));
+    setBtnActive('highlight', this.tiptap.isActive('highlight'));
+    setBtnActive('justifyLeft', this.tiptap.isActive({ textAlign: 'left' }));
+    setBtnActive(
+      'justifyCenter',
+      this.tiptap.isActive({ textAlign: 'center' })
+    );
+    setBtnActive('justifyRight', this.tiptap.isActive({ textAlign: 'right' }));
+    setBtnActive('insertUnorderedList', this.tiptap.isActive('bulletList'));
+    setBtnActive('insertOrderedList', this.tiptap.isActive('orderedList'));
+    setBtnActive('insertTaskList', this.tiptap.isActive('taskList'));
+    setBtnActive('insertCodeBlock', this.tiptap.isActive('codeBlock'));
+    setBtnActive('insertMath', this.tiptap.isActive('mathBlock'));
+    setBtnActive('createLink', this.tiptap.isActive('link'));
+
+    // Sync Text Style Dropdown
+    const select = toolbar.querySelector<HTMLSelectElement>('.editor-select');
+    if (select) {
+      if (this.tiptap.isActive('heading', { level: 1 })) select.value = 'h1';
+      else if (this.tiptap.isActive('heading', { level: 2 }))
+        select.value = 'h2';
+      else if (this.tiptap.isActive('heading', { level: 3 }))
+        select.value = 'h3';
+      else if (this.tiptap.isActive('blockquote')) select.value = 'blockquote';
+      else if (this.tiptap.isActive('codeBlock')) select.value = 'codeBlock';
+      else select.value = 'p';
+    }
+
+    // Toggle Table Tools
+    const tableTools = toolbar.querySelector<HTMLElement>(
+      '.editor-table-tools'
+    );
+    if (tableTools) {
+      if (this.tiptap.isActive('table')) {
+        tableTools.classList.remove('hidden');
+      } else {
+        tableTools.classList.add('hidden');
+      }
+    }
   }
 
   private updateFooter(text: string): void {
@@ -366,6 +415,8 @@ export class MarkonEditor {
           this.tiptap.chain().focus().toggleHeading({ level: 3 }).run();
         else if (val === 'blockquote')
           this.tiptap.chain().focus().toggleBlockquote().run();
+        else if (val === 'codeBlock')
+          this.tiptap.chain().focus().toggleCodeBlock().run();
       }
     });
   }
@@ -391,11 +442,20 @@ export class MarkonEditor {
       case 'strikeThrough':
         chain.toggleStrike().run();
         break;
+      case 'code':
+        chain.toggleCode().run();
+        break;
+      case 'highlight':
+        chain.toggleHighlight().run();
+        break;
       case 'justifyLeft':
         chain.setTextAlign('left').run();
         break;
       case 'justifyCenter':
         chain.setTextAlign('center').run();
+        break;
+      case 'justifyRight':
+        chain.setTextAlign('right').run();
         break;
       case 'insertUnorderedList':
         chain.toggleBulletList().run();
@@ -409,15 +469,42 @@ export class MarkonEditor {
       case 'insertTable':
         chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
         break;
+      case 'addRowAfter':
+        chain.addRowAfter().run();
+        break;
+      case 'deleteRow':
+        chain.deleteRow().run();
+        break;
+      case 'addColumnAfter':
+        chain.addColumnAfter().run();
+        break;
+      case 'deleteColumn':
+        chain.deleteColumn().run();
+        break;
+      case 'deleteTable':
+        chain.deleteTable().run();
+        break;
+      case 'insertCodeBlock':
+        chain.toggleCodeBlock().run();
+        break;
+      case 'insertMath':
+        chain.insertContent({ type: 'mathBlock' }).run();
+        break;
+      case 'horizontalRule':
+        chain.setHorizontalRule().run();
+        break;
       case 'createLink': {
+        const prevUrl = this.tiptap.getAttributes('link').href;
         const url =
           typeof window !== 'undefined'
-            ? window.prompt('Enter link URL:')
+            ? window.prompt('Enter link URL:', prevUrl || 'https://')
             : null;
         if (url) chain.setLink({ href: url }).run();
+        else if (url === '') chain.unsetLink().run();
         break;
       }
     }
+    this.updateToolbarState();
   }
 
   public getHTML(): string {
@@ -432,9 +519,10 @@ export class MarkonEditor {
     return this.tiptap.getText();
   }
 
-  public setContent(content: string): void {
-    this.tiptap.commands.setContent(content);
+  public setContent(content: string, emitUpdate = false): void {
+    this.tiptap.commands.setContent(content, { emitUpdate });
     this.updateFooter(this.tiptap.getText());
+    this.updateToolbarState();
   }
 
   public focus(): void {

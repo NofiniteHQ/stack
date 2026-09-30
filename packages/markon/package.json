@@ -7,9 +7,7 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
@@ -23,7 +21,6 @@
       "require": "./dist/react/index.cjs",
       "default": "./dist/react/index.js"
     },
-    "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },
   "files": [

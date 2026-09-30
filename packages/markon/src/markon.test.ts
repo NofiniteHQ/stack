@@ -9,18 +9,21 @@ describe('@nofinite/markon', () => {
     expect(counts.characters).toBe(27);
   });
 
-  it('renders static editor HTML with all controls', () => {
+  it('renders static editor HTML with all controls and NUICSS classes', () => {
     const html = renderMarkonEditor({
       placeholder: 'Test placeholder',
       initialValue: '<p>Initial test content</p>',
     });
 
-    expect(html).toContain('markon-editor');
+    expect(html).toContain('editor markon-editor');
     expect(html).toContain('editor-toolbar');
+    expect(html).toContain('editor-content');
+    expect(html).toContain('editor-footer');
     expect(html).toContain('data-command="bold"');
     expect(html).toContain('data-command="italic"');
-    expect(html).toContain('Initial test content');
-    expect(html).toContain('editor-footer');
+    expect(html).toContain('data-command="insertTable"');
+    expect(html).toContain('data-command="insertCodeBlock"');
+    expect(html).toContain('data-command="insertMath"');
   });
 
   describe('MarkonEditor DOM Class', () => {
@@ -35,17 +38,74 @@ describe('@nofinite/markon', () => {
       document.body.removeChild(container);
     });
 
-    it('instantiates and manages rich text content', () => {
+    it('instantiates and manages rich text without duplicate DOM rendering', () => {
       const editor = new MarkonEditor({
         element: container,
-        initialValue: '<p>Hello Markon</p>',
+        initialValue: '<h2>Unique Heading</h2><p>Unique Paragraph</p>',
       });
 
-      expect(editor.getText()).toContain('Hello Markon');
-      expect(editor.getHTML()).toContain('<p>Hello Markon</p>');
+      const contentEl = container.querySelector('.editor-content');
+      expect(contentEl).not.toBeNull();
+
+      // Ensure no duplicated content in the DOM tree
+      const headingCount = container.querySelectorAll('h2').length;
+      expect(headingCount).toBe(1);
+
+      expect(editor.getText()).toContain('Unique Heading');
+      expect(editor.getHTML()).toContain('<h2>Unique Heading</h2>');
 
       editor.setContent('<p>Updated Content</p>');
       expect(editor.getHTML()).toContain('<p>Updated Content</p>');
+
+      editor.destroy();
+    });
+
+    it('executes formatting commands and updates toolbar state', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Hello world</p>',
+      });
+
+      // Select all text and apply bold
+      editor.tiptap.commands.selectAll();
+      editor.execCommand('bold');
+
+      expect(editor.tiptap.isActive('bold')).toBe(true);
+
+      const boldBtn = container.querySelector(
+        '.editor-btn[data-command="bold"]'
+      );
+      expect(boldBtn?.classList.contains('btn-active')).toBe(true);
+      expect(boldBtn?.getAttribute('aria-pressed')).toBe('true');
+
+      editor.destroy();
+    });
+
+    it('inserts and manages tables', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Before table</p>',
+      });
+
+      editor.execCommand('insertTable');
+      expect(editor.tiptap.isActive('table')).toBe(true);
+      expect(editor.getHTML()).toContain('<table');
+
+      // Table tools should now be visible
+      const tableTools = container.querySelector('.editor-table-tools');
+      expect(tableTools?.classList.contains('hidden')).toBe(false);
+
+      editor.destroy();
+    });
+
+    it('inserts and manages math blocks', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Formula:</p>',
+      });
+
+      editor.execCommand('insertMath');
+      expect(editor.getHTML()).toContain('data-math-block');
 
       editor.destroy();
     });

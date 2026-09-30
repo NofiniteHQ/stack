@@ -626,9 +626,13 @@ input[type='number'] {
 6. TIPTAP EDITOR COMPONENT STYLES
 ------------------------------------------------------------ */
 @layer components {
+  .editor-content ul[data-type='taskList'],
+  .editor .editor-content ul[data-type='taskList'],
+  .markon-editor ul[data-type='taskList'],
   .tiptap-wrapper .tiptap ul[data-type='taskList'],
   .tiptap-wrapper ul[data-type='taskList'],
   .nui-editor ul[data-type='taskList'],
+  .editor-content ul.task-list,
   .tiptap-wrapper ul.task-list,
   .nui-editor ul.task-list,
   ul.task-list {
@@ -636,9 +640,13 @@ input[type='number'] {
     padding: 0 !important;
   }
 
+  .editor-content ul[data-type='taskList'] li,
+  .editor .editor-content ul[data-type='taskList'] li,
+  .markon-editor ul[data-type='taskList'] li,
   .tiptap-wrapper .tiptap ul[data-type='taskList'] li,
   .tiptap-wrapper ul[data-type='taskList'] li,
   .nui-editor ul[data-type='taskList'] li,
+  .editor-content ul.task-list li,
   .tiptap-wrapper ul.task-list li,
   .nui-editor ul.task-list li,
   ul.task-list li {
@@ -649,9 +657,13 @@ input[type='number'] {
     margin-top: 0.25rem !important;
   }
 
+  .editor-content ul[data-type='taskList'] li > label,
+  .editor .editor-content ul[data-type='taskList'] li > label,
+  .markon-editor ul[data-type='taskList'] li > label,
   .tiptap-wrapper .tiptap ul[data-type='taskList'] li > label,
   .tiptap-wrapper ul[data-type='taskList'] li > label,
   .nui-editor ul[data-type='taskList'] li > label,
+  .editor-content ul.task-list li > label,
   .tiptap-wrapper ul.task-list li > label,
   .nui-editor ul.task-list li > label,
   ul.task-list li > label {
@@ -662,9 +674,13 @@ input[type='number'] {
     margin-top: 0.25rem !important;
   }
 
+  .editor-content ul[data-type='taskList'] li > div,
+  .editor .editor-content ul[data-type='taskList'] li > div,
+  .markon-editor ul[data-type='taskList'] li > div,
   .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div,
   .tiptap-wrapper ul[data-type='taskList'] li > div,
   .nui-editor ul[data-type='taskList'] li > div,
+  .editor-content ul.task-list li > div,
   .tiptap-wrapper ul.task-list li > div,
   .nui-editor ul.task-list li > div,
   ul.task-list li > div {
@@ -672,21 +688,40 @@ input[type='number'] {
     margin: 0 !important;
   }
 
+  .editor-content ul[data-type='taskList'] li > div > p,
+  .editor .editor-content ul[data-type='taskList'] li > div > p,
+  .markon-editor ul[data-type='taskList'] li > div > p,
   .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div > p,
   .tiptap-wrapper ul[data-type='taskList'] li > div > p,
   .nui-editor ul[data-type='taskList'] li > div > p,
+  .editor-content ul.task-list li > div > p,
   .tiptap-wrapper ul.task-list li > div > p,
   .nui-editor ul.task-list li > div > p,
   ul.task-list li > div > p {
     margin: 0 !important;
   }
 
+  .editor-content p,
+  .editor .editor-content p,
+  .markon-editor p,
   .tiptap-wrapper .tiptap p {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     line-height: var(--leading-normal, 1.5);
   }
 
+  .editor-content h1,
+  .editor-content h2,
+  .editor-content h3,
+  .editor-content h4,
+  .editor .editor-content h1,
+  .editor .editor-content h2,
+  .editor .editor-content h3,
+  .editor .editor-content h4,
+  .markon-editor h1,
+  .markon-editor h2,
+  .markon-editor h3,
+  .markon-editor h4,
   .tiptap-wrapper .tiptap h1,
   .tiptap-wrapper .tiptap h2,
   .tiptap-wrapper .tiptap h3,
@@ -698,16 +733,28 @@ input[type='number'] {
     line-height: var(--leading-tight, 1.25);
   }
 
+  .editor-content h1,
+  .editor .editor-content h1,
+  .markon-editor h1,
   .tiptap-wrapper .tiptap h1 {
     font-size: var(--text-3xl, 1.875rem);
   }
+  .editor-content h2,
+  .editor .editor-content h2,
+  .markon-editor h2,
   .tiptap-wrapper .tiptap h2 {
     font-size: var(--text-2xl, 1.5rem);
   }
+  .editor-content h3,
+  .editor .editor-content h3,
+  .markon-editor h3,
   .tiptap-wrapper .tiptap h3 {
     font-size: var(--text-xl, 1.25rem);
   }
 
+  .editor-content a,
+  .editor .editor-content a,
+  .markon-editor a,
   .tiptap-wrapper .tiptap a {
     color: var(--color-primary);
     text-decoration: underline;
@@ -715,6 +762,12 @@ input[type='number'] {
     text-underline-offset: 2px;
   }
 
+  .editor-content ul,
+  .editor-content ol,
+  .editor .editor-content ul,
+  .editor .editor-content ol,
+  .markon-editor ul,
+  .markon-editor ol,
   .tiptap-wrapper .tiptap ul,
   .tiptap-wrapper .tiptap ol {
     padding-left: 1.5rem;
@@ -722,20 +775,32 @@ input[type='number'] {
     margin-bottom: 0.5rem;
   }
 
+  .editor-content ul,
+  .editor .editor-content ul,
+  .markon-editor ul,
   .tiptap-wrapper .tiptap ul {
     list-style-type: disc;
   }
+  .editor-content ol,
+  .editor .editor-content ol,
+  .markon-editor ol,
   .tiptap-wrapper .tiptap ol {
     list-style-type: decimal;
   }
 
+  .editor-content li p,
+  .editor .editor-content li p,
+  .markon-editor li p,
   .tiptap-wrapper .tiptap li p {
     margin-top: 0.25rem;
     margin-bottom: 0.25rem;
   }
 
+  .editor-content blockquote,
+  .editor .editor-content blockquote,
+  .markon-editor blockquote,
   .tiptap-wrapper .tiptap blockquote {
-    border-left: 3px solid var(--border-strong);
+    border-left: 3px solid var(--color-primary, var(--border-strong));
     padding-left: 1rem;
     margin-left: 0;
     margin-right: 0;
@@ -743,6 +808,9 @@ input[type='number'] {
     font-style: italic;
   }
 
+  .editor-content pre,
+  .editor .editor-content pre,
+  .markon-editor pre,
   .tiptap-wrapper .tiptap pre {
     background-color: var(--slate-900);
     color: var(--slate-50);
@@ -755,6 +823,9 @@ input[type='number'] {
     margin-bottom: 1rem;
   }
 
+  .editor-content code,
+  .editor .editor-content code,
+  .markon-editor code,
   .tiptap-wrapper .tiptap code {
     background-color: var(--bg-subtle);
     color: var(--color-primary);
@@ -764,6 +835,9 @@ input[type='number'] {
     font-size: 0.875em;
   }
 
+  .editor-content pre code,
+  .editor .editor-content pre code,
+  .markon-editor pre code,
   .tiptap-wrapper .tiptap pre code {
     background-color: transparent;
     color: inherit;
@@ -772,6 +846,9 @@ input[type='number'] {
     font-size: inherit;
   }
 
+  .editor-content p.is-editor-empty:first-child::before,
+  .editor .editor-content p.is-editor-empty:first-child::before,
+  .markon-editor p.is-editor-empty:first-child::before,
   .tiptap-wrapper .tiptap p.is-editor-empty:first-child::before {
     color: var(--fg-muted);
     content: attr(data-placeholder);
@@ -781,6 +858,9 @@ input[type='number'] {
     font-style: italic;
   }
 
+  .editor-content table,
+  .editor .editor-content table,
+  .markon-editor table,
   .tiptap-wrapper .tiptap table {
     border-collapse: collapse;
     table-layout: fixed;
@@ -790,6 +870,12 @@ input[type='number'] {
     border-radius: var(--radius-md);
   }
 
+  .editor-content table td,
+  .editor-content table th,
+  .editor .editor-content table td,
+  .editor .editor-content table th,
+  .markon-editor table td,
+  .markon-editor table th,
   .tiptap-wrapper .tiptap table td,
   .tiptap-wrapper .tiptap table th {
     min-width: 1em;
@@ -800,12 +886,18 @@ input[type='number'] {
     position: relative;
   }
 
+  .editor-content table th,
+  .editor .editor-content table th,
+  .markon-editor table th,
   .tiptap-wrapper .tiptap table th {
     font-weight: var(--weight-bold, 700);
     text-align: left;
     background-color: var(--bg-subtle);
   }
 
+  .editor-content table .selectedCell:after,
+  .editor .editor-content table .selectedCell:after,
+  .markon-editor table .selectedCell:after,
   .tiptap-wrapper .tiptap table .selectedCell:after {
     z-index: 2;
     position: absolute;
@@ -818,6 +910,9 @@ input[type='number'] {
     pointer-events: none;
   }
 
+  .editor-content table .column-resize-handle,
+  .editor .editor-content table .column-resize-handle,
+  .markon-editor table .column-resize-handle,
   .tiptap-wrapper .tiptap table .column-resize-handle {
     position: absolute;
     right: -2px;
