@@ -12,6 +12,10 @@ import {
   shift,
 } from '@floating-ui/dom';
 import type { Editor } from '@tiptap/core';
+import {
+  registerActivePopover,
+  unregisterActivePopover,
+} from './popoverManager';
 
 // --- FONT FAMILY MENU ---
 export interface FontFamilyItem {
@@ -60,6 +64,7 @@ export class MarkonFontFamilyMenu {
 
   public open(): void {
     if (this.isOpen) return;
+    registerActivePopover(this);
     this.isOpen = true;
     this.trigger.setAttribute('aria-expanded', 'true');
     this.trigger.classList.add('btn-active');
@@ -108,7 +113,7 @@ export class MarkonFontFamilyMenu {
       });
     });
 
-    const handleOutsideClick = (e: MouseEvent) => {
+    const handleOutsideClick = (e: MouseEvent | PointerEvent) => {
       if (
         !this.trigger.contains(e.target as Node) &&
         !menu.contains(e.target as Node)
@@ -116,13 +121,22 @@ export class MarkonFontFamilyMenu {
         this.close();
       }
     };
-    document.addEventListener('click', handleOutsideClick);
-    this.cleanupOutsideClick = () =>
-      document.removeEventListener('click', handleOutsideClick);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        this.close();
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    this.cleanupOutsideClick = () => {
+      document.removeEventListener('pointerdown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }
 
   public close(): void {
     if (!this.isOpen) return;
+    unregisterActivePopover(this);
     this.isOpen = false;
     this.trigger.setAttribute('aria-expanded', 'false');
     this.trigger.classList.remove('btn-active');
@@ -188,6 +202,7 @@ export class MarkonFontSizeMenu {
 
   public open(): void {
     if (this.isOpen) return;
+    registerActivePopover(this);
     this.isOpen = true;
     this.trigger.setAttribute('aria-expanded', 'true');
     this.trigger.classList.add('btn-active');
@@ -237,7 +252,7 @@ export class MarkonFontSizeMenu {
       });
     });
 
-    const handleOutsideClick = (e: MouseEvent) => {
+    const handleOutsideClick = (e: MouseEvent | PointerEvent) => {
       if (
         !this.trigger.contains(e.target as Node) &&
         !menu.contains(e.target as Node)
@@ -245,13 +260,22 @@ export class MarkonFontSizeMenu {
         this.close();
       }
     };
-    document.addEventListener('click', handleOutsideClick);
-    this.cleanupOutsideClick = () =>
-      document.removeEventListener('click', handleOutsideClick);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        this.close();
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    this.cleanupOutsideClick = () => {
+      document.removeEventListener('pointerdown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }
 
   public close(): void {
     if (!this.isOpen) return;
+    unregisterActivePopover(this);
     this.isOpen = false;
     this.trigger.setAttribute('aria-expanded', 'false');
     this.trigger.classList.remove('btn-active');
@@ -332,6 +356,7 @@ export class MarkonHighlightMenu {
 
   public open(): void {
     if (this.isOpen) return;
+    registerActivePopover(this);
     this.isOpen = true;
     this.trigger.setAttribute('aria-expanded', 'true');
     this.trigger.classList.add('btn-active');
@@ -424,7 +449,7 @@ export class MarkonHighlightMenu {
       });
     });
 
-    const handleOutsideClick = (e: MouseEvent) => {
+    const handleOutsideClick = (e: MouseEvent | PointerEvent) => {
       if (
         !this.trigger.contains(e.target as Node) &&
         !menu.contains(e.target as Node)
@@ -432,13 +457,22 @@ export class MarkonHighlightMenu {
         this.close();
       }
     };
-    document.addEventListener('click', handleOutsideClick);
-    this.cleanupOutsideClick = () =>
-      document.removeEventListener('click', handleOutsideClick);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        this.close();
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    this.cleanupOutsideClick = () => {
+      document.removeEventListener('pointerdown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }
 
   public close(): void {
     if (!this.isOpen) return;
+    unregisterActivePopover(this);
     this.isOpen = false;
     this.trigger.setAttribute('aria-expanded', 'false');
     this.trigger.classList.remove('btn-active');
@@ -509,6 +543,7 @@ export class MarkonTextColorMenu {
 
   public open(): void {
     if (this.isOpen) return;
+    registerActivePopover(this);
     this.isOpen = true;
     this.trigger.setAttribute('aria-expanded', 'true');
     this.trigger.classList.add('btn-active');
@@ -604,7 +639,7 @@ export class MarkonTextColorMenu {
       });
     });
 
-    const handleOutsideClick = (e: MouseEvent) => {
+    const handleOutsideClick = (e: MouseEvent | PointerEvent) => {
       if (
         !this.trigger.contains(e.target as Node) &&
         !menu.contains(e.target as Node)
@@ -612,13 +647,22 @@ export class MarkonTextColorMenu {
         this.close();
       }
     };
-    document.addEventListener('click', handleOutsideClick);
-    this.cleanupOutsideClick = () =>
-      document.removeEventListener('click', handleOutsideClick);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        this.close();
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    this.cleanupOutsideClick = () => {
+      document.removeEventListener('pointerdown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }
 
   public close(): void {
     if (!this.isOpen) return;
+    unregisterActivePopover(this);
     this.isOpen = false;
     this.trigger.setAttribute('aria-expanded', 'false');
     this.trigger.classList.remove('btn-active');

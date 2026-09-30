@@ -1,6 +1,12 @@
 import { Extension } from '@tiptap/core';
 import Suggestion, { type SuggestionOptions } from '@tiptap/suggestion';
-import { computePosition, flip, shift, offset } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  flip,
+  shift,
+  offset,
+} from '@floating-ui/dom';
 
 export interface SlashCommandItem {
   title: string;
@@ -124,6 +130,7 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
   const items = customItems || defaultSlashCommands;
 
   let popupEl: HTMLElement | null = null;
+  let cleanupAutoUpdate: (() => void) | null = null;
   let selectedIndex = 0;
   let currentItems: SlashCommandItem[] = [];
 
@@ -132,6 +139,10 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
     const itemsList: SlashCommandItem[] = props.items || [];
     currentItems = itemsList;
     if (itemsList.length === 0) {
+      if (cleanupAutoUpdate) {
+        cleanupAutoUpdate();
+        cleanupAutoUpdate = null;
+      }
       popupEl.style.display = 'none';
       return;
     }
@@ -159,27 +170,50 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
       popupEl?.appendChild(btn);
     });
 
-    const rect =
-      typeof props.clientRect === 'function' ? props.clientRect() : null;
-    if (!rect) return;
+    const updatePosition = () => {
+      if (!popupEl || popupEl.style.display === 'none') return;
+      const rect =
+        typeof props.clientRect === 'function' ? props.clientRect() : null;
+      if (!rect) return;
 
-    const virtualRef = {
-      getBoundingClientRect: () => rect,
+      const virtualRef = {
+        getBoundingClientRect: () => rect,
+      };
+
+      computePosition(virtualRef, popupEl, {
+        placement: 'bottom-start',
+        middleware: [offset(6), flip(), shift({ padding: 8 })],
+      }).then(({ x, y }) => {
+        if (popupEl) {
+          popupEl.style.left = `${x}px`;
+          popupEl.style.top = `${y}px`;
+        }
+      });
     };
 
-    computePosition(virtualRef, popupEl, {
-      placement: 'bottom-start',
-      middleware: [offset(6), flip(), shift({ padding: 8 })],
-    }).then(({ x, y }) => {
-      if (popupEl) {
-        popupEl.style.left = `${x}px`;
-        popupEl.style.top = `${y}px`;
-      }
-    });
+    if (!cleanupAutoUpdate && props.editor?.view?.dom) {
+      cleanupAutoUpdate = autoUpdate(
+        props.editor.view.dom,
+        popupEl,
+        updatePosition
+      );
+    }
+    updatePosition();
   };
 
   return Extension.create({
     name: 'markonSlashCommand',
+
+    onDestroy() {
+      if (cleanupAutoUpdate) {
+        cleanupAutoUpdate();
+        cleanupAutoUpdate = null;
+      }
+      if (popupEl) {
+        popupEl.remove();
+        popupEl = null;
+      }
+    },
 
     addOptions() {
       return {
@@ -239,6 +273,10 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
                 return false;
               },
               onExit: () => {
+                if (cleanupAutoUpdate) {
+                  cleanupAutoUpdate();
+                  cleanupAutoUpdate = null;
+                }
                 if (popupEl) {
                   popupEl.remove();
                   popupEl = null;

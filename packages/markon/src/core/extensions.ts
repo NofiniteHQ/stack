@@ -120,6 +120,10 @@ export const MathBlock = Node.create({
                   );
                 }
               }
+              editor.commands.focus();
+            },
+            onCancel: () => {
+              editor.commands.focus();
             },
           });
         });

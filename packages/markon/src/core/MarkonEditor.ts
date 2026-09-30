@@ -17,6 +17,7 @@ import {
   MarkonHighlightMenu,
   MarkonTextColorMenu,
 } from './toolbarMenus';
+import { closeAllPopovers } from './popoverManager';
 
 export interface MarkonEditorOptions {
   element?: HTMLElement;
@@ -631,6 +632,7 @@ export class MarkonEditor {
           this.updateToolbarState();
           break;
         }
+        const { from, to } = this.tiptap.state.selection;
         openMarkonModal({
           title: 'Insert Math Formula (LaTeX)',
           label: 'LaTeX Formula',
@@ -639,9 +641,11 @@ export class MarkonEditor {
           confirmText: 'Insert Formula',
           onConfirm: (eq) => {
             if (eq && eq.trim()) {
-              this.tiptap
-                .chain()
-                .focus()
+              const chain = this.tiptap.chain().focus();
+              if (from !== undefined && to !== undefined) {
+                chain.setTextSelection({ from, to });
+              }
+              chain
                 .insertContent({
                   type: 'mathBlock',
                   attrs: { equation: eq.trim() },
@@ -651,7 +655,11 @@ export class MarkonEditor {
             this.updateToolbarState();
           },
           onCancel: () => {
-            this.tiptap.commands.focus();
+            if (from !== undefined && to !== undefined) {
+              this.tiptap.chain().focus().setTextSelection({ from, to }).run();
+            } else {
+              this.tiptap.commands.focus();
+            }
           },
         });
         break;
@@ -665,6 +673,7 @@ export class MarkonEditor {
           this.updateToolbarState();
           break;
         }
+        const { from, to } = this.tiptap.state.selection;
         const prevUrl = this.tiptap.getAttributes('link').href || '';
         openMarkonModal({
           title: prevUrl ? 'Edit Link' : 'Insert Link',
@@ -673,15 +682,23 @@ export class MarkonEditor {
           placeholder: 'https://example.com',
           confirmText: prevUrl ? 'Update Link' : 'Add Link',
           onConfirm: (url) => {
+            const cmdChain = this.tiptap.chain().focus();
+            if (from !== undefined && to !== undefined) {
+              cmdChain.setTextSelection({ from, to });
+            }
             if (url && url.trim()) {
-              this.tiptap.chain().focus().setLink({ href: url.trim() }).run();
+              cmdChain.setLink({ href: url.trim() }).run();
             } else {
-              this.tiptap.chain().focus().unsetLink().run();
+              cmdChain.unsetLink().run();
             }
             this.updateToolbarState();
           },
           onCancel: () => {
-            this.tiptap.commands.focus();
+            if (from !== undefined && to !== undefined) {
+              this.tiptap.chain().focus().setTextSelection({ from, to }).run();
+            } else {
+              this.tiptap.commands.focus();
+            }
           },
         });
         break;
@@ -692,6 +709,7 @@ export class MarkonEditor {
           this.updateToolbarState();
           break;
         }
+        const { from, to } = this.tiptap.state.selection;
         openMarkonModal({
           title: 'Insert Image',
           label: 'Image URL (or leave blank to pick a file)',
@@ -699,8 +717,12 @@ export class MarkonEditor {
           placeholder: 'https://example.com/photo.jpg',
           confirmText: 'Insert Image',
           onConfirm: (src) => {
+            const imgChain = this.tiptap.chain().focus();
+            if (from !== undefined && to !== undefined) {
+              imgChain.setTextSelection({ from, to });
+            }
             if (src && src.trim() && src !== 'https://') {
-              this.tiptap.chain().focus().setImage({ src: src.trim() }).run();
+              imgChain.setImage({ src: src.trim() }).run();
             } else {
               const fileInput = this.element.querySelector<HTMLInputElement>(
                 '.editor-image-file-input'
@@ -710,7 +732,11 @@ export class MarkonEditor {
             this.updateToolbarState();
           },
           onCancel: () => {
-            this.tiptap.commands.focus();
+            if (from !== undefined && to !== undefined) {
+              this.tiptap.chain().focus().setTextSelection({ from, to }).run();
+            } else {
+              this.tiptap.commands.focus();
+            }
           },
         });
         break;
@@ -742,6 +768,7 @@ export class MarkonEditor {
   }
 
   public destroy(): void {
+    closeAllPopovers();
     this.fontFamilyMenu?.destroy();
     this.fontSizeMenu?.destroy();
     this.highlightMenu?.destroy();

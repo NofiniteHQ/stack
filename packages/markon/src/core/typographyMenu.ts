@@ -12,6 +12,10 @@ import {
   shift,
 } from '@floating-ui/dom';
 import type { Editor } from '@tiptap/core';
+import {
+  registerActivePopover,
+  unregisterActivePopover,
+} from './popoverManager';
 
 export interface TypographyItem {
   id: string;
@@ -111,6 +115,7 @@ export class MarkonTypographyMenu {
 
   public open(): void {
     if (this.isOpen) return;
+    registerActivePopover(this);
     this.isOpen = true;
     this.trigger.setAttribute('aria-expanded', 'true');
     this.trigger.classList.add('btn-active');
@@ -205,6 +210,7 @@ export class MarkonTypographyMenu {
 
   public close(): void {
     if (!this.isOpen) return;
+    unregisterActivePopover(this);
     this.isOpen = false;
     this.trigger.setAttribute('aria-expanded', 'false');
     this.trigger.classList.remove('btn-active');

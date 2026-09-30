@@ -1,10 +1,17 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
-import { computePosition, flip, shift, offset } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  flip,
+  shift,
+  offset,
+} from '@floating-ui/dom';
 import { openMarkonModal } from './dialog';
 
 export function createBubbleMenuExtension() {
   let menuEl: HTMLElement | null = null;
+  let cleanupAutoUpdate: (() => void) | null = null;
 
   return Extension.create({
     name: 'markonBubbleMenu',
@@ -22,6 +29,10 @@ export function createBubbleMenuExtension() {
                 const { from, to, empty } = state.selection;
 
                 if (empty || !editor.isEditable) {
+                  if (cleanupAutoUpdate) {
+                    cleanupAutoUpdate();
+                    cleanupAutoUpdate = null;
+                  }
                   if (menuEl) menuEl.style.display = 'none';
                   return;
                 }
@@ -67,17 +78,37 @@ export function createBubbleMenuExtension() {
                     else if (cmd === 'code')
                       editor.chain().focus().toggleCode().run();
                     else if (cmd === 'link') {
+                      const selFrom = editor.state.selection.from;
+                      const selTo = editor.state.selection.to;
                       const prevUrl = editor.getAttributes('link').href || '';
                       openMarkonModal({
-                        title: 'Insert / Edit Link',
+                        title: prevUrl ? 'Edit Link' : 'Insert Link',
                         label: 'Link URL',
                         initialValue: prevUrl,
                         placeholder: 'https://...',
                         confirmText: 'Save Link',
                         onConfirm: (url) => {
-                          if (url)
-                            editor.chain().focus().setLink({ href: url }).run();
-                          else editor.chain().focus().unsetLink().run();
+                          const chain = editor.chain().focus();
+                          if (selFrom !== undefined && selTo !== undefined) {
+                            chain.setTextSelection({
+                              from: selFrom,
+                              to: selTo,
+                            });
+                          }
+                          if (url && url.trim())
+                            chain.setLink({ href: url.trim() }).run();
+                          else chain.unsetLink().run();
+                        },
+                        onCancel: () => {
+                          if (selFrom !== undefined && selTo !== undefined) {
+                            editor
+                              .chain()
+                              .focus()
+                              .setTextSelection({ from: selFrom, to: selTo })
+                              .run();
+                          } else {
+                            editor.commands.focus();
+                          }
                         },
                       });
                     }
@@ -105,35 +136,54 @@ export function createBubbleMenuExtension() {
 
                 menuEl.style.display = 'flex';
 
-                // Virtual reference from selection
-                const startCoords = view.coordsAtPos(from);
-                const endCoords = view.coordsAtPos(to);
-                const top = Math.min(startCoords.top, endCoords.top);
-                const bottom = Math.max(startCoords.bottom, endCoords.bottom);
-                const left = Math.min(startCoords.left, endCoords.left);
-                const right = Math.max(startCoords.right, endCoords.right);
+                const updatePosition = () => {
+                  if (!menuEl || menuEl.style.display === 'none') return;
+                  const curState = view.state;
+                  const curSel = curState.selection;
+                  if (curSel.empty) return;
 
-                const virtualRef = {
-                  getBoundingClientRect: () =>
-                    new DOMRect(
-                      left,
-                      top,
-                      Math.max(right - left, 1),
-                      bottom - top
-                    ),
+                  const startCoords = view.coordsAtPos(curSel.from);
+                  const endCoords = view.coordsAtPos(curSel.to);
+                  const top = Math.min(startCoords.top, endCoords.top);
+                  const bottom = Math.max(startCoords.bottom, endCoords.bottom);
+                  const left = Math.min(startCoords.left, endCoords.left);
+                  const right = Math.max(startCoords.right, endCoords.right);
+
+                  const virtualRef = {
+                    getBoundingClientRect: () =>
+                      new DOMRect(
+                        left,
+                        top,
+                        Math.max(right - left, 1),
+                        Math.max(bottom - top, 1)
+                      ),
+                  };
+
+                  computePosition(virtualRef, menuEl, {
+                    placement: 'top',
+                    middleware: [offset(8), flip(), shift({ padding: 8 })],
+                  }).then(({ x, y }) => {
+                    if (menuEl) {
+                      menuEl.style.left = `${x}px`;
+                      menuEl.style.top = `${y}px`;
+                    }
+                  });
                 };
 
-                computePosition(virtualRef, menuEl, {
-                  placement: 'top',
-                  middleware: [offset(8), flip(), shift({ padding: 8 })],
-                }).then(({ x, y }) => {
-                  if (menuEl) {
-                    menuEl.style.left = `${x}px`;
-                    menuEl.style.top = `${y}px`;
-                  }
-                });
+                if (!cleanupAutoUpdate) {
+                  cleanupAutoUpdate = autoUpdate(
+                    view.dom,
+                    menuEl,
+                    updatePosition
+                  );
+                }
+                updatePosition();
               },
               destroy: () => {
+                if (cleanupAutoUpdate) {
+                  cleanupAutoUpdate();
+                  cleanupAutoUpdate = null;
+                }
                 if (menuEl) {
                   menuEl.remove();
                   menuEl = null;
