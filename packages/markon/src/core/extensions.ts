@@ -20,6 +20,7 @@ import Image from '@tiptap/extension-image';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
 import katex from 'katex';
+import { openMarkonModal } from './dialog';
 
 export const lowlight = createLowlight(common);
 
@@ -96,21 +97,29 @@ export const MathBlock = Node.create({
           e.preventDefault();
           e.stopPropagation();
           const current = node.attrs.equation;
-          const next = window.prompt('Edit LaTeX math formula:', current);
-          if (
-            next !== null &&
-            next !== current &&
-            typeof getPos === 'function'
-          ) {
-            const pos = getPos();
-            if (typeof pos === 'number') {
-              editor.view.dispatch(
-                editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                  equation: next,
-                })
-              );
-            }
-          }
+          openMarkonModal({
+            title: 'Edit Math Formula (LaTeX)',
+            label: 'LaTeX Equation',
+            initialValue: current,
+            placeholder: 'e.g. \\int_{0}^{\\infty} x^2 dx',
+            confirmText: 'Update Formula',
+            onConfirm: (next) => {
+              if (
+                typeof next === 'string' &&
+                next !== current &&
+                typeof getPos === 'function'
+              ) {
+                const pos = getPos();
+                if (typeof pos === 'number') {
+                  editor.view.dispatch(
+                    editor.view.state.tr.setNodeMarkup(pos, undefined, {
+                      equation: next,
+                    })
+                  );
+                }
+              }
+            },
+          });
         });
       }
 

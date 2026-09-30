@@ -626,6 +626,33 @@ input[type='number'] {
 6. TIPTAP EDITOR COMPONENT STYLES
 ------------------------------------------------------------ */
 @layer components {
+  /* Reset default browser focus outlines on TipTap canvas */
+  .editor-content .tiptap,
+  .editor-content .ProseMirror,
+  .markon-editor .tiptap,
+  .markon-editor .ProseMirror,
+  .tiptap-wrapper .tiptap,
+  .nui-editor .tiptap {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .editor-content .tiptap:focus,
+  .editor-content .tiptap:focus-visible,
+  .editor-content .ProseMirror:focus,
+  .editor-content .ProseMirror:focus-visible,
+  .markon-editor .tiptap:focus,
+  .markon-editor .tiptap:focus-visible,
+  .markon-editor .ProseMirror:focus,
+  .markon-editor .ProseMirror:focus-visible,
+  .tiptap-wrapper .tiptap:focus,
+  .tiptap-wrapper .tiptap:focus-visible {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
   .editor-content ul[data-type='taskList'],
   .editor .editor-content ul[data-type='taskList'],
   .markon-editor ul[data-type='taskList'],

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MarkonEditor, renderMarkonEditor, getCounts } from './index';
 
@@ -104,8 +105,23 @@ describe('@nofinite/markon', () => {
         initialValue: '<p>Formula:</p>',
       });
 
-      editor.execCommand('insertMath');
+      editor.execCommand('insertMath', 'E = mc^2');
       expect(editor.getHTML()).toContain('data-math-block');
+
+      editor.destroy();
+    });
+
+    it('mounts custom typography menu and drag handle', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Paragraph 1</p>',
+      });
+
+      expect(editor.typographyMenu).toBeDefined();
+      expect(editor.dragHandle).toBeDefined();
+
+      const trigger = container.querySelector('.editor-typography-trigger');
+      expect(trigger).toBeTruthy();
 
       editor.destroy();
     });

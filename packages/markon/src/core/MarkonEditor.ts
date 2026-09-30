@@ -8,6 +8,9 @@ import { Editor } from '@tiptap/core';
 import { getMarkonExtensions } from './extensions';
 import { createBubbleMenuExtension } from './bubbleMenu';
 import { createSlashCommandExtension } from './slashCommand';
+import { openMarkonModal } from './dialog';
+import { MarkonTypographyMenu } from './typographyMenu';
+import { MarkonDragHandle } from './dragHandle';
 
 export interface MarkonEditorOptions {
   element?: HTMLElement;
@@ -42,7 +45,7 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
   );
 
   return `
-    <div class="editor markon-editor w-full rounded-xl border border-default bg-surface shadow-sm overflow-hidden font-sans focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+    <div class="editor markon-editor relative w-full rounded-xl border border-default bg-surface shadow-sm overflow-hidden font-sans focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all"
          data-editor-name="${name}">
       <!-- Formatting Toolbar -->
       <div class="editor-toolbar flex flex-wrap items-center gap-1 p-2 border-b border-default bg-subtle/40 select-none sticky top-0 z-10" role="toolbar" aria-label="Editor Toolbar">
@@ -62,16 +65,15 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
 
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
-        <!-- Text Type Selector -->
-        <select class="editor-select text-xs font-medium bg-transparent border border-default rounded-md px-2 py-1 text-default cursor-pointer outline-none hover:bg-subtle focus:border-primary"
-                data-command="formatBlock" title="Text Style">
-          <option value="p">Paragraph</option>
-          <option value="h1">Heading 1</option>
-          <option value="h2">Heading 2</option>
-          <option value="h3">Heading 3</option>
-          <option value="blockquote">Quote</option>
-          <option value="codeBlock">Code Block</option>
-        </select>
+        <!-- Custom Typography Selector -->
+        <button type="button" class="editor-typography-trigger btn btn-ghost btn-sm px-2 gap-1.5 text-xs font-medium text-default hover:bg-subtle"
+                title="Text Style" aria-haspopup="true" aria-expanded="false">
+          <span class="editor-typography-icon font-mono font-bold text-xs text-primary shrink-0">¶</span>
+          <span class="editor-typography-label">Paragraph</span>
+          <svg class="w-3 h-3 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
 
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
@@ -185,20 +187,26 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
         </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertImage" title="Insert Image">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+        </button>
 
         <!-- Table Operations Group (Hidden when not in table) -->
-        <span class="editor-table-tools hidden flex items-center gap-1 ml-auto">
-          <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="addRowAfter" title="Add Row Below">+Row</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="deleteRow" title="Delete Row">-Row</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="addColumnAfter" title="Add Column Right">+Col</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs" data-command="deleteColumn" title="Delete Column">-Col</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-2 text-xs text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
+        <span class="editor-table-tools hidden items-center gap-0.5 px-1 py-0.5 rounded-lg bg-subtle/80 border border-default/60">
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="addRowAfter" title="Add Row Below">+Row</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="deleteRow" title="Delete Row">-Row</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="addColumnAfter" title="Add Column Right">+Col</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="deleteColumn" title="Delete Column">-Col</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
         </span>
       </div>
 
-      <!-- Editable Canvas (Empty container: TipTap mounts cleanly inside without duplicating initialValue) -->
-      <div class="editor-content markon-content p-4 outline-none text-default leading-relaxed text-sm overflow-y-auto"
+      <!-- Editable Canvas -->
+      <div class="editor-content markon-content relative pl-8 pr-4 py-4 outline-none text-default leading-relaxed text-sm overflow-y-auto"
            style="min-height: ${minHeight}"></div>
 
       <!-- Status Footer -->
@@ -235,6 +243,8 @@ export class MarkonEditor {
   public element: HTMLElement;
   public tiptap: Editor;
   public options: MarkonEditorOptions;
+  public typographyMenu?: MarkonTypographyMenu;
+  public dragHandle?: MarkonDragHandle;
 
   constructor(options: MarkonEditorOptions = {}) {
     this.options = options;
@@ -300,6 +310,24 @@ export class MarkonEditor {
     });
 
     this.attachEvents();
+
+    const typographyTrigger = this.element.querySelector<HTMLElement>(
+      '.editor-typography-trigger'
+    );
+    if (typographyTrigger) {
+      this.typographyMenu = new MarkonTypographyMenu(
+        this.tiptap,
+        typographyTrigger
+      );
+    }
+
+    if (!options.readOnly) {
+      this.dragHandle = new MarkonDragHandle({
+        editor: this.tiptap,
+        container: contentEl,
+      });
+    }
+
     this.updateToolbarState();
     this.updateFooter(this.tiptap.getText());
   }
@@ -342,18 +370,8 @@ export class MarkonEditor {
     setBtnActive('insertMath', this.tiptap.isActive('mathBlock'));
     setBtnActive('createLink', this.tiptap.isActive('link'));
 
-    // Sync Text Style Dropdown
-    const select = toolbar.querySelector<HTMLSelectElement>('.editor-select');
-    if (select) {
-      if (this.tiptap.isActive('heading', { level: 1 })) select.value = 'h1';
-      else if (this.tiptap.isActive('heading', { level: 2 }))
-        select.value = 'h2';
-      else if (this.tiptap.isActive('heading', { level: 3 }))
-        select.value = 'h3';
-      else if (this.tiptap.isActive('blockquote')) select.value = 'blockquote';
-      else if (this.tiptap.isActive('codeBlock')) select.value = 'codeBlock';
-      else select.value = 'p';
-    }
+    // Sync Custom Typography Selector
+    this.typographyMenu?.updateTriggerState();
 
     // Toggle Table Tools
     const tableTools = toolbar.querySelector<HTMLElement>(
@@ -362,8 +380,10 @@ export class MarkonEditor {
     if (tableTools) {
       if (this.tiptap.isActive('table')) {
         tableTools.classList.remove('hidden');
+        tableTools.classList.add('flex');
       } else {
         tableTools.classList.add('hidden');
+        tableTools.classList.remove('flex');
       }
     }
   }
@@ -399,24 +419,6 @@ export class MarkonEditor {
       const cmd = btn.getAttribute('data-command');
       if (cmd) {
         this.execCommand(cmd);
-      }
-    });
-
-    toolbar.addEventListener('change', (e: Event) => {
-      const select = e.target as HTMLSelectElement;
-      if (select?.classList?.contains('editor-select')) {
-        const val = select.value;
-        if (val === 'p') this.tiptap.chain().focus().setParagraph().run();
-        else if (val === 'h1')
-          this.tiptap.chain().focus().toggleHeading({ level: 1 }).run();
-        else if (val === 'h2')
-          this.tiptap.chain().focus().toggleHeading({ level: 2 }).run();
-        else if (val === 'h3')
-          this.tiptap.chain().focus().toggleHeading({ level: 3 }).run();
-        else if (val === 'blockquote')
-          this.tiptap.chain().focus().toggleBlockquote().run();
-        else if (val === 'codeBlock')
-          this.tiptap.chain().focus().toggleCodeBlock().run();
       }
     });
   }
@@ -487,20 +489,96 @@ export class MarkonEditor {
       case 'insertCodeBlock':
         chain.toggleCodeBlock().run();
         break;
-      case 'insertMath':
-        chain.insertContent({ type: 'mathBlock' }).run();
+      case 'insertMath': {
+        if (_val && typeof _val === 'string') {
+          this.tiptap
+            .chain()
+            .focus()
+            .insertContent({
+              type: 'mathBlock',
+              attrs: { equation: _val.trim() },
+            })
+            .run();
+          this.updateToolbarState();
+          break;
+        }
+        openMarkonModal({
+          title: 'Insert Math Formula (LaTeX)',
+          label: 'LaTeX Formula',
+          initialValue: 'E = mc^2',
+          placeholder: 'e.g. \\sum_{i=1}^n x_i',
+          confirmText: 'Insert Formula',
+          onConfirm: (eq) => {
+            if (eq && eq.trim()) {
+              this.tiptap
+                .chain()
+                .focus()
+                .insertContent({
+                  type: 'mathBlock',
+                  attrs: { equation: eq.trim() },
+                })
+                .run();
+            }
+            this.updateToolbarState();
+          },
+          onCancel: () => {
+            this.tiptap.commands.focus();
+          },
+        });
         break;
+      }
       case 'horizontalRule':
         chain.setHorizontalRule().run();
         break;
       case 'createLink': {
-        const prevUrl = this.tiptap.getAttributes('link').href;
-        const url =
-          typeof window !== 'undefined'
-            ? window.prompt('Enter link URL:', prevUrl || 'https://')
-            : null;
-        if (url) chain.setLink({ href: url }).run();
-        else if (url === '') chain.unsetLink().run();
+        if (_val && typeof _val === 'string') {
+          this.tiptap.chain().focus().setLink({ href: _val.trim() }).run();
+          this.updateToolbarState();
+          break;
+        }
+        const prevUrl = this.tiptap.getAttributes('link').href || '';
+        openMarkonModal({
+          title: prevUrl ? 'Edit Link' : 'Insert Link',
+          label: 'URL',
+          initialValue: prevUrl || 'https://',
+          placeholder: 'https://example.com',
+          confirmText: prevUrl ? 'Update Link' : 'Add Link',
+          onConfirm: (url) => {
+            if (url && url.trim()) {
+              this.tiptap.chain().focus().setLink({ href: url.trim() }).run();
+            } else {
+              this.tiptap.chain().focus().unsetLink().run();
+            }
+            this.updateToolbarState();
+          },
+          onCancel: () => {
+            this.tiptap.commands.focus();
+          },
+        });
+        break;
+      }
+      case 'insertImage': {
+        if (_val && typeof _val === 'string') {
+          this.tiptap.chain().focus().setImage({ src: _val.trim() }).run();
+          this.updateToolbarState();
+          break;
+        }
+        openMarkonModal({
+          title: 'Insert Image',
+          label: 'Image URL',
+          initialValue: 'https://',
+          placeholder: 'https://example.com/photo.jpg',
+          confirmText: 'Insert Image',
+          onConfirm: (src) => {
+            if (src && src.trim()) {
+              this.tiptap.chain().focus().setImage({ src: src.trim() }).run();
+            }
+            this.updateToolbarState();
+          },
+          onCancel: () => {
+            this.tiptap.commands.focus();
+          },
+        });
         break;
       }
     }
@@ -530,6 +608,8 @@ export class MarkonEditor {
   }
 
   public destroy(): void {
+    this.typographyMenu?.destroy();
+    this.dragHandle?.destroy();
     this.tiptap.destroy();
   }
 }
