@@ -65,14 +65,10 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
 
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
-        <!-- Custom Typography Selector -->
-        <button type="button" class="editor-typography-trigger btn btn-ghost btn-sm px-2 gap-1.5 text-xs font-medium text-default hover:bg-subtle"
+        <!-- Custom Typography Selector (Icon-only, fixed 32x32px square) -->
+        <button type="button" class="editor-typography-trigger editor-btn btn btn-ghost btn-sm btn-icon"
                 title="Text Style" aria-haspopup="true" aria-expanded="false">
           <span class="editor-typography-icon font-mono font-bold text-xs text-primary shrink-0">¶</span>
-          <span class="editor-typography-label">Paragraph</span>
-          <svg class="w-3 h-3 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m6 9 6 6 6-6"/>
-          </svg>
         </button>
 
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
