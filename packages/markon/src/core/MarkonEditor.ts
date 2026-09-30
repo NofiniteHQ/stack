@@ -858,10 +858,89 @@ export class MarkonEditor {
     return this.tiptap.getText();
   }
 
-  public setContent(content: string, emitUpdate = false): void {
+  public setContent(
+    content: string,
+    emitUpdate = false,
+    preserveCursor = false
+  ): void {
+    let selection: { from: number; to: number } | null = null;
+    if (preserveCursor && this.tiptap?.state) {
+      selection = {
+        from: this.tiptap.state.selection.from,
+        to: this.tiptap.state.selection.to,
+      };
+    }
+
     this.tiptap.commands.setContent(content, { emitUpdate });
-    this.updateFooter(this.tiptap.getText());
+
+    if (selection && this.tiptap?.state) {
+      const maxPos = this.tiptap.state.doc.content.size;
+      const safeFrom = Math.min(selection.from, maxPos);
+      const safeTo = Math.min(selection.to, maxPos);
+      try {
+        this.tiptap.commands.setTextSelection({ from: safeFrom, to: safeTo });
+      } catch {
+        // Fallback if target position is invalid
+      }
+    }
+
+    const text = this.tiptap.getText();
+    this.updateFooter(text);
     this.updateToolbarState();
+
+    this.element.dispatchEvent(
+      new CustomEvent('markon:change', {
+        detail: {
+          html: this.tiptap.getHTML(),
+          json: this.tiptap.getJSON(),
+          text,
+        },
+        bubbles: true,
+      })
+    );
+  }
+
+  public setReadOnly(readOnly: boolean): void {
+    this.options.readOnly = readOnly;
+    this.tiptap.setEditable(!readOnly);
+
+    const contentEl =
+      this.element.querySelector<HTMLElement>('.editor-content');
+    if (contentEl) {
+      contentEl.setAttribute('contenteditable', readOnly ? 'false' : 'true');
+    }
+
+    const toolbar = this.element.querySelector<HTMLElement>('.editor-toolbar');
+    if (toolbar) {
+      if (readOnly) {
+        toolbar.classList.add('opacity-50', 'pointer-events-none');
+        toolbar.setAttribute('aria-disabled', 'true');
+      } else {
+        toolbar.classList.remove('opacity-50', 'pointer-events-none');
+        toolbar.removeAttribute('aria-disabled');
+      }
+    }
+
+    if (readOnly) {
+      this.dragHandle?.destroy();
+      this.dragHandle = undefined;
+    } else if (!this.dragHandle && contentEl) {
+      this.dragHandle = new MarkonDragHandle({
+        editor: this.tiptap,
+        container: contentEl,
+      });
+    }
+
+    this.updateToolbarState();
+  }
+
+  public setMinHeight(minHeight: string): void {
+    this.options.minHeight = minHeight;
+    const contentEl =
+      this.element.querySelector<HTMLElement>('.editor-content');
+    if (contentEl) {
+      contentEl.style.minHeight = minHeight;
+    }
   }
 
   public focus(): void {

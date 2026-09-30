@@ -276,5 +276,93 @@ describe('@nofinite/markon', () => {
 
       editor.destroy();
     });
+
+    it('dynamically synchronizes readOnly without destroying the editor', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Editable initial</p>',
+        readOnly: false,
+      });
+
+      expect(editor.tiptap.isEditable).toBe(true);
+      expect(editor.dragHandle).toBeDefined();
+
+      // Switch to readOnly
+      editor.setReadOnly(true);
+      expect(editor.tiptap.isEditable).toBe(false);
+      expect(editor.dragHandle).toBeUndefined();
+
+      const toolbar = container.querySelector('.editor-toolbar');
+      expect(toolbar?.classList.contains('pointer-events-none')).toBe(true);
+
+      const contentEl = container.querySelector('.editor-content');
+      expect(contentEl?.getAttribute('contenteditable')).toBe('false');
+
+      // Switch back to editable
+      editor.setReadOnly(false);
+      expect(editor.tiptap.isEditable).toBe(true);
+      expect(editor.dragHandle).toBeDefined();
+      expect(toolbar?.classList.contains('pointer-events-none')).toBe(false);
+      expect(contentEl?.getAttribute('contenteditable')).toBe('true');
+
+      editor.destroy();
+    });
+
+    it('dynamically synchronizes minHeight without remounting', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        minHeight: '200px',
+      });
+
+      const contentEl = container.querySelector<HTMLElement>('.editor-content');
+      expect(contentEl?.style.minHeight).toBe('200px');
+
+      editor.setMinHeight('450px');
+      expect(contentEl?.style.minHeight).toBe('450px');
+
+      editor.destroy();
+    });
+
+    it('preserves cursor position on controlled content sync', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Original text for testing cursor stability</p>',
+      });
+
+      // Place cursor at position 8
+      editor.tiptap.commands.setTextSelection(8);
+      expect(editor.tiptap.state.selection.from).toBe(8);
+
+      // Update content with preserveCursor = true
+      editor.setContent(
+        '<p>Original text for testing cursor stability updated</p>',
+        false,
+        true
+      );
+      expect(editor.tiptap.state.selection.from).toBe(8);
+
+      editor.destroy();
+    });
+
+    it('dispatches markon:change custom event on programmatic setContent', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Initial</p>',
+      });
+
+      let eventFired = false;
+      let eventText = '';
+
+      container.addEventListener('markon:change', (e: Event) => {
+        eventFired = true;
+        eventText = (e as CustomEvent).detail.text;
+      });
+
+      editor.setContent('<p>Programmatic update</p>');
+      expect(eventFired).toBe(true);
+      expect(eventText).toBe('Programmatic update');
+
+      editor.destroy();
+    });
   });
 });

@@ -15,7 +15,13 @@ export interface MarkonEditorRef {
   getHTML: () => string;
   getJSON: () => any;
   getText: () => string;
-  setContent: (content: string) => void;
+  setContent: (
+    content: string,
+    emitUpdate?: boolean,
+    preserveCursor?: boolean
+  ) => void;
+  setReadOnly: (readOnly: boolean) => void;
+  setMinHeight: (minHeight: string) => void;
   focus: () => void;
   editor: CoreMarkonEditor | null;
 }
@@ -33,6 +39,8 @@ export const MarkonEditor = forwardRef<MarkonEditorRef, MarkonEditorProps>(
       showSaveStatus,
       showBubbleMenu,
       showSlashCommands,
+      onUploadFile,
+      onSave,
       ...rest
     },
     ref
@@ -41,19 +49,33 @@ export const MarkonEditor = forwardRef<MarkonEditorRef, MarkonEditorProps>(
     const editorRef = useRef<CoreMarkonEditor | null>(null);
     const lastEmittedValueRef = useRef<string>(value || '');
 
+    // Stable callback refs to eliminate stale closure bugs
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
+    const onSaveRef = useRef(onSave);
+    onSaveRef.current = onSave;
+
+    const onUploadFileRef = useRef(onUploadFile);
+    onUploadFileRef.current = onUploadFile;
+
     useImperativeHandle(
       ref,
       () => ({
         getHTML: () => editorRef.current?.getHTML() || '',
         getJSON: () => editorRef.current?.getJSON() || {},
         getText: () => editorRef.current?.getText() || '',
-        setContent: (c: string) => editorRef.current?.setContent(c, false),
+        setContent: (c: string, emitUpdate = false, preserveCursor = false) =>
+          editorRef.current?.setContent(c, emitUpdate, preserveCursor),
+        setReadOnly: (ro: boolean) => editorRef.current?.setReadOnly(ro),
+        setMinHeight: (mh: string) => editorRef.current?.setMinHeight(mh),
         focus: () => editorRef.current?.focus(),
         editor: editorRef.current,
       }),
       []
     );
 
+    // Initial instantiation
     useEffect(() => {
       if (!containerRef.current) return;
 
@@ -69,7 +91,16 @@ export const MarkonEditor = forwardRef<MarkonEditorRef, MarkonEditorProps>(
         showSlashCommands,
         onChange: (html, json, text) => {
           lastEmittedValueRef.current = html;
-          onChange?.(html, json, text);
+          onChangeRef.current?.(html, json, text);
+        },
+        onSave: (html, json) => {
+          onSaveRef.current?.(html, json);
+        },
+        onUploadFile: (file) => {
+          if (onUploadFileRef.current) {
+            return onUploadFileRef.current(file);
+          }
+          return Promise.reject(new Error('No onUploadFile handler provided'));
         },
         ...rest,
       });
@@ -82,19 +113,32 @@ export const MarkonEditor = forwardRef<MarkonEditorRef, MarkonEditorProps>(
       };
     }, []);
 
-    // Sync external value updates without resetting caret during typing
+    // Non-destructive controlled content sync (eliminates cursor jumping)
     useEffect(() => {
       if (editorRef.current && value !== undefined) {
-        // If the update came from internal typing, do not reset content
         if (value === lastEmittedValueRef.current) return;
 
         const currentHTML = editorRef.current.getHTML();
         if (currentHTML !== value) {
-          editorRef.current.setContent(value, false);
+          editorRef.current.setContent(value, false, true);
           lastEmittedValueRef.current = value;
         }
       }
     }, [value]);
+
+    // Reactive readOnly synchronization without tearing down the editor
+    useEffect(() => {
+      if (editorRef.current && readOnly !== undefined) {
+        editorRef.current.setReadOnly(readOnly);
+      }
+    }, [readOnly]);
+
+    // Reactive minHeight synchronization
+    useEffect(() => {
+      if (editorRef.current && minHeight !== undefined) {
+        editorRef.current.setMinHeight(minHeight);
+      }
+    }, [minHeight]);
 
     return <div ref={containerRef} className={className} />;
   }
