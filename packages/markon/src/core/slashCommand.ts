@@ -8,6 +8,8 @@ import {
   offset,
 } from '@floating-ui/dom';
 
+import { openMarkonModal } from './dialog';
+
 export interface SlashCommandItem {
   title: string;
   description: string;
@@ -108,6 +110,57 @@ export const defaultSlashCommands: SlashCommandItem[] = [
         .deleteRange(range)
         .insertContent({ type: 'mathBlock' })
         .run();
+    },
+  },
+  {
+    title: 'Video Embed',
+    description: 'Embed YouTube, Vimeo, or MP4 video',
+    command: (editor, range) => {
+      editor.chain().focus().deleteRange(range).run();
+      openMarkonModal({
+        title: 'Insert Video Embed',
+        label: 'Video URL (YouTube, Vimeo, or direct link)',
+        initialValue: 'https://',
+        placeholder: 'https://www.youtube.com/watch?v=...',
+        confirmText: 'Embed Video',
+        onConfirm: (url) => {
+          if (url && url.trim() && url !== 'https://') {
+            editor.commands.setVideo({ src: url.trim() });
+          }
+        },
+        onCancel: () => {
+          editor.commands.focus();
+        },
+      });
+    },
+  },
+  {
+    title: 'Collapsible Section',
+    description: 'Notion-style accordion toggle block',
+    command: (editor, range) => {
+      editor.chain().focus().deleteRange(range).insertDetails().run();
+    },
+  },
+  {
+    title: 'Image',
+    description: 'Insert an image from URL or upload',
+    command: (editor, range) => {
+      editor.chain().focus().deleteRange(range).run();
+      const markon = (editor as any).__markon;
+      if (markon) {
+        markon.execCommand('insertImage');
+      }
+    },
+  },
+  {
+    title: 'File Attachment',
+    description: 'Attach a downloadable document or file',
+    command: (editor, range) => {
+      editor.chain().focus().deleteRange(range).run();
+      const markon = (editor as any).__markon;
+      if (markon) {
+        markon.promptFileUpload();
+      }
     },
   },
   {

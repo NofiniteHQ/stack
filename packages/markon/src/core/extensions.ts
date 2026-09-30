@@ -18,13 +18,15 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import FontFamily from '@tiptap/extension-font-family';
 import { FontSize } from './fontSize';
-import Image from '@tiptap/extension-image';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { common, createLowlight } from 'lowlight';
+import { MarkonImage } from './image';
+import { MarkonCodeBlock, lowlight } from './codeBlock';
+import { VideoBlock } from './video';
+import { Details, DetailsSummary, DetailsContent } from './details';
+import { FileAttachment } from './fileAttachment';
 import katex from 'katex';
 import { openMarkonModal } from './dialog';
 
-export const lowlight = createLowlight(common);
+export { lowlight };
 
 export const MathBlock = Node.create({
   name: 'mathBlock',
@@ -190,19 +192,19 @@ export function getMarkonExtensions(placeholder?: string): AnyExtension[] {
     TableCell.configure({
       HTMLAttributes: { class: 'border border-default p-2' },
     }),
-    CodeBlockLowlight.configure({
+    MarkonCodeBlock.configure({
       lowlight,
-      HTMLAttributes: {
-        class:
-          'rounded-lg p-3 my-2 font-mono text-xs overflow-x-auto bg-subtle border border-default text-default',
-      },
     }),
     MathBlock,
     Subscript,
     Superscript,
-    Image.configure({
-      inline: true,
-      HTMLAttributes: { class: 'rounded-lg max-w-full my-2' },
+    MarkonImage.configure({
+      inline: false,
     }),
+    VideoBlock,
+    Details,
+    DetailsSummary,
+    DetailsContent,
+    FileAttachment,
   ];
 }

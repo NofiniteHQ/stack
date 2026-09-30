@@ -26,7 +26,7 @@ export function createBubbleMenuExtension() {
             return {
               update: (view) => {
                 const { state } = view;
-                const { from, to, empty } = state.selection;
+                const { empty } = state.selection;
 
                 if (empty || !editor.isEditable) {
                   if (cleanupAutoUpdate) {

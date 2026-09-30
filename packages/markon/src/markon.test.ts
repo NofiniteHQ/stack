@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { MarkonEditor, renderMarkonEditor, getCounts } from './index';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import {
+  MarkonEditor,
+  renderMarkonEditor,
+  getCounts,
+  parseVideoUrl,
+  formatFileSize,
+} from './index';
 
 describe('@nofinite/markon', () => {
   it('calculates word and character counts accurately', () => {
@@ -8,6 +14,30 @@ describe('@nofinite/markon', () => {
     const counts = getCounts(text);
     expect(counts.words).toBe(5);
     expect(counts.characters).toBe(27);
+  });
+
+  it('formats file sizes accurately', () => {
+    expect(formatFileSize(0)).toBe('0 B');
+    expect(formatFileSize(1024)).toBe('1 KB');
+    expect(formatFileSize(1048576 * 2.5)).toBe('2.5 MB');
+  });
+
+  it('parses video URLs correctly for YouTube, Vimeo, and custom streams', () => {
+    const yt1 = parseVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+    expect(yt1.service).toBe('youtube');
+    expect(yt1.embedUrl).toContain('dQw4w9WgXcQ');
+
+    const yt2 = parseVideoUrl('https://youtu.be/dQw4w9WgXcQ');
+    expect(yt2.service).toBe('youtube');
+    expect(yt2.embedUrl).toContain('dQw4w9WgXcQ');
+
+    const vimeo = parseVideoUrl('https://vimeo.com/76979871');
+    expect(vimeo.service).toBe('vimeo');
+    expect(vimeo.embedUrl).toContain('76979871');
+
+    const custom = parseVideoUrl('https://example.com/video.mp4');
+    expect(custom.service).toBe('custom');
+    expect(custom.embedUrl).toBe('https://example.com/video.mp4');
   });
 
   it('renders static editor HTML with all controls and NUICSS classes', () => {
@@ -30,8 +60,12 @@ describe('@nofinite/markon', () => {
     expect(html).toContain('editor-font-size-trigger');
     expect(html).toContain('editor-color-trigger');
     expect(html).toContain('editor-highlight-trigger');
+    expect(html).toContain('editor-table-trigger');
     expect(html).toContain('data-command="insertTable"');
     expect(html).toContain('data-command="insertCodeBlock"');
+    expect(html).toContain('data-command="insertVideo"');
+    expect(html).toContain('data-command="insertDetails"');
+    expect(html).toContain('data-command="insertFile"');
     expect(html).toContain('data-command="insertMath"');
   });
 
@@ -90,19 +124,113 @@ describe('@nofinite/markon', () => {
       editor.destroy();
     });
 
-    it('inserts and manages tables', () => {
+    it('inserts and manages tables and interactive table menu', () => {
       const editor = new MarkonEditor({
         element: container,
         initialValue: '<p>Before table</p>',
       });
 
-      editor.execCommand('insertTable');
+      expect(editor.tableMenu).toBeDefined();
+
+      // Open table menu
+      editor.tableMenu?.open();
+      const menuEl = document.querySelector('.markon-table-menu');
+      expect(menuEl).toBeTruthy();
+
+      // Trigger custom dimension insertion (4 cols x 2 rows)
+      const cell = menuEl?.querySelector(
+        'button[data-row="2"][data-col="4"]'
+      ) as HTMLButtonElement;
+      expect(cell).toBeTruthy();
+      cell?.click();
+
       expect(editor.tiptap.isActive('table')).toBe(true);
       expect(editor.getHTML()).toContain('<table');
 
       // Table tools should now be visible
       const tableTools = container.querySelector('.editor-table-tools');
       expect(tableTools?.classList.contains('hidden')).toBe(false);
+
+      editor.destroy();
+    });
+
+    it('inserts and manages video embeds', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Before video</p>',
+      });
+
+      editor.execCommand(
+        'insertVideo',
+        'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+      );
+
+      const html = editor.getHTML();
+      expect(html).toContain('data-video-block');
+      expect(html).toContain('youtube-nocookie.com/embed/dQw4w9WgXcQ');
+
+      editor.destroy();
+    });
+
+    it('inserts and manages collapsible details sections', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Before details</p>',
+      });
+
+      editor.execCommand('insertDetails');
+
+      const html = editor.getHTML();
+      expect(html).toContain('<details');
+      expect(html).toContain('<summary');
+      expect(html).toContain('Toggle title');
+
+      editor.destroy();
+    });
+
+    it('inserts and manages file attachments', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Before file</p>',
+      });
+
+      editor.tiptap.commands.insertFileAttachment({
+        src: 'https://example.com/specs.pdf',
+        name: 'specs.pdf',
+        size: '1.2 MB',
+        type: 'application/pdf',
+      });
+
+      const html = editor.getHTML();
+      expect(html).toContain('data-file-attachment');
+      expect(html).toContain('specs.pdf');
+      expect(html).toContain('1.2 MB');
+      expect(html).toContain('href="https://example.com/specs.pdf"');
+
+      editor.destroy();
+    });
+
+    it('handles file upload hook asynchronously', async () => {
+      const uploadMock = vi.fn().mockResolvedValue({
+        url: 'https://cdn.example.com/uploaded.png',
+        name: 'uploaded.png',
+        size: 50000,
+      });
+
+      const editor = new MarkonEditor({
+        element: container,
+        onUploadFile: uploadMock,
+      });
+
+      const fakeFile = new File(['fake content'], 'test.png', {
+        type: 'image/png',
+      });
+
+      await editor.handleUploadedFile(fakeFile);
+      expect(uploadMock).toHaveBeenCalledWith(fakeFile);
+
+      const html = editor.getHTML();
+      expect(html).toContain('https://cdn.example.com/uploaded.png');
 
       editor.destroy();
     });
@@ -130,6 +258,7 @@ describe('@nofinite/markon', () => {
       expect(editor.fontSizeMenu).toBeDefined();
       expect(editor.textColorMenu).toBeDefined();
       expect(editor.highlightMenu).toBeDefined();
+      expect(editor.tableMenu).toBeDefined();
       expect(editor.dragHandle).toBeDefined();
       expect(container.querySelector('.markon-drag-handle')).toBeTruthy();
       expect(container.querySelector('.markon-drop-indicator')).toBeTruthy();

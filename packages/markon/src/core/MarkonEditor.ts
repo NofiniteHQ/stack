@@ -17,6 +17,8 @@ import {
   MarkonHighlightMenu,
   MarkonTextColorMenu,
 } from './toolbarMenus';
+import { MarkonTableMenu } from './tableMenu';
+import { formatFileSize } from './fileAttachment';
 import { closeAllPopovers } from './popoverManager';
 
 export interface MarkonEditorOptions {
@@ -30,6 +32,9 @@ export interface MarkonEditorOptions {
   showSaveStatus?: boolean;
   showBubbleMenu?: boolean;
   showSlashCommands?: boolean;
+  onUploadFile?: (
+    file: File
+  ) => Promise<string | { url: string; name?: string; size?: number | string }>;
   onChange?: (html: string, json: any, text: string) => void;
   onSave?: (html: string, json: any) => void;
 }
@@ -206,7 +211,7 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
         <!-- Blocks & Inserts -->
-        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertTable" title="Insert Table (3x3)">
+        <button type="button" class="editor-table-trigger editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertTable" title="Insert Table" aria-haspopup="true" aria-expanded="false">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2"></rect>
             <path d="M3 9h18"></path>
@@ -222,6 +227,23 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="16 18 22 12 16 6"></polyline>
             <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertVideo" title="Embed Video (YouTube, Vimeo, MP4)">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="20" height="15" x="2" y="4.5" rx="2" ry="2"/>
+            <polygon points="10 9 15 12 10 15 10 9" fill="currentColor"/>
+          </svg>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertDetails" title="Collapsible Section">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="m9 10 3 3 3-3"/>
+          </svg>
+        </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertFile" title="Attach File">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
           </svg>
         </button>
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="horizontalRule" title="Horizontal Divider">
@@ -253,6 +275,7 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
         </span>
 
         <input type="file" class="editor-image-file-input hidden" accept="image/*" />
+        <input type="file" class="editor-generic-file-input hidden" />
       </div>
 
       <!-- Editable Canvas -->
@@ -298,6 +321,7 @@ export class MarkonEditor {
   public fontSizeMenu?: MarkonFontSizeMenu;
   public highlightMenu?: MarkonHighlightMenu;
   public textColorMenu?: MarkonTextColorMenu;
+  public tableMenu?: MarkonTableMenu;
   public dragHandle?: MarkonDragHandle;
 
   constructor(options: MarkonEditorOptions = {}) {
@@ -340,6 +364,20 @@ export class MarkonEditor {
       extensions,
       content: initialContent,
       editable: !options.readOnly,
+      editorProps: {
+        handleDrop: (_view, event, _slice, moved) => {
+          if (moved || !event.dataTransfer?.files?.length) return false;
+          const file = event.dataTransfer.files[0];
+          this.handleUploadedFile(file);
+          return true;
+        },
+        handlePaste: (_view, event) => {
+          if (!event.clipboardData?.files?.length) return false;
+          const file = event.clipboardData.files[0];
+          this.handleUploadedFile(file);
+          return true;
+        },
+      },
       onUpdate: ({ editor }) => {
         const html = editor.getHTML();
         const json = editor.getJSON();
@@ -362,6 +400,8 @@ export class MarkonEditor {
         this.updateToolbarState();
       },
     });
+
+    (this.tiptap as any).__markon = this;
 
     this.attachEvents();
 
@@ -407,6 +447,13 @@ export class MarkonEditor {
         this.tiptap,
         highlightTrigger
       );
+    }
+
+    const tableTrigger = this.element.querySelector<HTMLElement>(
+      '.editor-table-trigger'
+    );
+    if (tableTrigger) {
+      this.tableMenu = new MarkonTableMenu(this.tiptap, tableTrigger);
     }
 
     if (!options.readOnly) {
@@ -459,6 +506,8 @@ export class MarkonEditor {
     setBtnActive('insertTaskList', this.tiptap.isActive('taskList'));
     setBtnActive('insertCodeBlock', this.tiptap.isActive('codeBlock'));
     setBtnActive('insertMath', this.tiptap.isActive('mathBlock'));
+    setBtnActive('insertVideo', this.tiptap.isActive('videoBlock'));
+    setBtnActive('insertDetails', this.tiptap.isActive('details'));
     setBtnActive('createLink', this.tiptap.isActive('link'));
 
     // Sync Custom Typography Selector
@@ -512,6 +561,7 @@ export class MarkonEditor {
         '.editor-btn'
       );
       if (!btn) return;
+      if (btn.classList.contains('editor-table-trigger')) return;
       e.preventDefault();
 
       const cmd = btn.getAttribute('data-command');
@@ -527,15 +577,21 @@ export class MarkonEditor {
       fileInput.addEventListener('change', () => {
         const file = fileInput.files?.[0];
         if (file) {
-          const reader = new FileReader();
-          reader.onload = (readerEvent) => {
-            const dataUrl = readerEvent.target?.result as string;
-            if (dataUrl) {
-              this.tiptap.chain().focus().setImage({ src: dataUrl }).run();
-            }
-          };
-          reader.readAsDataURL(file);
+          this.handleUploadedFile(file);
           fileInput.value = '';
+        }
+      });
+    }
+
+    const genericFileInput = toolbar.querySelector<HTMLInputElement>(
+      '.editor-generic-file-input'
+    );
+    if (genericFileInput) {
+      genericFileInput.addEventListener('change', () => {
+        const file = genericFileInput.files?.[0];
+        if (file) {
+          this.handleUploadedFile(file);
+          genericFileInput.value = '';
         }
       });
     }
@@ -599,7 +655,13 @@ export class MarkonEditor {
         chain.toggleTaskList().run();
         break;
       case 'insertTable':
-        chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+        if (_val && typeof _val === 'object') {
+          const rows = _val.rows || 3;
+          const cols = _val.cols || 3;
+          chain.insertTable({ rows, cols, withHeaderRow: true }).run();
+        } else {
+          chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+        }
         break;
       case 'addRowAfter':
         chain.addRowAfter().run();
@@ -618,6 +680,45 @@ export class MarkonEditor {
         break;
       case 'insertCodeBlock':
         chain.toggleCodeBlock().run();
+        break;
+      case 'insertVideo': {
+        if (_val && typeof _val === 'string') {
+          this.tiptap.chain().focus().setVideo({ src: _val.trim() }).run();
+          this.updateToolbarState();
+          break;
+        }
+        const { from, to } = this.tiptap.state.selection;
+        openMarkonModal({
+          title: 'Embed Video',
+          label: 'YouTube, Vimeo, or Video URL',
+          initialValue: 'https://',
+          placeholder: 'https://youtube.com/watch?v=...',
+          confirmText: 'Embed Video',
+          onConfirm: (url) => {
+            const cmdChain = this.tiptap.chain().focus();
+            if (from !== undefined && to !== undefined) {
+              cmdChain.setTextSelection({ from, to });
+            }
+            if (url && url.trim() && url !== 'https://') {
+              cmdChain.setVideo({ src: url.trim() }).run();
+            }
+            this.updateToolbarState();
+          },
+          onCancel: () => {
+            if (from !== undefined && to !== undefined) {
+              this.tiptap.chain().focus().setTextSelection({ from, to }).run();
+            } else {
+              this.tiptap.commands.focus();
+            }
+          },
+        });
+        break;
+      }
+      case 'insertDetails':
+        chain.insertDetails().run();
+        break;
+      case 'insertFile':
+        this.promptFileUpload();
         break;
       case 'insertMath': {
         if (_val && typeof _val === 'string') {
@@ -767,6 +868,73 @@ export class MarkonEditor {
     this.tiptap.commands.focus();
   }
 
+  public promptFileUpload(): void {
+    const fileInput = this.element.querySelector<HTMLInputElement>(
+      '.editor-generic-file-input'
+    );
+    fileInput?.click();
+  }
+
+  public async handleUploadedFile(file: File): Promise<void> {
+    const isImage = file.type.startsWith('image/');
+    if (this.options.onUploadFile) {
+      try {
+        const res = await this.options.onUploadFile(file);
+        const url = typeof res === 'string' ? res : res.url;
+        const name = typeof res === 'object' && res.name ? res.name : file.name;
+        const size =
+          typeof res === 'object' && res.size
+            ? typeof res.size === 'number'
+              ? formatFileSize(res.size)
+              : res.size
+            : formatFileSize(file.size);
+
+        if (isImage) {
+          this.tiptap.chain().focus().setImage({ src: url }).run();
+        } else {
+          this.tiptap
+            .chain()
+            .focus()
+            .insertFileAttachment({
+              src: url,
+              name,
+              size,
+              type: file.type || 'file',
+            })
+            .run();
+        }
+        this.updateToolbarState();
+        return;
+      } catch (err) {
+        console.error('File upload failed', err);
+      }
+    }
+
+    // Fallback to Base64 FileReader
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        if (isImage) {
+          this.tiptap.chain().focus().setImage({ src: dataUrl }).run();
+        } else {
+          this.tiptap
+            .chain()
+            .focus()
+            .insertFileAttachment({
+              src: dataUrl,
+              name: file.name,
+              size: formatFileSize(file.size),
+              type: file.type || 'file',
+            })
+            .run();
+        }
+        this.updateToolbarState();
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   public destroy(): void {
     closeAllPopovers();
     this.fontFamilyMenu?.destroy();
@@ -774,6 +942,7 @@ export class MarkonEditor {
     this.highlightMenu?.destroy();
     this.textColorMenu?.destroy();
     this.typographyMenu?.destroy();
+    this.tableMenu?.destroy();
     this.dragHandle?.destroy();
     this.tiptap.destroy();
   }
