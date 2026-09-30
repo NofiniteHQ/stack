@@ -131,6 +131,8 @@ describe('@nofinite/markon', () => {
       expect(editor.textColorMenu).toBeDefined();
       expect(editor.highlightMenu).toBeDefined();
       expect(editor.dragHandle).toBeDefined();
+      expect(container.querySelector('.markon-drag-handle')).toBeTruthy();
+      expect(container.querySelector('.markon-drop-indicator')).toBeTruthy();
 
       const trigger = container.querySelector('.editor-typography-trigger');
       expect(trigger).toBeTruthy();

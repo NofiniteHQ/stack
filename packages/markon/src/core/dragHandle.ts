@@ -16,16 +16,25 @@ export class MarkonDragHandle {
   private editor: Editor;
   private container: HTMLElement;
   private handleEl: HTMLElement;
+  private dropLineEl: HTMLElement;
   private currentBlock: HTMLElement | null = null;
   private hideTimeout: any = null;
   private isDragging = false;
+  private draggedPos: number | null = null;
+  private dropTargetPos: number | null = null;
+  private cleanupListeners: (() => void) | null = null;
 
   constructor(options: MarkonDragHandleOptions) {
     this.editor = editorWithView(options.editor);
     this.container = options.container;
     this.container.style.position = 'relative';
+
     this.handleEl = this.createHandleElement();
+    this.dropLineEl = this.createDropLineElement();
+
     this.container.appendChild(this.handleEl);
+    this.container.appendChild(this.dropLineEl);
+
     this.attachEvents();
   }
 
@@ -48,6 +57,15 @@ export class MarkonDragHandle {
       </svg>
     `;
     return handle;
+  }
+
+  private createDropLineElement(): HTMLElement {
+    const line = document.createElement('div');
+    line.className =
+      'markon-drop-indicator bg-primary rounded-full transition-all pointer-events-none shadow-sm';
+    line.style.cssText =
+      'position: absolute; left: 24px; right: 12px; height: 2px; display: none; z-index: 30; transform: translateY(-50%);';
+    return line;
   }
 
   private attachEvents(): void {
@@ -83,18 +101,21 @@ export class MarkonDragHandle {
     editorDom.addEventListener('mousemove', onMouseMove);
     editorDom.addEventListener('mouseleave', onMouseLeave);
 
-    this.handleEl.addEventListener('mouseenter', () => {
+    const onHandleMouseEnter = () => {
       this.cancelHide();
       this.handleEl.style.opacity = '1';
       this.handleEl.style.pointerEvents = 'auto';
-    });
+    };
 
-    this.handleEl.addEventListener('mouseleave', () => {
+    const onHandleMouseLeave = () => {
       this.scheduleHide();
-    });
+    };
+
+    this.handleEl.addEventListener('mouseenter', onHandleMouseEnter);
+    this.handleEl.addEventListener('mouseleave', onHandleMouseLeave);
 
     // Handle Click: Select Node
-    this.handleEl.addEventListener('click', (e) => {
+    const onHandleClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       if (!this.currentBlock) return;
@@ -110,40 +131,167 @@ export class MarkonDragHandle {
           // ignore selection errors if position changed
         }
       }
-    });
+    };
+    this.handleEl.addEventListener('click', onHandleClick);
 
     // Handle Dragstart
-    this.handleEl.addEventListener('dragstart', (e) => {
+    const onDragStart = (e: DragEvent) => {
       if (!this.currentBlock) return;
+      const pos = this.findBlockPos(this.currentBlock);
+      if (typeof pos !== 'number') return;
+
+      this.draggedPos = pos;
       this.isDragging = true;
 
-      const pos = this.findBlockPos(this.currentBlock);
-      if (typeof pos === 'number') {
-        const { state, dispatch } = this.editor.view;
-        try {
-          const selection = NodeSelection.create(state.doc, pos);
-          dispatch(state.tr.setSelection(selection));
+      const { state, dispatch } = this.editor.view;
+      try {
+        const selection = NodeSelection.create(state.doc, pos);
+        dispatch(state.tr.setSelection(selection));
 
-          if (e.dataTransfer) {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.currentBlock.outerHTML);
-            e.dataTransfer.setData('text/plain', this.currentBlock.innerText);
-          }
-        } catch {
-          // ignore
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('application/x-markon-block', String(pos));
+          e.dataTransfer.setData('text/html', this.currentBlock.outerHTML);
+          e.dataTransfer.setData('text/plain', this.currentBlock.innerText);
         }
+      } catch {
+        // ignore
       }
 
       this.currentBlock.classList.add('opacity-40');
-    });
+    };
+    this.handleEl.addEventListener('dragstart', onDragStart);
 
-    this.handleEl.addEventListener('dragend', () => {
-      this.isDragging = false;
-      if (this.currentBlock) {
-        this.currentBlock.classList.remove('opacity-40');
+    const onDragEnd = () => {
+      this.cleanupDrag();
+    };
+    this.handleEl.addEventListener('dragend', onDragEnd);
+
+    // Dragover & Drop handlers on editor container
+    const onDragOver = (e: DragEvent) => {
+      if (!this.isDragging || this.draggedPos === null) return;
+      e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
       }
-      this.scheduleHide();
-    });
+
+      const coords = { left: e.clientX, top: e.clientY };
+      const posAtCoords = this.editor.view.posAtCoords(coords);
+      if (!posAtCoords) return;
+
+      const resolved = this.editor.view.state.doc.resolve(posAtCoords.pos);
+      if (resolved.depth === 0) return;
+
+      const targetBlockPos = resolved.before(1);
+      const targetNode = this.editor.view.state.doc.nodeAt(targetBlockPos);
+      if (!targetNode) return;
+
+      const domNode = this.editor.view.nodeDOM(targetBlockPos);
+      const domEl =
+        domNode instanceof HTMLElement
+          ? domNode
+          : (domNode?.parentElement as HTMLElement | null);
+      if (!domEl) return;
+
+      const rect = domEl.getBoundingClientRect();
+      const containerRect = this.container.getBoundingClientRect();
+      const isAfter = e.clientY > rect.top + rect.height / 2;
+
+      const insertPos = isAfter
+        ? targetBlockPos + targetNode.nodeSize
+        : targetBlockPos;
+      this.dropTargetPos = insertPos;
+
+      const lineTop =
+        (isAfter ? rect.bottom : rect.top) -
+        containerRect.top +
+        this.container.scrollTop;
+      this.dropLineEl.style.top = `${lineTop}px`;
+      this.dropLineEl.style.display = 'block';
+    };
+
+    const onDragLeave = (e: DragEvent) => {
+      const related = e.relatedTarget as HTMLElement;
+      if (related && this.container.contains(related)) return;
+      this.dropLineEl.style.display = 'none';
+      this.dropTargetPos = null;
+    };
+
+    const onDrop = (e: DragEvent) => {
+      if (
+        !this.isDragging ||
+        this.draggedPos === null ||
+        this.dropTargetPos === null
+      ) {
+        this.cleanupDrag();
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const fromPos = this.draggedPos;
+      const toPos = this.dropTargetPos;
+
+      const doc = this.editor.view.state.doc;
+      const sourceNode = doc.nodeAt(fromPos);
+
+      if (sourceNode && fromPos !== toPos) {
+        // Only move if not dropping directly before or after itself
+        if (toPos !== fromPos && toPos !== fromPos + sourceNode.nodeSize) {
+          const tr = this.editor.view.state.tr;
+
+          // Delete original block
+          tr.delete(fromPos, fromPos + sourceNode.nodeSize);
+
+          // Calculate mapped destination position
+          const mappedToPos = tr.mapping.map(toPos);
+
+          // Insert block at target destination
+          tr.insert(mappedToPos, sourceNode);
+
+          try {
+            const newSelection = NodeSelection.create(tr.doc, mappedToPos);
+            tr.setSelection(newSelection);
+          } catch {
+            // fallback
+          }
+
+          this.editor.view.dispatch(tr);
+          this.editor.view.focus();
+        }
+      }
+
+      this.cleanupDrag();
+    };
+
+    this.container.addEventListener('dragover', onDragOver);
+    this.container.addEventListener('dragleave', onDragLeave);
+    this.container.addEventListener('drop', onDrop);
+
+    this.cleanupListeners = () => {
+      editorDom.removeEventListener('mousemove', onMouseMove);
+      editorDom.removeEventListener('mouseleave', onMouseLeave);
+      this.handleEl.removeEventListener('mouseenter', onHandleMouseEnter);
+      this.handleEl.removeEventListener('mouseleave', onHandleMouseLeave);
+      this.handleEl.removeEventListener('click', onHandleClick);
+      this.handleEl.removeEventListener('dragstart', onDragStart);
+      this.handleEl.removeEventListener('dragend', onDragEnd);
+      this.container.removeEventListener('dragover', onDragOver);
+      this.container.removeEventListener('dragleave', onDragLeave);
+      this.container.removeEventListener('drop', onDrop);
+    };
+  }
+
+  private cleanupDrag(): void {
+    this.isDragging = false;
+    this.draggedPos = null;
+    this.dropTargetPos = null;
+    this.dropLineEl.style.display = 'none';
+    if (this.currentBlock) {
+      this.currentBlock.classList.remove('opacity-40');
+    }
+    this.scheduleHide();
   }
 
   private findTopLevelBlock(el: HTMLElement): HTMLElement | null {
@@ -164,7 +312,7 @@ export class MarkonDragHandle {
     try {
       const pos = this.editor.view.posAtDOM(block, 0);
       const resolved = this.editor.view.state.doc.resolve(pos);
-      return resolved.before(1);
+      return resolved.depth > 0 ? resolved.before(1) : 0;
     } catch {
       return null;
     }
@@ -209,7 +357,12 @@ export class MarkonDragHandle {
 
   public destroy(): void {
     this.cancelHide();
+    if (this.cleanupListeners) {
+      this.cleanupListeners();
+      this.cleanupListeners = null;
+    }
     this.handleEl.remove();
+    this.dropLineEl.remove();
   }
 }
 
