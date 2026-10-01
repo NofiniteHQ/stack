@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   calculateBarLayout,
   type DataPoint,
   defaultMargin,
-  type NormalizedDataPoint,
 } from '../core/math';
 import { formatMetricNumber } from '../core/axis';
+import { useChartTooltip } from './useChartTooltip';
+import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
 export interface BarChartProps<T = DataPoint> {
@@ -19,8 +20,10 @@ export interface BarChartProps<T = DataPoint> {
   className?: string;
   showGrid?: boolean;
   showAxes?: boolean;
+  showTooltip?: boolean;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
+  tooltipFormatter?: TooltipFormatter;
 }
 
 export function BarChart<T = DataPoint>({
@@ -34,10 +37,24 @@ export function BarChart<T = DataPoint>({
   className,
   showGrid = true,
   showAxes = true,
+  showTooltip = true,
   xTickFormat,
   yTickFormat,
+  tooltipFormatter,
 }: BarChartProps<T>) {
-  const [activeBar, setActiveBar] = useState<NormalizedDataPoint | null>(null);
+  const {
+    isOpen,
+    activePoint,
+    tooltipHtml,
+    tooltipRef,
+    containerRef,
+    show,
+    hide,
+  } = useChartTooltip({
+    enabled: showTooltip,
+    formatter: tooltipFormatter,
+    defaultColor: color,
+  });
 
   const { bars, yScale } = useMemo(() => {
     return calculateBarLayout(
@@ -52,6 +69,7 @@ export function BarChart<T = DataPoint>({
 
   return (
     <div
+      ref={containerRef}
       className={clsx(
         'chart-container nui-chart-container relative w-full select-none font-sans',
         className
@@ -110,10 +128,12 @@ export function BarChart<T = DataPoint>({
               height={b.height}
               rx={4}
               fill={b.data.color || color}
-              opacity={activeBar && activeBar !== b.data ? 0.6 : 1}
+              opacity={activePoint && activePoint !== b.data ? 0.6 : 1}
               className="chart-bar transition-all duration-150 cursor-pointer hover:opacity-85"
-              onMouseEnter={() => setActiveBar(b.data)}
-              onMouseLeave={() => setActiveBar(null)}
+              onPointerEnter={(e) => {
+                show(b.data, e.currentTarget);
+              }}
+              onPointerLeave={hide}
             />
           ))}
 
@@ -139,6 +159,23 @@ export function BarChart<T = DataPoint>({
             })}
         </g>
       </svg>
+
+      {showTooltip && (
+        <div
+          ref={tooltipRef}
+          className="chart-tooltip nui-chart-tooltip"
+          role="tooltip"
+          style={{
+            opacity: isOpen ? 1 : 0,
+            pointerEvents: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            transition: 'opacity 0.15s ease',
+          }}
+          dangerouslySetInnerHTML={{ __html: tooltipHtml }}
+        />
+      )}
     </div>
   );
 }

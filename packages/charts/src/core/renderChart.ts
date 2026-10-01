@@ -8,6 +8,7 @@ import {
 } from './math';
 import { generateAxisSvg } from './axis';
 import { scaleLinear } from 'd3-scale';
+import type { TooltipFormatter } from './tooltip';
 
 export type ChartVariant =
   | 'area'
@@ -27,10 +28,13 @@ export interface ChartOptions {
   donutCutout?: number;
   showGrid?: boolean;
   showAxes?: boolean;
+  showTooltip?: boolean;
+  showCrosshair?: boolean;
   xAccessor?: (d: any) => number | Date | string;
   yAccessor?: (d: any) => number;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
+  tooltipFormatter?: TooltipFormatter;
 }
 
 let gradientCounter = 0;
@@ -44,6 +48,8 @@ export function renderChart(options: ChartOptions): string {
   const color = options.color || 'var(--chart-1, var(--color-primary))';
   const showGrid = options.showGrid !== false;
   const showAxes = options.showAxes !== false;
+  const showTooltip = options.showTooltip !== false;
+  const showCrosshair = options.showCrosshair !== false;
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
@@ -89,6 +95,13 @@ export function renderChart(options: ChartOptions): string {
         `
           )
           .join('')}
+        ${
+          showCrosshair
+            ? `<line class="chart-crosshair" x1="0" y1="0" x2="0" y2="${innerHeight}" stroke="var(--border-strong, var(--border-default))" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />`
+            : ''
+        }
+        <circle class="chart-active-dot" cx="0" cy="0" r="5.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2.5" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />
+        <rect class="chart-scrub-overlay" x="0" y="0" width="${innerWidth}" height="${innerHeight}" fill="transparent" pointer-events="all" style="cursor: crosshair;" />
       </g>
     `;
   } else if (variant === 'bar') {
@@ -236,6 +249,11 @@ export function renderChart(options: ChartOptions): string {
         </defs>
         ${contentSvg}
       </svg>
+      ${
+        showTooltip
+          ? `<div class="chart-tooltip nui-chart-tooltip" role="tooltip" style="opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; transition: opacity 0.15s ease;"></div>`
+          : ''
+      }
     </div>
   `.trim();
 }

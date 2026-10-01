@@ -1,11 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { scaleLinear } from 'd3-scale';
-import {
-  defaultMargin,
-  normalizeData,
-  type NormalizedDataPoint,
-} from '../core/math';
+import { defaultMargin, normalizeData } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
+import { useChartTooltip } from './useChartTooltip';
+import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
 export interface ScatterChartProps<T = any> {
@@ -19,8 +17,10 @@ export interface ScatterChartProps<T = any> {
   className?: string;
   showGrid?: boolean;
   showAxes?: boolean;
+  showTooltip?: boolean;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
+  tooltipFormatter?: TooltipFormatter;
 }
 
 export function ScatterChart<T = any>({
@@ -34,12 +34,24 @@ export function ScatterChart<T = any>({
   className,
   showGrid = true,
   showAxes = true,
+  showTooltip = true,
   xTickFormat,
   yTickFormat,
+  tooltipFormatter,
 }: ScatterChartProps<T>) {
-  const [activePoint, setActivePoint] = useState<NormalizedDataPoint | null>(
-    null
-  );
+  const {
+    isOpen,
+    activePoint,
+    tooltipHtml,
+    tooltipRef,
+    containerRef,
+    show,
+    hide,
+  } = useChartTooltip({
+    enabled: showTooltip,
+    formatter: tooltipFormatter,
+    defaultColor: color,
+  });
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
@@ -68,6 +80,7 @@ export function ScatterChart<T = any>({
 
   return (
     <div
+      ref={containerRef}
       className={clsx(
         'chart-container nui-chart-container relative w-full select-none font-sans',
         className
@@ -150,12 +163,31 @@ export function ScatterChart<T = any>({
               stroke="var(--bg-surface)"
               strokeWidth={2}
               className="chart-point transition-all duration-150 cursor-pointer hover:scale-125"
-              onMouseEnter={() => setActivePoint(d)}
-              onMouseLeave={() => setActivePoint(null)}
+              onPointerEnter={(e) => {
+                show(d, e.currentTarget);
+              }}
+              onPointerLeave={hide}
             />
           ))}
         </g>
       </svg>
+
+      {showTooltip && (
+        <div
+          ref={tooltipRef}
+          className="chart-tooltip nui-chart-tooltip"
+          role="tooltip"
+          style={{
+            opacity: isOpen ? 1 : 0,
+            pointerEvents: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            transition: 'opacity 0.15s ease',
+          }}
+          dangerouslySetInnerHTML={{ __html: tooltipHtml }}
+        />
+      )}
     </div>
   );
 }

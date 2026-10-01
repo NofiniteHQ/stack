@@ -1,9 +1,7 @@
-import { useMemo, useState } from 'react';
-import {
-  calculatePieSegments,
-  type DataPoint,
-  type NormalizedDataPoint,
-} from '../core/math';
+import { useMemo } from 'react';
+import { calculatePieSegments, type DataPoint } from '../core/math';
+import { useChartTooltip } from './useChartTooltip';
+import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
 export interface PieChartProps<T = DataPoint> {
@@ -12,6 +10,8 @@ export interface PieChartProps<T = DataPoint> {
   height?: number;
   donutCutout?: number;
   className?: string;
+  showTooltip?: boolean;
+  tooltipFormatter?: TooltipFormatter;
   labelAccessor?: (d: T) => string;
   valueAccessor?: (d: T) => number;
 }
@@ -22,11 +22,23 @@ export function PieChart<T = DataPoint>({
   height = 300,
   donutCutout = 0,
   className,
+  showTooltip = true,
+  tooltipFormatter,
   labelAccessor,
   valueAccessor,
 }: PieChartProps<T>) {
-  const [activeSegment, setActiveSegment] =
-    useState<NormalizedDataPoint | null>(null);
+  const {
+    isOpen,
+    activePoint,
+    tooltipHtml,
+    tooltipRef,
+    containerRef,
+    show,
+    hide,
+  } = useChartTooltip({
+    enabled: showTooltip,
+    formatter: tooltipFormatter,
+  });
 
   const radius = Math.min(width, height) / 2 - 16;
 
@@ -42,6 +54,7 @@ export function PieChart<T = DataPoint>({
 
   return (
     <div
+      ref={containerRef}
       className={clsx(
         'chart-container nui-chart-container relative flex items-center justify-center select-none font-sans',
         className
@@ -64,14 +77,33 @@ export function PieChart<T = DataPoint>({
               }
               stroke="var(--bg-surface)"
               strokeWidth={2}
-              opacity={activeSegment && activeSegment !== s.data ? 0.6 : 1}
+              opacity={activePoint && activePoint !== s.data ? 0.6 : 1}
               className="chart-segment transition-all duration-150 cursor-pointer hover:scale-105"
-              onMouseEnter={() => setActiveSegment(s.data)}
-              onMouseLeave={() => setActiveSegment(null)}
+              onPointerEnter={(e) => {
+                show(s.data, e.currentTarget);
+              }}
+              onPointerLeave={hide}
             />
           ))}
         </g>
       </svg>
+
+      {showTooltip && (
+        <div
+          ref={tooltipRef}
+          className="chart-tooltip nui-chart-tooltip"
+          role="tooltip"
+          style={{
+            opacity: isOpen ? 1 : 0,
+            pointerEvents: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            transition: 'opacity 0.15s ease',
+          }}
+          dangerouslySetInnerHTML={{ __html: tooltipHtml }}
+        />
+      )}
     </div>
   );
 }

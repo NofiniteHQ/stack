@@ -1,11 +1,8 @@
-import { useMemo, useState } from 'react';
-import {
-  calculateAreaPath,
-  type DataPoint,
-  defaultMargin,
-  type NormalizedDataPoint,
-} from '../core/math';
+import { useMemo } from 'react';
+import { calculateAreaPath, type DataPoint, defaultMargin } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
+import { useChartTooltip } from './useChartTooltip';
+import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
 export interface LineChartProps<T = DataPoint> {
@@ -19,8 +16,11 @@ export interface LineChartProps<T = DataPoint> {
   className?: string;
   showGrid?: boolean;
   showAxes?: boolean;
+  showTooltip?: boolean;
+  showCrosshair?: boolean;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
+  tooltipFormatter?: TooltipFormatter;
 }
 
 export function LineChart<T = DataPoint>({
@@ -34,12 +34,25 @@ export function LineChart<T = DataPoint>({
   className,
   showGrid = true,
   showAxes = true,
+  showTooltip = true,
+  showCrosshair = true,
   xTickFormat,
   yTickFormat,
+  tooltipFormatter,
 }: LineChartProps<T>) {
-  const [activePoint, setActivePoint] = useState<NormalizedDataPoint | null>(
-    null
-  );
+  const {
+    isOpen,
+    activePoint,
+    tooltipHtml,
+    tooltipRef,
+    containerRef,
+    show,
+    hide,
+  } = useChartTooltip({
+    enabled: showTooltip,
+    formatter: tooltipFormatter,
+    defaultColor: color,
+  });
 
   const { linePath, xScale, yScale, points } = useMemo(() => {
     return calculateAreaPath(
@@ -53,8 +66,45 @@ export function LineChart<T = DataPoint>({
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
 
+  const activePointCoord = useMemo(() => {
+    if (!activePoint) return null;
+    return points.find((p) => p.data === activePoint) || null;
+  }, [activePoint, points]);
+
+  const handlePointerMove = (e: React.PointerEvent<SVGRectElement>) => {
+    if (!points || points.length === 0 || (!showTooltip && !showCrosshair))
+      return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const localX = (e.clientX - rect.left) * (innerWidth / rect.width);
+
+    let closest = points[0];
+    let minDistance = Infinity;
+    for (const p of points) {
+      const dist = Math.abs(p.x - localX);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closest = p;
+      }
+    }
+
+    if (closest) {
+      const virtualRef = {
+        getBoundingClientRect: () => {
+          const cRect = containerRef.current?.getBoundingClientRect() || rect;
+          const scaleX = cRect.width / width;
+          const scaleY = cRect.height / height;
+          const px = cRect.left + (margin.left + closest.x) * scaleX;
+          const py = cRect.top + (margin.top + closest.y) * scaleY;
+          return new DOMRect(px, py, 0, 0);
+        },
+      };
+      show(closest.data, virtualRef);
+    }
+  };
+
   return (
     <div
+      ref={containerRef}
       className={clsx(
         'chart-container nui-chart-container relative w-full select-none font-sans',
         className
@@ -148,12 +198,65 @@ export function LineChart<T = DataPoint>({
               stroke="var(--bg-surface)"
               strokeWidth={2}
               className="chart-point transition-all duration-150 cursor-pointer"
-              onMouseEnter={() => setActivePoint(p.data)}
-              onMouseLeave={() => setActivePoint(null)}
             />
           ))}
+
+          {showCrosshair && activePointCoord && (
+            <line
+              x1={activePointCoord.x}
+              y1={0}
+              x2={activePointCoord.x}
+              y2={innerHeight}
+              className="chart-crosshair pointer-events-none"
+              stroke="var(--border-strong, var(--border-default))"
+              strokeWidth={1}
+              strokeDasharray="3,3"
+              opacity={0.7}
+            />
+          )}
+
+          {activePointCoord && (
+            <circle
+              cx={activePointCoord.x}
+              cy={activePointCoord.y}
+              r={6}
+              fill={color}
+              stroke="var(--bg-surface)"
+              strokeWidth={2.5}
+              className="chart-point pointer-events-none transition-all duration-75"
+            />
+          )}
+
+          <rect
+            x={0}
+            y={0}
+            width={innerWidth}
+            height={innerHeight}
+            fill="transparent"
+            style={{ cursor: 'crosshair' }}
+            pointerEvents="all"
+            onPointerMove={handlePointerMove}
+            onPointerLeave={hide}
+          />
         </g>
       </svg>
+
+      {showTooltip && (
+        <div
+          ref={tooltipRef}
+          className="chart-tooltip nui-chart-tooltip"
+          role="tooltip"
+          style={{
+            opacity: isOpen ? 1 : 0,
+            pointerEvents: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            transition: 'opacity 0.15s ease',
+          }}
+          dangerouslySetInnerHTML={{ __html: tooltipHtml }}
+        />
+      )}
     </div>
   );
 }
