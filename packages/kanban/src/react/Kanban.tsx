@@ -3,6 +3,11 @@ import {
   draggable,
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import {
+  attachClosestEdge,
+  extractClosestEdge,
+  type Edge,
+} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import clsx from 'clsx';
 import {
   type KanbanColumn as CoreColumn,
@@ -42,7 +47,7 @@ interface CardProps {
 function KanbanCardItem({ item, columnId, index, onCardMove }: CardProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isOver, setIsOver] = useState(false);
+  const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -62,19 +67,39 @@ function KanbanCardItem({ item, columnId, index, onCardMove }: CardProps) {
 
     const cleanupDrop = dropTargetForElements({
       element: el,
-      getData: () => ({ type: 'card', cardId: item.id, columnId, index }),
       canDrop: ({ source }) => source.data.type === 'card',
-      onDragEnter: () => setIsOver(true),
-      onDragLeave: () => setIsOver(false),
-      onDrop: ({ source }) => {
-        setIsOver(false);
-        if (source.data.type === 'card') {
+      getData: ({ input, element }) => {
+        const data = { type: 'card', cardId: item.id, columnId, index };
+        return attachClosestEdge(data, {
+          input,
+          element,
+          allowedEdges: ['top', 'bottom'],
+        });
+      },
+      onDragEnter: (args) => {
+        setClosestEdge(extractClosestEdge(args.self.data));
+      },
+      onDrag: (args) => {
+        setClosestEdge(extractClosestEdge(args.self.data));
+      },
+      onDragLeave: () => {
+        setClosestEdge(null);
+      },
+      onDrop: ({ source, location, self }) => {
+        setClosestEdge(null);
+        // Innermost drop target ensures no duplicate or clobbered updates
+        if (
+          location.current.dropTargets[0]?.element === el &&
+          source.data.type === 'card'
+        ) {
+          const edge = extractClosestEdge(self.data);
           onCardMove({
             cardId: source.data.cardId as string,
             sourceColumnId: source.data.columnId as string,
             targetColumnId: columnId,
             sourceIndex: source.data.index as number,
             targetIndex: index,
+            edge,
           });
         }
       },
@@ -90,13 +115,17 @@ function KanbanCardItem({ item, columnId, index, onCardMove }: CardProps) {
     <div
       ref={ref}
       className={clsx(
-        'p-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] shadow-xs transition-all cursor-grab active:cursor-grabbing select-none',
-        isDragging &&
-          'opacity-40 scale-95 shadow-lg border-[var(--color-primary)]',
-        isOver && 'border-t-2 border-t-[var(--color-primary)] pt-4'
+        'kanban-card relative p-3 rounded-xl border border-default bg-surface shadow-xs transition-all cursor-grab active:cursor-grabbing select-none',
+        isDragging && 'opacity-40 scale-95 shadow-lg border-primary'
       )}
     >
+      {closestEdge === 'top' && (
+        <div className="absolute -top-1.5 left-1 right-1 h-1 bg-primary rounded-full z-20 pointer-events-none" />
+      )}
       {item.content}
+      {closestEdge === 'bottom' && (
+        <div className="absolute -bottom-1.5 left-1 right-1 h-1 bg-primary rounded-full z-20 pointer-events-none" />
+      )}
     </div>
   );
 }
@@ -118,12 +147,15 @@ function KanbanColumnComponent({
 }: ColumnComponentProps) {
   const colRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const cardListRef = useRef<HTMLDivElement | null>(null);
   const [isColDragging, setIsColDragging] = useState(false);
   const [isColOver, setIsColOver] = useState(false);
+  const [closestColEdge, setClosestColEdge] = useState<Edge | null>(null);
 
   useEffect(() => {
     const colEl = colRef.current;
     const headerEl = headerRef.current;
+    const cardListEl = cardListRef.current;
     if (!colEl || !headerEl) return;
 
     // Header acts as drag handle for column
@@ -138,36 +170,68 @@ function KanbanColumnComponent({
       onDrop: () => setIsColDragging(false),
     });
 
-    // Entire column body acts as drop target
+    // Entire column body acts as drop target with hitbox
     const cleanupDrop = dropTargetForElements({
       element: colEl,
-      getData: () => ({
-        type: 'column',
-        columnId: column.id,
-        columnIndex: index,
-      }),
-      onDragEnter: () => setIsColOver(true),
-      onDragLeave: () => setIsColOver(false),
-      onDrop: ({ source }) => {
+      getData: ({ input, element }) => {
+        const data = {
+          type: 'column',
+          columnId: column.id,
+          columnIndex: index,
+        };
+        return attachClosestEdge(data, {
+          input,
+          element,
+          allowedEdges: ['left', 'right'],
+        });
+      },
+      onDragEnter: (args) => {
+        if (args.source.data.type === 'column') {
+          setClosestColEdge(extractClosestEdge(args.self.data));
+        } else if (args.source.data.type === 'card') {
+          setIsColOver(true);
+        }
+      },
+      onDrag: (args) => {
+        if (args.source.data.type === 'column') {
+          setClosestColEdge(extractClosestEdge(args.self.data));
+        }
+      },
+      onDragLeave: () => {
         setIsColOver(false);
+        setClosestColEdge(null);
+      },
+      onDrop: ({ source, location, self }) => {
+        setIsColOver(false);
+        setClosestColEdge(null);
+        const innerTarget = location.current.dropTargets[0];
+
         if (source.data.type === 'column') {
           const sourceIdx = source.data.columnIndex as number;
-          if (sourceIdx !== index) {
+          const edge = extractClosestEdge(self.data);
+          if (sourceIdx !== index || edge != null) {
             onColumnMove({
               columnId: source.data.columnId as string,
               sourceIndex: sourceIdx,
               targetIndex: index,
+              edge,
             });
           }
         } else if (source.data.type === 'card') {
-          // If dropped on column container, append to end
-          onCardMove({
-            cardId: source.data.cardId as string,
-            sourceColumnId: source.data.columnId as string,
-            targetColumnId: column.id,
-            sourceIndex: source.data.index as number,
-            targetIndex: column.items.length,
-          });
+          // If dropped on column container or empty card list, append to end
+          if (
+            innerTarget?.element === colEl ||
+            innerTarget?.data.type === 'column' ||
+            innerTarget?.element === cardListEl
+          ) {
+            onCardMove({
+              cardId: source.data.cardId as string,
+              sourceColumnId: source.data.columnId as string,
+              targetColumnId: column.id,
+              sourceIndex: source.data.index as number,
+              targetIndex: column.items.length,
+            });
+          }
         }
       },
     });
@@ -182,44 +246,60 @@ function KanbanColumnComponent({
     <div
       ref={colRef}
       className={clsx(
-        'w-80 flex-shrink-0 flex flex-col rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] shadow-xs max-h-[85vh] transition-all',
-        isColDragging && 'opacity-40 scale-95 border-[var(--color-primary)]',
-        isColOver && 'border-2 border-dashed border-[var(--color-primary)]',
+        'kanban-column relative w-80 flex-shrink-0 flex flex-col rounded-2xl border border-default bg-surface shadow-xs max-h-[85vh] transition-all',
+        isColDragging && 'opacity-40 scale-95 border-primary',
+        isColOver && 'border-primary/40',
         columnClassName
       )}
     >
+      {closestColEdge === 'left' && (
+        <div className="absolute -left-2 top-0 bottom-0 w-1 bg-primary rounded-full z-20 pointer-events-none" />
+      )}
+      {closestColEdge === 'right' && (
+        <div className="absolute -right-2 top-0 bottom-0 w-1 bg-primary rounded-full z-20 pointer-events-none" />
+      )}
+
       <div
         ref={headerRef}
-        className="p-3 font-semibold text-sm flex items-center justify-between border-b border-[var(--border-default)] cursor-grab active:cursor-grabbing select-none"
+        className="p-3 font-semibold text-sm flex items-center justify-between border-b border-default cursor-grab active:cursor-grabbing select-none"
       >
         {column.header ? (
           column.header
         ) : (
           <>
-            <span className="text-[var(--color-primary)] truncate">
+            <span className="text-primary truncate font-bold">
               {column.title}
             </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-muted)] text-[var(--text-muted)] font-mono">
+            <span className="badge badge-subtle px-1.5 py-0.5 rounded-full text-xs font-mono font-semibold text-muted bg-surface border border-default">
               {column.items.length}
             </span>
           </>
         )}
       </div>
 
-      <div className="p-3 flex flex-col gap-2 overflow-y-auto flex-1 min-h-[120px]">
-        {column.items.map((item, itemIdx) => (
-          <KanbanCardItem
-            key={item.id}
-            item={item}
-            columnId={column.id}
-            index={itemIdx}
-            onCardMove={onCardMove}
-          />
-        ))}
+      <div
+        ref={cardListRef}
+        className="kanban-card-list p-3 flex flex-col gap-2.5 overflow-y-auto flex-1 min-h-[140px]"
+      >
+        {column.items.length === 0 ? (
+          <div className="h-24 border border-dashed border-default/60 rounded-xl flex items-center justify-center text-xs text-muted/60 select-none pointer-events-none">
+            No cards
+          </div>
+        ) : (
+          column.items.map((item, itemIdx) => (
+            <KanbanCardItem
+              key={item.id}
+              item={item}
+              columnId={column.id}
+              index={itemIdx}
+              onCardMove={onCardMove}
+            />
+          ))
+        )}
       </div>
 
       {column.footer && (
-        <div className="p-2 border-t border-[var(--border-default)] bg-[var(--bg-subtle)] rounded-b-xl">
+        <div className="p-2 border-t border-default bg-subtle rounded-b-2xl">
           {column.footer}
         </div>
       )}
@@ -241,27 +321,31 @@ export function Kanban({
   }, [columns]);
 
   const handleCardMove = (event: CardMoveEvent) => {
-    const updated = moveCardBetweenColumns(
-      data as unknown as CoreColumn[],
-      event
-    ) as unknown as KanbanColumnProps[];
-    setData(updated);
-    onChange?.(updated);
+    setData((prev) => {
+      const updated = moveCardBetweenColumns(
+        prev as unknown as CoreColumn[],
+        event
+      ) as unknown as KanbanColumnProps[];
+      onChange?.(updated);
+      return updated;
+    });
   };
 
   const handleColumnMove = (event: ColumnMoveEvent) => {
-    const updated = reorderColumns(
-      data as unknown as CoreColumn[],
-      event
-    ) as unknown as KanbanColumnProps[];
-    setData(updated);
-    onChange?.(updated);
+    setData((prev) => {
+      const updated = reorderColumns(
+        prev as unknown as CoreColumn[],
+        event
+      ) as unknown as KanbanColumnProps[];
+      onChange?.(updated);
+      return updated;
+    });
   };
 
   return (
     <div
       className={clsx(
-        'flex gap-4 overflow-x-auto p-4 items-start select-none font-sans min-h-[400px]',
+        'kanban kanban-board flex gap-4 overflow-x-auto p-4 items-start select-none font-sans min-h-[400px]',
         className
       )}
       {...props}

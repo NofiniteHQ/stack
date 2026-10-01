@@ -52,18 +52,22 @@ export interface KanbanColumn {
   [key: string]: unknown;
 }
 
+export type Edge = 'top' | 'right' | 'bottom' | 'left';
+
 export interface CardMoveEvent {
   cardId: string;
   sourceColumnId: string;
   targetColumnId: string;
   sourceIndex: number;
   targetIndex: number;
+  edge?: Edge | null;
 }
 
 export interface ColumnMoveEvent {
   columnId: string;
   sourceIndex: number;
   targetIndex: number;
+  edge?: Edge | null;
 }
 
 export interface CardAddEvent {

@@ -1,4 +1,9 @@
-import type { KanbanColumn, CardMoveEvent, ColumnMoveEvent } from './types';
+import type {
+  KanbanColumn,
+  CardMoveEvent,
+  ColumnMoveEvent,
+  Edge,
+} from './types';
 
 /**
  * Pure immutability helper to reorder an item within a single array
@@ -15,13 +20,59 @@ export function reorderArray<T>(
 }
 
 /**
- * Pure immutability helper to move a card within or across columns
+ * Reorders a list respecting directional edge hitboxes (top/bottom or left/right).
+ * Implements the standard Pragmatic Drag-and-Drop algorithm for list positioning.
+ */
+export function reorderWithEdge<T>({
+  list,
+  startIndex,
+  indexOfTarget,
+  closestEdgeOfTarget,
+  axis,
+}: {
+  list: T[];
+  startIndex: number;
+  indexOfTarget: number;
+  closestEdgeOfTarget: Edge | null;
+  axis: 'vertical' | 'horizontal';
+}): T[] {
+  if (closestEdgeOfTarget == null) {
+    return reorderArray(list, startIndex, indexOfTarget);
+  }
+
+  const isAfter =
+    axis === 'vertical'
+      ? closestEdgeOfTarget === 'bottom'
+      : closestEdgeOfTarget === 'right';
+
+  let destinationIndex = isAfter ? indexOfTarget + 1 : indexOfTarget;
+
+  // Moving downwards shifts indices when the source item is removed first
+  if (startIndex < destinationIndex) {
+    destinationIndex -= 1;
+  }
+
+  if (destinationIndex === startIndex) {
+    return list;
+  }
+
+  return reorderArray(list, startIndex, destinationIndex);
+}
+
+/**
+ * Pure immutability helper to move a card within or across columns, respecting hitboxes.
  */
 export function moveCardBetweenColumns(
   columns: KanbanColumn[],
   event: CardMoveEvent
 ): KanbanColumn[] {
-  const { sourceColumnId, targetColumnId, sourceIndex, targetIndex } = event;
+  const {
+    sourceColumnId,
+    targetColumnId,
+    sourceIndex,
+    targetIndex,
+    edge = null,
+  } = event;
 
   const sourceColIndex = columns.findIndex((c) => c.id === sourceColumnId);
   const targetColIndex = columns.findIndex((c) => c.id === targetColumnId);
@@ -35,7 +86,13 @@ export function moveCardBetweenColumns(
 
   // Moving within the same column
   if (sourceColumnId === targetColumnId) {
-    const newItems = reorderArray(sourceCol.items, sourceIndex, targetIndex);
+    const newItems = reorderWithEdge({
+      list: sourceCol.items,
+      startIndex: sourceIndex,
+      indexOfTarget: targetIndex,
+      closestEdgeOfTarget: edge,
+      axis: 'vertical',
+    });
     const newColumns = Array.from(columns);
     newColumns[sourceColIndex] = { ...sourceCol, items: newItems };
     return newColumns;
@@ -48,9 +105,16 @@ export function moveCardBetweenColumns(
   const [removedCard] = sourceItems.splice(sourceIndex, 1);
   if (!removedCard) return columns;
 
+  let insertIndex = targetIndex;
+  if (edge === 'bottom') {
+    insertIndex = targetIndex + 1;
+  } else if (edge === 'top') {
+    insertIndex = targetIndex;
+  }
+
   const clampedTargetIndex = Math.max(
     0,
-    Math.min(targetIndex, targetItems.length)
+    Math.min(insertIndex, targetItems.length)
   );
   targetItems.splice(clampedTargetIndex, 0, removedCard);
 
@@ -62,11 +126,19 @@ export function moveCardBetweenColumns(
 }
 
 /**
- * Pure immutability helper to reorder columns
+ * Pure immutability helper to reorder columns, respecting horizontal edge hitboxes.
  */
 export function reorderColumns(
   columns: KanbanColumn[],
   event: ColumnMoveEvent
 ): KanbanColumn[] {
-  return reorderArray(columns, event.sourceIndex, event.targetIndex);
+  const { sourceIndex, targetIndex, edge = null } = event;
+
+  return reorderWithEdge({
+    list: columns,
+    startIndex: sourceIndex,
+    indexOfTarget: targetIndex,
+    closestEdgeOfTarget: edge,
+    axis: 'horizontal',
+  });
 }

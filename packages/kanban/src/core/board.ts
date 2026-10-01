@@ -1,8 +1,11 @@
 import {
   draggable,
   dropTargetForElements,
-  monitorForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import {
+  attachClosestEdge,
+  extractClosestEdge,
+} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import type {
   KanbanColumn,
   KanbanItem,
@@ -266,29 +269,62 @@ export function bindCardDropTarget(
   index: number,
   onDrop?: (event: CardMoveEvent) => void
 ): () => void {
+  function clearIndicators() {
+    element.classList.remove(
+      'border-t-2',
+      'border-b-2',
+      'border-t-primary',
+      'border-b-primary'
+    );
+  }
+
   return dropTargetForElements({
     element,
-    getData: () => ({ type: 'card', cardId, columnId, index }),
     canDrop: ({ source }) => source.data.type === 'card',
-    onDragEnter: () => {
-      element.classList.add('border-t-2', 'border-t-primary');
+    getData: ({ input, element }) => {
+      const data = { type: 'card', cardId, columnId, index };
+      return attachClosestEdge(data, {
+        input,
+        element,
+        allowedEdges: ['top', 'bottom'],
+      });
+    },
+    onDragEnter: (args) => {
+      const edge = extractClosestEdge(args.self.data);
+      clearIndicators();
+      if (edge === 'top') {
+        element.classList.add('border-t-2', 'border-t-primary');
+      } else if (edge === 'bottom') {
+        element.classList.add('border-b-2', 'border-b-primary');
+      }
+    },
+    onDrag: (args) => {
+      const edge = extractClosestEdge(args.self.data);
+      clearIndicators();
+      if (edge === 'top') {
+        element.classList.add('border-t-2', 'border-t-primary');
+      } else if (edge === 'bottom') {
+        element.classList.add('border-b-2', 'border-b-primary');
+      }
     },
     onDragLeave: () => {
-      element.classList.remove('border-t-2', 'border-t-primary');
+      clearIndicators();
     },
-    onDrop: ({ source, location }) => {
-      element.classList.remove('border-t-2', 'border-t-primary');
-      // Verify this card is the innermost drop target to avoid duplicate bubbling triggers
+    onDrop: ({ source, location, self }) => {
+      clearIndicators();
+      // Ensure innermost target handles the drop
       if (
         location.current.dropTargets[0]?.element === element &&
         source.data.type === 'card'
       ) {
+        const edge = extractClosestEdge(self.data);
         onDrop?.({
           cardId: source.data.cardId as string,
           sourceColumnId: source.data.columnId as string,
           targetColumnId: columnId,
           sourceIndex: source.data.index as number,
           targetIndex: index,
+          edge,
         });
       }
     },
@@ -302,42 +338,82 @@ export function bindColumnDropTarget(
   onCardDrop?: (event: CardMoveEvent) => void,
   onColumnDrop?: (event: ColumnMoveEvent) => void
 ): () => void {
+  function clearColumnIndicators() {
+    element.classList.remove(
+      'border-l-2',
+      'border-r-2',
+      'border-l-primary',
+      'border-r-primary',
+      'border-primary/40'
+    );
+  }
+
   return dropTargetForElements({
     element,
-    getData: () => ({ type: 'column', columnId, columnIndex }),
-    onDragEnter: () => {
-      element.classList.add('border-primary/40');
+    getData: ({ input, element }) => {
+      const data = { type: 'column', columnId, columnIndex };
+      return attachClosestEdge(data, {
+        input,
+        element,
+        allowedEdges: ['left', 'right'],
+      });
+    },
+    onDragEnter: (args) => {
+      if (args.source.data.type === 'column') {
+        const edge = extractClosestEdge(args.self.data);
+        clearColumnIndicators();
+        if (edge === 'left') {
+          element.classList.add('border-l-2', 'border-l-primary');
+        } else if (edge === 'right') {
+          element.classList.add('border-r-2', 'border-r-primary');
+        }
+      } else if (args.source.data.type === 'card') {
+        element.classList.add('border-primary/40');
+      }
+    },
+    onDrag: (args) => {
+      if (args.source.data.type === 'column') {
+        const edge = extractClosestEdge(args.self.data);
+        clearColumnIndicators();
+        if (edge === 'left') {
+          element.classList.add('border-l-2', 'border-l-primary');
+        } else if (edge === 'right') {
+          element.classList.add('border-r-2', 'border-r-primary');
+        }
+      }
     },
     onDragLeave: () => {
-      element.classList.remove('border-primary/40');
+      clearColumnIndicators();
     },
-    onDrop: ({ source, location }) => {
-      element.classList.remove('border-primary/40');
+    onDrop: ({ source, location, self }) => {
+      clearColumnIndicators();
       const innerTarget = location.current.dropTargets[0];
 
       if (source.data.type === 'card') {
-        // If the innermost target was a card, the card drop target handles it!
-        // Only append to end if dropped onto the column container / empty space
+        // Only append to end if dropped onto the column container / empty space (NOT an individual card)
         if (
           innerTarget?.element === element ||
           innerTarget?.data.type === 'column' ||
-          innerTarget?.element.classList.contains('kanban-card-list')
+          innerTarget?.element.classList.contains('kanban-card-list') ||
+          innerTarget?.element.classList.contains('kanban-empty-placeholder')
         ) {
           onCardDrop?.({
             cardId: source.data.cardId as string,
             sourceColumnId: source.data.columnId as string,
             targetColumnId: columnId,
             sourceIndex: source.data.index as number,
-            targetIndex: 9999, // Append to end of column
+            targetIndex: 9999,
           });
         }
       } else if (source.data.type === 'column') {
         const sourceIndex = source.data.columnIndex as number;
-        if (sourceIndex !== columnIndex) {
+        const edge = extractClosestEdge(self.data);
+        if (sourceIndex !== columnIndex || edge != null) {
           onColumnDrop?.({
             columnId: source.data.columnId as string,
             sourceIndex,
             targetIndex: columnIndex,
+            edge,
           });
         }
       }
