@@ -736,6 +736,78 @@ describe('@nofinite/markon', () => {
       root.unmount();
       document.body.removeChild(testDiv);
     });
+
+    it('renders publication-grade document and hydrates interactivity via <MarkonRender />', async () => {
+      const { createRoot } = await import('react-dom/client');
+      const React = await import('react');
+      const { MarkonRender: ReactMarkonRender } = await import('./react');
+
+      const testDiv = document.createElement('div');
+      document.body.appendChild(testDiv);
+      const root = createRoot(testDiv);
+
+      let renderedResult: any = null;
+
+      const doc = {
+        type: 'doc',
+        content: [
+          {
+            type: 'heading',
+            attrs: { level: 2 },
+            content: [{ type: 'text', text: 'Section Alpha' }],
+          },
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Testing the React publication renderer wrapper.',
+              },
+            ],
+          },
+          {
+            type: 'codeBlock',
+            attrs: { language: 'typescript' },
+            content: [{ type: 'text', text: 'const answer = 42;' }],
+          },
+        ],
+      };
+
+      await new Promise<void>((resolve) => {
+        root.render(
+          React.createElement(ReactMarkonRender, {
+            content: doc,
+            layout: 'article',
+            metadata: {
+              title: 'React Publication Article',
+              author: 'Elena Vance',
+              publishedAt: '2026-10-01',
+              tags: ['React', 'Publication'],
+            },
+            onRendered: (res) => {
+              renderedResult = res;
+            },
+          })
+        );
+        setTimeout(resolve, 100);
+      });
+
+      // Verify DOM content
+      expect(testDiv.innerHTML).toContain('React Publication Article');
+      expect(testDiv.innerHTML).toContain('Elena Vance');
+      expect(testDiv.innerHTML).toContain('Section Alpha');
+      expect(testDiv.innerHTML).toContain('markon-toc-aside');
+      expect(testDiv.innerHTML).toContain('markon-code-block');
+
+      // Verify onRendered callback
+      expect(renderedResult).not.toBeNull();
+      expect(renderedResult.toc.length).toBe(1);
+      expect(renderedResult.toc[0].text).toBe('Section Alpha');
+      expect(renderedResult.readingTimeMinutes).toBeGreaterThanOrEqual(1);
+
+      root.unmount();
+      document.body.removeChild(testDiv);
+    });
   });
 
   describe('Universal MarkonRenderer Core', () => {
