@@ -8,6 +8,10 @@ import {
   formatFileSize,
   htmlToMarkdown,
   markdownToHtml,
+  MarkonRenderer,
+  renderMarkon,
+  extractTOC,
+  calculateReadingTime,
 } from './index';
 
 describe('@nofinite/markon', () => {
@@ -731,6 +735,347 @@ describe('@nofinite/markon', () => {
 
       root.unmount();
       document.body.removeChild(testDiv);
+    });
+  });
+
+  describe('Universal MarkonRenderer Core', () => {
+    it('renders TipTap JSONContent into semantic HTML with syntax highlighting and NUICSS tokens', () => {
+      const jsonDoc = {
+        type: 'doc',
+        content: [
+          {
+            type: 'heading',
+            attrs: { level: 1 },
+            content: [{ type: 'text', text: 'Architecture Overview' }],
+          },
+          {
+            type: 'paragraph',
+            content: [
+              { type: 'text', text: 'Welcome to ' },
+              {
+                type: 'text',
+                text: 'Markon 2.0',
+                marks: [{ type: 'bold' }],
+              },
+              { type: 'text', text: ', the next-gen editor engine.' },
+            ],
+          },
+          {
+            type: 'codeBlock',
+            attrs: { language: 'typescript' },
+            content: [{ type: 'text', text: 'const answer: number = 42;' }],
+          },
+          {
+            type: 'callout',
+            attrs: { type: 'warning' },
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Strict upstream fix rule: Zero downstream monkey-patching.',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'mathBlock',
+            attrs: { equation: 'E = mc^2' },
+          },
+          {
+            type: 'table',
+            content: [
+              {
+                type: 'tableRow',
+                content: [
+                  {
+                    type: 'tableHeader',
+                    content: [
+                      {
+                        type: 'paragraph',
+                        content: [{ type: 'text', text: 'Package' }],
+                      },
+                    ],
+                  },
+                  {
+                    type: 'tableHeader',
+                    content: [
+                      {
+                        type: 'paragraph',
+                        content: [{ type: 'text', text: 'Role' }],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: 'tableRow',
+                content: [
+                  {
+                    type: 'tableCell',
+                    content: [
+                      {
+                        type: 'paragraph',
+                        content: [{ type: 'text', text: '@nofinite/nuicss' }],
+                      },
+                    ],
+                  },
+                  {
+                    type: 'tableCell',
+                    content: [
+                      {
+                        type: 'paragraph',
+                        content: [
+                          { type: 'text', text: 'Single source of truth' },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = renderMarkon({
+        content: jsonDoc,
+        layout: 'minimal',
+      });
+
+      expect(result.html).toContain('id="architecture-overview"');
+      expect(result.html).toContain('Architecture Overview');
+      expect(result.html).toContain('<strong>Markon 2.0</strong>');
+      // Lowlight highlighted code block
+      expect(result.html).toContain('markon-code-block');
+      expect(result.html).toContain('data-code="const answer: number = 42;"');
+      expect(result.html).toContain('hljs-keyword');
+      // Callout alert
+      expect(result.html).toContain('markon-callout alert alert-warning');
+      expect(result.html).toContain(
+        'Strict upstream fix rule: Zero downstream monkey-patching.'
+      );
+      // Pre-rendered Katex formula
+      expect(result.html).toContain('markon-math-block');
+      expect(result.html).toContain('katex');
+      // Table container
+      expect(result.html).toContain('table-container');
+      expect(result.html).toContain('@nofinite/nuicss');
+
+      // TOC extraction
+      expect(result.toc.length).toBe(1);
+      expect(result.toc[0]).toEqual({
+        id: 'architecture-overview',
+        text: 'Architecture Overview',
+        level: 1,
+      });
+    });
+
+    it('renders publication-grade Article layout with hero cover, author byline, reading time, and sticky TOC', () => {
+      const doc = {
+        type: 'doc',
+        content: [
+          {
+            type: 'heading',
+            attrs: { level: 1 },
+            content: [{ type: 'text', text: 'Design Tokens in Practice' }],
+          },
+          {
+            type: 'heading',
+            attrs: { level: 2 },
+            content: [{ type: 'text', text: 'OKLCH Colors' }],
+          },
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Perceptually uniform color palettes guarantee consistent contrast across light and dark modes.',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = renderMarkon({
+        content: doc,
+        layout: 'article',
+        metadata: {
+          title: 'Mastering Modern Design Tokens',
+          subtitle: 'A deep dive into OKLCH and semantic color engineering',
+          category: 'ENGINEERING',
+          cover: {
+            src: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe',
+            alt: 'Abstract 3D Fluid Design',
+            caption: 'Design system tokens rendered in real-time',
+          },
+          author: {
+            name: 'Alex Rivera',
+            title: 'Staff UI Architect',
+            url: 'https://github.com/alexrivera',
+          },
+          publishedAt: '2026-10-01',
+          tags: ['Design Systems', 'OKLCH', 'Architecture'],
+        },
+      });
+
+      // Article layout markers
+      expect(result.html).toContain('markon-article');
+      expect(result.html).toContain('Mastering Modern Design Tokens');
+      expect(result.html).toContain(
+        'A deep dive into OKLCH and semantic color'
+      );
+      expect(result.html).toContain('ENGINEERING');
+      expect(result.html).toContain('Alex Rivera');
+      expect(result.html).toContain('Staff UI Architect');
+      expect(result.html).toContain('https://github.com/alexrivera');
+      expect(result.html).toContain('markon-hero-cover');
+      expect(result.html).toContain(
+        'Design system tokens rendered in real-time'
+      );
+      // Sticky TOC
+      expect(result.html).toContain('markon-toc-aside');
+      expect(result.html).toContain('href="#design-tokens-in-practice"');
+      expect(result.html).toContain('href="#oklch-colors"');
+      // Tags
+      expect(result.html).toContain('markon-tags');
+      expect(result.html).toContain('Design Systems');
+      expect(result.html).toContain('OKLCH');
+      // Reading time
+      expect(result.readingTimeMinutes).toBeGreaterThanOrEqual(1);
+    });
+
+    it('renders Document and Newsroom layouts correctly', () => {
+      const doc = {
+        type: 'doc',
+        content: [
+          {
+            type: 'heading',
+            attrs: { level: 1 },
+            content: [{ type: 'text', text: 'API Reference' }],
+          },
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Detailed documentation.' }],
+          },
+        ],
+      };
+
+      // Document layout
+      const docResult = renderMarkon({
+        content: doc,
+        layout: 'document',
+        metadata: {
+          title: 'Markon Core API',
+          category: 'SDK Reference',
+          publishedAt: '2026-10-01',
+        },
+      });
+      expect(docResult.html).toContain('markon-document');
+      expect(docResult.html).toContain('SDK Reference');
+      expect(docResult.html).toContain('Markon Core API');
+      expect(docResult.html).toContain('markon-doc-header');
+
+      // Newsroom layout
+      const newsResult = renderMarkon({
+        content: doc,
+        layout: 'newsroom',
+        metadata: {
+          title: 'Nofinite Launches Markon 2.0',
+          author: 'Press Office',
+          publishedAt: '2026-10-01',
+          badge: 'PRESS RELEASE',
+        },
+      });
+      expect(newsResult.html).toContain('markon-newsroom');
+      expect(newsResult.html).toContain('PRESS RELEASE');
+      expect(newsResult.html).toContain('Nofinite Launches Markon 2.0');
+      expect(newsResult.html).toContain('By Press Office');
+    });
+
+    it('extracts Table of Contents accurately from JSON, HTML, and Markdown', () => {
+      // From JSON
+      const jsonDoc = {
+        type: 'doc',
+        content: [
+          {
+            type: 'heading',
+            attrs: { level: 1 },
+            content: [{ type: 'text', text: 'Intro' }],
+          },
+          {
+            type: 'heading',
+            attrs: { level: 2 },
+            content: [{ type: 'text', text: 'Getting Started' }],
+          },
+        ],
+      };
+      const jsonToc = extractTOC(jsonDoc);
+      expect(jsonToc).toEqual([
+        { id: 'intro', text: 'Intro', level: 1 },
+        { id: 'getting-started', text: 'Getting Started', level: 2 },
+      ]);
+
+      // From HTML
+      const html = '<h1>Intro</h1><p>text</p><h2>Getting Started</h2>';
+      const htmlToc = extractTOC(html);
+      expect(htmlToc).toEqual([
+        { id: 'intro', text: 'Intro', level: 1 },
+        { id: 'getting-started', text: 'Getting Started', level: 2 },
+      ]);
+
+      // From Markdown
+      const md = '# Intro\n\nSome text\n\n## Getting Started';
+      const mdToc = extractTOC(md);
+      expect(mdToc).toEqual([
+        { id: 'intro', text: 'Intro', level: 1 },
+        { id: 'getting-started', text: 'Getting Started', level: 2 },
+      ]);
+    });
+
+    it('calculates reading time and word counts', () => {
+      const text = 'word '.repeat(450);
+      const res = calculateReadingTime(text);
+      expect(res.words).toBe(450);
+      expect(res.minutes).toBe(3); // 450 / 200 = 2.25 => 3 min
+    });
+
+    it('attaches copy button listener and smooth scroll in MarkonRenderer.mount', async () => {
+      const container = document.createElement('div');
+      container.innerHTML = `
+        <div class="markon-render">
+          <a href="#section-1" class="markon-toc-link">Section 1</a>
+          <button type="button" class="markon-code-copy-btn" data-code="console.log('hi');">Copy</button>
+          <h2 id="section-1">Section 1</h2>
+        </div>
+      `;
+      document.body.appendChild(container);
+
+      // Mock navigator.clipboard
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, {
+        clipboard: {
+          writeText: writeTextMock,
+        },
+      });
+
+      const cleanup = MarkonRenderer.mount(container);
+
+      // Trigger copy button click
+      const copyBtn = container.querySelector(
+        '.markon-code-copy-btn'
+      ) as HTMLButtonElement;
+      copyBtn.click();
+
+      // Wait a tick for async clipboard
+      await new Promise<void>((resolve) => setTimeout(resolve, 50));
+      expect(writeTextMock).toHaveBeenCalledWith("console.log('hi');");
+      expect(copyBtn.innerHTML).toContain('Copied!');
+
+      cleanup();
+      document.body.removeChild(container);
     });
   });
 });
