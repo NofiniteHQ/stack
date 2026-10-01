@@ -172,3 +172,28 @@ Examples include:
 - `aria-checked`
 
 Avoid duplicating the same state through unnecessary custom JavaScript-driven CSS classes.
+
+---
+
+## Ecosystem Agent Standards & Observed Patterns
+
+All engineering agents working in this ecosystem must adhere to these governing standards:
+
+### 1. Root-Cause Upstream Fix Rule (Zero Downstream Monkey-Patching)
+
+- When a styling or component defect appears in downstream applications or documentation (`nuix`, `oss-docs`), **never** add quick-fix CSS classes or manual style monkey-patches in `globals.css` or component files.
+- All fixes must be implemented upstream in `@nofinite/nuicss` or `@nofinite/nui`, verified, built, and cleanly consumed downstream.
+
+### 2. The "Green Test" Fallacy & Compulsory Visual Validation
+
+- Unit tests (`vitest`, `jest`) only verify DOM nodes, props, and boolean state; they **never** prove visual aesthetics, spatial harmony, contrast ratios, border rendering, or backdrop filters.
+- Any UI, styling, or component change requires visual verification (browser inspection or Playwright screenshot in `/temp/`) before declaring completion.
+
+### 3. Native IDE Tooling Over Fragile Extensions
+
+- Leverage standard VS Code & Cursor Custom Data specifications (`html.customData` and `css.customData`) generated automatically from the single source of truth tokens rather than forcing users to install third-party IDE extensions.
+
+### 4. CLI & Product Boundary Architecture
+
+- **`nuicss` CLI (`packages/nuicss-cli`)**: The public, standalone Go-native binary for zero-Node CSS compilation (`nuicss -i input.css -o output.css -w -m`), Tailwind-to-NUICSS codemods (`nuicss migrate`), IDE setup (`nuicss init`), and cross-ecosystem UI scaffolding (`nuicss add <component>`).
+- **`nofinite` CLI (`packages/cli`)**: The developer platform and cloud services CLI dedicated to developer authentication, SSO, API access, cloud deployments, and internal development tools. Do not mix platform SSO concerns into the standalone CSS compiler.
