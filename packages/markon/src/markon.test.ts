@@ -268,6 +268,36 @@ describe('@nofinite/markon', () => {
       const trigger = container.querySelector('.editor-typography-trigger');
       expect(trigger).toBeTruthy();
 
+      const labelEl = trigger?.querySelector('.editor-typography-label');
+      expect(labelEl).toBeTruthy();
+      expect(labelEl?.textContent).toBe('Paragraph');
+
+      // Change format to Heading 1
+      editor.tiptap.commands.setHeading({ level: 1 });
+      editor.updateToolbarState();
+      expect(labelEl?.textContent).toBe('Heading 1');
+      expect(
+        trigger?.querySelector('.editor-typography-icon')?.textContent
+      ).toBe('H1');
+
+      // Change format to Heading 2
+      editor.tiptap.commands.setHeading({ level: 2 });
+      editor.updateToolbarState();
+      expect(labelEl?.textContent).toBe('Heading 2');
+      expect(
+        trigger?.querySelector('.editor-typography-icon')?.textContent
+      ).toBe('H2');
+
+      // Change format to Blockquote
+      editor.tiptap.commands.toggleBlockquote();
+      editor.updateToolbarState();
+      expect(labelEl?.textContent).toBe('Quote');
+
+      // Switch back to Paragraph
+      editor.tiptap.chain().clearNodes().run();
+      editor.updateToolbarState();
+      expect(labelEl?.textContent).toBe('Paragraph');
+
       // Test subscript and clearFormatting
       editor.tiptap.commands.selectAll();
       editor.execCommand('subscript');

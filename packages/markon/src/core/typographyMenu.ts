@@ -43,7 +43,9 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     icon: 'H1',
     command: (editor) =>
       editor.chain().focus().clearNodes().setHeading({ level: 1 }).run(),
-    isActive: (editor) => editor.isActive('heading', { level: 1 }),
+    isActive: (editor) =>
+      editor.isActive('heading', { level: 1 }) &&
+      !editor.isActive('blockquote'),
   },
   {
     id: 'h2',
@@ -51,7 +53,9 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     icon: 'H2',
     command: (editor) =>
       editor.chain().focus().clearNodes().setHeading({ level: 2 }).run(),
-    isActive: (editor) => editor.isActive('heading', { level: 2 }),
+    isActive: (editor) =>
+      editor.isActive('heading', { level: 2 }) &&
+      !editor.isActive('blockquote'),
   },
   {
     id: 'h3',
@@ -59,13 +63,16 @@ export const TYPOGRAPHY_ITEMS: TypographyItem[] = [
     icon: 'H3',
     command: (editor) =>
       editor.chain().focus().clearNodes().setHeading({ level: 3 }).run(),
-    isActive: (editor) => editor.isActive('heading', { level: 3 }),
+    isActive: (editor) =>
+      editor.isActive('heading', { level: 3 }) &&
+      !editor.isActive('blockquote'),
   },
   {
     id: 'blockquote',
     label: 'Quote',
     icon: '“',
-    command: (editor) => editor.chain().focus().toggleBlockquote().run(),
+    command: (editor) =>
+      editor.chain().focus().clearNodes().toggleBlockquote().run(),
     isActive: (editor) => editor.isActive('blockquote'),
   },
   {
@@ -85,6 +92,7 @@ export class MarkonTypographyMenu {
   private isOpen = false;
   private cleanupAutoUpdate: (() => void) | null = null;
   private cleanupOutsideClick: (() => void) | null = null;
+  private cleanupTriggerEvents: (() => void) | null = null;
 
   constructor(editor: Editor, trigger: HTMLElement) {
     this.editor = editor;
@@ -93,16 +101,22 @@ export class MarkonTypographyMenu {
   }
 
   private init(): void {
-    // Prevent focus loss when clicking trigger
-    this.trigger.addEventListener('mousedown', (e) => {
+    const onMouseDown = (e: MouseEvent) => {
       e.preventDefault();
-    });
-
-    this.trigger.addEventListener('click', (e) => {
+    };
+    const onClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       this.toggle();
-    });
+    };
+
+    this.trigger.addEventListener('mousedown', onMouseDown);
+    this.trigger.addEventListener('click', onClick);
+
+    this.cleanupTriggerEvents = () => {
+      this.trigger.removeEventListener('mousedown', onMouseDown);
+      this.trigger.removeEventListener('click', onClick);
+    };
   }
 
   public toggle(): void {
@@ -122,9 +136,11 @@ export class MarkonTypographyMenu {
 
     const menu = document.createElement('div');
     menu.className =
-      'editor-typography-menu card bg-surface border border-default rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 min-w-[170px] animate-in fade-in zoom-in-95 duration-100';
+      'editor-typography-menu dropdown-menu card bg-surface border border-default rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 min-w-[170px] animate-in fade-in zoom-in-95 duration-100';
     menu.setAttribute('role', 'menu');
+    menu.setAttribute('data-state', 'open');
     menu.style.position = 'fixed';
+    menu.style.display = 'flex';
     menu.style.zIndex = '9999';
 
     TYPOGRAPHY_ITEMS.forEach((item) => {
@@ -240,10 +256,18 @@ export class MarkonTypographyMenu {
     if (iconEl) {
       iconEl.textContent = activeItem.icon;
     }
+    const labelEl = this.trigger.querySelector('.editor-typography-label');
+    if (labelEl) {
+      labelEl.textContent = activeItem.label;
+    }
     this.trigger.setAttribute('title', `Text Style: ${activeItem.label}`);
   }
 
   public destroy(): void {
     this.close();
+    if (this.cleanupTriggerEvents) {
+      this.cleanupTriggerEvents();
+      this.cleanupTriggerEvents = null;
+    }
   }
 }

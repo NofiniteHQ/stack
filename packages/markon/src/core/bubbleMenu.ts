@@ -13,6 +13,13 @@ type BubbleContext = 'none' | 'text' | 'image' | 'video';
 
 function detectBubbleContext(editor: any): BubbleContext {
   if (!editor.isEditable) return 'none';
+  if (
+    typeof document !== 'undefined' &&
+    document.querySelector('dialog.modal[open], dialog[open]')
+  ) {
+    return 'none';
+  }
+  if (!editor.view?.hasFocus()) return 'none';
   if (editor.isActive('image')) return 'image';
   if (editor.isActive('videoBlock')) return 'video';
   if (editor.isActive('codeBlock')) return 'none';
@@ -40,6 +47,13 @@ export function createBubbleMenuExtension() {
 
               if (context === 'text') {
                 menuEl.innerHTML = `
+                  <div class="flex items-center gap-0.5 pr-1 border-r border-default/50 mr-0.5">
+                    <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-semibold" data-bubble-block="paragraph" title="Paragraph">P</button>
+                    <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-bold" data-bubble-block="h1" title="Heading 1">H1</button>
+                    <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-bold" data-bubble-block="h2" title="Heading 2">H2</button>
+                    <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-bold" data-bubble-block="h3" title="Heading 3">H3</button>
+                    <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-serif font-bold" data-bubble-block="blockquote" title="Quote">“</button>
+                  </div>
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="bold" title="Bold"><strong>B</strong></button>
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="italic" title="Italic"><em>I</em></button>
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="underline" title="Underline"><span class="underline">U</span></button>
@@ -127,6 +141,43 @@ export function createBubbleMenuExtension() {
               if (!menuEl) return;
               menuEl.addEventListener('mousedown', (e) => {
                 const target = e.target as HTMLElement;
+
+                // 0. Block switcher commands
+                const blockBtn = target.closest<HTMLButtonElement>(
+                  '[data-bubble-block]'
+                );
+                if (blockBtn) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const blk = blockBtn.getAttribute('data-bubble-block');
+                  if (blk === 'paragraph') {
+                    editor.chain().focus().clearNodes().setParagraph().run();
+                  } else if (blk === 'h1') {
+                    editor
+                      .chain()
+                      .focus()
+                      .clearNodes()
+                      .toggleHeading({ level: 1 })
+                      .run();
+                  } else if (blk === 'h2') {
+                    editor
+                      .chain()
+                      .focus()
+                      .clearNodes()
+                      .toggleHeading({ level: 2 })
+                      .run();
+                  } else if (blk === 'h3') {
+                    editor
+                      .chain()
+                      .focus()
+                      .clearNodes()
+                      .toggleHeading({ level: 3 })
+                      .run();
+                  } else if (blk === 'blockquote') {
+                    editor.chain().focus().toggleBlockquote().run();
+                  }
+                  return;
+                }
 
                 // 1. Text commands
                 const textBtn =
@@ -330,6 +381,38 @@ export function createBubbleMenuExtension() {
 
                 // Update active states
                 if (context === 'text') {
+                  const updateActiveBlock = (blk: string, active: boolean) => {
+                    const b = menuEl?.querySelector(
+                      `[data-bubble-block="${blk}"]`
+                    );
+                    if (b) {
+                      if (active) b.classList.add('btn-active', 'text-primary');
+                      else b.classList.remove('btn-active', 'text-primary');
+                    }
+                  };
+
+                  updateActiveBlock(
+                    'paragraph',
+                    !editor.isActive('heading') &&
+                      !editor.isActive('blockquote')
+                  );
+                  updateActiveBlock(
+                    'h1',
+                    editor.isActive('heading', { level: 1 })
+                  );
+                  updateActiveBlock(
+                    'h2',
+                    editor.isActive('heading', { level: 2 })
+                  );
+                  updateActiveBlock(
+                    'h3',
+                    editor.isActive('heading', { level: 3 })
+                  );
+                  updateActiveBlock(
+                    'blockquote',
+                    editor.isActive('blockquote')
+                  );
+
                   const updateActive = (cmd: string, active: boolean) => {
                     const b = menuEl?.querySelector(
                       `[data-bubble-cmd="${cmd}"]`
@@ -443,10 +526,28 @@ export function createBubbleMenuExtension() {
                     };
                   }
 
+                  // Ensure bubble menu avoids colliding with the main toolbar
+                  const editorContainer = view.dom.closest('.markon-editor');
+                  const toolbarEl =
+                    editorContainer?.querySelector('.editor-toolbar');
+                  const toolbarBottom = toolbarEl
+                    ? toolbarEl.getBoundingClientRect().bottom
+                    : 0;
+                  const selRect = virtualRef.getBoundingClientRect();
+
+                  const preferredPlacement =
+                    selRect.top - toolbarBottom < 48 ? 'bottom' : 'top';
+
                   computePosition(virtualRef, menuEl, {
                     strategy: 'fixed',
-                    placement: 'top',
-                    middleware: [offset(8), flip(), shift({ padding: 8 })],
+                    placement: preferredPlacement,
+                    middleware: [
+                      offset(8),
+                      flip({
+                        fallbackPlacements: ['bottom', 'top'],
+                      }),
+                      shift({ padding: 8 }),
+                    ],
                   }).then(({ x, y }) => {
                     if (menuEl) {
                       menuEl.style.left = `${x}px`;

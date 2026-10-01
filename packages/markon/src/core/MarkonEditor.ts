@@ -86,10 +86,14 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
 
         <span class="w-px h-5 bg-border mx-1 self-center shrink-0"></span>
 
-        <!-- Typography / Headings (Icon-only) -->
-        <button type="button" class="editor-typography-trigger editor-btn btn btn-ghost btn-sm btn-icon"
+        <!-- Typography / Headings Dropdown -->
+        <button type="button" class="editor-typography-trigger editor-btn btn btn-ghost btn-sm h-8 px-2 gap-1.5 font-normal text-xs flex items-center shrink-0"
                 title="Text Style" aria-haspopup="true" aria-expanded="false">
           <span class="editor-typography-icon font-mono font-bold text-xs text-primary shrink-0">¶</span>
+          <span class="editor-typography-label font-medium truncate max-w-[85px]">Paragraph</span>
+          <svg class="w-3 h-3 opacity-60 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </button>
 
         <!-- Font Family Selector -->
