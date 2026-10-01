@@ -36,7 +36,7 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
       loop = false,
       muted = false,
       controls = true,
-      theme = 'dark',
+      theme = 'auto',
       className,
     },
     ref
@@ -44,10 +44,12 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
     const mediaSrc = src || url;
     if (!mediaSrc) return null;
 
+    const colorScheme = theme === 'auto' ? undefined : theme;
+
     return (
       <div
         className={clsx(
-          'w-full rounded-xl border border-[var(--border-default)] shadow-sm bg-[var(--bg-surface)] backdrop-blur-sm p-3 relative select-none',
+          'w-full rounded-xl border border-default shadow-sm bg-surface backdrop-blur-sm p-3 relative select-none',
           className
         )}
         contentEditable={false}
@@ -58,19 +60,17 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
               <img
                 src={artwork}
                 alt={title || 'Audio artwork'}
-                className="w-10 h-10 rounded-lg object-cover border border-[var(--border-default)] flex-shrink-0"
+                className="w-10 h-10 rounded-lg object-cover border border-default flex-shrink-0"
               />
             )}
             <div className="min-w-0 flex-1">
               {title && (
-                <div className="text-sm font-semibold text-[var(--color-primary)] truncate">
+                <div className="text-sm font-semibold text-primary truncate">
                   {title}
                 </div>
               )}
               {artist && (
-                <div className="text-xs text-[var(--text-muted)] truncate">
-                  {artist}
-                </div>
+                <div className="text-xs text-muted truncate">{artist}</div>
               )}
             </div>
           </div>
@@ -88,9 +88,13 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
           load="play"
           className={clsx(
             'w-full nui-vidstack-audio-player',
-            theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : ''
+            colorScheme === 'dark'
+              ? 'dark'
+              : colorScheme === 'light'
+              ? 'light'
+              : ''
           )}
-          data-color-scheme={theme}
+          data-color-scheme={colorScheme}
         >
           <MediaProvider />
           {controls && <DefaultAudioLayout icons={defaultLayoutIcons} />}

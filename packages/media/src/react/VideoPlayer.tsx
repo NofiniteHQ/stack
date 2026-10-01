@@ -37,7 +37,7 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
       muted = false,
       playsInline = true,
       controls = true,
-      theme = 'dark',
+      theme = 'auto',
       aspectRatio = '16/9',
       className,
     },
@@ -46,10 +46,12 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
     const mediaSrc = src || url;
     if (!mediaSrc) return null;
 
+    const colorScheme = theme === 'auto' ? undefined : theme;
+
     return (
       <div
         className={clsx(
-          'w-full aspect-video rounded-xl overflow-hidden border border-[var(--border-default)] shadow-sm bg-black group relative select-none',
+          'w-full aspect-video rounded-xl overflow-hidden border border-default shadow-sm bg-black group relative select-none',
           className
         )}
         style={{ aspectRatio }}
@@ -67,9 +69,13 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
           load="play"
           className={clsx(
             'w-full h-full nui-vidstack-player',
-            theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : ''
+            colorScheme === 'dark'
+              ? 'dark'
+              : colorScheme === 'light'
+              ? 'light'
+              : ''
           )}
-          data-color-scheme={theme}
+          data-color-scheme={colorScheme}
         >
           <MediaProvider />
           {controls && <DefaultVideoLayout icons={defaultLayoutIcons} />}
