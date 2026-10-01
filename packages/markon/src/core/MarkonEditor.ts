@@ -275,12 +275,12 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
         </button>
 
         <!-- Table Operations Group (Hidden when not in table) -->
-        <span class="editor-table-tools hidden items-center gap-0.5 px-1 py-0.5 rounded-lg bg-subtle/80 border border-default/60" style="display: none;">
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="addRowAfter" title="Add Row Below">+Row</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="deleteRow" title="Delete Row">-Row</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="addColumnAfter" title="Add Column Right">+Col</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs" data-command="deleteColumn" title="Delete Column">-Col</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-sm px-1.5 py-0.5 text-xs text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
+        <span class="editor-table-tools hidden items-center gap-0.5 px-1 py-0.5 rounded-lg bg-subtle border border-default" style="display: none;">
+          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="addRowAfter" title="Add Row Below">+Row</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="deleteRow" title="Delete Row">-Row</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="addColumnAfter" title="Add Column Right">+Col</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="deleteColumn" title="Delete Column">-Col</button>
+          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
         </span>
 
         <input type="file" class="editor-image-file-input hidden" accept="image/*" hidden style="display: none;" />

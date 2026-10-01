@@ -33,13 +33,11 @@ export function openMarkonModal(options: MarkonModalOptions): void {
   const cancelText = options.cancelText || 'Cancel';
 
   dialog.innerHTML = `
-    <div class="modal-box w-full max-w-md bg-surface border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[85vh] overflow-y-auto animate-in zoom-in-95 fade-in duration-150">
-      <div class="modal-header pb-3 border-b border-default mb-4">
-        <h3 class="modal-title text-base font-semibold text-default m-0">${escapeHtml(
-          title
-        )}</h3>
+    <div class="modal-box w-full max-w-md animate-in zoom-in-95 fade-in duration-150">
+      <div class="modal-header">
+        <h3 class="modal-title">${escapeHtml(title)}</h3>
       </div>
-      <form method="dialog" class="modal-body py-2 space-y-3">
+      <form method="dialog" class="modal-body space-y-3">
         <div>
           <label class="block text-xs font-medium text-muted mb-1.5">${escapeHtml(
             label
@@ -49,7 +47,7 @@ export function openMarkonModal(options: MarkonModalOptions): void {
           )}" placeholder="${escapeHtml(placeholder)}" />
         </div>
       </form>
-      <div class="modal-footer flex items-center justify-end gap-3 pt-4 border-t border-default mt-4">
+      <div class="modal-footer">
         <button type="button" class="btn btn-ghost btn-sm" data-action="cancel">${escapeHtml(
           cancelText
         )}</button>

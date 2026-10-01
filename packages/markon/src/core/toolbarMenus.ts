@@ -308,21 +308,21 @@ export interface HighlightPreset {
 export const HIGHLIGHT_PRESETS: HighlightPreset[] = [
   {
     label: 'Yellow',
-    color: 'var(--color-warning-subtle, oklch(0.96 0.08 95))',
+    color: 'var(--color-warning-subtle)',
   },
   {
     label: 'Green',
-    color: 'var(--color-success-subtle, oklch(0.95 0.06 150))',
+    color: 'var(--color-success-subtle)',
   },
-  { label: 'Blue', color: 'var(--color-info-subtle, oklch(0.94 0.06 240))' },
-  { label: 'Pink', color: 'var(--color-danger-subtle, oklch(0.95 0.06 25))' },
+  { label: 'Blue', color: 'var(--color-info-subtle)' },
+  { label: 'Pink', color: 'var(--color-danger-subtle)' },
   {
-    label: 'Orange',
-    color: 'var(--color-warning-subtle, oklch(0.94 0.07 65))',
+    label: 'Primary',
+    color: 'var(--color-primary-subtle)',
   },
   {
-    label: 'Purple',
-    color: 'var(--color-accent-subtle, oklch(0.94 0.07 310))',
+    label: 'Secondary',
+    color: 'var(--color-secondary-subtle)',
   },
 ];
 
@@ -419,7 +419,7 @@ export class MarkonHighlightMenu {
     clearBtn.className =
       'btn btn-ghost btn-sm w-full justify-start text-xs text-muted hover:text-danger gap-2';
     clearBtn.innerHTML = `
-      <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
@@ -505,7 +505,7 @@ export interface TextColorPreset {
 export const TEXT_COLOR_PRESETS: TextColorPreset[] = [
   { label: 'Default', color: 'inherit' },
   { label: 'Primary', color: 'var(--color-primary)' },
-  { label: 'Indigo', color: 'var(--brand-700, #1d4ed8)' },
+  { label: 'Brand', color: 'var(--brand-700)' },
   { label: 'Success', color: 'var(--color-success)' },
   { label: 'Danger', color: 'var(--color-danger)' },
   { label: 'Warning', color: 'var(--color-warning)' },
@@ -609,7 +609,7 @@ export class MarkonTextColorMenu {
     clearBtn.className =
       'btn btn-ghost btn-sm w-full justify-start text-xs text-muted hover:text-danger gap-2';
     clearBtn.innerHTML = `
-      <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
