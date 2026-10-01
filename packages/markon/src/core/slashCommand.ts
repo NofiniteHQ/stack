@@ -201,17 +201,19 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
     }
 
     popupEl.style.display = 'block';
+    popupEl.setAttribute('data-state', 'open');
     popupEl.innerHTML = '';
     itemsList.forEach((item, index) => {
+      const isSelected = index === selectedIndex;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = `dropdown-item flex flex-col items-start gap-0.5 cursor-pointer text-left ${
-        index === selectedIndex ? 'btn-active' : ''
+        isSelected ? 'btn-active' : ''
       }`;
       btn.style.alignItems = 'flex-start';
       btn.style.height = 'auto';
       btn.style.padding = '6px 10px';
-      if (index === selectedIndex) {
+      if (isSelected) {
         btn.style.backgroundColor = 'var(--bg-subtle)';
       }
       btn.innerHTML = `<span class="font-semibold text-xs text-default" style="color: var(--fg-default);">${item.title}</span><span class="text-xs text-muted" style="color: var(--fg-muted); font-size: 0.75rem;">${item.description}</span>`;
@@ -225,6 +227,9 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
         if (popupEl) popupEl.style.display = 'none';
       });
       popupEl?.appendChild(btn);
+      if (isSelected) {
+        btn.scrollIntoView({ block: 'nearest' });
+      }
     });
 
     const updatePosition = () => {
@@ -328,6 +333,7 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
                 updatePopup(props);
               },
               onKeyDown: ({ event, props }: any) => {
+                if (!currentItems || currentItems.length === 0) return false;
                 if (event.key === 'ArrowUp') {
                   selectedIndex =
                     (selectedIndex - 1 + currentItems.length) %

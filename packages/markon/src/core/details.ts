@@ -109,6 +109,46 @@ export const Details = Node.create({
     ];
   },
 
+  addNodeView() {
+    return ({ node, getPos, editor }) => {
+      const dom = document.createElement('details');
+      dom.className =
+        'markon-details rounded-xl border border-default p-3 my-2 bg-subtle/20 group open:bg-subtle/30 transition-all';
+      if (node.attrs.open) {
+        dom.setAttribute('open', '');
+      }
+
+      dom.addEventListener('toggle', () => {
+        if (typeof getPos === 'function') {
+          const pos = getPos();
+          if (typeof pos === 'number') {
+            const isOpen = dom.open;
+            if (isOpen !== node.attrs.open) {
+              editor.view.dispatch(
+                editor.view.state.tr.setNodeMarkup(pos, undefined, {
+                  ...node.attrs,
+                  open: isOpen,
+                })
+              );
+            }
+          }
+        }
+      });
+
+      return {
+        dom,
+        contentDOM: dom,
+        update: (updatedNode) => {
+          if (updatedNode.type.name !== 'details') return false;
+          if (updatedNode.attrs.open !== dom.open) {
+            dom.open = !!updatedNode.attrs.open;
+          }
+          return true;
+        },
+      };
+    };
+  },
+
   addCommands() {
     return {
       insertDetails:

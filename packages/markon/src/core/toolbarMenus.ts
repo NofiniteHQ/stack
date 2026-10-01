@@ -41,6 +41,7 @@ export class MarkonFontFamilyMenu {
   private isOpen = false;
   private cleanupAutoUpdate: (() => void) | null = null;
   private cleanupOutsideClick: (() => void) | null = null;
+  private cleanupTriggerEvents: (() => void) | null = null;
 
   constructor(editor: Editor, trigger: HTMLElement) {
     this.editor = editor;
@@ -49,12 +50,20 @@ export class MarkonFontFamilyMenu {
   }
 
   private init(): void {
-    this.trigger.addEventListener('mousedown', (e) => e.preventDefault());
-    this.trigger.addEventListener('click', (e) => {
+    const onMouseDown = (e: MouseEvent) => e.preventDefault();
+    const onClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       this.toggle();
-    });
+    };
+
+    this.trigger.addEventListener('mousedown', onMouseDown);
+    this.trigger.addEventListener('click', onClick);
+
+    this.cleanupTriggerEvents = () => {
+      this.trigger.removeEventListener('mousedown', onMouseDown);
+      this.trigger.removeEventListener('click', onClick);
+    };
   }
 
   public toggle(): void {
@@ -71,8 +80,11 @@ export class MarkonFontFamilyMenu {
 
     const menu = document.createElement('div');
     menu.className =
-      'markon-font-family-menu card bg-surface border border-default rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 min-w-[160px] animate-in fade-in zoom-in-95 duration-100';
+      'markon-font-family-menu dropdown-menu card bg-surface border border-default rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 min-w-[160px] animate-in fade-in zoom-in-95 duration-100';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('data-state', 'open');
     menu.style.position = 'fixed';
+    menu.style.display = 'flex';
     menu.style.zIndex = '9999';
 
     const currentFont = this.editor.getAttributes('textStyle').fontFamily;
@@ -157,6 +169,10 @@ export class MarkonFontFamilyMenu {
 
   public destroy(): void {
     this.close();
+    if (this.cleanupTriggerEvents) {
+      this.cleanupTriggerEvents();
+      this.cleanupTriggerEvents = null;
+    }
   }
 }
 
@@ -179,6 +195,7 @@ export class MarkonFontSizeMenu {
   private isOpen = false;
   private cleanupAutoUpdate: (() => void) | null = null;
   private cleanupOutsideClick: (() => void) | null = null;
+  private cleanupTriggerEvents: (() => void) | null = null;
 
   constructor(editor: Editor, trigger: HTMLElement) {
     this.editor = editor;
@@ -187,12 +204,20 @@ export class MarkonFontSizeMenu {
   }
 
   private init(): void {
-    this.trigger.addEventListener('mousedown', (e) => e.preventDefault());
-    this.trigger.addEventListener('click', (e) => {
+    const onMouseDown = (e: MouseEvent) => e.preventDefault();
+    const onClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       this.toggle();
-    });
+    };
+
+    this.trigger.addEventListener('mousedown', onMouseDown);
+    this.trigger.addEventListener('click', onClick);
+
+    this.cleanupTriggerEvents = () => {
+      this.trigger.removeEventListener('mousedown', onMouseDown);
+      this.trigger.removeEventListener('click', onClick);
+    };
   }
 
   public toggle(): void {
@@ -209,8 +234,11 @@ export class MarkonFontSizeMenu {
 
     const menu = document.createElement('div');
     menu.className =
-      'markon-font-size-menu card bg-surface border border-default rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 min-w-[100px] max-h-56 overflow-y-auto animate-in fade-in zoom-in-95 duration-100';
+      'markon-font-size-menu dropdown-menu card bg-surface border border-default rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 min-w-[100px] max-h-56 overflow-y-auto animate-in fade-in zoom-in-95 duration-100';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('data-state', 'open');
     menu.style.position = 'fixed';
+    menu.style.display = 'flex';
     menu.style.zIndex = '9999';
 
     const currentSize = this.editor.getAttributes('textStyle').fontSize;
@@ -296,6 +324,10 @@ export class MarkonFontSizeMenu {
 
   public destroy(): void {
     this.close();
+    if (this.cleanupTriggerEvents) {
+      this.cleanupTriggerEvents();
+      this.cleanupTriggerEvents = null;
+    }
   }
 }
 
@@ -333,6 +365,7 @@ export class MarkonHighlightMenu {
   private isOpen = false;
   private cleanupAutoUpdate: (() => void) | null = null;
   private cleanupOutsideClick: (() => void) | null = null;
+  private cleanupTriggerEvents: (() => void) | null = null;
 
   constructor(editor: Editor, trigger: HTMLElement) {
     this.editor = editor;
@@ -341,12 +374,20 @@ export class MarkonHighlightMenu {
   }
 
   private init(): void {
-    this.trigger.addEventListener('mousedown', (e) => e.preventDefault());
-    this.trigger.addEventListener('click', (e) => {
+    const onMouseDown = (e: MouseEvent) => e.preventDefault();
+    const onClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       this.toggle();
-    });
+    };
+
+    this.trigger.addEventListener('mousedown', onMouseDown);
+    this.trigger.addEventListener('click', onClick);
+
+    this.cleanupTriggerEvents = () => {
+      this.trigger.removeEventListener('mousedown', onMouseDown);
+      this.trigger.removeEventListener('click', onClick);
+    };
   }
 
   public toggle(): void {
@@ -363,8 +404,11 @@ export class MarkonHighlightMenu {
 
     const menu = document.createElement('div');
     menu.className =
-      'markon-highlight-menu card bg-surface border border-default rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-2 min-w-[160px] animate-in fade-in zoom-in-95 duration-100';
+      'markon-highlight-menu dropdown-menu card bg-surface border border-default rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-2 min-w-[160px] animate-in fade-in zoom-in-95 duration-100';
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('data-state', 'open');
     menu.style.position = 'fixed';
+    menu.style.display = 'flex';
     menu.style.zIndex = '9999';
 
     const header = document.createElement('div');
@@ -493,6 +537,10 @@ export class MarkonHighlightMenu {
 
   public destroy(): void {
     this.close();
+    if (this.cleanupTriggerEvents) {
+      this.cleanupTriggerEvents();
+      this.cleanupTriggerEvents = null;
+    }
   }
 }
 
@@ -520,6 +568,7 @@ export class MarkonTextColorMenu {
   private isOpen = false;
   private cleanupAutoUpdate: (() => void) | null = null;
   private cleanupOutsideClick: (() => void) | null = null;
+  private cleanupTriggerEvents: (() => void) | null = null;
 
   constructor(editor: Editor, trigger: HTMLElement) {
     this.editor = editor;
@@ -528,12 +577,20 @@ export class MarkonTextColorMenu {
   }
 
   private init(): void {
-    this.trigger.addEventListener('mousedown', (e) => e.preventDefault());
-    this.trigger.addEventListener('click', (e) => {
+    const onMouseDown = (e: MouseEvent) => e.preventDefault();
+    const onClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       this.toggle();
-    });
+    };
+
+    this.trigger.addEventListener('mousedown', onMouseDown);
+    this.trigger.addEventListener('click', onClick);
+
+    this.cleanupTriggerEvents = () => {
+      this.trigger.removeEventListener('mousedown', onMouseDown);
+      this.trigger.removeEventListener('click', onClick);
+    };
   }
 
   public toggle(): void {
@@ -550,8 +607,11 @@ export class MarkonTextColorMenu {
 
     const menu = document.createElement('div');
     menu.className =
-      'markon-color-menu card bg-surface border border-default rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-2 min-w-[170px] animate-in fade-in zoom-in-95 duration-100';
+      'markon-color-menu dropdown-menu card bg-surface border border-default rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-2 min-w-[170px] animate-in fade-in zoom-in-95 duration-100';
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('data-state', 'open');
     menu.style.position = 'fixed';
+    menu.style.display = 'flex';
     menu.style.zIndex = '9999';
 
     const header = document.createElement('div');
@@ -683,5 +743,9 @@ export class MarkonTextColorMenu {
 
   public destroy(): void {
     this.close();
+    if (this.cleanupTriggerEvents) {
+      this.cleanupTriggerEvents();
+      this.cleanupTriggerEvents = null;
+    }
   }
 }

@@ -24,6 +24,7 @@ export class MarkonTableMenu {
   private isOpen = false;
   private cleanupAutoUpdate: (() => void) | null = null;
   private cleanupOutsideClick: (() => void) | null = null;
+  private cleanupTriggerEvents: (() => void) | null = null;
   private maxCols = 10;
   private maxRows = 10;
 
@@ -34,12 +35,20 @@ export class MarkonTableMenu {
   }
 
   private init(): void {
-    this.trigger.addEventListener('mousedown', (e) => e.preventDefault());
-    this.trigger.addEventListener('click', (e) => {
+    const onMouseDown = (e: MouseEvent) => e.preventDefault();
+    const onClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       this.toggle();
-    });
+    };
+
+    this.trigger.addEventListener('mousedown', onMouseDown);
+    this.trigger.addEventListener('click', onClick);
+
+    this.cleanupTriggerEvents = () => {
+      this.trigger.removeEventListener('mousedown', onMouseDown);
+      this.trigger.removeEventListener('click', onClick);
+    };
   }
 
   public toggle(): void {
@@ -82,14 +91,12 @@ export class MarkonTableMenu {
       }
     };
 
-    setTimeout(() => {
-      document.addEventListener('pointerdown', onPointerDown);
-      document.addEventListener('keydown', onKeyDown);
-      this.cleanupOutsideClick = () => {
-        document.removeEventListener('pointerdown', onPointerDown);
-        document.removeEventListener('keydown', onKeyDown);
-      };
-    }, 0);
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    this.cleanupOutsideClick = () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }
 
   public close(): void {
@@ -116,6 +123,7 @@ export class MarkonTableMenu {
   private updatePosition(): void {
     if (!this.menuEl) return;
     computePosition(this.trigger, this.menuEl, {
+      strategy: 'fixed',
       placement: 'bottom-start',
       middleware: [offset(4), flip(), shift({ padding: 8 })],
     }).then(({ x, y }) => {
@@ -129,7 +137,11 @@ export class MarkonTableMenu {
   private renderMenu(): void {
     this.menuEl = document.createElement('div');
     this.menuEl.className =
-      'markon-table-menu fixed z-50 p-3 rounded-xl border border-default bg-surface shadow-xl flex flex-col gap-2 select-none animate-in fade-in zoom-in-95 duration-100';
+      'markon-table-menu dropdown-menu card fixed z-50 p-3 rounded-xl border border-default bg-surface shadow-xl flex flex-col gap-2 select-none animate-in fade-in zoom-in-95 duration-100';
+    this.menuEl.setAttribute('role', 'dialog');
+    this.menuEl.setAttribute('data-state', 'open');
+    this.menuEl.style.position = 'fixed';
+    this.menuEl.style.display = 'flex';
     this.menuEl.style.width = '240px';
 
     const header = document.createElement('div');
@@ -143,8 +155,10 @@ export class MarkonTableMenu {
     ) as HTMLElement;
 
     const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid gap-1';
-    gridContainer.style.gridTemplateColumns = `repeat(${this.maxCols}, minmax(0, 1fr))`;
+    gridContainer.style.display = 'grid';
+    gridContainer.style.gap = '4px';
+    gridContainer.style.gridTemplateColumns = `repeat(${this.maxCols}, 18px)`;
+    gridContainer.style.justifyContent = 'center';
 
     const cells: HTMLElement[][] = [];
 
@@ -153,10 +167,17 @@ export class MarkonTableMenu {
       for (let c = 1; c <= this.maxCols; c++) {
         const cell = document.createElement('button');
         cell.type = 'button';
-        cell.className =
-          'w-4 h-4 rounded-xs border border-default/70 transition-colors cursor-pointer bg-subtle/50';
+        cell.style.width = '18px';
+        cell.style.height = '18px';
+        cell.style.borderRadius = '3px';
+        cell.style.border = '1px solid var(--border-default)';
+        cell.style.backgroundColor = 'var(--bg-subtle)';
+        cell.style.cursor = 'pointer';
+        cell.style.padding = '0';
+        cell.style.transition = 'all 150ms ease';
         cell.setAttribute('data-row', String(r));
         cell.setAttribute('data-col', String(c));
+        cell.setAttribute('aria-label', `${c} by ${r} table`);
 
         cell.addEventListener('mouseenter', () => {
           if (dimensionSpan) {
@@ -181,11 +202,12 @@ export class MarkonTableMenu {
         for (let c = 1; c <= this.maxCols; c++) {
           const el = cells[r][c];
           if (r <= rows && c <= cols) {
-            el.className =
-              'w-4 h-4 rounded-xs border border-primary bg-primary/20 transition-colors cursor-pointer';
+            el.style.borderColor = 'var(--color-primary)';
+            el.style.backgroundColor =
+              'color-mix(in srgb, var(--color-primary) 30%, transparent)';
           } else {
-            el.className =
-              'w-4 h-4 rounded-xs border border-default/70 bg-subtle/50 transition-colors cursor-pointer';
+            el.style.borderColor = 'var(--border-default)';
+            el.style.backgroundColor = 'var(--bg-subtle)';
           }
         }
       }
@@ -206,5 +228,9 @@ export class MarkonTableMenu {
 
   public destroy(): void {
     this.close();
+    if (this.cleanupTriggerEvents) {
+      this.cleanupTriggerEvents();
+      this.cleanupTriggerEvents = null;
+    }
   }
 }

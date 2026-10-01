@@ -616,6 +616,56 @@ describe('@nofinite/markon', () => {
 
       editor.destroy();
     });
+
+    it('synchronizes details nodeview open state to TipTap node attributes on toggle event', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '',
+      });
+
+      editor.execCommand('insertDetails');
+      const detailsEl = container.querySelector<HTMLDetailsElement>(
+        'details.markon-details'
+      );
+      expect(detailsEl).toBeTruthy();
+      expect(detailsEl?.open).toBe(true);
+
+      // Simulate native details toggle to closed
+      if (detailsEl) {
+        detailsEl.open = false;
+        detailsEl.dispatchEvent(new Event('toggle'));
+      }
+
+      const json = editor.tiptap.getJSON();
+      const detailsNode = json.content?.find((n) => n.type === 'details');
+      expect(detailsNode?.attrs?.open).toBe(false);
+
+      editor.destroy();
+    });
+
+    it('ensures table menu attaches dropdown-menu superclass and cleans up safely', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Table menu test</p>',
+      });
+
+      const tableTrigger = container.querySelector<HTMLButtonElement>(
+        '.editor-table-trigger'
+      );
+      expect(tableTrigger).toBeTruthy();
+
+      tableTrigger?.click();
+      const menu = document.querySelector<HTMLElement>('.markon-table-menu');
+      expect(menu).toBeTruthy();
+      expect(menu?.classList.contains('dropdown-menu')).toBe(true);
+      expect(menu?.getAttribute('data-state')).toBe('open');
+
+      // Close menu
+      tableTrigger?.click();
+      expect(document.querySelector('.markon-table-menu')).toBeNull();
+
+      editor.destroy();
+    });
   });
 
   describe('MarkonEditor React Component', () => {
