@@ -1,16 +1,6 @@
+/**
+ * @nofinite/charts - Universal, Framework-Agnostic Core
+ * For React components, import from `@nofinite/charts/react`.
+ */
+
 export * from './core';
-export {
-  AreaChart,
-  LineChart,
-  BarChart,
-  PieChart,
-  DonutChart,
-  ScatterChart,
-  Sparkline,
-  type AreaChartProps,
-  type LineChartProps,
-  type BarChartProps,
-  type PieChartProps,
-  type ScatterChartProps,
-  type SparklineProps,
-} from './react';

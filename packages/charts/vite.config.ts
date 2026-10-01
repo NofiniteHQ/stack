@@ -4,6 +4,13 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import path from 'node:path';
 
+const assetFileNamePattern = (assetInfo: any) => {
+  if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+    return 'styles.css';
+  }
+  return 'assets/[name]-[hash][extname]';
+};
+
 export default defineConfig({
   root: __dirname,
 
@@ -25,21 +32,37 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         'react/index': path.resolve(__dirname, 'src/react/index.ts'),
+        styles: path.resolve(__dirname, 'src/styles.ts'),
       },
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@nofinite/nuicss'],
+      external: (id: string) => {
+        if (id.endsWith('.css')) return false;
+        if (
+          [
+            'react',
+            'react-dom',
+            'react/jsx-runtime',
+            '@nofinite/nuicss',
+          ].includes(id)
+        ) {
+          return true;
+        }
+        return false;
+      },
       output: [
         {
           format: 'es',
           entryFileNames: '[name].js',
           chunkFileNames: 'chunks/[name]-[hash].js',
+          assetFileNames: assetFileNamePattern,
         },
         {
           format: 'cjs',
           entryFileNames: '[name].cjs',
           chunkFileNames: 'chunks/[name]-[hash].cjs',
           exports: 'named',
+          assetFileNames: assetFileNamePattern,
         },
       ],
     },

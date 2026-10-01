@@ -1,17 +1,19 @@
 import { renderChart, type ChartOptions } from './renderChart';
 
+export interface ChartInstanceOptions extends ChartOptions {
+  element?: HTMLElement;
+}
+
 export class Chart {
   public element: HTMLElement;
   public options: ChartOptions;
 
-  constructor(options: ChartOptions & { element?: HTMLElement }) {
+  constructor(options: ChartInstanceOptions) {
     this.options = options;
     if (options.element) {
       this.element = options.element;
     } else {
-      const container = document.createElement('div');
-      container.innerHTML = renderChart(options);
-      this.element = container.firstElementChild as HTMLElement;
+      this.element = document.createElement('div');
     }
 
     this.render();
@@ -21,8 +23,13 @@ export class Chart {
     this.element.innerHTML = renderChart(this.options);
   }
 
-  public update(newData: any[]): void {
-    this.options.data = newData;
+  public update(newData?: any[], newOptions?: Partial<ChartOptions>): void {
+    if (newData) {
+      this.options.data = newData;
+    }
+    if (newOptions) {
+      this.options = { ...this.options, ...newOptions };
+    }
     this.render();
   }
 
