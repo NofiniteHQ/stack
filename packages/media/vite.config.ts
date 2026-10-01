@@ -25,30 +25,48 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         'react/index': path.resolve(__dirname, 'src/react/index.ts'),
+        styles: path.resolve(__dirname, 'src/styles.ts'),
       },
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        '@nofinite/nuicss',
-        '@vidstack/react',
-        'vidstack',
-        /^@vidstack\/react(\/.*)?$/,
-        /^vidstack(\/.*)?$/,
-      ],
+      external: (id) => {
+        if (id.endsWith('.css')) return false;
+        if (
+          [
+            'react',
+            'react-dom',
+            'react/jsx-runtime',
+            '@nofinite/nuicss',
+          ].includes(id)
+        )
+          return true;
+        if (id.startsWith('@vidstack/react') || id.startsWith('vidstack'))
+          return true;
+        return false;
+      },
       output: [
         {
           format: 'es',
           entryFileNames: '[name].js',
           chunkFileNames: 'chunks/[name]-[hash].js',
+          assetFileNames: (assetInfo) => {
+            if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+              return 'styles.css';
+            }
+            return 'assets/[name]-[hash][extname]';
+          },
         },
         {
           format: 'cjs',
           entryFileNames: '[name].cjs',
           chunkFileNames: 'chunks/[name]-[hash].cjs',
           exports: 'named',
+          assetFileNames: (assetInfo) => {
+            if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+              return 'styles.css';
+            }
+            return 'assets/[name]-[hash][extname]';
+          },
         },
       ],
     },

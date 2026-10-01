@@ -1,0 +1,40 @@
+@import 'vidstack/player/styles/default/theme.css';
+@import 'vidstack/player/styles/default/layouts/video.css';
+@import 'vidstack/player/styles/default/layouts/audio.css';
+
+/* ==========================================================================
+   @nofinite/media - NUICSS Design System Token Bridge
+   Single source of truth for media player styling across Nofinite ecosystem
+   ========================================================================== */
+
+.nui-vidstack-player,
+.nui-vidstack-audio-player,
+.nui-media-container media-player {
+  --media-brand: var(--color-primary, #3b82f6);
+  --media-focus-ring: var(--color-primary, #3b82f6);
+  --media-font-family: var(
+    --font-sans,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif
+  );
+  --media-border-radius: var(--radius-lg, 0.75rem);
+  --media-slider-track-bg: var(--border-default, rgba(255, 255, 255, 0.2));
+  --media-slider-track-fill-bg: var(--color-primary, #3b82f6);
+  --media-slider-thumb-bg: var(--color-primary, #3b82f6);
+  --media-menu-bg: var(--bg-surface, #1e293b);
+  --media-menu-border: var(--border-default, rgba(255, 255, 255, 0.1));
+  --media-menu-color: var(--text-default, #f8fafc);
+  --media-tooltip-bg: var(--bg-surface, #0f172a);
+  --media-tooltip-color: var(--text-default, #f8fafc);
+  --media-buffering-color: var(--color-primary, #3b82f6);
+}
+
+.nui-media-container {
+  display: block;
+  position: relative;
+  width: 100%;
+}

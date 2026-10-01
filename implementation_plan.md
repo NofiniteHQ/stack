@@ -1,166 +1,168 @@
-# Comprehensive Phased Implementation Plan: Production-Grade `@nofinite/markon`
+# Implementation Plan: `@nofinite/media` Complete Production-Grade & Framework-Agnostic Overhaul
 
-## Objective
+## 1. Objective
 
-Elevate `@nofinite/markon` into an enterprise-grade, framework-agnostic content authoring engine that strictly adheres to the Nofinite ecosystem constitution ([`@nofinite/nuicss`](file:///d:/stack/packages/nuicss) design tokens & [`@nofinite/nuix`](file:///d:/nuix) headless architecture), fixes all subtle vanilla DOM selection and event lifecycle bugs, restores 100% of the rich features originally present in the React version, and provides a flawless React wrapper without cursor jumping or stale props.
-
----
-
-## Phased Execution Roadmap
-
-Execution is structured into 6 sequential, fully focused phases. Each phase will be executed independently and will only proceed upon explicit user confirmation ("next").
-
-```mermaid
-graph TD
-    P1["Phase 1: Standards, Design Tokens & Upstream NUIX Alignment"] --> P2["Phase 2: Core Selection, Focus & Popover Stability"]
-    P2 --> P3["Phase 3: Functional Block Drag-and-Drop Engine"]
-    P3 --> P4["Phase 4: Production Feature Parity Restoration"]
-    P4 --> P5["Phase 5: React & Hook Integration Hardening"]
-    P5 --> P6["Phase 6: Draft Auto-Save, Formats & Visual Verification"]
-```
+Refactor and elevate `@nofinite/media` into an enterprise-grade, framework-agnostic audio/video streaming media suite powered by Vidstack and strictly adhering to `@nofinite/nuicss` design tokens and standards. Eliminate all regressions, phantom CSS exports, React bundle pollution on the main entrypoint, and unstyled DOM wireframes, while exposing a complete production-grade streaming feature set (HLS/DASH, tracks/captions, VTT scrubbing thumbnails, adaptive bitrate quality switching, event hooks, and light/dark theme synchronization).
 
 ---
 
-### Phase 1: Standards, Design Tokens & Upstream NUIX Alignment
+## 2. Current Behavior & Verified Problems
 
-**Focus:** Purge hardcoded styles, eliminate design system violations, enforce the modal contract, and align with `@nofinite/nuix` and `@nofinite/nuicss`.
+From our forensic audit and Playwright headless inspection:
 
-- **1.1 Design Token & CSS Cleanup:**
-  - Replace all hardcoded hex literals in `packages/markon/src/core/toolbarMenus.ts` (`HIGHLIGHT_PRESETS` and `TEXT_COLOR_PRESETS`) with semantic NUICSS design tokens (`var(--color-primary)`, `var(--color-warning)`, `var(--color-danger)`, `var(--color-success)`, `var(--color-neutral)`, etc.) and OKLCH palettes.
-  - Eliminate hardcoded theme classes in `packages/markon/src/core/extensions.ts` line 193 (`bg-slate-900 text-slate-50`). Replace with theme-adaptive NUICSS tokens (`bg-subtle text-default border border-default`).
-  - Purge arbitrary Tailwind bracket utilities (`text-[10px]`, `text-[11px]`) across `bubbleMenu.ts`, `slashCommand.ts`, and `toolbarMenus.ts`, replacing them with semantic typography scales (`text-xs`).
-- **1.2 Strict Modal Hierarchy & Backdrop Contract (`dialog.ts`):**
-  - Comply with the constitution rule: Remove the ambiguous corner `✕` close button from confirmation/edit modals containing explicit "Cancel" and "Save" action buttons.
-  - Enforce glassmorphic backdrop styling (`backdrop:bg-overlay backdrop:backdrop-blur-sm`) on native `<dialog class="modal">` elements instead of inline transparent workarounds.
-- **1.3 Upstream NUIX Component Integration:**
-  - Introduce `@nofinite/nuix` as a dependency in `packages/markon/package.json`.
-  - Harmonize modal and popover DOM structures with NUIX superclasses (`modal-box`, `modal-footer`, `dropdown`, `popover`).
+1. **Unstyled DOM Wireframe for Consumers:** `<VideoPlayer>` and `<AudioPlayer>` in React render unstyled raw SVG icons, uncontained text, and misaligned checkboxes when consumed in applications because the package does not bundle or export Vidstack layout styles.
+2. **Phantom `./dist/styles.css` Export:** `package.json` points `./styles.css` to `./dist/styles.css`, but no CSS file is ever generated or packaged, causing `ERR_MODULE_NOT_FOUND` in production.
+3. **Dead Framework-Agnostic Core (`createMediaPlayer`):** `createMediaPlayer` creates `<media-player>` and `<media-provider>` via `document.createElement` without ever importing or registering Vidstack custom elements. The browser treats them as inert `HTMLUnknownElement`s; no video plays, no layout is attached, and methods are no-ops.
+4. **Bundle Pollution on Root Entrypoint:** `src/index.ts` re-exports React components (`VideoPlayer`, `AudioPlayer`), forcing non-React consumers (Vanilla JS, Svelte, Vue, Angular) to pull in `react` and `react/jsx-runtime`, throwing errors if React is not installed.
+5. **Violation of `@nofinite/nuicss` Standards:** Components use arbitrary bracketed utilities (`border-[var(--border-default)]`, `bg-[var(--bg-surface)]`) rather than NUICSS tokens and superclasses. Player CSS custom properties are not bound to NUICSS OKLCH tokens, and hardcoded `theme="dark"` defaults cause jarring color clashes inside light-mode cards.
+6. **Missing Production-Grade Media Features:** No event callbacks (`onPlay`, `onPause`, `onTimeUpdate`), no captions/subtitles support (`tracks`), no VTT thumbnail scrubber support (`thumbnails`), no playback speed controls, and no quality selection menus.
+7. **Downstream Documentation Desync:** `oss-docs` still attempts to import `VideoPlayer` from `@nofinite/nui`, which was removed during the decoupling refactor.
 
 ---
 
-### Phase 2: Core Selection, Focus & Popover Stability (Subtle Bug Remediation)
+## 3. Proposed Phase-Wise Architecture & Execution Plan
 
-**Focus:** Eliminate ProseMirror selection loss, scroll disconnects, popover race conditions, and module singleton leaks.
+### Phase 1: Package Boundaries, Clean Exports & Build Pipeline
 
-- **2.1 Modal Selection & Focus Preservation:**
-  - In `MarkonEditor.ts` and `dialog.ts`, capture the active ProseMirror selection range (`editor.state.selection`) _prior_ to displaying any modal input (Link, Image, Math).
-  - When the modal confirms, restore the exact selection range before dispatching TipTap command transactions (`setLink`, `setImage`, `insertContent`), preventing collapsed or misplaced formatting.
-- **2.2 Bubble Menu Floating UI Auto-Update:**
-  - In `packages/markon/src/core/bubbleMenu.ts`, connect `@floating-ui/dom`'s `autoUpdate` to track window scrolling and container scrolling (`.editor-content`).
-  - Safely unregister `autoUpdate` on selection collapse and editor destruction.
-  - Replace raw emoji icons (e.g. `🔗`) with crisp SVG icons matching NUIX design standards.
-- **2.3 Slash Command Instance Encapsulation:**
-  - Refactor `packages/markon/src/core/slashCommand.ts` to remove module-level singleton state (`popupEl`, `selectedIndex`, `currentItems`).
-  - Encapsulate popup state per extension/editor instance so multiple editors on the same page operate without collision or cross-contamination.
-- **2.4 Unified Popover Manager & Outside Click Safety:**
-  - Consolidate the 5 popover menu classes (`Typography`, `FontFamily`, `FontSize`, `Highlight`, `TextColor`) to use a shared popover lifecycle helper.
-  - Automatically close any open popover when a new one opens, eliminating concurrent z-index fights and document event listener leaks.
+- **Decouple Entrypoints:**
+  - `.` (`@nofinite/media`): Strictly framework-agnostic. Exports `createMediaPlayer`, streaming utilities (`isHlsSource`, `isDashSource`, `formatMediaTime`), types, and custom element auto-registration. **Zero React dependencies**.
+  - `./react` (`@nofinite/media/react`): React adapters (`VideoPlayer`, `AudioPlayer`), React types, and re-exported Vidstack React hooks (`useMediaRemote`, `useMediaState`).
+  - `./styles.css` (`@nofinite/media/styles.css`): Single comprehensive compiled stylesheet containing Vidstack base styles, default layouts, and NUICSS token mappings.
+- **Build Pipeline (`vite.config.ts`):**
+  - Add stylesheet build input or CSS bundling step to compile `src/styles/media.css` directly into `dist/styles.css`.
+  - Maintain clean dual-format builds (ESM `.js` + CJS `.cjs`) and TypeScript `.d.ts` declaration maps.
+- **Verification Gate 1:** Run `npm pack --dry-run` in `packages/media` to verify all expected artifacts (`dist/styles.css`, `dist/index.js`, `dist/react/index.js`, `dist/types/`) are present in the tarball.
 
 ---
 
-### Phase 3: Functional Block Drag-and-Drop Engine
+### Phase 2: NUICSS Design System Integration & Theme Synchronization
 
-**Focus:** Transform the cosmetic drag handle into a true Notion-style block reordering and manipulation system.
-
-- **3.1 Safe ProseMirror Node Resolution:**
-  - In `packages/markon/src/core/dragHandle.ts`, fix the `resolved.before(1)` crash when resolving positions at root depth 0 or inside nested nodes.
-- **3.2 Complete Drag-and-Drop Lifecycle:**
-  - Implement `dragover`, `dragenter`, `dragleave`, and `drop` event listeners on the editor container.
-  - Calculate target block drop coordinates accurately using ProseMirror's `posAtCoords`.
-- **3.3 Visual Drop Indicator:**
-  - Render an animated drop insertion indicator line between blocks showing precisely where the dropped block will land.
-- **3.4 Atomic Node Movement Transaction:**
-  - On `drop`, execute a clean atomic ProseMirror transaction (`tr.delete(sourcePos, sourcePos + nodeSize).insert(targetPos, node)`), preserving selection and node attributes.
-
----
-
-### Phase 4: Production Feature Parity Restoration
-
-**Focus:** Port back and modernize all rich content authoring features from the previous React implementation (`packages/nui/src/components/editor/`).
-
-- **4.1 Interactive Table Dimension Picker:**
-  - Replace the rigid "3x3 Table" button with an interactive grid picker (hover over rows/columns up to 10x10 to choose table size dynamically before inserting).
-- **4.2 Video & Media Embed Engine:**
-  - Implement a framework-agnostic `CustomVideo` TipTap extension supporting YouTube, Vimeo, and direct video URLs (`.mp4`, `.webm`) with responsive aspect ratios.
-- **4.3 Resizable & Alignable Image NodeView:**
-  - Create a custom DOM NodeView for images featuring corner drag resize handles, width percentage controls, and alignment tools (left, center, right).
-- **4.4 Enhanced Code Block NodeView:**
-  - Create an interactive Code Block NodeView equipped with syntax language selector dropdown (TypeScript, JavaScript, Python, HTML, CSS, JSON, etc.) and a one-click "Copy Code" button with toast notification.
-- **4.5 Collapsible / Accordion Sections:**
-  - Re-introduce toggle headings / collapsible accordion blocks (Notion-style `<details>` / `<summary>` blocks).
-- **4.6 File Attachments & Drag-and-Drop File Upload:**
-  - Add file attachment block with icon, filename, filesize, and download action.
-  - Support `onUploadFile?: (file: File) => Promise<string>` hook to upload dropped images and files asynchronously rather than forcing multi-megabyte Base64 strings.
+- **Single Source of Truth Stylesheet (`src/styles/media.css`):**
+  - Import Vidstack core theme and default layouts:
+    - `@vidstack/react/player/styles/default/theme.css`
+    - `@vidstack/react/player/styles/default/layouts/video.css`
+    - `@vidstack/react/player/styles/default/layouts/audio.css`
+  - Bridge Vidstack CSS custom properties directly to `@nofinite/nuicss` OKLCH tokens:
+    ```css
+    .nui-vidstack-player,
+    .nui-vidstack-audio-player {
+      --media-brand: var(--color-primary);
+      --media-focus-ring: var(--color-primary);
+      --media-font-family: var(--font-sans, system-ui, sans-serif);
+      --media-border-radius: var(--radius-lg, 0.75rem);
+      --media-slider-track-bg: var(--border-default);
+      --media-slider-track-fill-bg: var(--color-primary);
+      --media-menu-bg: var(--bg-surface);
+      --media-menu-border: var(--border-default);
+      --media-menu-color: var(--text-default);
+    }
+    ```
+- **Refactor React Superclasses & Token Usage:**
+  - Replace all arbitrary Tailwind bracketed classes in `VideoPlayer.tsx` and `AudioPlayer.tsx` with clean semantic tokens (`border border-default`, `bg-surface`, `text-primary`, `text-muted`).
+  - Remove hardcoded `theme = 'dark'` default. Introduce dynamic theme resolution (`theme?: 'light' | 'dark' | 'auto'`) that harmonizes the inner player with outer card containers and responds to `data-theme` and `prefers-color-scheme`.
+- **Verification Gate 2:** Validate that light mode renders a harmonious light surface card with matching player controls, and dark mode renders a dark surface card with OKLCH primary accents.
 
 ---
 
-### Phase 5: React & Hook Integration Hardening (`MarkonEditor.tsx` & `useMarkon.ts`)
+### Phase 3: True Framework-Agnostic Core (`createMediaPlayer`) Engine
 
-**Focus:** Guarantee seamless, flicker-free, and cursor-stable integration in modern React / Next.js environments.
-
-- **5.1 Dynamic Props Reactivity (No Stale Closures):**
-  - Update `packages/markon/src/react/MarkonEditor.tsx` to reactively synchronize updates to `readOnly`, `placeholder`, `minHeight`, and toolbar flags without tearing down and re-instantiating the editor.
-- **5.2 Non-Destructive Controlled Content Sync (Eliminate Cursor Jumping):**
-  - Prevent caret jumping to index 0 on parent re-renders by performing diff-checks before dispatching transactions and preserving ProseMirror cursor coordinates when syncing incoming `value`.
-- **5.3 Reactive `useMarkon` Hook Statistics:**
-  - Ensure `wordCount`, `charCount`, and `isEmpty` update on both user input and programmatic `setContent()` calls.
-
----
-
-### Phase 6: Draft Auto-Save, Bidirectional Formats & Visual Verification
-
-**Focus:** Enterprise persistence, export formats, automated testing, and Playwright visual validation.
-
-- **6.1 Real Auto-Save & Crash Recovery:**
-  - Implement local storage / IndexedDB draft manager with active save states: `saving`, `saved`, `error`, and last-saved timestamp.
-  - Wire the status footer to show live saving indicators.
-- **6.2 Serialization & Clean Output:**
-  - Add bidirectional Markdown parsing and export utilities.
-- **6.3 Comprehensive Verification & Playwright Visual Testing:**
-  - Expand `packages/markon/src/markon.test.ts` to cover all new extensions, commands, and selection restoration.
-  - Run Playwright visual tests capturing screenshots in `/temp/screenshots/` to verify spatial layout, popover alignments, and modal backdrop blur.
-  - Run `npm pack` in `packages/markon` to verify compiled distribution tarball integrity.
+- **Custom Elements Lifecycle & Registration:**
+  - Safely import and register Vidstack custom elements (`vidstack/player`, `vidstack/player/ui`, `vidstack/player/layouts/default`, `vidstack/icons`) when running in the browser (`typeof window !== 'undefined'`).
+- **Comprehensive Declarative Options (`MediaPlayerOptions`):**
+  - Implement options for: `src`, `type`, `poster`, `title`, `artist`, `artwork`, `controls`, `tracks` (subtitles/VTT), `thumbnails` (scrubber storyboard), `playbackRates`, `theme`, `autoplay`, `loop`, `muted`, `playsinline`, `aspectRatio`, `className`.
+- **Layout Construction:**
+  - When `controls: true`, construct and append `<media-video-layout>` or `<media-audio-layout>` with full player controls.
+  - Append `<track>` elements dynamically when `tracks` are provided.
+- **Rich Observable Instance API (`MediaPlayerInstance`):**
+  - Methods: `play()`, `pause()`, `setSrc(src)`, `destroy()`, `on(event, handler)`, `off(event, handler)`, `getState()`.
+  - Expose state observables: `currentTime`, `duration`, `paused`, `volume`, `muted`, `buffered`, `fullscreen`.
+- **Verification Gate 3:** Run Playwright headless DOM tests verifying `<media-player>` upgrades to an active custom element with functional `<video>`/`<audio>` tags, working `play()`/`pause()`, and layout controls.
 
 ---
 
-## Dependencies & Affected Files
+### Phase 4: Production-Grade React Suite (`VideoPlayer` & `AudioPlayer`)
 
-### Modified Packages:
-
-- `packages/markon`: Primary engine refactor and extension enhancements.
-- `packages/nuicss`: Upstream token and mark/sub/sup style definitions.
-
-### Key Files Affected:
-
-- `packages/markon/package.json`
-- `packages/markon/src/core/MarkonEditor.ts`
-- `packages/markon/src/core/dialog.ts`
-- `packages/markon/src/core/bubbleMenu.ts`
-- `packages/markon/src/core/slashCommand.ts`
-- `packages/markon/src/core/dragHandle.ts`
-- `packages/markon/src/core/toolbarMenus.ts`
-- `packages/markon/src/core/typographyMenu.ts`
-- `packages/markon/src/core/extensions.ts`
-- `packages/markon/src/react/MarkonEditor.tsx`
-- `packages/markon/src/react/useMarkon.ts`
-- `packages/nuicss/src/styles/theme.css`
+- **Event Callbacks:**
+  - Expose standard playback event callbacks on `VideoPlayerProps` and `AudioPlayerProps`: `onPlay`, `onPause`, `onEnded`, `onTimeUpdate`, `onVolumeChange`, `onError`, `onSeeked`, `onLoadedMetadata`, `onFullscreenChange`.
+- **Subtitles & Captions (`tracks`):**
+  - Support `tracks` prop: `Array<{ src: string; label: string; language: string; kind?: 'subtitles' | 'captions' | 'chapters'; default?: boolean }>`.
+  - Render `<track>` elements inside `<MediaProvider>`.
+- **Storyboard Scrubbing (`thumbnails`):**
+  - Pass `thumbnails` (VTT URL) to `DefaultVideoLayout` for live thumbnail preview scrubbers.
+- **Adaptive Bitrate Quality & Speed Controls:**
+  - Support `playbackRates` (e.g. `[0.5, 0.75, 1, 1.25, 1.5, 2]`).
+  - Configure quality selection menu for HLS/DASH streams.
+- **Re-exported React Hooks:**
+  - Export `useMediaRemote`, `useMediaState`, and `MediaPlayerInstance` from `@nofinite/media/react` so developers can build custom controls or query player state easily.
+- **Verification Gate 4:** Typecheck with `tsc -p tsconfig.lib.json` and run unit/component test suite.
 
 ---
 
-## Risks & Mitigations
+### Phase 5: Storybook Showcase, Documentation & Compulsory Visual Validation
 
-| Risk                                                    | Mitigation                                                                                                             |
-| :------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------- |
-| **Selection loss during modal or popover interactions** | Explicitly cache `editor.state.selection` before opening overlays, and restore it before dispatching commands.         |
-| **Cursor jumping in controlled React forms**            | Perform DOM/JSON equality checks and use transaction mapping instead of full `setContent` resets.                      |
-| **DOM bloat from multiple Floating UI instances**       | Implement a shared popover manager that enforces a single active popover and registers `autoUpdate` only when visible. |
-| **CSS token divergence**                                | Strictly bind all colors and surfaces to `@nofinite/nuicss` variables; zero hardcoded hex literals.                    |
+- **Unified Storybook Stories (`packages/media/src/react/MediaPlayer.stories.tsx`):**
+  - Story 1: Video HLS with multi-quality stream and poster.
+  - Story 2: Video MP4 with VTT storyboard thumbnails, captions, and playback speed menu.
+  - Story 3: Audio Player with title, artist, artwork, and full scrubbing controls.
+  - Story 4: Light Mode vs Dark Mode comparison showcase.
+  - Story 5: Vanilla DOM Player mounted dynamically.
+- **Documentation Sync:**
+  - Update `d:\oss-docs\src\registry\video.tsx` and `index.ts` to import `VideoPlayer` from `@nofinite/media/react` and import `@nofinite/media/styles.css`.
+- **Compulsory Visual Verification:**
+  - Execute Playwright test script in `/temp/` capturing screenshots in `/temp/screenshots/` across light mode, dark mode, player hover, scrubber interaction, and mobile viewports.
+  - Confirm spatial harmony, border contrast, and 100% OKLCH token conformance.
 
 ---
 
-## Verification Strategy
+## 4. Affected Files & Repositories
 
-1. **Unit & Integration Tests:** Vitest test suite covering node creation, selection state, and command execution.
-2. **Visual Verification:** Playwright screenshots saved to `/temp/screenshots/` to verify aesthetics, drop indicators, and glassmorphic backdrops.
-3. **NPM Output Verification:** Run `npm pack` to inspect tarball contents and ensure all type declarations and bundles are present.
-4. **Local Git Commits:** Compulsory logical commit following successful verification of each phase.
+| Repository    | Path                                               | Role                                                           |
+| :------------ | :------------------------------------------------- | :------------------------------------------------------------- |
+| `d:\stack`    | `packages/media/package.json`                      | Package exports, peerDeps, sideEffects                         |
+| `d:\stack`    | `packages/media/vite.config.ts`                    | CSS bundle generation & build config                           |
+| `d:\stack`    | `packages/media/src/index.ts`                      | Clean framework-agnostic entrypoint                            |
+| `d:\stack`    | `packages/media/src/core/player.ts`                | Core DOM player engine & custom elements registration          |
+| `d:\stack`    | `packages/media/src/core/index.ts`                 | Core exports & types                                           |
+| `d:\stack`    | `packages/media/src/styles/media.css`              | **New** single-source stylesheet with NUICSS tokens            |
+| `d:\stack`    | `packages/media/src/react/VideoPlayer.tsx`         | Production-grade React VideoPlayer with event hooks & captions |
+| `d:\stack`    | `packages/media/src/react/AudioPlayer.tsx`         | Harmonized React AudioPlayer with NUICSS tokens & artwork      |
+| `d:\stack`    | `packages/media/src/react/index.ts`                | React entrypoint & hooks re-export                             |
+| `d:\stack`    | `packages/media/src/react/MediaPlayer.stories.tsx` | Monorepo Storybook stories                                     |
+| `d:\stack`    | `packages/media/src/media.test.ts`                 | Comprehensive unit & integration tests                         |
+| `d:\oss-docs` | `src/registry/video.tsx`                           | Fix outdated `@nofinite/nui` import                            |
+| `d:\oss-docs` | `src/registry/index.ts`                            | Fix code preview string                                        |
+
+---
+
+## 5. Dependencies & Tools
+
+- `vidstack` (v1.15.6) & `@vidstack/react` (v1.15.6): Underlying robust media player primitives.
+- `@nofinite/nuicss`: Design tokens and semantic superclasses.
+- `@playwright/test`: Compulsory visual regression validation in `/temp/`.
+- `vitest`: Unit test executor via `@nx/vitest`.
+
+---
+
+## 6. Risks & Mitigation
+
+- **Risk:** Custom elements SSR errors in frameworks like Next.js.
+  - _Mitigation:_ Guard all custom element definitions with `typeof window !== 'undefined'` and `typeof customElements !== 'undefined'`.
+- **Risk:** CSS specificity clashes with application styles.
+  - _Mitigation:_ Scope player styles with `.nui-vidstack-player` and `.nui-vidstack-audio-player` wrapper classes and utilize CSS variables.
+- **Risk:** Breaking changes for early users who imported `VideoPlayer` from `@nofinite/media`.
+  - _Mitigation:_ Document migration clearly: `import { VideoPlayer } from '@nofinite/media/react';` and `import '@nofinite/media/styles.css';`.
+
+---
+
+## 7. Rollback Considerations
+
+Each phase will be committed locally to git immediately upon successful verification. If any unexpected regression occurs, git provides instant rollback to the preceding clean commit.
+
+---
+
+## 8. Verification Strategy
+
+1. **Packaging Verification:** `npm pack --dry-run` to inspect tarball output.
+2. **Type Checking:** `pnpm nx run media:typecheck` or `tsc -p packages/media/tsconfig.lib.json`.
+3. **Unit Tests:** `pnpm nx run media:test`.
+4. **Visual Playwright Verification:** Screenshots rendered in `/temp/screenshots/` inspected and confirmed.
