@@ -1,10 +1,15 @@
 import { useMemo, useState, useId } from 'react';
-import { calculateAreaPath, type DataPoint, defaultMargin } from '../core/math';
+import {
+  calculateAreaPath,
+  type DataPoint,
+  defaultMargin,
+  type NormalizedDataPoint,
+} from '../core/math';
 import clsx from 'clsx';
 
 export interface AreaChartProps<T = DataPoint> {
   data: T[];
-  xAccessor?: (d: T) => number | Date;
+  xAccessor?: (d: T) => number | Date | string;
   yAccessor?: (d: T) => number;
   width?: number;
   height?: number;
@@ -16,8 +21,8 @@ export interface AreaChartProps<T = DataPoint> {
 
 export function AreaChart<T = DataPoint>({
   data,
-  xAccessor = (d: any) => (d.date ? new Date(d.date) : 0),
-  yAccessor = (d: any) => d.value ?? 0,
+  xAccessor,
+  yAccessor,
   width = 500,
   height = 300,
   margin = defaultMargin,
@@ -26,11 +31,13 @@ export function AreaChart<T = DataPoint>({
   showGrid = true,
 }: AreaChartProps<T>) {
   const gradientId = useId();
-  const [activePoint, setActivePoint] = useState<T | null>(null);
+  const [activePoint, setActivePoint] = useState<NormalizedDataPoint | null>(
+    null
+  );
 
-  const { areaPath, linePath, yScale } = useMemo(() => {
+  const { areaPath, linePath, yScale, points } = useMemo(() => {
     return calculateAreaPath(
-      data as any,
+      data,
       { width, height, margin },
       xAccessor as any,
       yAccessor as any
@@ -41,12 +48,16 @@ export function AreaChart<T = DataPoint>({
 
   return (
     <div
-      className={clsx('relative w-full select-none font-sans', className)}
+      className={clsx(
+        'chart-container nui-chart-container relative w-full select-none font-sans',
+        className
+      )}
       style={{ height }}
     >
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="w-full h-full overflow-visible"
+        preserveAspectRatio="none"
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -68,39 +79,38 @@ export function AreaChart<T = DataPoint>({
                   x2={innerWidth}
                   y2={yScale(t)}
                   stroke="var(--border-default)"
-                  strokeOpacity={0.6}
+                  strokeOpacity={0.5}
                   strokeDasharray="3,3"
+                  className="chart-grid"
                 />
               ))}
 
-          <path d={areaPath} fill={`url(#${gradientId})`} />
-          <path
-            d={linePath}
-            fill="none"
-            stroke={color}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} />}
+          {linePath && (
+            <path
+              d={linePath}
+              fill="none"
+              stroke={color}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
 
-          {data.map((d: any, i: number) => {
-            const x = (i / Math.max(1, data.length - 1)) * innerWidth;
-            const y = yScale(yAccessor(d));
-            return (
-              <circle
-                key={i}
-                cx={x}
-                cy={y}
-                r={activePoint === d ? 5 : 3.5}
-                fill={color}
-                stroke="var(--bg-surface)"
-                strokeWidth={2}
-                className="transition-all duration-150 cursor-pointer"
-                onMouseEnter={() => setActivePoint(d)}
-                onMouseLeave={() => setActivePoint(null)}
-              />
-            );
-          })}
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={activePoint === p.data ? 5.5 : 3.5}
+              fill={color}
+              stroke="var(--bg-surface)"
+              strokeWidth={2}
+              className="chart-point transition-all duration-150 cursor-pointer"
+              onMouseEnter={() => setActivePoint(p.data)}
+              onMouseLeave={() => setActivePoint(null)}
+            />
+          ))}
         </g>
       </svg>
     </div>

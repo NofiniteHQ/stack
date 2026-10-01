@@ -1,11 +1,16 @@
 import { useMemo, useState } from 'react';
 import { scaleLinear } from 'd3-scale';
-import { extent } from 'd3-array';
-import { defaultMargin } from '../core/math';
+import {
+  defaultMargin,
+  normalizeData,
+  type NormalizedDataPoint,
+} from '../core/math';
 import clsx from 'clsx';
 
-export interface ScatterChartProps {
-  data: { x: number; y: number; label?: string; color?: string }[];
+export interface ScatterChartProps<T = any> {
+  data: T[];
+  xAccessor?: (d: T) => number | Date | string;
+  yAccessor?: (d: T) => number;
   width?: number;
   height?: number;
   margin?: { top: number; right: number; bottom: number; left: number };
@@ -13,53 +18,69 @@ export interface ScatterChartProps {
   className?: string;
 }
 
-export function ScatterChart({
+export function ScatterChart<T = any>({
   data,
+  xAccessor,
+  yAccessor,
   width = 500,
   height = 300,
   margin = defaultMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
-}: ScatterChartProps) {
-  const [activePoint, setActivePoint] = useState<any | null>(null);
+}: ScatterChartProps<T>) {
+  const [activePoint, setActivePoint] = useState<NormalizedDataPoint | null>(
+    null
+  );
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
 
-  const { xScale, yScale } = useMemo(() => {
-    const xExt = extent(data, (d) => d.x) as [number, number];
-    const yExt = extent(data, (d) => d.y) as [number, number];
+  const { normalized, xScale, yScale } = useMemo(() => {
+    const items = normalizeData(data, {
+      xAccessor: xAccessor as any,
+      yAccessor: yAccessor as any,
+    });
+    const xs = items.map((d) => (typeof d.x === 'number' ? d.x : 0));
+    const ys = items.map((d) => d.y);
+    const minX = Math.min(0, ...xs);
+    const maxX = Math.max(10, ...xs) || 100;
+    const minY = Math.min(0, ...ys);
+    const maxY = Math.max(10, ...ys) || 100;
 
     const xScale = scaleLinear()
-      .domain([xExt[0] || 0, xExt[1] || 100])
+      .domain([minX, maxX * 1.05])
       .range([0, innerWidth]);
     const yScale = scaleLinear()
-      .domain([yExt[0] || 0, yExt[1] || 100])
+      .domain([minY, maxY * 1.05])
       .range([innerHeight, 0]);
 
-    return { xScale, yScale };
-  }, [data, innerWidth, innerHeight]);
+    return { normalized: items, xScale, yScale };
+  }, [data, innerWidth, innerHeight, xAccessor, yAccessor]);
 
   return (
     <div
-      className={clsx('relative w-full select-none font-sans', className)}
+      className={clsx(
+        'chart-container nui-chart-container relative w-full select-none font-sans',
+        className
+      )}
       style={{ height }}
     >
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="w-full h-full overflow-visible"
+        preserveAspectRatio="none"
       >
         <g transform={`translate(${margin.left}, ${margin.top})`}>
-          {data.map((d, i) => (
+          {normalized.map((d, i) => (
             <circle
               key={i}
-              cx={xScale(d.x)}
+              cx={xScale(typeof d.x === 'number' ? d.x : 0)}
               cy={yScale(d.y)}
               r={activePoint === d ? 6 : 4}
               fill={d.color || color}
               stroke="var(--bg-surface)"
               strokeWidth={2}
-              className="transition-all duration-150 cursor-pointer"
+              className="chart-point transition-all duration-150 cursor-pointer hover:scale-125"
               onMouseEnter={() => setActivePoint(d)}
               onMouseLeave={() => setActivePoint(null)}
             />
@@ -85,13 +106,17 @@ export function Sparkline({
   color = 'var(--color-primary)',
   className,
 }: SparklineProps) {
+  if (!data || data.length === 0) {
+    return null;
+  }
+
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
 
   const points = data
     .map((val, i) => {
-      const x = (i / (data.length - 1)) * width;
+      const x = (i / Math.max(1, data.length - 1)) * width;
       const y = height - ((val - min) / range) * (height - 6) - 3;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
@@ -99,7 +124,10 @@ export function Sparkline({
 
   return (
     <div
-      className={clsx('inline-flex items-center select-none', className)}
+      className={clsx(
+        'sparkline inline-flex items-center select-none',
+        className
+      )}
       style={{ width, height }}
     >
       <svg

@@ -36,6 +36,20 @@
   -webkit-user-select: none;
 }
 
+.chart-container-circular {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-container-circular svg {
+  max-height: 100%;
+  max-width: 100%;
+  width: auto;
+  height: 100%;
+  margin: 0 auto;
+}
+
 /* Guide Grid */
 .chart-grid {
   stroke: var(--border-default, rgba(128, 128, 128, 0.25));
