@@ -4,6 +4,8 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import path from 'node:path';
 
+import fs from 'node:fs';
+
 export default defineConfig({
   root: __dirname,
 
@@ -15,6 +17,16 @@ export default defineConfig({
       outDir: path.resolve(__dirname, 'dist/types'),
       insertTypesEntry: true,
     }),
+    {
+      name: 'copy-styles',
+      closeBundle() {
+        const srcStyle = path.resolve(__dirname, 'src/styles.css');
+        const distStyle = path.resolve(__dirname, 'dist/styles.css');
+        if (fs.existsSync(srcStyle)) {
+          fs.copyFileSync(srcStyle, distStyle);
+        }
+      },
+    },
   ],
 
   build: {

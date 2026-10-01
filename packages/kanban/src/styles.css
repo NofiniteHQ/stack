@@ -1,0 +1,43 @@
+/**
+ * @nofinite/kanban - Base Styles
+ * Universal styles and utility fallback layer for Kanban boards.
+ * Fully compatible with @nofinite/nuicss semantic design tokens.
+ */
+
+.kanban-board {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  align-items: flex-start;
+  user-select: none;
+  min-height: 400px;
+}
+
+.kanban-column {
+  width: 20rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  transition: all 0.15s ease-in-out;
+}
+
+.kanban-card {
+  position: relative;
+  user-select: none;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kanban-card:focus-visible {
+  outline: 2px solid var(--color-primary, #6366f1);
+  outline-offset: 2px;
+}
+
+.kanban-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  overflow-y: auto;
+  flex: 1 1 0%;
+  min-height: 140px;
+}
