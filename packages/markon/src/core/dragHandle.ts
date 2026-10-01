@@ -77,8 +77,8 @@ export class MarkonDragHandle {
       const target = e.target as HTMLElement;
       if (!target) return;
 
-      // Find top-level block inside ProseMirror
-      const block = this.findTopLevelBlock(target);
+      // Find draggable block or list item inside ProseMirror
+      const block = this.findDraggableBlock(target);
       if (block && block !== this.currentBlock) {
         this.currentBlock = block;
         this.showHandleForBlock(block);
@@ -179,14 +179,57 @@ export class MarkonDragHandle {
       const posAtCoords = this.editor.view.posAtCoords(coords);
       if (!posAtCoords) return;
 
-      const resolved = this.editor.view.state.doc.resolve(posAtCoords.pos);
+      const doc = this.editor.view.state.doc;
+      const sourceNode = doc.nodeAt(this.draggedPos);
+      if (!sourceNode) return;
+
+      const resolved = doc.resolve(posAtCoords.pos);
       if (resolved.depth === 0) return;
 
-      const targetBlockPos = resolved.before(1);
-      const targetNode = this.editor.view.state.doc.nodeAt(targetBlockPos);
-      if (!targetNode) return;
+      // Determine matching target block level
+      let targetPos: number | null = null;
+      let targetNode: any = null;
 
-      const domNode = this.editor.view.nodeDOM(targetBlockPos);
+      // If dragged item is a listItem / taskItem, try to find target list item at same depth
+      if (
+        sourceNode.type.name === 'listItem' ||
+        sourceNode.type.name === 'taskItem'
+      ) {
+        for (let d = resolved.depth; d > 0; d--) {
+          const nodeAtDepth = resolved.node(d);
+          if (nodeAtDepth.type.name === sourceNode.type.name) {
+            targetPos = resolved.before(d);
+            targetNode = nodeAtDepth;
+            break;
+          }
+        }
+      }
+
+      // Default to top-level block if not a nested match
+      if (targetPos === null || !targetNode) {
+        // Guard: Don't allow dropping inside a table cell if source is not a table row/cell; target the entire table block instead
+        for (let d = resolved.depth; d > 0; d--) {
+          if (
+            ['table', 'tableRow', 'tableCell', 'tableHeader'].includes(
+              resolved.node(d).type.name
+            )
+          ) {
+            if (resolved.node(d).type.name === 'table') {
+              targetPos = resolved.before(d);
+              targetNode = resolved.node(d);
+            }
+          }
+        }
+
+        if (!targetPos) {
+          targetPos = resolved.before(1);
+          targetNode = doc.nodeAt(targetPos);
+        }
+      }
+
+      if (!targetNode || targetPos === null) return;
+
+      const domNode = this.editor.view.nodeDOM(targetPos);
       const domEl =
         domNode instanceof HTMLElement
           ? domNode
@@ -197,9 +240,7 @@ export class MarkonDragHandle {
       const containerRect = this.container.getBoundingClientRect();
       const isAfter = e.clientY > rect.top + rect.height / 2;
 
-      const insertPos = isAfter
-        ? targetBlockPos + targetNode.nodeSize
-        : targetBlockPos;
+      const insertPos = isAfter ? targetPos + targetNode.nodeSize : targetPos;
       this.dropTargetPos = insertPos;
 
       const lineTop =
@@ -241,24 +282,28 @@ export class MarkonDragHandle {
         if (toPos !== fromPos && toPos !== fromPos + sourceNode.nodeSize) {
           const tr = this.editor.view.state.tr;
 
-          // Delete original block
-          tr.delete(fromPos, fromPos + sourceNode.nodeSize);
-
-          // Calculate mapped destination position
-          const mappedToPos = tr.mapping.map(toPos);
-
-          // Insert block at target destination
-          tr.insert(mappedToPos, sourceNode);
-
           try {
+            // Delete original block
+            tr.delete(fromPos, fromPos + sourceNode.nodeSize);
+
+            // Calculate mapped destination position
+            const mappedToPos = tr.mapping.map(toPos);
+
+            // Insert block at target destination
+            tr.insert(mappedToPos, sourceNode);
+
             const newSelection = NodeSelection.create(tr.doc, mappedToPos);
             tr.setSelection(newSelection);
-          } catch {
-            // fallback
-          }
 
-          this.editor.view.dispatch(tr);
-          this.editor.view.focus();
+            this.editor.view.dispatch(tr);
+            this.editor.view.focus();
+          } catch (err) {
+            // If schema disallows direct insertion at target position, abort gracefully
+            console.warn(
+              '[MarkonDragHandle] Drag and drop transaction aborted by schema safety:',
+              err
+            );
+          }
         }
       }
 
@@ -294,17 +339,22 @@ export class MarkonDragHandle {
     this.scheduleHide();
   }
 
-  private findTopLevelBlock(el: HTMLElement): HTMLElement | null {
+  private findDraggableBlock(el: HTMLElement): HTMLElement | null {
     const editorDom = this.editor.view.dom;
     let curr: HTMLElement | null = el;
 
-    while (curr && curr.parentElement && curr.parentElement !== editorDom) {
+    // Check if within a list item first for granular dragging
+    while (curr && curr !== editorDom) {
+      const tag = curr.tagName.toLowerCase();
+      if (tag === 'li') {
+        return curr;
+      }
+      if (curr.parentElement === editorDom) {
+        return curr;
+      }
       curr = curr.parentElement;
     }
 
-    if (curr && curr.parentElement === editorDom) {
-      return curr;
-    }
     return null;
   }
 
@@ -312,6 +362,15 @@ export class MarkonDragHandle {
     try {
       const pos = this.editor.view.posAtDOM(block, 0);
       const resolved = this.editor.view.state.doc.resolve(pos);
+      if (block.tagName.toLowerCase() === 'li') {
+        // Find depth corresponding to this list item
+        for (let d = resolved.depth; d > 0; d--) {
+          const name = resolved.node(d).type.name;
+          if (name === 'listItem' || name === 'taskItem') {
+            return resolved.before(d);
+          }
+        }
+      }
       return resolved.depth > 0 ? resolved.before(1) : 0;
     } catch {
       return null;
