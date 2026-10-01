@@ -3,5 +3,7 @@ export * from './normalize';
 export * from './axis';
 export * from './tooltip';
 export * from './legend';
+export * from './a11y';
+export * from './export';
 export * from './renderChart';
 export * from './Chart';

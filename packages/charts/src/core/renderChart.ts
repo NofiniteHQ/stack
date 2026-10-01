@@ -12,6 +12,7 @@ import {
 } from './math';
 import { generateAxisSvg } from './axis';
 import { renderLegendHtml } from './legend';
+import { generateA11yTableHtml } from './a11y';
 import { scaleLinear } from 'd3-scale';
 import type { TooltipFormatter } from './tooltip';
 
@@ -39,9 +40,9 @@ export interface ChartOptions {
   showAxes?: boolean;
   showTooltip?: boolean;
   showCrosshair?: boolean;
-  xAccessor?: (d: any) => number | Date | string;
-  yAccessor?: (d: any) => number;
-  xTickFormat?: (val: any) => string;
+  xAccessor?: (d: unknown) => number | Date | string;
+  yAccessor?: (d: unknown) => number;
+  xTickFormat?: (val: unknown) => string;
   yTickFormat?: (val: number) => string;
   tooltipFormatter?: TooltipFormatter;
 }
@@ -50,7 +51,7 @@ let gradientCounter = 0;
 
 function renderReferenceLinesSvg(
   referenceLines: ReferenceLine[] | undefined,
-  yScale: any,
+  yScale: ((val: number) => number) | undefined,
   innerWidth: number
 ): string {
   if (!referenceLines || referenceLines.length === 0 || !yScale) return '';
@@ -415,6 +416,9 @@ export function renderChart(options: ChartOptions): string {
         ${contentSvg}
       </svg>
       ${legendHtml}
+      ${generateA11yTableHtml(seriesList, {
+        title: `${variant.toUpperCase()} chart data table`,
+      })}
       ${
         showTooltip
           ? `<div class="chart-tooltip nui-chart-tooltip" role="tooltip" style="opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; transition: opacity 0.15s ease;"></div>`

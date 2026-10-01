@@ -5,6 +5,7 @@ import {
   calculateMultiSeriesAreaPath,
   calculateMultiBarLayout,
   type ChartSeries,
+  type DataPoint,
   normalizeData,
   defaultMargin,
 } from './math';
@@ -15,6 +16,7 @@ import {
   renderTooltipHtml,
   type TooltipPayload,
 } from './tooltip';
+import { exportToCSV, exportToSVG, exportToPNG } from './export';
 
 export interface ChartInstanceOptions extends ChartOptions {
   element?: HTMLElement;
@@ -415,7 +417,10 @@ export class Chart {
     }
   }
 
-  public update(newData?: any[], newOptions?: Partial<ChartOptions>): void {
+  public update(
+    newData?: DataPoint[],
+    newOptions?: Partial<ChartOptions>
+  ): void {
     if (newData) {
       if (this.options.series) {
         this.options.data = newData;
@@ -433,5 +438,38 @@ export class Chart {
     this.abortController?.abort();
     this.abortController = null;
     this.element.innerHTML = '';
+  }
+
+  public toCSV(filename = 'chart-data.csv'): string {
+    const seriesList = this.options.series || [
+      { name: 'Series 1', data: this.options.data || [] },
+    ];
+    return exportToCSV(seriesList, filename);
+  }
+
+  public toSVG(filename = 'chart.svg'): string {
+    const svgEl = this.element.querySelector('svg');
+    if (!svgEl) return '';
+    return exportToSVG(svgEl, filename);
+  }
+
+  public toPNG(
+    filenameOrOptions:
+      | string
+      | { filename?: string; scale?: number } = 'chart.png',
+    scaleArg = 2
+  ): Promise<Blob | null> {
+    const filename =
+      typeof filenameOrOptions === 'string'
+        ? filenameOrOptions
+        : filenameOrOptions?.filename || 'chart.png';
+    const scale =
+      typeof filenameOrOptions === 'object' &&
+      filenameOrOptions?.scale !== undefined
+        ? filenameOrOptions.scale
+        : scaleArg;
+    const svgEl = this.element.querySelector('svg');
+    if (!svgEl) return Promise.resolve(null);
+    return exportToPNG(svgEl, filename, scale);
   }
 }
