@@ -261,10 +261,13 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
       btn.style.alignItems = 'flex-start';
       btn.style.height = 'auto';
       btn.style.padding = '6px 10px';
-      if (isSelected) {
-        btn.style.backgroundColor = 'var(--bg-subtle)';
-      }
-      btn.innerHTML = `<span class="font-semibold text-xs text-default" style="color: var(--fg-default);">${item.title}</span><span class="text-xs text-muted" style="color: var(--fg-muted); font-size: 0.75rem;">${item.description}</span>`;
+      btn.style.borderRadius = 'var(--radius-lg, 0.5rem)';
+      btn.style.border = 'none';
+      btn.style.width = '100%';
+      btn.style.backgroundColor = isSelected
+        ? 'var(--bg-subtle)'
+        : 'transparent';
+      btn.innerHTML = `<span class="item-title font-semibold text-xs" style="color: var(--fg-default);">${item.title}</span><span class="item-desc text-xs" style="color: var(--fg-muted); font-size: 0.72rem; line-height: 1.3;">${item.description}</span>`;
       btn.addEventListener('mousedown', (e) => {
         e.preventDefault();
       });
@@ -310,10 +313,14 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
       computePosition(virtualRef, popupEl, {
         strategy: 'fixed',
         placement: 'bottom-start',
-        middleware: [offset(6), flip(), shift({ padding: 8 })],
+        middleware: [
+          offset(6),
+          flip({ fallbackPlacements: ['top-start', 'bottom-end'] }),
+          shift({ padding: 12 }),
+        ],
       }).then(({ x, y }) => {
         if (popupEl) {
-          popupEl.style.left = `${x}px`;
+          popupEl.style.left = `${Math.max(12, x)}px`;
           popupEl.style.top = `${y}px`;
         }
       });
@@ -361,13 +368,23 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
               onStart: (props: any) => {
                 if (!popupEl) {
                   popupEl = document.createElement('div');
-                  popupEl.className =
-                    'markon-slash-menu dropdown-menu font-sans';
+                  popupEl.className = 'markon-slash-menu font-sans';
+                  popupEl.setAttribute('data-state', 'open');
                   popupEl.style.position = 'fixed';
                   popupEl.style.zIndex = '9999';
                   popupEl.style.maxHeight = '280px';
                   popupEl.style.overflowY = 'auto';
+                  popupEl.style.overflowX = 'hidden';
                   popupEl.style.width = '260px';
+                  popupEl.style.backgroundColor = 'var(--bg-surface)';
+                  popupEl.style.border = '1px solid var(--border-default)';
+                  popupEl.style.borderRadius = 'var(--radius-xl, 0.75rem)';
+                  popupEl.style.boxShadow =
+                    'var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.18))';
+                  popupEl.style.backdropFilter = 'blur(12px)';
+                  (popupEl.style as any).webkitBackdropFilter = 'blur(12px)';
+                  popupEl.style.padding = '4px';
+                  popupEl.style.scrollbarWidth = 'thin';
                   popupEl.style.display = 'none';
                   document.body.appendChild(popupEl);
                 }

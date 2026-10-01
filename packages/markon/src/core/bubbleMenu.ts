@@ -47,7 +47,7 @@ export function createBubbleMenuExtension() {
 
               if (context === 'text') {
                 menuEl.innerHTML = `
-                  <div class="flex items-center gap-0.5 pr-1 border-r border-default/50 mr-0.5">
+                  <div class="markon-bubble-block-group" style="display: inline-flex; align-items: center; gap: 2px; padding-right: 4px; margin-right: 4px; border-right: 1px solid var(--border-default);">
                     <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-semibold" data-bubble-block="paragraph" title="Paragraph">P</button>
                     <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-bold" data-bubble-block="h1" title="Heading 1">H1</button>
                     <button type="button" class="btn btn-ghost btn-xs h-7 px-1.5 text-xs font-bold" data-bubble-block="h2" title="Heading 2">H2</button>
@@ -362,14 +362,24 @@ export function createBubbleMenuExtension() {
                 if (!menuEl) {
                   menuEl = document.createElement('div');
                   menuEl.className =
-                    'markon-bubble-menu dropdown-menu flex items-center select-none font-sans';
+                    'markon-bubble-menu flex items-center select-none font-sans';
+                  menuEl.setAttribute('data-state', 'open');
                   menuEl.style.position = 'fixed';
                   menuEl.style.zIndex = '9999';
                   menuEl.style.display = 'flex';
+                  menuEl.style.alignItems = 'center';
                   menuEl.style.gap = '4px';
-                  menuEl.style.padding = '4px';
+                  menuEl.style.padding = '4px 6px';
+                  menuEl.style.backgroundColor = 'var(--bg-surface)';
+                  menuEl.style.border = '1px solid var(--border-default)';
+                  menuEl.style.borderRadius = 'var(--radius-xl, 0.75rem)';
+                  menuEl.style.boxShadow =
+                    'var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.15))';
+                  menuEl.style.backdropFilter = 'blur(12px)';
+                  (menuEl.style as any).webkitBackdropFilter = 'blur(12px)';
                   menuEl.style.minWidth = 'unset';
                   menuEl.style.width = 'max-content';
+                  menuEl.style.whiteSpace = 'nowrap';
                   setupDelegation();
                   document.body.appendChild(menuEl);
                 }
@@ -546,11 +556,11 @@ export function createBubbleMenuExtension() {
                       flip({
                         fallbackPlacements: ['bottom', 'top'],
                       }),
-                      shift({ padding: 8 }),
+                      shift({ padding: 12 }),
                     ],
                   }).then(({ x, y }) => {
                     if (menuEl) {
-                      menuEl.style.left = `${x}px`;
+                      menuEl.style.left = `${Math.max(12, x)}px`;
                       menuEl.style.top = `${y}px`;
                     }
                   });

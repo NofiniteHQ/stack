@@ -26,6 +26,7 @@ import {
   type SaveStatusState,
 } from './draftManager';
 import { htmlToMarkdown, markdownToHtml } from './markdown';
+import { ensureMarkonStyles } from './styleInjector';
 
 export type { AutoSaveConfig, SaveStatusState };
 
@@ -56,6 +57,7 @@ export function getCounts(text: string): { words: number; characters: number } {
 }
 
 export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
+  ensureMarkonStyles();
   const name = options.name || 'content';
   const minHeight = options.minHeight || '220px';
   const showWordCount = options.showWordCount !== false;
@@ -346,6 +348,7 @@ export class MarkonEditor {
   public draftManager?: MarkonDraftManager;
 
   constructor(options: MarkonEditorOptions = {}) {
+    ensureMarkonStyles();
     this.options = options;
 
     if (options.element) {

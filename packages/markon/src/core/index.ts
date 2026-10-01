@@ -18,3 +18,4 @@ export * from './markdown';
 export * from './draftManager';
 export * from './callout';
 export * from './renderer';
+export * from './styleInjector';

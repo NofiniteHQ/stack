@@ -7,7 +7,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
@@ -15,6 +17,7 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
+    "./styles.css": "./dist/markon.css",
     "./react": {
       "types": "./dist/types/react/index.d.ts",
       "import": "./dist/react/index.js",
