@@ -9,6 +9,7 @@ import {
   defaultTooltipPayload,
   renderTooltipHtml,
   type TooltipFormatter,
+  type TooltipPayload,
 } from '../core/tooltip';
 import type { NormalizedDataPoint } from '../core/math';
 
@@ -31,13 +32,17 @@ export function useChartTooltip(options: UseChartTooltipOptions = {}) {
   const show = useCallback(
     (
       point: NormalizedDataPoint,
-      reference: Element | { getBoundingClientRect: () => DOMRect }
+      reference: Element | { getBoundingClientRect: () => DOMRect },
+      customPayload?: TooltipPayload | string
     ) => {
       if (!enabled) return;
       setActivePoint(point);
-      const payload = formatter
-        ? formatter(point)
-        : defaultTooltipPayload(point, defaultColor);
+      const payload =
+        customPayload !== undefined
+          ? customPayload
+          : formatter
+          ? formatter(point)
+          : defaultTooltipPayload(point, defaultColor);
       setTooltipHtml(renderTooltipHtml(payload));
       setIsOpen(true);
 

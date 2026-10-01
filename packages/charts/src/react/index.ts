@@ -4,3 +4,4 @@ export * from './BarChart';
 export * from './PieChart';
 export * from './ScatterChart';
 export * from './useChartTooltip';
+export * from './ChartLegend';

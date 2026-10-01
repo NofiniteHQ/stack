@@ -2,11 +2,16 @@ import {
   type DataPoint,
   defaultMargin,
   calculateAreaPath,
-  calculateBarLayout,
   calculatePieSegments,
+  calculateMultiSeriesAreaPath,
+  calculateMultiBarLayout,
+  type ChartSeries,
+  type BarLayoutMode,
+  type ReferenceLine,
   normalizeData,
 } from './math';
 import { generateAxisSvg } from './axis';
+import { renderLegendHtml } from './legend';
 import { scaleLinear } from 'd3-scale';
 import type { TooltipFormatter } from './tooltip';
 
@@ -20,7 +25,11 @@ export type ChartVariant =
 
 export interface ChartOptions {
   variant: ChartVariant;
-  data: DataPoint[];
+  data?: DataPoint[];
+  series?: ChartSeries[];
+  barLayout?: BarLayoutMode;
+  referenceLines?: ReferenceLine[];
+  showLegend?: boolean;
   width?: number;
   height?: number;
   margin?: { top: number; right: number; bottom: number; left: number };
@@ -39,11 +48,43 @@ export interface ChartOptions {
 
 let gradientCounter = 0;
 
+function renderReferenceLinesSvg(
+  referenceLines: ReferenceLine[] | undefined,
+  yScale: any,
+  innerWidth: number
+): string {
+  if (!referenceLines || referenceLines.length === 0 || !yScale) return '';
+
+  return referenceLines
+    .map((ref) => {
+      if (ref.y === undefined || typeof yScale !== 'function') return '';
+      const yPos = yScale(ref.y);
+      if (isNaN(yPos)) return '';
+
+      const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
+      const dash = ref.strokeDasharray || '4,4';
+      const labelText = ref.label
+        ? `<text x="${innerWidth - 6}" y="${
+            yPos - 6
+          }" text-anchor="end" class="chart-reference-label text-[10px] font-medium font-sans select-none pointer-events-none" fill="${strokeColor}">${
+            ref.label
+          }</text>`
+        : '';
+
+      return `
+        <g class="chart-reference-group">
+          <line x1="0" y1="${yPos}" x2="${innerWidth}" y2="${yPos}" stroke="${strokeColor}" stroke-width="1.5" stroke-dasharray="${dash}" class="chart-reference-line" />
+          ${labelText}
+        </g>
+      `;
+    })
+    .join('');
+}
+
 export function renderChart(options: ChartOptions): string {
   const width = options.width || 600;
   const height = options.height || 300;
   const margin = options.margin || defaultMargin;
-  const data = options.data || [];
   const variant = options.variant;
   const color = options.color || 'var(--chart-1, var(--color-primary))';
   const showGrid = options.showGrid !== false;
@@ -53,69 +94,176 @@ export function renderChart(options: ChartOptions): string {
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
-  const gradientId = `nui-chart-grad-${++gradientCounter}`;
+  const baseGradId = `nui-chart-grad-${++gradientCounter}`;
+
+  // Standardize series list
+  const seriesList: ChartSeries[] =
+    options.series && options.series.length > 0
+      ? options.series
+      : [
+          {
+            name: 'Series 1',
+            data: options.data || [],
+            color,
+          },
+        ];
 
   let contentSvg = '';
+  let defsSvg = '';
 
   if (variant === 'area' || variant === 'line') {
-    const { areaPath, linePath, xScale, yScale, points } = calculateAreaPath(
-      data,
-      { width, height, margin },
-      options.xAccessor,
-      options.yAccessor
-    );
+    if (seriesList.length > 1) {
+      // Multi-Series
+      const { xScale, yScale, series } = calculateMultiSeriesAreaPath(
+        seriesList,
+        { width, height, margin },
+        options.xAccessor,
+        options.yAccessor
+      );
 
-    const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
-      width,
-      height,
-      margin,
-      xScale,
-      yScale,
-      showAxes,
-      showGrid,
-      xTickFormat: options.xTickFormat,
-      yTickFormat: options.yTickFormat,
-    });
+      const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
+        width,
+        height,
+        margin,
+        xScale,
+        yScale,
+        showAxes,
+        showGrid,
+        xTickFormat: options.xTickFormat,
+        yTickFormat: options.yTickFormat,
+      });
 
-    contentSvg = `
-      <g transform="translate(${margin.left}, ${margin.top})">
-        ${gridSvg}
-        ${yAxisSvg}
-        ${xAxisSvg}
-        ${
-          variant === 'area'
-            ? `<path d="${areaPath}" fill="url(#${gradientId})" />`
-            : ''
-        }
-        <path d="${linePath}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-        ${points
-          .map(
-            (p) => `
-          <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2" class="chart-point transition-transform hover:scale-150" data-label="${p.data.label}" data-value="${p.data.y}" />
-        `
-          )
-          .join('')}
-        ${
-          showCrosshair
-            ? `<line class="chart-crosshair" x1="0" y1="0" x2="0" y2="${innerHeight}" stroke="var(--border-strong, var(--border-default))" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />`
-            : ''
-        }
-        <circle class="chart-active-dot" cx="0" cy="0" r="5.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2.5" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />
-        <rect class="chart-scrub-overlay" x="0" y="0" width="${innerWidth}" height="${innerHeight}" fill="transparent" pointer-events="all" style="cursor: crosshair;" />
-      </g>
-    `;
+      const refLinesSvg = renderReferenceLinesSvg(
+        options.referenceLines,
+        yScale,
+        innerWidth
+      );
+
+      defsSvg = series
+        .map(
+          (s, idx) => `
+        <linearGradient id="${baseGradId}-${idx}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${s.color}" stop-opacity="0.28" />
+          <stop offset="100%" stop-color="${s.color}" stop-opacity="0.00" />
+        </linearGradient>
+      `
+        )
+        .join('');
+
+      const seriesSvg = series
+        .map((s, idx) => {
+          if (s.hidden) return '';
+          return `
+          <g class="chart-series" data-series="${s.name}">
+            ${
+              variant === 'area'
+                ? `<path d="${s.areaPath}" fill="url(#${baseGradId}-${idx})" />`
+                : ''
+            }
+            <path d="${s.linePath}" fill="none" stroke="${
+            s.color
+          }" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            ${s.points
+              .map(
+                (p) => `
+              <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${s.color}" stroke="var(--bg-surface)" stroke-width="2" class="chart-point transition-transform hover:scale-150" data-label="${p.data.label}" data-value="${p.data.y}" data-series="${s.name}" />
+            `
+              )
+              .join('')}
+          </g>
+        `;
+        })
+        .join('');
+
+      contentSvg = `
+        <g transform="translate(${margin.left}, ${margin.top})">
+          ${gridSvg}
+          ${yAxisSvg}
+          ${xAxisSvg}
+          ${refLinesSvg}
+          ${seriesSvg}
+          ${
+            showCrosshair
+              ? `<line class="chart-crosshair" x1="0" y1="0" x2="0" y2="${innerHeight}" stroke="var(--border-strong, var(--border-default))" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />`
+              : ''
+          }
+          <circle class="chart-active-dot" cx="0" cy="0" r="5.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2.5" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />
+          <rect class="chart-scrub-overlay" x="0" y="0" width="${innerWidth}" height="${innerHeight}" fill="transparent" pointer-events="all" style="cursor: crosshair;" />
+        </g>
+      `;
+    } else {
+      // Single series
+      const { areaPath, linePath, xScale, yScale, points } = calculateAreaPath(
+        seriesList[0].data,
+        { width, height, margin },
+        options.xAccessor,
+        options.yAccessor
+      );
+
+      const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
+        width,
+        height,
+        margin,
+        xScale,
+        yScale,
+        showAxes,
+        showGrid,
+        xTickFormat: options.xTickFormat,
+        yTickFormat: options.yTickFormat,
+      });
+
+      const refLinesSvg = renderReferenceLinesSvg(
+        options.referenceLines,
+        yScale,
+        innerWidth
+      );
+
+      defsSvg = `
+        <linearGradient id="${baseGradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.28" />
+          <stop offset="100%" stop-color="${color}" stop-opacity="0.00" />
+        </linearGradient>
+      `;
+
+      contentSvg = `
+        <g transform="translate(${margin.left}, ${margin.top})">
+          ${gridSvg}
+          ${yAxisSvg}
+          ${xAxisSvg}
+          ${refLinesSvg}
+          ${
+            variant === 'area'
+              ? `<path d="${areaPath}" fill="url(#${baseGradId})" />`
+              : ''
+          }
+          <path d="${linePath}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          ${points
+            .map(
+              (p) => `
+            <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2" class="chart-point transition-transform hover:scale-150" data-label="${p.data.label}" data-value="${p.data.y}" />
+          `
+            )
+            .join('')}
+          ${
+            showCrosshair
+              ? `<line class="chart-crosshair" x1="0" y1="0" x2="0" y2="${innerHeight}" stroke="var(--border-strong, var(--border-default))" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />`
+              : ''
+          }
+          <circle class="chart-active-dot" cx="0" cy="0" r="5.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2.5" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />
+          <rect class="chart-scrub-overlay" x="0" y="0" width="${innerWidth}" height="${innerHeight}" fill="transparent" pointer-events="all" style="cursor: crosshair;" />
+        </g>
+      `;
+    }
   } else if (variant === 'bar') {
-    const { bars, xScale, yScale } = calculateBarLayout(
-      data,
+    const layout = options.barLayout || 'grouped';
+    const { bars, xScale, yScale, categories } = calculateMultiBarLayout(
+      seriesList,
       { width, height, margin },
+      layout,
       { xAccessor: options.xAccessor, yAccessor: options.yAccessor }
     );
 
-    const categories = bars.map((b) => ({
-      label: b.data.label,
-      x: b.x,
-      width: b.width,
-    }));
+    const isHorizontal = layout === 'horizontal';
 
     const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
       width,
@@ -127,25 +275,26 @@ export function renderChart(options: ChartOptions): string {
       showGrid,
       xTickFormat: options.xTickFormat,
       yTickFormat: options.yTickFormat,
-      categories,
+      categories: isHorizontal ? undefined : categories,
     });
+
+    const refLinesSvg = renderReferenceLinesSvg(
+      options.referenceLines,
+      yScale,
+      innerWidth
+    );
 
     contentSvg = `
       <g transform="translate(${margin.left}, ${margin.top})">
         ${gridSvg}
         ${yAxisSvg}
         ${xAxisSvg}
+        ${refLinesSvg}
         ${bars
           .map(
             (b) => `
-          <rect x="${b.x}" y="${b.y}" width="${b.width}" height="${
-              b.height
-            }" rx="4"
-                fill="${
-                  b.data.color || color
-                }" class="chart-bar transition-opacity hover:opacity-85" data-label="${
-              b.data.label
-            }" data-value="${b.data.y}" />
+          <rect x="${b.x}" y="${b.y}" width="${b.width}" height="${b.height}" rx="4"
+                fill="${b.color}" class="chart-bar transition-opacity hover:opacity-85" data-label="${b.data.label}" data-value="${b.data.y}" data-series="${b.seriesName}" />
         `
           )
           .join('')}
@@ -154,7 +303,7 @@ export function renderChart(options: ChartOptions): string {
   } else if (variant === 'pie' || variant === 'donut') {
     const radius = Math.min(innerWidth, innerHeight) / 2 - 8;
     const cutout = variant === 'donut' ? options.donutCutout ?? 0.6 : 0;
-    const segments = calculatePieSegments(data, radius, cutout, {
+    const segments = calculatePieSegments(seriesList[0].data, radius, cutout, {
       xAccessor: options.xAccessor,
       yAccessor: options.yAccessor,
     });
@@ -179,7 +328,7 @@ export function renderChart(options: ChartOptions): string {
       </g>
     `;
   } else if (variant === 'scatter') {
-    const normalized = normalizeData(data, {
+    const normalized = normalizeData(seriesList[0].data, {
       xAccessor: options.xAccessor,
       yAccessor: options.yAccessor,
     });
@@ -209,11 +358,18 @@ export function renderChart(options: ChartOptions): string {
       yTickFormat: options.yTickFormat,
     });
 
+    const refLinesSvg = renderReferenceLinesSvg(
+      options.referenceLines,
+      yScale,
+      innerWidth
+    );
+
     contentSvg = `
       <g transform="translate(${margin.left}, ${margin.top})">
         ${gridSvg}
         ${yAxisSvg}
         ${xAxisSvg}
+        ${refLinesSvg}
         ${normalized
           .map(
             (d) => `
@@ -236,19 +392,29 @@ export function renderChart(options: ChartOptions): string {
   const isCircular = variant === 'pie' || variant === 'donut';
   const preserveAspect = isCircular ? 'xMidYMid meet' : 'none';
 
+  const legendHtml =
+    options.showLegend && seriesList.length > 0
+      ? renderLegendHtml(
+          seriesList.map((s, idx) => ({
+            name: s.name,
+            color:
+              s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+            hidden: s.hidden,
+          }))
+        )
+      : '';
+
   return `
     <div class="chart-container nui-chart-container ${
       isCircular ? 'chart-container-circular' : ''
     } relative w-full font-sans select-none" style="height: ${height}px;">
       <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible" preserveAspectRatio="${preserveAspect}">
         <defs>
-          <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${color}" stop-opacity="0.28" />
-            <stop offset="100%" stop-color="${color}" stop-opacity="0.00" />
-          </linearGradient>
+          ${defsSvg}
         </defs>
         ${contentSvg}
       </svg>
+      ${legendHtml}
       ${
         showTooltip
           ? `<div class="chart-tooltip nui-chart-tooltip" role="tooltip" style="opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; transition: opacity 0.15s ease;"></div>`

@@ -1,15 +1,19 @@
 import { renderChart, type ChartOptions } from './renderChart';
 import {
   calculateAreaPath,
-  calculateBarLayout,
   calculatePieSegments,
+  calculateMultiSeriesAreaPath,
+  calculateMultiBarLayout,
+  type ChartSeries,
   normalizeData,
   defaultMargin,
 } from './math';
+import { formatMetricNumber } from './axis';
 import {
   positionTooltip,
   defaultTooltipPayload,
   renderTooltipHtml,
+  type TooltipPayload,
 } from './tooltip';
 
 export interface ChartInstanceOptions extends ChartOptions {
@@ -41,13 +45,6 @@ export class Chart {
   }
 
   private attachInteractivity(signal: AbortSignal): void {
-    if (
-      this.options.showTooltip === false &&
-      this.options.showCrosshair === false
-    ) {
-      return;
-    }
-
     const container =
       this.element.querySelector<HTMLElement>('.chart-container') ||
       this.element;
@@ -68,76 +65,216 @@ export class Chart {
     const color = this.options.color || 'var(--chart-1, var(--color-primary))';
     const variant = this.options.variant;
 
-    if ((variant === 'area' || variant === 'line') && overlay) {
-      const { points } = calculateAreaPath(
-        this.options.data,
-        { width, height, margin },
-        this.options.xAccessor,
-        this.options.yAccessor
+    const seriesList: ChartSeries[] =
+      this.options.series && this.options.series.length > 0
+        ? this.options.series
+        : [
+            {
+              name: 'Series 1',
+              data: this.options.data || [],
+              color,
+            },
+          ];
+
+    // Interactive Legend
+    const legendButtons =
+      container.querySelectorAll<HTMLButtonElement>('.chart-legend-item');
+    legendButtons.forEach((btn) => {
+      btn.addEventListener(
+        'click',
+        (e) => {
+          e.stopPropagation();
+          const seriesName = btn.getAttribute('data-series');
+          const target = seriesList.find((s) => s.name === seriesName);
+          if (target) {
+            target.hidden = !target.hidden;
+            this.options.series = seriesList;
+            this.render();
+          }
+        },
+        { signal }
       );
+    });
 
-      const onPointerMove = (e: PointerEvent) => {
-        if (!points || points.length === 0) return;
-        const rect = overlay.getBoundingClientRect();
-        const localX = (e.clientX - rect.left) * (innerWidth / rect.width);
+    if (
+      this.options.showTooltip === false &&
+      this.options.showCrosshair === false
+    ) {
+      return;
+    }
 
-        let closest = points[0];
-        let minDistance = Infinity;
-        for (const p of points) {
-          const dist = Math.abs(p.x - localX);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closest = p;
+    if ((variant === 'area' || variant === 'line') && overlay) {
+      if (seriesList.length > 1) {
+        // Multi-Series Interactivity
+        const { series } = calculateMultiSeriesAreaPath(
+          seriesList,
+          { width, height, margin },
+          this.options.xAccessor,
+          this.options.yAccessor
+        );
+
+        const activeSeries = series.filter((s) => !s.hidden);
+
+        const onPointerMove = (e: PointerEvent) => {
+          if (activeSeries.length === 0) return;
+          const rect = overlay.getBoundingClientRect();
+          const localX = (e.clientX - rect.left) * (innerWidth / rect.width);
+
+          // Find primary closest point across all active series
+          const primaryPoints = activeSeries[0].points;
+          let primaryClosest = primaryPoints[0];
+          let minDistance = Infinity;
+          for (const p of primaryPoints) {
+            const dist = Math.abs(p.x - localX);
+            if (dist < minDistance) {
+              minDistance = dist;
+              primaryClosest = p;
+            }
           }
-        }
 
-        if (closest) {
-          if (crosshair && this.options.showCrosshair !== false) {
-            crosshair.setAttribute('x1', String(closest.x));
-            crosshair.setAttribute('x2', String(closest.x));
-            crosshair.style.opacity = '0.7';
+          if (primaryClosest) {
+            if (crosshair && this.options.showCrosshair !== false) {
+              crosshair.setAttribute('x1', String(primaryClosest.x));
+              crosshair.setAttribute('x2', String(primaryClosest.x));
+              crosshair.style.opacity = '0.7';
+            }
+            if (activeDot) {
+              activeDot.setAttribute('cx', String(primaryClosest.x));
+              activeDot.setAttribute('cy', String(primaryClosest.y));
+              activeDot.style.opacity = '1';
+            }
+
+            if (tooltipEl && this.options.showTooltip !== false) {
+              const multiPayload: TooltipPayload = {
+                title:
+                  primaryClosest.data.label ||
+                  (primaryClosest.data.x instanceof Date
+                    ? primaryClosest.data.x.toLocaleDateString()
+                    : String(primaryClosest.data.x)),
+                items: activeSeries.map((s) => {
+                  let sClosest = s.points[0];
+                  let sMin = Infinity;
+                  for (const pt of s.points) {
+                    const d = Math.abs(pt.x - localX);
+                    if (d < sMin) {
+                      sMin = d;
+                      sClosest = pt;
+                    }
+                  }
+                  return {
+                    color: s.color,
+                    label: s.name,
+                    value:
+                      typeof sClosest.data.y === 'number'
+                        ? formatMetricNumber(sClosest.data.y)
+                        : String(sClosest.data.y),
+                  };
+                }),
+              };
+
+              tooltipEl.innerHTML = renderTooltipHtml(multiPayload);
+
+              const virtualRef = {
+                getBoundingClientRect: () => {
+                  const cRect = container.getBoundingClientRect();
+                  const scaleX = cRect.width / width;
+                  const scaleY = cRect.height / height;
+                  const px =
+                    cRect.left + (margin.left + primaryClosest.x) * scaleX;
+                  const py =
+                    cRect.top + (margin.top + primaryClosest.y) * scaleY;
+                  return new DOMRect(px, py, 0, 0);
+                },
+              };
+              positionTooltip(virtualRef, tooltipEl);
+              tooltipEl.style.opacity = '1';
+            }
           }
-          if (activeDot) {
-            activeDot.setAttribute('cx', String(closest.x));
-            activeDot.setAttribute('cy', String(closest.y));
-            activeDot.style.opacity = '1';
+        };
+
+        const onPointerLeave = () => {
+          if (crosshair) crosshair.style.opacity = '0';
+          if (activeDot) activeDot.style.opacity = '0';
+          if (tooltipEl) tooltipEl.style.opacity = '0';
+        };
+
+        overlay.addEventListener('pointermove', onPointerMove, { signal });
+        overlay.addEventListener('pointerdown', onPointerMove, { signal });
+        overlay.addEventListener('pointerleave', onPointerLeave, { signal });
+      } else {
+        // Single Series Interactivity
+        const { points } = calculateAreaPath(
+          seriesList[0].data,
+          { width, height, margin },
+          this.options.xAccessor,
+          this.options.yAccessor
+        );
+
+        const onPointerMove = (e: PointerEvent) => {
+          if (!points || points.length === 0) return;
+          const rect = overlay.getBoundingClientRect();
+          const localX = (e.clientX - rect.left) * (innerWidth / rect.width);
+
+          let closest = points[0];
+          let minDistance = Infinity;
+          for (const p of points) {
+            const dist = Math.abs(p.x - localX);
+            if (dist < minDistance) {
+              minDistance = dist;
+              closest = p;
+            }
           }
-          if (tooltipEl && this.options.showTooltip !== false) {
-            const payload = this.options.tooltipFormatter
-              ? this.options.tooltipFormatter(closest.data)
-              : defaultTooltipPayload(closest.data, color);
-            tooltipEl.innerHTML = renderTooltipHtml(payload);
 
-            const virtualRef = {
-              getBoundingClientRect: () => {
-                const cRect = container.getBoundingClientRect();
-                const scaleX = cRect.width / width;
-                const scaleY = cRect.height / height;
-                const px = cRect.left + (margin.left + closest.x) * scaleX;
-                const py = cRect.top + (margin.top + closest.y) * scaleY;
-                return new DOMRect(px, py, 0, 0);
-              },
-            };
-            positionTooltip(virtualRef, tooltipEl);
-            tooltipEl.style.opacity = '1';
+          if (closest) {
+            if (crosshair && this.options.showCrosshair !== false) {
+              crosshair.setAttribute('x1', String(closest.x));
+              crosshair.setAttribute('x2', String(closest.x));
+              crosshair.style.opacity = '0.7';
+            }
+            if (activeDot) {
+              activeDot.setAttribute('cx', String(closest.x));
+              activeDot.setAttribute('cy', String(closest.y));
+              activeDot.style.opacity = '1';
+            }
+            if (tooltipEl && this.options.showTooltip !== false) {
+              const payload = this.options.tooltipFormatter
+                ? this.options.tooltipFormatter(closest.data)
+                : defaultTooltipPayload(closest.data, color);
+              tooltipEl.innerHTML = renderTooltipHtml(payload);
+
+              const virtualRef = {
+                getBoundingClientRect: () => {
+                  const cRect = container.getBoundingClientRect();
+                  const scaleX = cRect.width / width;
+                  const scaleY = cRect.height / height;
+                  const px = cRect.left + (margin.left + closest.x) * scaleX;
+                  const py = cRect.top + (margin.top + closest.y) * scaleY;
+                  return new DOMRect(px, py, 0, 0);
+                },
+              };
+              positionTooltip(virtualRef, tooltipEl);
+              tooltipEl.style.opacity = '1';
+            }
           }
-        }
-      };
+        };
 
-      const onPointerLeave = () => {
-        if (crosshair) crosshair.style.opacity = '0';
-        if (activeDot) activeDot.style.opacity = '0';
-        if (tooltipEl) tooltipEl.style.opacity = '0';
-      };
+        const onPointerLeave = () => {
+          if (crosshair) crosshair.style.opacity = '0';
+          if (activeDot) activeDot.style.opacity = '0';
+          if (tooltipEl) tooltipEl.style.opacity = '0';
+        };
 
-      overlay.addEventListener('pointermove', onPointerMove, { signal });
-      overlay.addEventListener('pointerdown', onPointerMove, { signal });
-      overlay.addEventListener('pointerleave', onPointerLeave, { signal });
+        overlay.addEventListener('pointermove', onPointerMove, { signal });
+        overlay.addEventListener('pointerdown', onPointerMove, { signal });
+        overlay.addEventListener('pointerleave', onPointerLeave, { signal });
+      }
     } else if (variant === 'bar') {
       const barEls = container.querySelectorAll<SVGRectElement>('.chart-bar');
-      const { bars } = calculateBarLayout(
-        this.options.data,
+      const layout = this.options.barLayout || 'grouped';
+      const { bars } = calculateMultiBarLayout(
+        seriesList,
         { width, height, margin },
+        layout,
         { xAccessor: this.options.xAccessor, yAccessor: this.options.yAccessor }
       );
 
@@ -154,7 +291,19 @@ export class Chart {
             if (tooltipEl && this.options.showTooltip !== false) {
               const payload = this.options.tooltipFormatter
                 ? this.options.tooltipFormatter(b.data)
-                : defaultTooltipPayload(b.data, b.data.color || color);
+                : {
+                    title: b.data.label,
+                    items: [
+                      {
+                        color: b.color,
+                        label: b.seriesName || b.data.label,
+                        value:
+                          typeof b.data.y === 'number'
+                            ? formatMetricNumber(b.data.y)
+                            : String(b.data.y),
+                      },
+                    ],
+                  };
               tooltipEl.innerHTML = renderTooltipHtml(payload);
               positionTooltip(barEl, tooltipEl);
               tooltipEl.style.opacity = '1';
@@ -179,10 +328,15 @@ export class Chart {
         container.querySelectorAll<SVGPathElement>('.chart-segment');
       const radius = Math.min(innerWidth, innerHeight) / 2 - 8;
       const cutout = variant === 'donut' ? this.options.donutCutout ?? 0.6 : 0;
-      const segments = calculatePieSegments(this.options.data, radius, cutout, {
-        xAccessor: this.options.xAccessor,
-        yAccessor: this.options.yAccessor,
-      });
+      const segments = calculatePieSegments(
+        seriesList[0].data,
+        radius,
+        cutout,
+        {
+          xAccessor: this.options.xAccessor,
+          yAccessor: this.options.yAccessor,
+        }
+      );
 
       segmentEls.forEach((segmentEl, i) => {
         const s = segments[i];
@@ -226,7 +380,7 @@ export class Chart {
     } else if (variant === 'scatter') {
       const pointEls =
         container.querySelectorAll<SVGCircleElement>('.chart-point');
-      const normalized = normalizeData(this.options.data, {
+      const normalized = normalizeData(seriesList[0].data, {
         xAccessor: this.options.xAccessor,
         yAccessor: this.options.yAccessor,
       });
@@ -263,7 +417,11 @@ export class Chart {
 
   public update(newData?: any[], newOptions?: Partial<ChartOptions>): void {
     if (newData) {
-      this.options.data = newData;
+      if (this.options.series) {
+        this.options.data = newData;
+      } else {
+        this.options.data = newData;
+      }
     }
     if (newOptions) {
       this.options = { ...this.options, ...newOptions };
