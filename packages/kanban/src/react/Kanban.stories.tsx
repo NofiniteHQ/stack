@@ -189,3 +189,90 @@ export const CustomColumns: Story = {
     ],
   },
 };
+
+export const ProductionSprintBoard: Story = {
+  args: {
+    allowAdd: true,
+    headerActions: true,
+    columns: [
+      {
+        id: 'backlog',
+        title: 'Backlog',
+        wipLimit: 5,
+        items: [
+          {
+            id: 'task-auth',
+            title: 'Implement WebAuthn passkey authentication flow',
+            description:
+              'Evaluate FIDO2 client assertions and integrate biometric credentials for zero-trust login.',
+            badge: { label: 'Security', variant: 'primary' },
+            assignee: { name: 'Elena Rostova', initials: 'ER' },
+            dueDate: 'Nov 12',
+            subtasks: { completed: 3, total: 5 },
+          },
+          {
+            id: 'task-perf',
+            title: 'Optimize UnoCSS bundle tree-shaking',
+            description:
+              'Audit dynamic color-mix runtime evaluation to eliminate unused OKLCH palette lookups.',
+            badge: { label: 'Performance', variant: 'warning' },
+            assignee: { name: 'Marcus Chen', initials: 'MC' },
+            dueDate: 'Oct 28',
+            isOverdue: true,
+            subtasks: { completed: 1, total: 4 },
+          },
+        ],
+      },
+      {
+        id: 'in-progress',
+        title: 'In Progress',
+        wipLimit: 2,
+        items: [
+          {
+            id: 'task-dnd',
+            title: 'Pragmatic DnD Hitbox Closest-Edge integration',
+            description:
+              'Calculate relative Euclidean pointer distance for directional drop indicators.',
+            badge: { label: 'Architecture', variant: 'info' },
+            assignee: { name: 'Devin Vance', initials: 'DV' },
+            dueDate: 'Oct 04',
+            subtasks: { completed: 4, total: 4 },
+          },
+        ],
+      },
+      {
+        id: 'review',
+        title: 'Code Review',
+        wipLimit: 3,
+        items: [
+          {
+            id: 'task-a11y',
+            title: 'Screen reader accessibility & keyboard reordering',
+            description:
+              'Ensure ARIA live regions announce card movement across columns and drop zones.',
+            badge: { label: 'A11y', variant: 'subtle' },
+            assignee: { name: 'Sophia Miller', initials: 'SM' },
+            dueDate: 'Nov 01',
+            subtasks: { completed: 2, total: 2 },
+          },
+        ],
+      },
+      {
+        id: 'done',
+        title: 'Done',
+        items: [
+          {
+            id: 'task-tokens',
+            title: 'NUICSS Semantic Token System migration',
+            description:
+              'Replace arbitrary bracket utility clusters with semantic superclasses.',
+            badge: { label: 'Design System', variant: 'success' },
+            assignee: { name: 'Devin Vance', initials: 'DV' },
+            dueDate: 'Sep 29',
+            subtasks: { completed: 6, total: 6 },
+          },
+        ],
+      },
+    ],
+  },
+};
