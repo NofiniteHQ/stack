@@ -462,5 +462,24 @@ describe('@nofinite/markon', () => {
 
       recoveredEditor.destroy();
     });
+
+    it('preserves cursor position on programmatic setContent when preserveCursor is enabled', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Initial test content</p>',
+      });
+
+      // Position cursor at offset 7
+      editor.tiptap.commands.setTextSelection({ from: 7, to: 7 });
+      expect(editor.tiptap.state.selection.from).toBe(7);
+
+      // Perform non-destructive update with preserveCursor
+      editor.setContent('<p>Initial test content updated</p>', false, true);
+
+      // Verify cursor is still at offset 7
+      expect(editor.tiptap.state.selection.from).toBe(7);
+
+      editor.destroy();
+    });
   });
 });
