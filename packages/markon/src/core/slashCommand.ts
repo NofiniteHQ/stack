@@ -205,12 +205,16 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
     itemsList.forEach((item, index) => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = `w-full text-left px-3 py-2 rounded-lg text-xs flex flex-col gap-0.5 transition-colors cursor-pointer border-none bg-transparent ${
-        index === selectedIndex
-          ? 'bg-primary/10 text-primary font-medium'
-          : 'text-default hover:bg-subtle'
+      btn.className = `dropdown-item flex flex-col items-start gap-0.5 cursor-pointer text-left ${
+        index === selectedIndex ? 'btn-active' : ''
       }`;
-      btn.innerHTML = `<span class="font-semibold">${item.title}</span><span class="text-xs text-muted">${item.description}</span>`;
+      btn.style.alignItems = 'flex-start';
+      btn.style.height = 'auto';
+      btn.style.padding = '6px 10px';
+      if (index === selectedIndex) {
+        btn.style.backgroundColor = 'var(--bg-subtle)';
+      }
+      btn.innerHTML = `<span class="font-semibold text-xs text-default" style="color: var(--fg-default);">${item.title}</span><span class="text-xs text-muted" style="color: var(--fg-muted); font-size: 0.75rem;">${item.description}</span>`;
       btn.addEventListener('mousedown', (e) => {
         e.preventDefault();
       });
@@ -225,8 +229,25 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
 
     const updatePosition = () => {
       if (!popupEl || popupEl.style.display === 'none') return;
-      const rect =
+      let rect =
         typeof props.clientRect === 'function' ? props.clientRect() : null;
+
+      if (!rect || (rect.left === 0 && rect.top === 0 && rect.bottom === 0)) {
+        try {
+          const { from } = props.editor.state.selection;
+          const coords = props.editor.view.coordsAtPos(from);
+          if (coords) {
+            rect = new DOMRect(
+              coords.left,
+              coords.top,
+              0,
+              coords.bottom - coords.top || 18
+            );
+          }
+        } catch {
+          // fallback failed
+        }
+      }
       if (!rect) return;
 
       const virtualRef = {
@@ -234,6 +255,7 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
       };
 
       computePosition(virtualRef, popupEl, {
+        strategy: 'fixed',
         placement: 'bottom-start',
         middleware: [offset(6), flip(), shift({ padding: 8 })],
       }).then(({ x, y }) => {
@@ -287,7 +309,13 @@ export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {
                 if (!popupEl) {
                   popupEl = document.createElement('div');
                   popupEl.className =
-                    'markon-slash-menu fixed z-50 p-1 w-64 max-h-72 overflow-y-auto rounded-xl border border-default bg-surface shadow-lg text-default font-sans';
+                    'markon-slash-menu dropdown-menu font-sans';
+                  popupEl.style.position = 'fixed';
+                  popupEl.style.zIndex = '9999';
+                  popupEl.style.maxHeight = '280px';
+                  popupEl.style.overflowY = 'auto';
+                  popupEl.style.width = '260px';
+                  popupEl.style.display = 'none';
                   document.body.appendChild(popupEl);
                 }
                 selectedIndex = 0;
