@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Kanban, type KanbanColumnProps } from './Kanban';
 
@@ -21,14 +20,14 @@ const initialSprintColumns: KanbanColumnProps[] = [
       {
         id: 'task-1',
         content: (
-          <div className="space-y-1">
-            <div className="text-xs font-semibold text-[var(--color-primary)]">
+          <div className="space-y-1.5">
+            <div className="text-xs font-semibold text-primary font-mono">
               AUTH-102
             </div>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-semibold text-default leading-snug">
               Implement Passkey WebAuthn registration
             </div>
-            <div className="text-xs text-[var(--text-muted)]">
+            <div className="text-xs text-muted leading-relaxed">
               Research browser compatibility & FIDO2
             </div>
           </div>
@@ -37,11 +36,11 @@ const initialSprintColumns: KanbanColumnProps[] = [
       {
         id: 'task-2',
         content: (
-          <div className="space-y-1">
-            <div className="text-xs font-semibold text-[var(--text-muted)]">
+          <div className="space-y-1.5">
+            <div className="text-xs font-semibold text-muted font-mono">
               UI-88
             </div>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-semibold text-default leading-snug">
               Audit glassmorphic contrast ratios in dark mode
             </div>
           </div>
@@ -56,18 +55,18 @@ const initialSprintColumns: KanbanColumnProps[] = [
       {
         id: 'task-3',
         content: (
-          <div className="space-y-1">
-            <div className="text-xs font-semibold text-[var(--color-primary)]">
+          <div className="space-y-1.5">
+            <div className="text-xs font-semibold text-primary font-mono">
               CORE-404
             </div>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-semibold text-default leading-snug">
               Unified Storybook Monorepo Architecture
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-[10px] uppercase font-mono tracking-wider px-1.5 py-0.5 rounded bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+              <span className="badge badge-primary badge-subtle text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
                 Vite
               </span>
-              <span className="text-[10px] uppercase font-mono tracking-wider px-1.5 py-0.5 rounded bg-[var(--bg-muted)] text-[var(--text-muted)]">
+              <span className="badge badge-subtle text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
                 P1
               </span>
             </div>
@@ -83,11 +82,11 @@ const initialSprintColumns: KanbanColumnProps[] = [
       {
         id: 'task-4',
         content: (
-          <div className="space-y-1">
-            <div className="text-xs font-semibold text-[var(--color-success)]">
+          <div className="space-y-1.5">
+            <div className="text-xs font-semibold text-success font-mono">
               SEC-12
             </div>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-semibold text-default leading-snug">
               CSRF double-submit cookie validation middleware
             </div>
           </div>
@@ -102,11 +101,11 @@ const initialSprintColumns: KanbanColumnProps[] = [
       {
         id: 'task-5',
         content: (
-          <div className="space-y-1">
-            <div className="text-xs font-semibold text-[var(--text-muted)] line-through">
+          <div className="space-y-1.5">
+            <div className="text-xs font-semibold text-muted font-mono line-through">
               PKG-01
             </div>
-            <div className="text-sm font-medium line-through opacity-70">
+            <div className="text-sm font-semibold text-muted line-through opacity-70 leading-snug">
               Monorepo React 19.3.0 Upgrade
             </div>
           </div>
@@ -129,10 +128,10 @@ export const CustomColumns: Story = {
         id: 'ideas',
         header: (
           <div className="flex items-center justify-between w-full">
-            <span className="font-bold text-sm tracking-wide text-[var(--color-primary)]">
+            <span className="font-bold text-sm tracking-wide text-primary">
               💡 Feature Proposals
             </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+            <span className="badge badge-primary badge-subtle text-xs font-mono font-semibold px-2 py-0.5 rounded-full">
               2
             </span>
           </div>
@@ -140,7 +139,7 @@ export const CustomColumns: Story = {
         footer: (
           <button
             type="button"
-            className="w-full py-1 text-xs text-center font-medium text-[var(--text-muted)] hover:text-[var(--text-default)] transition-colors"
+            className="w-full py-1.5 text-xs text-center font-medium text-muted hover:text-default hover:bg-subtle/50 rounded-lg transition-colors cursor-pointer"
           >
             + Add Proposal
           </button>
@@ -149,7 +148,7 @@ export const CustomColumns: Story = {
           {
             id: 'prop-1',
             content: (
-              <div className="text-sm">
+              <div className="text-sm font-medium text-default leading-snug">
                 Real-time canvas whiteboard collaboration with CRDT sync
               </div>
             ),
@@ -157,7 +156,7 @@ export const CustomColumns: Story = {
           {
             id: 'prop-2',
             content: (
-              <div className="text-sm">
+              <div className="text-sm font-medium text-default leading-snug">
                 Embedded KaTeX formula autocomplete in Markon editor
               </div>
             ),
@@ -168,10 +167,10 @@ export const CustomColumns: Story = {
         id: 'approved',
         header: (
           <div className="flex items-center justify-between w-full">
-            <span className="font-bold text-sm tracking-wide text-[var(--color-success)]">
+            <span className="font-bold text-sm tracking-wide text-success">
               Approved for Q3
             </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-success)]/10 text-[var(--color-success)]">
+            <span className="badge badge-success badge-subtle text-xs font-mono font-semibold px-2 py-0.5 rounded-full">
               1
             </span>
           </div>
@@ -180,7 +179,7 @@ export const CustomColumns: Story = {
           {
             id: 'app-1',
             content: (
-              <div className="text-sm font-medium">
+              <div className="text-sm font-medium text-default leading-snug">
                 Pragmatic Drag-and-Drop Kanban Component Library
               </div>
             ),
