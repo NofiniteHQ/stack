@@ -52,6 +52,7 @@ export const MarkonImage = Image.extend<MarkonImageOptions>({
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
+      let currentNode = node;
       const container = document.createElement('div');
       container.className = 'markon-image-container my-3 select-none flex';
 
@@ -119,7 +120,7 @@ export const MarkonImage = Image.extend<MarkonImageOptions>({
             if (typeof pos === 'number') {
               editor.view.dispatch(
                 editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                  ...node.attrs,
+                  ...currentNode.attrs,
                   ...newAttrs,
                 })
               );
@@ -244,6 +245,7 @@ export const MarkonImage = Image.extend<MarkonImageOptions>({
         dom: container,
         update: (updatedNode) => {
           if (updatedNode.type.name !== 'image') return false;
+          currentNode = updatedNode;
           applyAlignment(updatedNode.attrs.alignment || 'center');
           wrapper.style.width = updatedNode.attrs.width || '100%';
           if (updatedNode.attrs.src !== img.src) {

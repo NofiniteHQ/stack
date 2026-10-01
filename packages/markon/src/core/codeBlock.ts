@@ -35,6 +35,8 @@ export const MarkonCodeBlock =
   CodeBlockLowlight.extend<CodeBlockLowlightOptions>({
     addNodeView() {
       return ({ node, getPos, editor }) => {
+        let currentNode = node;
+        let copyTimeout: ReturnType<typeof setTimeout> | null = null;
         const container = document.createElement('div');
         container.className =
           'markon-code-block relative rounded-xl border border-default bg-subtle my-3 overflow-hidden font-mono text-xs shadow-sm';
@@ -67,7 +69,7 @@ export const MarkonCodeBlock =
               if (typeof pos === 'number') {
                 editor.view.dispatch(
                   editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                    ...node.attrs,
+                    ...currentNode.attrs,
                     language: select.value,
                   })
                 );
@@ -78,6 +80,14 @@ export const MarkonCodeBlock =
           select.disabled = true;
         }
         header.appendChild(select);
+
+        // Pre & Code contentDOM
+        const pre = document.createElement('pre');
+        pre.className =
+          'p-3 overflow-x-auto text-default m-0 leading-relaxed font-mono';
+        const code = document.createElement('code');
+        code.className = `hljs language-${node.attrs.language || 'plaintext'}`;
+        pre.appendChild(code);
 
         // Copy Button
         const copyBtn = document.createElement('button');
@@ -97,7 +107,7 @@ export const MarkonCodeBlock =
         copyBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const codeText = node.textContent;
+          const codeText = code.textContent ?? currentNode.textContent ?? '';
           if (typeof navigator !== 'undefined' && navigator.clipboard) {
             navigator.clipboard.writeText(codeText).then(() => {
               copyBtn.innerHTML = `
@@ -106,7 +116,8 @@ export const MarkonCodeBlock =
               </svg>
               <span class="text-primary font-medium">Copied!</span>
             `;
-              setTimeout(() => {
+              if (copyTimeout) clearTimeout(copyTimeout);
+              copyTimeout = setTimeout(() => {
                 copyBtn.innerHTML = `
                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
@@ -120,14 +131,6 @@ export const MarkonCodeBlock =
         });
         header.appendChild(copyBtn);
         container.appendChild(header);
-
-        // Pre & Code contentDOM
-        const pre = document.createElement('pre');
-        pre.className =
-          'p-3 overflow-x-auto text-default m-0 leading-relaxed font-mono';
-        const code = document.createElement('code');
-        code.className = `hljs language-${node.attrs.language || 'plaintext'}`;
-        pre.appendChild(code);
         container.appendChild(pre);
 
         return {
@@ -135,6 +138,7 @@ export const MarkonCodeBlock =
           contentDOM: code,
           update: (updatedNode) => {
             if (updatedNode.type.name !== 'codeBlock') return false;
+            currentNode = updatedNode;
             if (select.value !== (updatedNode.attrs.language || 'plaintext')) {
               select.value = updatedNode.attrs.language || 'plaintext';
             }
@@ -142,6 +146,12 @@ export const MarkonCodeBlock =
               updatedNode.attrs.language || 'plaintext'
             }`;
             return true;
+          },
+          destroy: () => {
+            if (copyTimeout) {
+              clearTimeout(copyTimeout);
+              copyTimeout = null;
+            }
           },
         };
       };

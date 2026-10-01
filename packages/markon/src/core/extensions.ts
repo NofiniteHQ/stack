@@ -76,6 +76,7 @@ export const MathBlock = Node.create({
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
+      let currentNode = node;
       const dom = document.createElement('div');
       dom.className =
         'markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center select-none cursor-pointer hover:border-primary/50 transition-colors';
@@ -100,7 +101,7 @@ export const MathBlock = Node.create({
         dom.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const current = node.attrs.equation;
+          const current = currentNode.attrs.equation;
           openMarkonModal({
             title: 'Edit Math Formula (LaTeX)',
             label: 'LaTeX Equation',
@@ -135,6 +136,8 @@ export const MathBlock = Node.create({
         dom,
         update: (updatedNode) => {
           if (updatedNode.type.name !== 'mathBlock') return false;
+          currentNode = updatedNode;
+          dom.setAttribute('data-equation', updatedNode.attrs.equation);
           render(updatedNode.attrs.equation);
           return true;
         },

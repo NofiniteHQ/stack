@@ -164,6 +164,7 @@ export const FileAttachment = Node.create({
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
+      let currentNode = node;
       const container = document.createElement('div');
       container.className =
         'markon-file-attachment file-item group/file relative my-2 select-none hover:bg-subtle transition-colors';
@@ -276,6 +277,10 @@ export const FileAttachment = Node.create({
         dom: container,
         update: (updatedNode) => {
           if (updatedNode.type.name !== 'fileAttachment') return false;
+          currentNode = updatedNode;
+          container.setAttribute('data-src', updatedNode.attrs.src);
+          container.setAttribute('data-name', updatedNode.attrs.name);
+          container.setAttribute('data-size', updatedNode.attrs.size);
           nameEl.textContent = updatedNode.attrs.name || 'Attachment';
           sizeEl.textContent = updatedNode.attrs.size || 'Attachment';
           downloadLink.href = updatedNode.attrs.src;

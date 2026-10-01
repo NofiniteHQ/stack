@@ -75,7 +75,9 @@ export const MarkonEditor = forwardRef<MarkonEditorRef, MarkonEditorProps>(
         setReadOnly: (ro: boolean) => editorRef.current?.setReadOnly(ro),
         setMinHeight: (mh: string) => editorRef.current?.setMinHeight(mh),
         focus: () => editorRef.current?.focus(),
-        editor: editorRef.current,
+        get editor() {
+          return editorRef.current;
+        },
       }),
       []
     );

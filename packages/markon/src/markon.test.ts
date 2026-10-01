@@ -481,5 +481,141 @@ describe('@nofinite/markon', () => {
 
       editor.destroy();
     });
+
+    it('ensures image nodeview updates attributes sequentially without stale closure regressions', () => {
+      const editor = new MarkonEditor({
+        element: container,
+      });
+
+      editor.tiptap.commands.setImage({
+        src: 'https://example.com/test.jpg',
+        alignment: 'center',
+        width: '100%',
+      } as any);
+
+      // Verify initial attributes
+      expect(editor.getHTML()).toContain('data-alignment="center"');
+
+      // Select image node (at pos 0)
+      editor.tiptap.commands.setNodeSelection(0);
+      expect(editor.tiptap.isActive('image')).toBe(true);
+
+      // Update alignment to left
+      editor.tiptap.commands.updateAttributes('image', { alignment: 'left' });
+      expect(editor.getHTML()).toContain('data-alignment="left"');
+
+      // Update width to 50% - alignment must REMAIN left, not snap back to center
+      editor.tiptap.commands.updateAttributes('image', { width: '50%' });
+      const html = editor.getHTML();
+      expect(html).toContain('data-alignment="left"');
+      expect(html).toContain('width: 50%');
+
+      editor.destroy();
+    });
+
+    it('ensures codeblock nodeview dynamically copies live code and updates language', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Code:</p>',
+      });
+
+      editor.tiptap.commands.setCodeBlock({ language: 'javascript' });
+      expect(editor.tiptap.isActive('codeBlock')).toBe(true);
+
+      const codeBlockEl = container.querySelector('.markon-code-block');
+      expect(codeBlockEl).toBeTruthy();
+
+      const select = codeBlockEl?.querySelector('select') as HTMLSelectElement;
+      expect(select.value).toBe('javascript');
+
+      // Update language via TipTap
+      editor.tiptap.commands.updateAttributes('codeBlock', {
+        language: 'typescript',
+      });
+      expect(select.value).toBe('typescript');
+
+      editor.destroy();
+    });
+
+    it('ensures mathBlock updates data-equation attribute on equation edits', () => {
+      const editor = new MarkonEditor({
+        element: container,
+      });
+
+      editor.execCommand('insertMath', 'E = mc^2');
+      expect(editor.getHTML()).toContain('data-equation="E = mc^2"');
+
+      editor.tiptap.commands.setNodeSelection(0);
+      expect(editor.tiptap.isActive('mathBlock')).toBe(true);
+
+      editor.tiptap.commands.updateAttributes('mathBlock', {
+        equation: 'a^2 + b^2 = c^2',
+      });
+      expect(editor.getHTML()).toContain('data-equation="a^2 + b^2 = c^2"');
+
+      const mathEl = container.querySelector('.markon-math-block');
+      expect(mathEl?.getAttribute('data-equation')).toBe('a^2 + b^2 = c^2');
+
+      editor.destroy();
+    });
+
+    it('ensures fileAttachment nodeview updates data attributes on node changes', () => {
+      const editor = new MarkonEditor({
+        element: container,
+      });
+
+      editor.tiptap.commands.insertFileAttachment({
+        src: 'https://example.com/file1.pdf',
+        name: 'file1.pdf',
+        size: '1.0 MB',
+      });
+
+      const fileEl = container.querySelector('.markon-file-attachment');
+      expect(fileEl?.getAttribute('data-name')).toBe('file1.pdf');
+
+      editor.tiptap.commands.setNodeSelection(0);
+      expect(editor.tiptap.isActive('fileAttachment')).toBe(true);
+
+      editor.tiptap.commands.updateAttributes('fileAttachment', {
+        name: 'file2.pdf',
+        size: '2.0 MB',
+      });
+
+      expect(fileEl?.getAttribute('data-name')).toBe('file2.pdf');
+      expect(fileEl?.getAttribute('data-size')).toBe('2.0 MB');
+
+      editor.destroy();
+    });
+  });
+
+  describe('MarkonEditor React Component', () => {
+    it('provides non-null live editor instance on ref.current.editor', async () => {
+      const { createRoot } = await import('react-dom/client');
+      const React = await import('react');
+      const { MarkonEditor: ReactMarkonEditor } = await import('./react');
+
+      const testDiv = document.createElement('div');
+      document.body.appendChild(testDiv);
+      const root = createRoot(testDiv);
+
+      const ref = React.createRef<any>();
+
+      await new Promise<void>((resolve) => {
+        root.render(
+          React.createElement(ReactMarkonEditor, {
+            ref,
+            initialValue: '<p>React Editor Test</p>',
+          })
+        );
+        setTimeout(resolve, 100);
+      });
+
+      expect(ref.current).toBeTruthy();
+      expect(ref.current.editor).not.toBeNull();
+      expect(ref.current.editor.getText()).toContain('React Editor Test');
+
+      root.unmount();
+      document.body.removeChild(testDiv);
+    });
   });
 });

@@ -172,6 +172,7 @@ export const VideoBlock = Node.create<VideoOptions>({
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
+      let currentNode = node;
       const container = document.createElement('div');
       container.className =
         'markon-video-block relative group/video my-4 select-none';
@@ -253,7 +254,7 @@ export const VideoBlock = Node.create<VideoOptions>({
                 if (typeof pos === 'number') {
                   editor.view.dispatch(
                     editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                      ...node.attrs,
+                      ...currentNode.attrs,
                       alignment: 'left',
                     })
                   );
@@ -274,7 +275,7 @@ export const VideoBlock = Node.create<VideoOptions>({
                 if (typeof pos === 'number') {
                   editor.view.dispatch(
                     editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                      ...node.attrs,
+                      ...currentNode.attrs,
                       alignment: 'center',
                     })
                   );
@@ -295,7 +296,7 @@ export const VideoBlock = Node.create<VideoOptions>({
                 if (typeof pos === 'number') {
                   editor.view.dispatch(
                     editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                      ...node.attrs,
+                      ...currentNode.attrs,
                       alignment: 'right',
                     })
                   );
@@ -314,7 +315,7 @@ export const VideoBlock = Node.create<VideoOptions>({
               openMarkonModal({
                 title: 'Edit Video URL',
                 label: 'YouTube, Vimeo, or Video URL',
-                initialValue: node.attrs.src,
+                initialValue: currentNode.attrs.src,
                 placeholder: 'https://youtube.com/watch?v=...',
                 confirmText: 'Update Video',
                 onConfirm: (val) => {
@@ -324,7 +325,7 @@ export const VideoBlock = Node.create<VideoOptions>({
                       const { service, embedUrl } = parseVideoUrl(val);
                       editor.view.dispatch(
                         editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                          ...node.attrs,
+                          ...currentNode.attrs,
                           src: embedUrl,
                           service,
                         })
@@ -366,11 +367,13 @@ export const VideoBlock = Node.create<VideoOptions>({
         dom: container,
         update: (updatedNode) => {
           if (updatedNode.type.name !== 'videoBlock') return false;
+          const prevAttrs = currentNode.attrs;
+          currentNode = updatedNode;
           applyAlignment(updatedNode.attrs.alignment || 'center');
           container.style.width = updatedNode.attrs.width || '100%';
           if (
-            updatedNode.attrs.src !== node.attrs.src ||
-            updatedNode.attrs.service !== node.attrs.service
+            updatedNode.attrs.src !== prevAttrs.src ||
+            updatedNode.attrs.service !== prevAttrs.service
           ) {
             renderPlayer(updatedNode.attrs.src, updatedNode.attrs.service);
           }
