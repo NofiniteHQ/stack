@@ -58,12 +58,16 @@ export interface KanbanProps
   headerActions?: boolean;
   columnClassName?: string;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
+  renderHeader?: (column: KanbanColumnProps) => React.ReactNode;
 }
 
 interface CardProps {
   item: KanbanItem;
   columnId: string;
   index: number;
+  totalCards: number;
+  columnIndex: number;
+  totalColumns: number;
   onCardMove: (event: CardMoveEvent) => void;
   onCardClick?: (cardId: string, columnId: string, item: KanbanItem) => void;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
@@ -73,6 +77,7 @@ function KanbanCardItem({
   item,
   columnId,
   index,
+  totalCards,
   onCardMove,
   onCardClick,
   renderCard,
@@ -156,9 +161,48 @@ function KanbanCardItem({
 
   const hasFooter = item.dueDate || item.subtasks || item.assignee;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Keyboard accessibility for card reordering & activation
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onCardClick?.(item.id, columnId, item);
+      return;
+    }
+
+    if (e.altKey) {
+      if (e.key === 'ArrowUp' && index > 0) {
+        e.preventDefault();
+        onCardMove({
+          cardId: item.id,
+          sourceColumnId: columnId,
+          targetColumnId: columnId,
+          sourceIndex: index,
+          targetIndex: index - 1,
+          edge: 'top',
+        });
+      } else if (e.key === 'ArrowDown' && index < totalCards - 1) {
+        e.preventDefault();
+        onCardMove({
+          cardId: item.id,
+          sourceColumnId: columnId,
+          targetColumnId: columnId,
+          sourceIndex: index,
+          targetIndex: index + 1,
+          edge: 'bottom',
+        });
+      }
+    }
+  };
+
   return (
     <div
       ref={ref}
+      role="button"
+      tabIndex={0}
+      aria-label={`${item.title || 'Kanban card'}, item ${
+        index + 1
+      } of ${totalCards}`}
+      onKeyDown={handleKeyDown}
       onClick={(e) => {
         if (
           !(e.target as HTMLElement).closest(
@@ -169,7 +213,7 @@ function KanbanCardItem({
         }
       }}
       className={clsx(
-        'kanban-card relative p-3.5 rounded-xl border border-default bg-surface text-default shadow-xs transition-all cursor-grab active:cursor-grabbing hover:border-primary/40 hover:shadow-md select-none group',
+        'kanban-card relative p-3.5 rounded-xl border border-default bg-surface text-default shadow-xs transition-all cursor-grab active:cursor-grabbing hover:border-primary/40 hover:shadow-md select-none group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         isDragging && 'opacity-40 scale-95 shadow-lg border-primary'
       )}
     >
@@ -280,6 +324,7 @@ function KanbanCardItem({
 interface ColumnComponentProps {
   column: KanbanColumnProps;
   index: number;
+  totalColumns: number;
   columnClassName?: string;
   allowAdd?: boolean;
   headerActions?: boolean;
@@ -289,11 +334,13 @@ interface ColumnComponentProps {
   onCardClick?: (cardId: string, columnId: string, item: KanbanItem) => void;
   onColumnOptions?: (columnId: string) => void;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
+  renderHeader?: (column: KanbanColumnProps) => React.ReactNode;
 }
 
 function KanbanColumnComponent({
   column,
   index,
+  totalColumns,
   columnClassName,
   allowAdd,
   headerActions,
@@ -303,6 +350,7 @@ function KanbanColumnComponent({
   onCardClick,
   onColumnOptions,
   renderCard,
+  renderHeader,
 }: ColumnComponentProps) {
   const colRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
@@ -430,7 +478,9 @@ function KanbanColumnComponent({
         ref={headerRef}
         className="p-3 font-semibold text-sm flex items-center justify-between border-b border-default select-none cursor-grab active:cursor-grabbing"
       >
-        {column.header ? (
+        {renderHeader ? (
+          renderHeader(column)
+        ) : column.header ? (
           column.header
         ) : (
           <>
@@ -491,6 +541,9 @@ function KanbanColumnComponent({
               item={item}
               columnId={column.id}
               index={itemIdx}
+              totalCards={column.items.length}
+              columnIndex={index}
+              totalColumns={totalColumns}
               onCardMove={onCardMove}
               onCardClick={onCardClick}
               renderCard={renderCard}
@@ -544,6 +597,7 @@ export function Kanban({
   className,
   columnClassName,
   renderCard,
+  renderHeader,
   ...props
 }: KanbanProps) {
   const [data, setData] = useState<KanbanColumnProps[]>(columns);
@@ -589,6 +643,7 @@ export function Kanban({
           key={col.id}
           column={col}
           index={idx}
+          totalColumns={data.length}
           columnClassName={columnClassName}
           allowAdd={allowAdd}
           headerActions={headerActions}
@@ -598,6 +653,7 @@ export function Kanban({
           onCardClick={onCardClick}
           onColumnOptions={onColumnOptions}
           renderCard={renderCard}
+          renderHeader={renderHeader}
         />
       ))}
     </div>

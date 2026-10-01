@@ -213,4 +213,67 @@ describe('@nofinite/kanban DOM renderer and binder', () => {
     expect(container.innerHTML).toBe('');
     container.remove();
   });
+
+  it('moves a card into an empty column accurately', () => {
+    const columns: KanbanColumn[] = [
+      {
+        id: 'col-1',
+        title: 'To Do',
+        items: [{ id: 'card-1', title: 'Task 1' }],
+      },
+      {
+        id: 'col-empty',
+        title: 'Empty Column',
+        items: [],
+      },
+    ];
+
+    const result = moveCardBetweenColumns(columns, {
+      cardId: 'card-1',
+      sourceColumnId: 'col-1',
+      targetColumnId: 'col-empty',
+      sourceIndex: 0,
+      targetIndex: 9999, // Drop on empty column appends
+    });
+
+    expect(result[0].items.length).toBe(0);
+    expect(result[1].items.length).toBe(1);
+    expect(result[1].items[0].id).toBe('card-1');
+  });
+
+  it('handles reorder edge insertions at head and tail', () => {
+    const columns: KanbanColumn[] = [
+      {
+        id: 'col-1',
+        title: 'Sprint',
+        items: [
+          { id: 'c1', title: 'Task 1' },
+          { id: 'c2', title: 'Task 2' },
+          { id: 'c3', title: 'Task 3' },
+        ],
+      },
+    ];
+
+    // Move c3 to top with edge: 'top'
+    const movedToTop = moveCardBetweenColumns(columns, {
+      cardId: 'c3',
+      sourceColumnId: 'col-1',
+      targetColumnId: 'col-1',
+      sourceIndex: 2,
+      targetIndex: 0,
+      edge: 'top',
+    });
+    expect(movedToTop[0].items.map((i) => i.id)).toEqual(['c3', 'c1', 'c2']);
+
+    // Move c1 to bottom with edge: 'bottom'
+    const movedToBottom = moveCardBetweenColumns(columns, {
+      cardId: 'c1',
+      sourceColumnId: 'col-1',
+      targetColumnId: 'col-1',
+      sourceIndex: 0,
+      targetIndex: 2,
+      edge: 'bottom',
+    });
+    expect(movedToBottom[0].items.map((i) => i.id)).toEqual(['c2', 'c3', 'c1']);
+  });
 });

@@ -276,3 +276,52 @@ export const ProductionSprintBoard: Story = {
     ],
   },
 };
+
+export const CustomRenderers: Story = {
+  args: {
+    columns: [
+      {
+        id: 'bugs',
+        title: 'Reported Bugs',
+        items: [
+          {
+            id: 'bug-1',
+            title: 'Memory leak in event listener cleanup',
+            severity: 'critical',
+          },
+          {
+            id: 'bug-2',
+            title: 'Z-index collision between dropdown and modal backdrop',
+            severity: 'minor',
+          },
+        ],
+      },
+      {
+        id: 'investigating',
+        title: 'Investigating',
+        items: [],
+      },
+    ],
+    renderHeader: (col) => (
+      <div className="flex items-center justify-between w-full">
+        <span className="font-mono text-xs font-bold uppercase tracking-wider text-primary">
+          # {col.title}
+        </span>
+        <span className="badge badge-warning text-xs font-mono px-2 py-0.5 rounded-full">
+          {col.items.length} items
+        </span>
+      </div>
+    ),
+    renderCard: (item) => (
+      <div className="p-1 space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-mono font-bold text-danger">
+            {(item as Record<string, unknown>).severity as string}
+          </span>
+          <span className="text-[10px] text-muted font-mono">{item.id}</span>
+        </div>
+        <div className="text-sm font-semibold text-default">{item.title}</div>
+      </div>
+    ),
+  },
+};
