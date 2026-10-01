@@ -16,3 +16,4 @@ export * from './fileAttachment';
 export * from './popoverManager';
 export * from './markdown';
 export * from './draftManager';
+export * from './callout';

@@ -54,6 +54,41 @@ export function htmlToMarkdown(html: string): string {
       return `\n\n![video](${src})\n\n`;
     }
 
+    // Check for callout / alert block
+    if (
+      el.hasAttribute('data-callout') ||
+      el.classList.contains('markon-callout') ||
+      el.classList.contains('alert')
+    ) {
+      let calloutType = el.getAttribute('data-callout-type') || 'info';
+      if (!el.getAttribute('data-callout-type')) {
+        if (el.classList.contains('alert-success')) calloutType = 'success';
+        else if (el.classList.contains('alert-warning'))
+          calloutType = 'warning';
+        else if (el.classList.contains('alert-danger')) calloutType = 'danger';
+      }
+      const alertTagMap: Record<string, string> = {
+        info: 'NOTE',
+        success: 'TIP',
+        warning: 'WARNING',
+        danger: 'CAUTION',
+      };
+      const alertTag = alertTagMap[calloutType] || 'NOTE';
+      const contentEl = el.querySelector('.alert-content') || el;
+      let bodyText = '';
+      contentEl.childNodes.forEach((child) => {
+        if (
+          !child.contains ||
+          !child.parentElement?.classList.contains('alert-icon')
+        ) {
+          bodyText += processNode(child);
+        }
+      });
+      return `\n\n> [!${alertTag}]\n> ${bodyText
+        .trim()
+        .replace(/\n/g, '\n> ')}\n\n`;
+    }
+
     // Check for details / accordion
     if (tag === 'details') {
       const summaryEl = el.querySelector('summary');
@@ -365,12 +400,50 @@ export function markdownToHtml(md: string): string {
       continue;
     }
 
-    // Blockquote
-    if (line.startsWith('> ')) {
+    // Alert / Callout (> [!NOTE], > [!TIP], > [!WARNING], > [!CAUTION], > [!IMPORTANT])
+    const alertMatch = line.match(
+      /^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/i
+    );
+    if (alertMatch) {
       flushList();
+      const rawTag = alertMatch[1].toUpperCase();
+      let alertType = 'info';
+      if (rawTag === 'TIP') alertType = 'success';
+      else if (rawTag === 'WARNING') alertType = 'warning';
+      else if (rawTag === 'CAUTION') alertType = 'danger';
+      else if (rawTag === 'IMPORTANT') alertType = 'info';
+
+      const alertLines: string[] = [];
+      i++;
+      while (i < lines.length && lines[i].trim().startsWith('>')) {
+        alertLines.push(lines[i].replace(/^>\s?/, ''));
+        i++;
+      }
+      i--; // rewind one since loop will increment
+
+      const innerContent = alertLines.join('\n').trim();
+      const innerHtml = innerContent
+        ? `<p>${inlineFormatting(innerContent)}</p>`
+        : '<p></p>';
+
+      htmlParts.push(
+        `<div data-callout="" data-callout-type="${alertType}" class="markon-callout alert alert-${alertType} my-3 relative rounded-xl border"><div class="alert-content flex-1 min-w-0">${innerHtml}</div></div>`
+      );
+      continue;
+    }
+
+    // Blockquote
+    if (line.startsWith('>')) {
+      flushList();
+      const quoteLines: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith('>')) {
+        quoteLines.push(lines[i].replace(/^>\s?/, ''));
+        i++;
+      }
+      i--;
       htmlParts.push(
         `<blockquote><p>${inlineFormatting(
-          line.slice(2).trim()
+          quoteLines.join(' ').trim()
         )}</p></blockquote>`
       );
       continue;

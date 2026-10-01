@@ -254,6 +254,13 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
             <path d="m9 10 3 3 3-3"/>
           </svg>
         </button>
+        <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertCallout" title="Callout / Alert Note">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </button>
         <button type="button" class="editor-btn btn btn-ghost btn-sm btn-icon" data-command="insertFile" title="Attach File">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
@@ -756,6 +763,9 @@ export class MarkonEditor {
       }
       case 'insertDetails':
         chain.insertDetails().run();
+        break;
+      case 'insertCallout':
+        chain.insertCallout(_val || { type: 'info' }).run();
         break;
       case 'insertFile':
         this.promptFileUpload();

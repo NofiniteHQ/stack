@@ -177,6 +177,54 @@ export const defaultSlashCommands: SlashCommandItem[] = [
       editor.chain().focus().deleteRange(range).toggleHighlight().run();
     },
   },
+  {
+    title: 'Info Callout',
+    description: 'Insert an informational note box',
+    command: (editor, range) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertCallout({ type: 'info' })
+        .run();
+    },
+  },
+  {
+    title: 'Success Callout',
+    description: 'Insert a success tip or completion box',
+    command: (editor, range) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertCallout({ type: 'success' })
+        .run();
+    },
+  },
+  {
+    title: 'Warning Callout',
+    description: 'Insert a warning or caution advisory box',
+    command: (editor, range) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertCallout({ type: 'warning' })
+        .run();
+    },
+  },
+  {
+    title: 'Danger Callout',
+    description: 'Insert an error or danger alert box',
+    command: (editor, range) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertCallout({ type: 'danger' })
+        .run();
+    },
+  },
 ];
 
 export function createSlashCommandExtension(customItems?: SlashCommandItem[]) {

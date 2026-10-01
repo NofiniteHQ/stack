@@ -666,6 +666,41 @@ describe('@nofinite/markon', () => {
 
       editor.destroy();
     });
+
+    it('inserts and manages callout with NUICSS alert superclasses and updates type', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '',
+      });
+
+      editor.execCommand('insertCallout', { type: 'warning' });
+      const calloutEl = container.querySelector<HTMLElement>('.markon-callout');
+      expect(calloutEl).toBeTruthy();
+      expect(calloutEl?.classList.contains('alert')).toBe(true);
+      expect(calloutEl?.classList.contains('alert-warning')).toBe(true);
+      expect(calloutEl?.getAttribute('data-callout-type')).toBe('warning');
+
+      // Update callout type to danger
+      editor.tiptap.commands.setCalloutType('danger');
+      expect(calloutEl?.classList.contains('alert-danger')).toBe(true);
+      expect(calloutEl?.classList.contains('alert-warning')).toBe(false);
+      expect(calloutEl?.getAttribute('data-callout-type')).toBe('danger');
+
+      editor.destroy();
+    });
+
+    it('converts GitHub alert markdown syntax to and from callout HTML', () => {
+      const markdown = '> [!WARNING]\n> This is a critical security advisory.';
+      const html = markdownToHtml(markdown);
+      expect(html).toContain('markon-callout');
+      expect(html).toContain('alert-warning');
+      expect(html).toContain('data-callout-type="warning"');
+      expect(html).toContain('This is a critical security advisory.');
+
+      const convertedMd = htmlToMarkdown(html);
+      expect(convertedMd).toContain('> [!WARNING]');
+      expect(convertedMd).toContain('This is a critical security advisory.');
+    });
   });
 
   describe('MarkonEditor React Component', () => {

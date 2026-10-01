@@ -23,8 +23,11 @@ import { MarkonCodeBlock, lowlight } from './codeBlock';
 import { VideoBlock } from './video';
 import { Details, DetailsSummary, DetailsContent } from './details';
 import { FileAttachment } from './fileAttachment';
+import { Callout, type CalloutType } from './callout';
 import katex from 'katex';
 import { openMarkonModal } from './dialog';
+
+export { Callout, type CalloutType };
 
 export { lowlight };
 
@@ -209,5 +212,6 @@ export function getMarkonExtensions(placeholder?: string): AnyExtension[] {
     DetailsSummary,
     DetailsContent,
     FileAttachment,
+    Callout,
   ];
 }
