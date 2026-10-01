@@ -5,6 +5,7 @@ import {
   normalizeData,
   type NormalizedDataPoint,
 } from '../core/math';
+import { formatMetricNumber, formatTemporalTick } from '../core/axis';
 import clsx from 'clsx';
 
 export interface ScatterChartProps<T = any> {
@@ -16,6 +17,10 @@ export interface ScatterChartProps<T = any> {
   margin?: { top: number; right: number; bottom: number; left: number };
   color?: string;
   className?: string;
+  showGrid?: boolean;
+  showAxes?: boolean;
+  xTickFormat?: (val: any) => string;
+  yTickFormat?: (val: number) => string;
 }
 
 export function ScatterChart<T = any>({
@@ -27,6 +32,10 @@ export function ScatterChart<T = any>({
   margin = defaultMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
+  showGrid = true,
+  showAxes = true,
+  xTickFormat,
+  yTickFormat,
 }: ScatterChartProps<T>) {
   const [activePoint, setActivePoint] = useState<NormalizedDataPoint | null>(
     null
@@ -71,6 +80,66 @@ export function ScatterChart<T = any>({
         preserveAspectRatio="none"
       >
         <g transform={`translate(${margin.left}, ${margin.top})`}>
+          {showGrid &&
+            yScale.ticks &&
+            yScale.ticks(5).map((t: number) => {
+              const y = yScale(t);
+              const isZero = t === 0;
+              return (
+                <line
+                  key={t}
+                  x1={0}
+                  y1={y}
+                  x2={innerWidth}
+                  y2={y}
+                  stroke="var(--border-default)"
+                  strokeOpacity={isZero ? 0.6 : 0.35}
+                  strokeDasharray={isZero ? 'none' : '3,3'}
+                  className="chart-grid"
+                />
+              );
+            })}
+
+          {showAxes &&
+            yScale.ticks &&
+            yScale.ticks(5).map((t: number) => (
+              <text
+                key={t}
+                x={-10}
+                y={yScale(t)}
+                textAnchor="end"
+                dominantBaseline="central"
+                className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                fill="var(--fg-muted, currentColor)"
+                opacity={0.75}
+              >
+                {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
+              </text>
+            ))}
+
+          {showAxes &&
+            xScale &&
+            typeof xScale.ticks === 'function' &&
+            xScale
+              .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
+              .map((t: any, i: number) => {
+                const x = xScale(t);
+                if (x < -5 || x > innerWidth + 5) return null;
+                return (
+                  <text
+                    key={i}
+                    x={x}
+                    y={innerHeight + 18}
+                    textAnchor="middle"
+                    className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                    fill="var(--fg-muted, currentColor)"
+                    opacity={0.75}
+                  >
+                    {xTickFormat ? xTickFormat(t) : formatTemporalTick(t)}
+                  </text>
+                );
+              })}
+
           {normalized.map((d, i) => (
             <circle
               key={i}

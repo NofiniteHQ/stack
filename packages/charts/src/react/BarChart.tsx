@@ -5,6 +5,7 @@ import {
   defaultMargin,
   type NormalizedDataPoint,
 } from '../core/math';
+import { formatMetricNumber } from '../core/axis';
 import clsx from 'clsx';
 
 export interface BarChartProps<T = DataPoint> {
@@ -17,6 +18,9 @@ export interface BarChartProps<T = DataPoint> {
   color?: string;
   className?: string;
   showGrid?: boolean;
+  showAxes?: boolean;
+  xTickFormat?: (val: any) => string;
+  yTickFormat?: (val: number) => string;
 }
 
 export function BarChart<T = DataPoint>({
@@ -29,6 +33,9 @@ export function BarChart<T = DataPoint>({
   color = 'var(--chart-1, var(--color-primary))',
   className,
   showGrid = true,
+  showAxes = true,
+  xTickFormat,
+  yTickFormat,
 }: BarChartProps<T>) {
   const [activeBar, setActiveBar] = useState<NormalizedDataPoint | null>(null);
 
@@ -41,6 +48,7 @@ export function BarChart<T = DataPoint>({
   }, [data, width, height, margin, xAccessor, yAccessor]);
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
+  const innerHeight = Math.max(0, height - margin.top - margin.bottom);
 
   return (
     <div
@@ -58,21 +66,40 @@ export function BarChart<T = DataPoint>({
         <g transform={`translate(${margin.left}, ${margin.top})`}>
           {showGrid &&
             yScale.ticks &&
-            yScale
-              .ticks(5)
-              .map((t: number) => (
+            yScale.ticks(5).map((t: number) => {
+              const y = yScale(t);
+              const isZero = t === 0;
+              return (
                 <line
                   key={t}
                   x1={0}
-                  y1={yScale(t)}
+                  y1={y}
                   x2={innerWidth}
-                  y2={yScale(t)}
+                  y2={y}
                   stroke="var(--border-default)"
-                  strokeOpacity={0.5}
-                  strokeDasharray="3,3"
+                  strokeOpacity={isZero ? 0.6 : 0.35}
+                  strokeDasharray={isZero ? 'none' : '3,3'}
                   className="chart-grid"
                 />
-              ))}
+              );
+            })}
+
+          {showAxes &&
+            yScale.ticks &&
+            yScale.ticks(5).map((t: number) => (
+              <text
+                key={t}
+                x={-10}
+                y={yScale(t)}
+                textAnchor="end"
+                dominantBaseline="central"
+                className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                fill="var(--fg-muted, currentColor)"
+                opacity={0.75}
+              >
+                {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
+              </text>
+            ))}
 
           {bars.map((b, i) => (
             <rect
@@ -89,6 +116,27 @@ export function BarChart<T = DataPoint>({
               onMouseLeave={() => setActiveBar(null)}
             />
           ))}
+
+          {showAxes &&
+            bars.map((b, i) => {
+              const cx = b.x + b.width / 2;
+              const label = xTickFormat
+                ? xTickFormat(b.data.label)
+                : b.data.label;
+              return (
+                <text
+                  key={`cat-${i}`}
+                  x={cx}
+                  y={innerHeight + 18}
+                  textAnchor="middle"
+                  className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                  fill="var(--fg-muted, currentColor)"
+                  opacity={0.75}
+                >
+                  {label}
+                </text>
+              );
+            })}
         </g>
       </svg>
     </div>

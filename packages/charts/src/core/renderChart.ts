@@ -6,6 +6,7 @@ import {
   calculatePieSegments,
   normalizeData,
 } from './math';
+import { generateAxisSvg } from './axis';
 import { scaleLinear } from 'd3-scale';
 
 export type ChartVariant =
@@ -28,6 +29,8 @@ export interface ChartOptions {
   showAxes?: boolean;
   xAccessor?: (d: any) => number | Date | string;
   yAccessor?: (d: any) => number;
+  xTickFormat?: (val: any) => string;
+  yTickFormat?: (val: number) => string;
 }
 
 let gradientCounter = 0;
@@ -40,6 +43,7 @@ export function renderChart(options: ChartOptions): string {
   const variant = options.variant;
   const color = options.color || 'var(--chart-1, var(--color-primary))';
   const showGrid = options.showGrid !== false;
+  const showAxes = options.showAxes !== false;
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
@@ -48,30 +52,30 @@ export function renderChart(options: ChartOptions): string {
   let contentSvg = '';
 
   if (variant === 'area' || variant === 'line') {
-    const { areaPath, linePath, yScale, points } = calculateAreaPath(
+    const { areaPath, linePath, xScale, yScale, points } = calculateAreaPath(
       data,
       { width, height, margin },
       options.xAccessor,
       options.yAccessor
     );
 
-    // Grid lines
-    let gridSvg = '';
-    if (showGrid && yScale.ticks) {
-      const ticks = yScale.ticks(5);
-      gridSvg = ticks
-        .map(
-          (t: number) => `
-        <line x1="0" y1="${yScale(t)}" x2="${innerWidth}" y2="${yScale(t)}"
-              stroke="var(--border-default)" stroke-opacity="0.5" stroke-dasharray="3,3" class="chart-grid" />
-      `
-        )
-        .join('');
-    }
+    const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
+      width,
+      height,
+      margin,
+      xScale,
+      yScale,
+      showAxes,
+      showGrid,
+      xTickFormat: options.xTickFormat,
+      yTickFormat: options.yTickFormat,
+    });
 
     contentSvg = `
       <g transform="translate(${margin.left}, ${margin.top})">
         ${gridSvg}
+        ${yAxisSvg}
+        ${xAxisSvg}
         ${
           variant === 'area'
             ? `<path d="${areaPath}" fill="url(#${gradientId})" />`
@@ -88,28 +92,36 @@ export function renderChart(options: ChartOptions): string {
       </g>
     `;
   } else if (variant === 'bar') {
-    const { bars, yScale } = calculateBarLayout(
+    const { bars, xScale, yScale } = calculateBarLayout(
       data,
       { width, height, margin },
       { xAccessor: options.xAccessor, yAccessor: options.yAccessor }
     );
 
-    let gridSvg = '';
-    if (showGrid && yScale.ticks) {
-      const ticks = yScale.ticks(5);
-      gridSvg = ticks
-        .map(
-          (t: number) => `
-        <line x1="0" y1="${yScale(t)}" x2="${innerWidth}" y2="${yScale(t)}"
-              stroke="var(--border-default)" stroke-opacity="0.5" stroke-dasharray="3,3" class="chart-grid" />
-      `
-        )
-        .join('');
-    }
+    const categories = bars.map((b) => ({
+      label: b.data.label,
+      x: b.x,
+      width: b.width,
+    }));
+
+    const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
+      width,
+      height,
+      margin,
+      xScale,
+      yScale,
+      showAxes,
+      showGrid,
+      xTickFormat: options.xTickFormat,
+      yTickFormat: options.yTickFormat,
+      categories,
+    });
 
     contentSvg = `
       <g transform="translate(${margin.left}, ${margin.top})">
         ${gridSvg}
+        ${yAxisSvg}
+        ${xAxisSvg}
         ${bars
           .map(
             (b) => `
@@ -172,8 +184,23 @@ export function renderChart(options: ChartOptions): string {
       .domain([minY, maxY * 1.05])
       .range([innerHeight, 0]);
 
+    const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
+      width,
+      height,
+      margin,
+      xScale,
+      yScale,
+      showAxes,
+      showGrid,
+      xTickFormat: options.xTickFormat,
+      yTickFormat: options.yTickFormat,
+    });
+
     contentSvg = `
       <g transform="translate(${margin.left}, ${margin.top})">
+        ${gridSvg}
+        ${yAxisSvg}
+        ${xAxisSvg}
         ${normalized
           .map(
             (d) => `
