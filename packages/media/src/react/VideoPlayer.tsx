@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import {
   MediaPlayer,
   MediaProvider,
+  Track,
   type MediaPlayerInstance,
 } from '@vidstack/react';
 import {
@@ -9,6 +10,7 @@ import {
   DefaultVideoLayout,
 } from '@vidstack/react/player/layouts/default';
 import clsx from 'clsx';
+import type { MediaTrack, MediaTheme } from '../core';
 
 export interface VideoPlayerProps {
   src?: string;
@@ -20,9 +22,22 @@ export interface VideoPlayerProps {
   muted?: boolean;
   playsInline?: boolean;
   controls?: boolean;
-  theme?: 'dark' | 'light' | 'auto';
+  theme?: MediaTheme;
   aspectRatio?: string;
   className?: string;
+  tracks?: MediaTrack[];
+  thumbnails?: string;
+  playbackRates?: number[];
+  // Event Callbacks
+  onPlay?: () => void;
+  onPause?: () => void;
+  onEnded?: () => void;
+  onTimeUpdate?: (detail: { currentTime: number; duration: number }) => void;
+  onVolumeChange?: (detail: { volume: number; muted: boolean }) => void;
+  onError?: (error: any) => void;
+  onSeeked?: (time: number) => void;
+  onLoadedMetadata?: (detail: { duration: number }) => void;
+  onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
 export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
@@ -40,6 +55,18 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
       theme = 'auto',
       aspectRatio = '16/9',
       className,
+      tracks,
+      thumbnails,
+      playbackRates,
+      onPlay,
+      onPause,
+      onEnded,
+      onTimeUpdate,
+      onVolumeChange,
+      onError,
+      onSeeked,
+      onLoadedMetadata,
+      onFullscreenChange,
     },
     ref
   ) => {
@@ -76,9 +103,82 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
               : ''
           )}
           data-color-scheme={colorScheme}
+          onPlay={() => onPlay?.()}
+          onPause={() => onPause?.()}
+          onEnded={() => onEnded?.()}
+          onTimeUpdate={(e: any) => {
+            if (onTimeUpdate) {
+              const currentTime =
+                typeof e?.currentTime === 'number'
+                  ? e.currentTime
+                  : e?.detail?.currentTime ?? 0;
+              const duration =
+                typeof e?.duration === 'number'
+                  ? e.duration
+                  : e?.detail?.duration ?? 0;
+              onTimeUpdate({ currentTime, duration });
+            }
+          }}
+          onVolumeChange={(e: any) => {
+            if (onVolumeChange) {
+              const volume =
+                typeof e?.volume === 'number'
+                  ? e.volume
+                  : e?.detail?.volume ?? 1;
+              const isMuted =
+                typeof e?.muted === 'boolean'
+                  ? e.muted
+                  : e?.detail?.muted ?? false;
+              onVolumeChange({ volume, muted: isMuted });
+            }
+          }}
+          onError={(e: any) => onError?.(e)}
+          onSeeked={(e: any) => {
+            if (onSeeked) {
+              const time =
+                typeof e === 'number'
+                  ? e
+                  : typeof e?.currentTime === 'number'
+                  ? e.currentTime
+                  : e?.detail ?? 0;
+              onSeeked(time);
+            }
+          }}
+          onLoadedMetadata={(e: any) => {
+            if (onLoadedMetadata) {
+              const duration =
+                typeof e?.duration === 'number'
+                  ? e.duration
+                  : e?.detail?.duration ?? 0;
+              onLoadedMetadata({ duration });
+            }
+          }}
+          onFullscreenChange={(e: any) => {
+            if (onFullscreenChange) {
+              const isFullscreen =
+                typeof e === 'boolean' ? e : e?.detail ?? false;
+              onFullscreenChange(isFullscreen);
+            }
+          }}
         >
-          <MediaProvider />
-          {controls && <DefaultVideoLayout icons={defaultLayoutIcons} />}
+          <MediaProvider>
+            {tracks?.map((track) => (
+              <Track
+                key={track.src}
+                src={track.src}
+                label={track.label}
+                lang={track.language}
+                kind={track.kind || 'subtitles'}
+                default={track.default}
+              />
+            ))}
+          </MediaProvider>
+          {controls && (
+            <DefaultVideoLayout
+              icons={defaultLayoutIcons}
+              thumbnails={thumbnails}
+            />
+          )}
         </MediaPlayer>
       </div>
     );

@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import {
   MediaPlayer,
   MediaProvider,
+  Track,
   type MediaPlayerInstance,
 } from '@vidstack/react';
 import {
@@ -9,6 +10,7 @@ import {
   DefaultAudioLayout,
 } from '@vidstack/react/player/layouts/default';
 import clsx from 'clsx';
+import type { MediaTrack, MediaTheme } from '../core';
 
 export interface AudioPlayerProps {
   src?: string;
@@ -20,8 +22,18 @@ export interface AudioPlayerProps {
   loop?: boolean;
   muted?: boolean;
   controls?: boolean;
-  theme?: 'dark' | 'light' | 'auto';
+  theme?: MediaTheme;
   className?: string;
+  tracks?: MediaTrack[];
+  // Event Callbacks
+  onPlay?: () => void;
+  onPause?: () => void;
+  onEnded?: () => void;
+  onTimeUpdate?: (detail: { currentTime: number; duration: number }) => void;
+  onVolumeChange?: (detail: { volume: number; muted: boolean }) => void;
+  onError?: (error: any) => void;
+  onSeeked?: (time: number) => void;
+  onLoadedMetadata?: (detail: { duration: number }) => void;
 }
 
 export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
@@ -38,6 +50,15 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
       controls = true,
       theme = 'auto',
       className,
+      tracks,
+      onPlay,
+      onPause,
+      onEnded,
+      onTimeUpdate,
+      onVolumeChange,
+      onError,
+      onSeeked,
+      onLoadedMetadata,
     },
     ref
   ) => {
@@ -95,8 +116,69 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
               : ''
           )}
           data-color-scheme={colorScheme}
+          onPlay={() => onPlay?.()}
+          onPause={() => onPause?.()}
+          onEnded={() => onEnded?.()}
+          onTimeUpdate={(e: any) => {
+            if (onTimeUpdate) {
+              const currentTime =
+                typeof e?.currentTime === 'number'
+                  ? e.currentTime
+                  : e?.detail?.currentTime ?? 0;
+              const duration =
+                typeof e?.duration === 'number'
+                  ? e.duration
+                  : e?.detail?.duration ?? 0;
+              onTimeUpdate({ currentTime, duration });
+            }
+          }}
+          onVolumeChange={(e: any) => {
+            if (onVolumeChange) {
+              const volume =
+                typeof e?.volume === 'number'
+                  ? e.volume
+                  : e?.detail?.volume ?? 1;
+              const isMuted =
+                typeof e?.muted === 'boolean'
+                  ? e.muted
+                  : e?.detail?.muted ?? false;
+              onVolumeChange({ volume, muted: isMuted });
+            }
+          }}
+          onError={(e: any) => onError?.(e)}
+          onSeeked={(e: any) => {
+            if (onSeeked) {
+              const time =
+                typeof e === 'number'
+                  ? e
+                  : typeof e?.currentTime === 'number'
+                  ? e.currentTime
+                  : e?.detail ?? 0;
+              onSeeked(time);
+            }
+          }}
+          onLoadedMetadata={(e: any) => {
+            if (onLoadedMetadata) {
+              const duration =
+                typeof e?.duration === 'number'
+                  ? e.duration
+                  : e?.detail?.duration ?? 0;
+              onLoadedMetadata({ duration });
+            }
+          }}
         >
-          <MediaProvider />
+          <MediaProvider>
+            {tracks?.map((track) => (
+              <Track
+                key={track.src}
+                src={track.src}
+                label={track.label}
+                lang={track.language}
+                kind={track.kind || 'subtitles'}
+                default={track.default}
+              />
+            ))}
+          </MediaProvider>
           {controls && <DefaultAudioLayout icons={defaultLayoutIcons} />}
         </MediaPlayer>
       </div>
