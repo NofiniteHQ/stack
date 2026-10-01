@@ -8,7 +8,6 @@
 import 'vidstack/player';
 import 'vidstack/player/ui';
 import 'vidstack/player/layouts/default';
-import 'vidstack/icons';
 
 export type MediaType = 'video' | 'audio';
 export type MediaTheme = 'dark' | 'light' | 'auto';
