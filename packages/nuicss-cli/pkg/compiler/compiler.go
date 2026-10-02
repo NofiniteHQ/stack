@@ -2,8 +2,10 @@ package compiler
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -27,6 +29,9 @@ type CompileResult struct {
 	OutputPath  string
 }
 
+// DirectiveRegex matches @nuicss and @import directives in various formats
+var DirectiveRegex = regexp.MustCompile(`@(?:nuicss(?:\s+([a-zA-Z0-9_-]+))?|import\s+["'](?:@nofinite\/)?nuicss(?:\/([a-zA-Z0-9_-]+))?["'])\s*;?`)
+
 // Compile processes the input CSS file and outputs the compiled NUICSS stylesheet
 func Compile(opts CompileOptions) (*CompileResult, error) {
 	start := time.Now()
@@ -34,10 +39,18 @@ func Compile(opts CompileOptions) (*CompileResult, error) {
 	var inputContent string
 	var inputBytes int
 
-	if opts.InputPath != "" {
+	if opts.InputPath != "" && opts.InputPath != "-" {
 		data, err := os.ReadFile(opts.InputPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read input file %q: %w", opts.InputPath, err)
+		}
+		inputContent = string(data)
+		inputBytes = len(data)
+	} else if opts.InputPath == "-" {
+		// Read from stdin
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read from stdin: %w", err)
 		}
 		inputContent = string(data)
 		inputBytes = len(data)
@@ -52,28 +65,30 @@ func Compile(opts CompileOptions) (*CompileResult, error) {
 
 	var compiled string
 
-	// Directives handling
-	hasNuicssDirective := strings.Contains(inputContent, "@nuicss;") ||
-		strings.Contains(inputContent, "@nuicss ")
-
-	if hasNuicssDirective {
-		// Replace @nuicss; with base design system
-		compiled = strings.ReplaceAll(inputContent, "@nuicss;", baseCSS)
+	// Directives handling via multi-variant regex
+	if DirectiveRegex.MatchString(inputContent) {
+		// Replace matched directive cleanly with base design system
+		compiled = DirectiveRegex.ReplaceAllString(inputContent, baseCSS)
 	} else if strings.TrimSpace(inputContent) == "" {
-		// Empty input file: output full base design system
+		// Empty input file or no input: output full base design system
 		compiled = baseCSS
 	} else {
 		// User provided custom CSS without directive: prepend NUICSS base
 		compiled = baseCSS + "\n\n" + inputContent
 	}
 
-	// Apply minification if requested
+	// Apply minification to any user custom CSS if requested
 	if opts.Minify {
 		compiled = minifier.Minify(compiled)
 	}
 
 	// Write output
-	if opts.OutputPath != "" {
+	if opts.OutputPath == "-" {
+		// Stream to stdout
+		if _, err := os.Stdout.Write([]byte(compiled)); err != nil {
+			return nil, fmt.Errorf("failed to write to stdout: %w", err)
+		}
+	} else if opts.OutputPath != "" {
 		dir := filepath.Dir(opts.OutputPath)
 		if dir != "." && dir != "" {
 			if err := os.MkdirAll(dir, 0755); err != nil {

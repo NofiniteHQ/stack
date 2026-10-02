@@ -14,7 +14,7 @@ if (platform === 'win32') {
 } else if (platform === 'darwin') {
   binaryName = arch === 'arm64' ? 'nuicss-darwin-arm64' : 'nuicss-darwin-amd64';
 } else if (platform === 'linux') {
-  binaryName = 'nuicss-linux-amd64';
+  binaryName = arch === 'arm64' ? 'nuicss-linux-arm64' : 'nuicss-linux-amd64';
 } else {
   console.error(`Unsupported operating system: ${platform}`);
   process.exit(1);
@@ -22,7 +22,7 @@ if (platform === 'win32') {
 
 let binaryPath = path.join(__dirname, binaryName);
 
-// Fallback to nuicss.exe or nuicss if specific arch binary is missing
+// Fallback to generic name if specific arch binary is missing
 if (!fs.existsSync(binaryPath)) {
   const fallback = platform === 'win32' ? 'nuicss.exe' : 'nuicss';
   const fallbackPath = path.join(__dirname, fallback);
@@ -36,6 +36,22 @@ if (!fs.existsSync(binaryPath)) {
     `NUICSS binary not found for ${platform}-${arch} at: ${binaryPath}`
   );
   process.exit(1);
+}
+
+// Ensure binary has executable permissions on POSIX systems
+if (platform !== 'win32') {
+  try {
+    fs.accessSync(binaryPath, fs.constants.X_OK);
+  } catch (_) {
+    try {
+      fs.chmodSync(binaryPath, 0o755);
+    } catch (e) {
+      console.warn(
+        `Warning: Could not set executable permission on ${binaryPath}:`,
+        e.message
+      );
+    }
+  }
 }
 
 const result = spawnSync(binaryPath, process.argv.slice(2), {

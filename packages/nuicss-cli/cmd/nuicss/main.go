@@ -10,11 +10,12 @@ import (
 	"github.com/nofinitehq/stack/packages/nuicss-cli/pkg/initializer"
 	"github.com/nofinitehq/stack/packages/nuicss-cli/pkg/migrator"
 	"github.com/nofinitehq/stack/packages/nuicss-cli/pkg/scaffolder"
+	"github.com/nofinitehq/stack/packages/nuicss-cli/pkg/scanner"
 	"github.com/nofinitehq/stack/packages/nuicss-cli/pkg/tokens"
 	"github.com/nofinitehq/stack/packages/nuicss-cli/pkg/watcher"
 )
 
-const Version = "0.1.0"
+const Version = "0.2.0"
 
 func printHelp() {
 	fmt.Println(`NUICSS Standalone Compiler CLI (Go Native)
@@ -25,7 +26,9 @@ Usage:
 
 Commands:
   (default)          Compile CSS: nuicss -i input.css -o output.css [-w] [-m]
-  init               Initialize starter CSS and native IDE IntelliSense
+  compile, build     Compile CSS stylesheets
+  check [path]       Lint source files for design token & superclass violations
+  init               Initialize starter CSS, nuicss.config.ts, and IDE IntelliSense
   migrate [path]     Convert Tailwind utility soup to NUICSS superclasses
   tokens             Inspect OKLCH color palettes and design tokens
   add <component>    Scaffold ecosystem UI component (e.g. nuicss add modal)
@@ -34,8 +37,8 @@ Commands:
   help, -h           Show this help message
 
 Options:
-  -i, --input        Path to input CSS file containing @nuicss; (default: "input.css")
-  -o, --output       Path to output compiled CSS file (default: "dist/output.css")
+  -i, --input        Path to input CSS file containing @nuicss; (use "-" for stdin, default: "input.css")
+  -o, --output       Path to output compiled CSS file (use "-" for stdout, default: "dist/output.css")
   -w, --watch        Watch input CSS and template files for live rebuilds
   -m, --minify       Minify generated CSS for production
   --dry-run          Preview changes without modifying files (used with migrate)`)
@@ -70,6 +73,27 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
+		os.Exit(0)
+
+	case "check":
+		targetPath := "."
+		if len(args) > 1 && !strings.HasPrefix(args[1], "-") {
+			targetPath = args[1]
+		}
+		fmt.Printf("\n🔍 Running NUICSS Design System Linter on %q...\n", targetPath)
+		report, err := scanner.CheckDirectories([]string{targetPath})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		if len(report.Issues) > 0 {
+			fmt.Printf("\n⚠️  Found %d design system violations across %d files:\n\n", len(report.Issues), report.TotalFilesScanned)
+			for _, issue := range report.Issues {
+				fmt.Printf("  %s:%d [%s]\n    %s\n    Suggestion: %s\n\n", issue.FilePath, issue.Line, issue.Rule, issue.Message, issue.Suggestion)
+			}
+			os.Exit(1)
+		}
+		fmt.Printf("✓ All %d scanned files adhere to NUICSS design system tokens and superclasses.\n\n", report.TotalFilesScanned)
 		os.Exit(0)
 
 	case "tokens":
@@ -115,10 +139,21 @@ func main() {
 			os.Exit(1)
 		}
 		os.Exit(0)
+
+	case "compile", "build":
+		args = args[1:]
+
+	default:
+		if !strings.HasPrefix(command, "-") {
+			fmt.Fprintf(os.Stderr, "Error: unknown command %q. Run 'nuicss help' for available commands.\n", command)
+			os.Exit(1)
+		}
 	}
 
-	// Default mode: Compile CSS with flags
-	fs := flag.NewFlagSet("compile", flag.ExitOnError)
+	// Compilation mode: Parse compile flags
+	fs := flag.NewFlagSet("compile", flag.ContinueOnError)
+	fs.Usage = printHelp
+
 	var (
 		inputPath  string
 		outputPath string
@@ -136,7 +171,6 @@ func main() {
 	fs.BoolVar(&minify, "minify", false, "Minify output")
 
 	if err := fs.Parse(args); err != nil {
-		fmt.Fprintf(os.Stderr, "Flag error: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -162,7 +196,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\n⚡ NUICSS compiled successfully!\n")
-	fmt.Printf("   Output:   %s (%d bytes)\n", res.OutputPath, res.OutputBytes)
-	fmt.Printf("   Duration: %v\n\n", res.Duration)
+	if outputPath != "-" {
+		fmt.Printf("\n⚡ NUICSS compiled successfully!\n")
+		fmt.Printf("   Output:   %s (%d bytes)\n", res.OutputPath, res.OutputBytes)
+		fmt.Printf("   Duration: %v\n\n", res.Duration)
+	}
 }

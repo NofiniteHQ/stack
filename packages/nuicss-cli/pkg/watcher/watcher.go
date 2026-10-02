@@ -3,6 +3,7 @@ package watcher
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -35,7 +36,7 @@ func Watch(opts WatchOptions) error {
 	}
 
 	// Add input file directory to watcher
-	if opts.CompileOpts.InputPath != "" {
+	if opts.CompileOpts.InputPath != "" && opts.CompileOpts.InputPath != "-" {
 		inputDir := filepath.Dir(opts.CompileOpts.InputPath)
 		_ = watcher.Add(inputDir)
 	}
@@ -70,6 +71,10 @@ func Watch(opts WatchOptions) error {
 		timer      *time.Timer
 	)
 
+	// Precompute absolute output path for robust loop prevention
+	absOutputPath, _ := filepath.Abs(opts.CompileOpts.OutputPath)
+	cleanOutputPath := filepath.Clean(absOutputPath)
+
 	for {
 		select {
 		case event, ok := <-watcher.Events:
@@ -82,17 +87,30 @@ func Watch(opts WatchOptions) error {
 				continue
 			}
 
+			// Dynamically watch newly created directories
+			if event.Op&fsnotify.Create != 0 {
+				if fi, err := os.Stat(event.Name); err == nil && fi.IsDir() {
+					dirName := fi.Name()
+					if dirName != "node_modules" && dirName != ".git" && dirName != ".next" && dirName != "dist" && dirName != "temp" {
+						_ = watcher.Add(event.Name)
+					}
+					continue
+				}
+			}
+
+			// Don't recompile on output file changes (check with absolute normalized paths)
+			if absEvent, err := filepath.Abs(event.Name); err == nil {
+				if strings.EqualFold(filepath.Clean(absEvent), cleanOutputPath) {
+					continue
+				}
+			}
+
 			// Filter by relevant extensions
 			ext := strings.ToLower(filepath.Ext(event.Name))
 			isCSS := ext == ".css"
 			isTemplate := ext == ".html" || ext == ".tsx" || ext == ".jsx" || ext == ".vue" || ext == ".svelte" || ext == ".templ" || ext == ".php"
 
 			if !isCSS && !isTemplate {
-				continue
-			}
-
-			// Don't recompile on output file changes
-			if filepath.Clean(event.Name) == filepath.Clean(opts.CompileOpts.OutputPath) {
 				continue
 			}
 

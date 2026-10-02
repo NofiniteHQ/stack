@@ -7,54 +7,74 @@ import (
 	"testing"
 )
 
-func TestCompile(t *testing.T) {
-	tempDir := t.TempDir()
-	inputPath := filepath.Join(tempDir, "input.css")
-	outputPath := filepath.Join(tempDir, "output.css")
-
-	inputCSS := `
-	/* Custom styles */
-	@nuicss;
-
-	.custom-hero {
-		background: var(--bg-surface);
-	}
-	`
-
-	if err := os.WriteFile(inputPath, []byte(inputCSS), 0644); err != nil {
-		t.Fatalf("Failed to write test input: %v", err)
-	}
-
-	res, err := Compile(CompileOptions{
-		InputPath:  inputPath,
-		OutputPath: outputPath,
-		Minify:     false,
-	})
-
-	if err != nil {
-		t.Fatalf("Compile failed: %v", err)
-	}
-
-	if res.OutputBytes == 0 {
-		t.Errorf("Expected non-zero output bytes")
-	}
-
-	data, err := os.ReadFile(outputPath)
-	if err != nil {
-		t.Fatalf("Failed to read output: %v", err)
+func TestCompileVariants(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		contains string
+	}{
+		{
+			name:     "standard semicolon",
+			input:    "@nuicss;\n.custom-hero { color: red; }",
+			contains: ".btn",
+		},
+		{
+			name:     "trailing space without semicolon (Bug 2 fix)",
+			input:    "@nuicss \n.custom-hero { color: red; }",
+			contains: ".btn",
+		},
+		{
+			name:     "newline without semicolon",
+			input:    "@nuicss\n.custom-hero { color: red; }",
+			contains: ".btn",
+		},
+		{
+			name:     "import syntax",
+			input:    "@import \"nuicss\";\n.custom-hero { color: red; }",
+			contains: ".btn",
+		},
+		{
+			name:     "empty input file",
+			input:    "",
+			contains: ".btn",
+		},
 	}
 
-	outputStr := string(data)
-	if strings.Contains(outputStr, "@nuicss;") {
-		t.Errorf("Expected @nuicss; to be replaced")
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tempDir := t.TempDir()
+			inputPath := filepath.Join(tempDir, "input.css")
+			outputPath := filepath.Join(tempDir, "output.css")
 
-	if !strings.Contains(outputStr, ".btn") {
-		t.Errorf("Expected compiled CSS to contain .btn")
-	}
+			if err := os.WriteFile(inputPath, []byte(tt.input), 0644); err != nil {
+				t.Fatal(err)
+			}
 
-	if !strings.Contains(outputStr, ".custom-hero") {
-		t.Errorf("Expected compiled CSS to contain custom-hero")
+			res, err := Compile(CompileOptions{
+				InputPath:  inputPath,
+				OutputPath: outputPath,
+				Minify:     false,
+			})
+			if err != nil {
+				t.Fatalf("Compile failed: %v", err)
+			}
+
+			data, err := os.ReadFile(outputPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			out := string(data)
+
+			if strings.Contains(out, "@nuicss") {
+				t.Errorf("Output should not contain raw @nuicss directive literal")
+			}
+			if !strings.Contains(out, tt.contains) {
+				t.Errorf("Output missing expected content %q, total length: %d", tt.contains, len(out))
+			}
+			if res.OutputBytes != len(data) {
+				t.Errorf("Mismatch in reported bytes: %d vs %d", res.OutputBytes, len(data))
+			}
+		})
 	}
 }
 
