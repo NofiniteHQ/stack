@@ -1,67 +1,10 @@
 #!/usr/bin/env node
 
-const path = require('path');
-const { spawnSync } = require('child_process');
-const fs = require('fs');
-
-const platform = process.platform;
-const arch = process.arch;
-
-let binaryName = '';
-
-if (platform === 'win32') {
-  binaryName = 'nuicss-windows-amd64.exe';
-} else if (platform === 'darwin') {
-  binaryName = arch === 'arm64' ? 'nuicss-darwin-arm64' : 'nuicss-darwin-amd64';
-} else if (platform === 'linux') {
-  binaryName = arch === 'arm64' ? 'nuicss-linux-arm64' : 'nuicss-linux-amd64';
-} else {
-  console.error(`Unsupported operating system: ${platform}`);
-  process.exit(1);
-}
-
-let binaryPath = path.join(__dirname, binaryName);
-
-// Fallback to generic name if specific arch binary is missing
-if (!fs.existsSync(binaryPath)) {
-  const fallback = platform === 'win32' ? 'nuicss.exe' : 'nuicss';
-  const fallbackPath = path.join(__dirname, fallback);
-  if (fs.existsSync(fallbackPath)) {
-    binaryPath = fallbackPath;
-  }
-}
-
-if (!fs.existsSync(binaryPath)) {
-  console.error(
-    `NUICSS binary not found for ${platform}-${arch} at: ${binaryPath}`
-  );
-  process.exit(1);
-}
-
-// Ensure binary has executable permissions on POSIX systems
-if (platform !== 'win32') {
-  try {
-    fs.accessSync(binaryPath, fs.constants.X_OK);
-  } catch (_) {
-    try {
-      fs.chmodSync(binaryPath, 0o755);
-    } catch (e) {
-      console.warn(
-        `Warning: Could not set executable permission on ${binaryPath}:`,
-        e.message
-      );
-    }
-  }
-}
-
-const result = spawnSync(binaryPath, process.argv.slice(2), {
-  stdio: 'inherit',
-  windowsHide: true,
-});
-
-if (result.error) {
-  console.error('Failed to execute NUICSS binary:', result.error.message);
-  process.exit(1);
-}
-
-process.exit(result.status !== null ? result.status : 0);
+import('../dist/index.js')
+  .then((m) => {
+    return m.runCli();
+  })
+  .catch((err) => {
+    console.error(`\n[NUICSS] ✖ Fatal Error: ${err?.message || err}\n`);
+    process.exit(1);
+  });

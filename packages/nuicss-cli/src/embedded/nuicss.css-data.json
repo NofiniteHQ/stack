@@ -1,0 +1,1736 @@
+{
+  "version": 1.1,
+  "properties": [
+    {
+      "name": "--white",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#ffffff`"
+      }
+    },
+    {
+      "name": "--black",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#000000`"
+      }
+    },
+    {
+      "name": "--transparent",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `transparent`"
+      }
+    },
+    {
+      "name": "--slate-50",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#f8fafc`"
+      }
+    },
+    {
+      "name": "--slate-100",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#f1f5f9`"
+      }
+    },
+    {
+      "name": "--slate-200",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#e2e8f0`"
+      }
+    },
+    {
+      "name": "--slate-300",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#cbd5e1`"
+      }
+    },
+    {
+      "name": "--slate-400",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#94a3b8`"
+      }
+    },
+    {
+      "name": "--slate-500",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#64748b`"
+      }
+    },
+    {
+      "name": "--slate-600",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#475569`"
+      }
+    },
+    {
+      "name": "--slate-700",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#334155`"
+      }
+    },
+    {
+      "name": "--slate-800",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#1e293b`"
+      }
+    },
+    {
+      "name": "--slate-900",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#0f172a`"
+      }
+    },
+    {
+      "name": "--slate-950",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#020617`"
+      }
+    },
+    {
+      "name": "--brand-50",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#eff6ff`"
+      }
+    },
+    {
+      "name": "--brand-100",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#dbeafe`"
+      }
+    },
+    {
+      "name": "--brand-200",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#bfdbfe`"
+      }
+    },
+    {
+      "name": "--brand-300",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#93c5fd`"
+      }
+    },
+    {
+      "name": "--brand-400",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#60a5fa`"
+      }
+    },
+    {
+      "name": "--brand-500",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#3b82f6`"
+      }
+    },
+    {
+      "name": "--brand-600",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#2563eb`"
+      }
+    },
+    {
+      "name": "--brand-700",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#1d4ed8`"
+      }
+    },
+    {
+      "name": "--brand-800",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#1e40af`"
+      }
+    },
+    {
+      "name": "--brand-900",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#1e3a8a`"
+      }
+    },
+    {
+      "name": "--brand-950",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#172554`"
+      }
+    },
+    {
+      "name": "--red-500",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#ef4444`"
+      }
+    },
+    {
+      "name": "--red-600",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#dc2626`"
+      }
+    },
+    {
+      "name": "--green-500",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#10b981`"
+      }
+    },
+    {
+      "name": "--green-600",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#059669`"
+      }
+    },
+    {
+      "name": "--amber-500",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#f59e0b`"
+      }
+    },
+    {
+      "name": "--amber-600",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#d97706`"
+      }
+    },
+    {
+      "name": "--blue-500",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#0ea5e9`"
+      }
+    },
+    {
+      "name": "--brand-primary",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--brand-600)`"
+      }
+    },
+    {
+      "name": "--brand-primary-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--brand-700)`"
+      }
+    },
+    {
+      "name": "--brand-primary-active",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--brand-800)`"
+      }
+    },
+    {
+      "name": "--brand-primary-fg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--bg-page",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-50)`"
+      }
+    },
+    {
+      "name": "--bg-canvas",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-50)`"
+      }
+    },
+    {
+      "name": "--bg-surface",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--bg-surface-raised",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-50)`"
+      }
+    },
+    {
+      "name": "--bg-surface-overlay",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--bg-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+      }
+    },
+    {
+      "name": "--bg-muted",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+      }
+    },
+    {
+      "name": "--bg-inset",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+      }
+    },
+    {
+      "name": "--bg-card",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--bg-accent",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+      }
+    },
+    {
+      "name": "--bg-overlay",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `rgba(0, 0, 0, 0.4)`"
+      }
+    },
+    {
+      "name": "--glass-bg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `rgba(255, 255, 255, 0.7)`"
+      }
+    },
+    {
+      "name": "--glass-border",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `rgba(0, 0, 0, 0.08)`"
+      }
+    },
+    {
+      "name": "--bg-selected",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(in oklch, var(--color-primary) 8%, transparent)`"
+      }
+    },
+    {
+      "name": "--bg-selected-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(\n    in oklch,\n    var(--color-primary) 12%,\n    transparent\n  )`"
+      }
+    },
+    {
+      "name": "--fg-default",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+      }
+    },
+    {
+      "name": "--fg-card",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+      }
+    },
+    {
+      "name": "--fg-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-600)`"
+      }
+    },
+    {
+      "name": "--fg-muted",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-500)`"
+      }
+    },
+    {
+      "name": "--fg-accent",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+      }
+    },
+    {
+      "name": "--fg-inverse",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--fg-disabled",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-400)`"
+      }
+    },
+    {
+      "name": "--nui-fg-default",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--fg-default)`"
+      }
+    },
+    {
+      "name": "--nui-fg-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--fg-subtle)`"
+      }
+    },
+    {
+      "name": "--nui-fg-muted",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--fg-muted)`"
+      }
+    },
+    {
+      "name": "--nui-color-danger",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-danger)`"
+      }
+    },
+    {
+      "name": "--border-default",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+      }
+    },
+    {
+      "name": "--border-strong",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-300)`"
+      }
+    },
+    {
+      "name": "--border-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+      }
+    },
+    {
+      "name": "--border-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-300)`"
+      }
+    },
+    {
+      "name": "--border-focus",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary)`"
+      }
+    },
+    {
+      "name": "--border-disabled",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+      }
+    },
+    {
+      "name": "--color-primary",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--brand-primary)`"
+      }
+    },
+    {
+      "name": "--color-primary-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(in oklch, var(--color-primary) 88%, black)`"
+      }
+    },
+    {
+      "name": "--color-primary-active",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(in oklch, var(--color-primary) 76%, black)`"
+      }
+    },
+    {
+      "name": "--color-primary-fg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--brand-primary-fg)`"
+      }
+    },
+    {
+      "name": "--color-secondary",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+      }
+    },
+    {
+      "name": "--color-secondary-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+      }
+    },
+    {
+      "name": "--color-secondary-active",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-300)`"
+      }
+    },
+    {
+      "name": "--color-secondary-fg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+      }
+    },
+    {
+      "name": "--color-secondary-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(\n    in oklch,\n    var(--color-secondary) 15%,\n    transparent\n  )`"
+      }
+    },
+    {
+      "name": "--color-danger",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--red-500)`"
+      }
+    },
+    {
+      "name": "--color-danger-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(\n    in oklch,\n    var(--color-danger) 10%,\n    transparent\n  )`"
+      }
+    },
+    {
+      "name": "--color-danger-fg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--color-success",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--green-500)`"
+      }
+    },
+    {
+      "name": "--color-success-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(\n    in oklch,\n    var(--color-success) 10%,\n    transparent\n  )`"
+      }
+    },
+    {
+      "name": "--color-success-fg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--color-warning",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--amber-500)`"
+      }
+    },
+    {
+      "name": "--color-warning-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(\n    in oklch,\n    var(--color-warning) 10%,\n    transparent\n  )`"
+      }
+    },
+    {
+      "name": "--color-warning-fg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--color-info",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--blue-500)`"
+      }
+    },
+    {
+      "name": "--color-info-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(in oklch, var(--color-info) 10%, transparent)`"
+      }
+    },
+    {
+      "name": "--color-info-fg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+      }
+    },
+    {
+      "name": "--color-primary-subtle",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(\n    in oklch,\n    var(--color-primary) 10%,\n    transparent\n  )`"
+      }
+    },
+    {
+      "name": "--chart-1",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary)`"
+      }
+    },
+    {
+      "name": "--chart-2",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-info)`"
+      }
+    },
+    {
+      "name": "--chart-3",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-success)`"
+      }
+    },
+    {
+      "name": "--chart-4",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-warning)`"
+      }
+    },
+    {
+      "name": "--chart-5",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-danger)`"
+      }
+    },
+    {
+      "name": "--chart-6",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `oklch(0.65 0.22 300)`"
+      }
+    },
+    {
+      "name": "--chart-7",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `oklch(0.7 0.2 350)`"
+      }
+    },
+    {
+      "name": "--chart-8",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `oklch(0.72 0.19 50)`"
+      }
+    },
+    {
+      "name": "--focus-ring",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--fg-default)`"
+      }
+    },
+    {
+      "name": "--focus-ring-offset",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--bg-page)`"
+      }
+    },
+    {
+      "name": "--spacing",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.25rem`"
+      }
+    },
+    {
+      "name": "--space-0",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0px`"
+      }
+    },
+    {
+      "name": "--space-0-5",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.125rem`"
+      }
+    },
+    {
+      "name": "--space-1",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.25rem`"
+      }
+    },
+    {
+      "name": "--space-1-5",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.375rem`"
+      }
+    },
+    {
+      "name": "--space-2",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.5rem`"
+      }
+    },
+    {
+      "name": "--space-2-5",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.625rem`"
+      }
+    },
+    {
+      "name": "--space-3",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.75rem`"
+      }
+    },
+    {
+      "name": "--space-4",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1rem`"
+      }
+    },
+    {
+      "name": "--space-5",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.25rem`"
+      }
+    },
+    {
+      "name": "--space-6",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.5rem`"
+      }
+    },
+    {
+      "name": "--space-7",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.75rem`"
+      }
+    },
+    {
+      "name": "--space-8",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `2rem`"
+      }
+    },
+    {
+      "name": "--space-9",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `2.25rem`"
+      }
+    },
+    {
+      "name": "--space-10",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `2.5rem`"
+      }
+    },
+    {
+      "name": "--space-11",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `2.75rem`"
+      }
+    },
+    {
+      "name": "--space-12",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `3rem`"
+      }
+    },
+    {
+      "name": "--space-14",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `3.5rem`"
+      }
+    },
+    {
+      "name": "--space-16",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `4rem`"
+      }
+    },
+    {
+      "name": "--space-20",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `5rem`"
+      }
+    },
+    {
+      "name": "--space-24",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `6rem`"
+      }
+    },
+    {
+      "name": "--space-28",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `7rem`"
+      }
+    },
+    {
+      "name": "--space-32",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `8rem`"
+      }
+    },
+    {
+      "name": "--space-36",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `9rem`"
+      }
+    },
+    {
+      "name": "--space-40",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `10rem`"
+      }
+    },
+    {
+      "name": "--space-44",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `11rem`"
+      }
+    },
+    {
+      "name": "--space-48",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `12rem`"
+      }
+    },
+    {
+      "name": "--space-52",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `13rem`"
+      }
+    },
+    {
+      "name": "--space-64",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `16rem`"
+      }
+    },
+    {
+      "name": "--space-72",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `18rem`"
+      }
+    },
+    {
+      "name": "--space-80",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `20rem`"
+      }
+    },
+    {
+      "name": "--space-96",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `24rem`"
+      }
+    },
+    {
+      "name": "--space-auto",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `auto`"
+      }
+    },
+    {
+      "name": "--space-fluid-xs",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem)`"
+      }
+    },
+    {
+      "name": "--space-fluid-sm",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(0.5rem, 0.4rem + 0.5vw, 1rem)`"
+      }
+    },
+    {
+      "name": "--space-fluid-md",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(1rem, 0.75rem + 1vw, 2rem)`"
+      }
+    },
+    {
+      "name": "--space-fluid-lg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(1.5rem, 1rem + 2vw, 3.5rem)`"
+      }
+    },
+    {
+      "name": "--space-fluid-xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(2.5rem, 1.5rem + 4vw, 6rem)`"
+      }
+    },
+    {
+      "name": "--radius-none",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0px`"
+      }
+    },
+    {
+      "name": "--radius-sm",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.25rem`"
+      }
+    },
+    {
+      "name": "--radius-control",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.375rem`"
+      }
+    },
+    {
+      "name": "--radius-md",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.375rem`"
+      }
+    },
+    {
+      "name": "--radius-lg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.5rem`"
+      }
+    },
+    {
+      "name": "--radius-container",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.75rem`"
+      }
+    },
+    {
+      "name": "--radius-xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.75rem`"
+      }
+    },
+    {
+      "name": "--radius-2xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1rem`"
+      }
+    },
+    {
+      "name": "--radius-3xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.5rem`"
+      }
+    },
+    {
+      "name": "--radius-full",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `9999px`"
+      }
+    },
+    {
+      "name": "--font-sans",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `ui-sans-serif, system-ui, -apple-system, sans-serif`"
+      }
+    },
+    {
+      "name": "--font-serif",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif`"
+      }
+    },
+    {
+      "name": "--font-mono",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`"
+      }
+    },
+    {
+      "name": "--text-xs",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.75rem`"
+      }
+    },
+    {
+      "name": "--text-sm",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.875rem`"
+      }
+    },
+    {
+      "name": "--text-base",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1rem`"
+      }
+    },
+    {
+      "name": "--text-lg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.125rem`"
+      }
+    },
+    {
+      "name": "--text-xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.25rem`"
+      }
+    },
+    {
+      "name": "--text-2xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.5rem`"
+      }
+    },
+    {
+      "name": "--text-3xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.875rem`"
+      }
+    },
+    {
+      "name": "--text-4xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `2.25rem`"
+      }
+    },
+    {
+      "name": "--text-5xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `3rem`"
+      }
+    },
+    {
+      "name": "--text-6xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `3.75rem`"
+      }
+    },
+    {
+      "name": "--text-7xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `4.5rem`"
+      }
+    },
+    {
+      "name": "--text-8xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `6rem`"
+      }
+    },
+    {
+      "name": "--text-9xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `8rem`"
+      }
+    },
+    {
+      "name": "--text-fluid-xs",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(0.7rem, 0.65rem + 0.25vw, 0.8rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-sm",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(0.8rem, 0.75rem + 0.3vw, 0.95rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-base",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(0.95rem, 0.9rem + 0.35vw, 1.125rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-lg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(1.125rem, 1rem + 0.6vw, 1.375rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(1.25rem, 1.1rem + 0.8vw, 1.75rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-2xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-3xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(1.875rem, 1.5rem + 1.8vw, 3rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-4xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(2.25rem, 1.75rem + 2.5vw, 4rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-5xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(3rem, 2.25rem + 3.5vw, 5rem)`"
+      }
+    },
+    {
+      "name": "--text-fluid-hero",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `clamp(3.5rem, 2.5rem + 5vw, 6.5rem)`"
+      }
+    },
+    {
+      "name": "--weight-light",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `300`"
+      }
+    },
+    {
+      "name": "--weight-regular",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `400`"
+      }
+    },
+    {
+      "name": "--weight-medium",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `500`"
+      }
+    },
+    {
+      "name": "--weight-semibold",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `600`"
+      }
+    },
+    {
+      "name": "--weight-bold",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `700`"
+      }
+    },
+    {
+      "name": "--weight-extrabold",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `800`"
+      }
+    },
+    {
+      "name": "--tracking-tighter",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `-0.05em`"
+      }
+    },
+    {
+      "name": "--tracking-tight",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `-0.025em`"
+      }
+    },
+    {
+      "name": "--tracking-normal",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0`"
+      }
+    },
+    {
+      "name": "--tracking-wide",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.025em`"
+      }
+    },
+    {
+      "name": "--tracking-wider",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.05em`"
+      }
+    },
+    {
+      "name": "--tracking-widest",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.1em`"
+      }
+    },
+    {
+      "name": "--leading-none",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1`"
+      }
+    },
+    {
+      "name": "--leading-tight",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.25`"
+      }
+    },
+    {
+      "name": "--leading-snug",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.375`"
+      }
+    },
+    {
+      "name": "--leading-normal",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.5`"
+      }
+    },
+    {
+      "name": "--leading-relaxed",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1.625`"
+      }
+    },
+    {
+      "name": "--leading-loose",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `2`"
+      }
+    },
+    {
+      "name": "--shadow-none",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 0 #0000`"
+      }
+    },
+    {
+      "name": "--shadow-xs",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 1px 2px rgba(0, 0, 0, 0.04)`"
+      }
+    },
+    {
+      "name": "--shadow-sm",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)`"
+      }
+    },
+    {
+      "name": "--shadow-md",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 4px 6px -1px rgba(0, 0, 0, 0.06),\n    0 2px 4px -2px rgba(0, 0, 0, 0.04)`"
+      }
+    },
+    {
+      "name": "--shadow-lg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 10px 15px -3px rgba(0, 0, 0, 0.06),\n    0 4px 6px -4px rgba(0, 0, 0, 0.03)`"
+      }
+    },
+    {
+      "name": "--shadow-xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 20px 25px -5px rgba(0, 0, 0, 0.08),\n    0 8px 10px -6px rgba(0, 0, 0, 0.03)`"
+      }
+    },
+    {
+      "name": "--shadow-2xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 25px 50px -12px rgba(0, 0, 0, 0.15)`"
+      }
+    },
+    {
+      "name": "--shadow-inner",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)`"
+      }
+    },
+    {
+      "name": "--shadow-popover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 10px 38px -10px rgba(22, 23, 24, 0.12),\n    0 10px 20px -15px rgba(22, 23, 24, 0.08)`"
+      }
+    },
+    {
+      "name": "--transition-fast",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `150ms`"
+      }
+    },
+    {
+      "name": "--transition-normal",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `200ms`"
+      }
+    },
+    {
+      "name": "--transition-slow",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `300ms`"
+      }
+    },
+    {
+      "name": "--transition-slower",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `500ms`"
+      }
+    },
+    {
+      "name": "--ease-linear",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `linear`"
+      }
+    },
+    {
+      "name": "--ease-in",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `cubic-bezier(0.4, 0, 1, 1)`"
+      }
+    },
+    {
+      "name": "--ease-out",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `cubic-bezier(0, 0, 0.2, 1)`"
+      }
+    },
+    {
+      "name": "--ease-in-out",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `cubic-bezier(0.4, 0, 0.2, 1)`"
+      }
+    },
+    {
+      "name": "--ease-spring",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `cubic-bezier(0.175, 0.885, 0.32, 1.275)`"
+      }
+    },
+    {
+      "name": "--ease-bounce",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `cubic-bezier(0.34, 1.56, 0.64, 1)`"
+      }
+    },
+    {
+      "name": "--ease-smooth",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `cubic-bezier(0.4, 0, 0.2, 1)`"
+      }
+    },
+    {
+      "name": "--ease-out-expo",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `cubic-bezier(0.16, 1, 0.3, 1)`"
+      }
+    },
+    {
+      "name": "--container-sm",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `640px`"
+      }
+    },
+    {
+      "name": "--container-md",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `768px`"
+      }
+    },
+    {
+      "name": "--container-lg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1024px`"
+      }
+    },
+    {
+      "name": "--container-xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1280px`"
+      }
+    },
+    {
+      "name": "--container-2xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1536px`"
+      }
+    },
+    {
+      "name": "--icon-xs",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `12px`"
+      }
+    },
+    {
+      "name": "--icon-sm",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `16px`"
+      }
+    },
+    {
+      "name": "--icon-md",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `20px`"
+      }
+    },
+    {
+      "name": "--icon-lg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `24px`"
+      }
+    },
+    {
+      "name": "--icon-xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `32px`"
+      }
+    },
+    {
+      "name": "--icon-2xl",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `40px`"
+      }
+    },
+    {
+      "name": "--z-hide",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `-1`"
+      }
+    },
+    {
+      "name": "--z-auto",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `auto`"
+      }
+    },
+    {
+      "name": "--z-base",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0`"
+      }
+    },
+    {
+      "name": "--z-docked",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `10`"
+      }
+    },
+    {
+      "name": "--z-dropdown",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1000`"
+      }
+    },
+    {
+      "name": "--z-sticky",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1100`"
+      }
+    },
+    {
+      "name": "--z-modal",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1300`"
+      }
+    },
+    {
+      "name": "--z-tooltip",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1500`"
+      }
+    },
+    {
+      "name": "--z-max",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `9999`"
+      }
+    },
+    {
+      "name": "--opacity-0",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0`"
+      }
+    },
+    {
+      "name": "--opacity-5",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.05`"
+      }
+    },
+    {
+      "name": "--opacity-10",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.1`"
+      }
+    },
+    {
+      "name": "--opacity-25",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.25`"
+      }
+    },
+    {
+      "name": "--opacity-50",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.5`"
+      }
+    },
+    {
+      "name": "--opacity-75",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.75`"
+      }
+    },
+    {
+      "name": "--opacity-90",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.9`"
+      }
+    },
+    {
+      "name": "--opacity-95",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0.95`"
+      }
+    },
+    {
+      "name": "--opacity-100",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `1`"
+      }
+    },
+    {
+      "name": "--color-danger-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#ef4444`"
+      }
+    },
+    {
+      "name": "--color-success-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#10b981`"
+      }
+    },
+    {
+      "name": "--color-warning-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#f59e0b`"
+      }
+    },
+    {
+      "name": "--color-info-hover",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#0ea5e9`"
+      }
+    }
+  ],
+  "atDirectives": [
+    {
+      "name": "@nuicss",
+      "description": {
+        "kind": "markdown",
+        "value": "Injects NUICSS preflights, OKLCH design tokens, and utility classes into stylesheets."
+      }
+    }
+  ]
+}

@@ -6,12 +6,14 @@
   "bin": {
     "nuicss": "./bin/nuicss.js"
   },
-  "main": "./bin/nuicss.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "bin/"
+    "bin/",
+    "dist/"
   ],
   "scripts": {
-    "build": "powershell -ExecutionPolicy Bypass -File ./build.ps1",
+    "build": "tsc && node --input-type=module -e \"import fs from 'node:fs'; for(const f of ['nuicss.html-data.json', 'nuicss.css-data.json', 'styles.css']) fs.copyFileSync('src/embedded/' + f, 'dist/embedded/' + f);\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -19,6 +21,7 @@
     "@unocss/cli": "^66.10.5",
     "@unocss/core": "^66.10.5",
     "cac": "^7.0.0",
+    "chokidar": "^5.0.0",
     "colorette": "^2.0.20",
     "jsonc-parser": "^3.3.1"
   },
