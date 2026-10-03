@@ -131,12 +131,9 @@ export async function runCli(argv = process.argv): Promise<void> {
   await cli.runMatchedCommand();
 }
 
-// Auto-run if executed directly as entrypoint
-if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
-  runCli().catch((err) => {
-    console.error(
-      `\n${bold(cyan('[NUICSS]'))} ✖ Error: ${err?.message || err}\n`
-    );
-    process.exit(1);
-  });
-}
+runCli().catch((err) => {
+  console.error(
+    `\n${bold(cyan('[NUICSS]'))} ✖ Error: ${err?.message || err}\n`
+  );
+  process.exit(1);
+});

@@ -13,7 +13,8 @@
     "dist/"
   ],
   "scripts": {
-    "build": "tsc && node --input-type=module -e \"import fs from 'node:fs'; for(const f of ['nuicss.html-data.json', 'nuicss.css-data.json', 'styles.css']) fs.copyFileSync('src/embedded/' + f, 'dist/embedded/' + f);\"",
+    "build": "powershell -ExecutionPolicy Bypass -File ./build.ps1",
+    "build:ts": "tsc && node --input-type=module -e \"import fs from 'node:fs'; for(const f of ['nuicss.html-data.json', 'nuicss.css-data.json', 'styles.css']) fs.copyFileSync('src/embedded/' + f, 'dist/embedded/' + f);\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

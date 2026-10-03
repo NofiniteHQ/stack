@@ -54,3 +54,5 @@ storybook-static
 *.tsbuildinfo
 # AI Temporary Files
 /temp/
+.bun-cache/
+

@@ -4,8 +4,9 @@ import { createRequire } from 'node:module';
 import { bold, green, cyan } from 'colorette';
 import { getHtmlData, getCssData } from '../embedded/index.js';
 
-const require = createRequire(import.meta.url);
-const { parse, modify, applyEdits } = require('jsonc-parser');
+import * as jsonc from 'jsonc-parser';
+
+const { parse, modify, applyEdits } = (jsonc as any).default || jsonc;
 
 export interface InitOptions {
   cwd?: string;

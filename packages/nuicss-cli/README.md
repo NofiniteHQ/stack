@@ -2,7 +2,7 @@
 
 > The lightning-fast standalone compiler, codemod, and linter toolkit for the NUICSS design system.
 
-Built in Go for **zero runtime dependencies**, instant execution ($<3\text{ms}$ startup), and cross-platform native performance (Windows, Linux x64/arm64, macOS Apple Silicon/Intel).
+Built with Bun for **zero runtime dependencies**, instant execution ($<3\text{ms}$ startup), and cross-platform native performance (Windows, Linux x64/arm64, macOS Apple Silicon/Intel).
 
 ---
 
@@ -26,10 +26,10 @@ pnpm add -g nuicss
 
 ### Standalone Binary (For Go, Python, Rust, PHP, or Docker)
 
-If you don't use Node.js, download the pre-compiled binary for your operating system from GitHub Releases, or compile it with:
+If you don't use Node.js, download the pre-compiled standalone binary for your operating system from GitHub Releases, or compile it locally with Bun:
 
 ```bash
-go install github.com/nofinitehq/stack/packages/nuicss-cli/cmd/nuicss@latest
+bun run build
 ```
 
 ---
