@@ -361,15 +361,6 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
 
-  packages/cli:
-    devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.37
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
-
   packages/kanban:
     dependencies:
       '@atlaskit/pragmatic-drag-and-drop':
@@ -592,15 +583,40 @@ importers:
       '@unocss/runtime':
         specifier: ^66.10.5
         version: 66.10.5
-      esbuild:
-        specifier: ^0.19.11
-        version: 0.19.12
       jiti:
         specifier: ^2.7.0
         version: 2.7.0
       postcss:
         specifier: ^8.5.28
         version: 8.5.28
+
+  packages/nuicss-cli:
+    dependencies:
+      '@nofinite/nuicss':
+        specifier: workspace:*
+        version: link:../nuicss
+      '@unocss/cli':
+        specifier: ^66.10.5
+        version: 66.10.5
+      '@unocss/core':
+        specifier: ^66.10.5
+        version: 66.10.5
+      cac:
+        specifier: ^7.0.0
+        version: 7.0.0
+      colorette:
+        specifier: ^2.0.20
+        version: 2.0.20
+      jsonc-parser:
+        specifier: ^3.3.1
+        version: 3.3.1
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.0
+        version: 20.19.37
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/utils:
     dependencies:

@@ -1,7 +1,8 @@
 {
   "name": "nuicss",
   "version": "0.2.0",
-  "description": "Lightning-fast standalone compiler and toolkit for NUICSS design system.",
+  "description": "Lightning-fast standalone compiler and toolkit for the NUICSS design system.",
+  "type": "module",
   "bin": {
     "nuicss": "./bin/nuicss.js"
   },
@@ -10,9 +11,20 @@
     "bin/"
   ],
   "scripts": {
-    "test": "go test ./...",
-    "build:windows": "go build -o bin/nuicss-windows-amd64.exe ./cmd/nuicss",
-    "build:all": "powershell -ExecutionPolicy Bypass -File ./build.ps1"
+    "build": "powershell -ExecutionPolicy Bypass -File ./build.ps1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nofinite/nuicss": "workspace:*",
+    "@unocss/cli": "^66.10.5",
+    "@unocss/core": "^66.10.5",
+    "cac": "^7.0.0",
+    "colorette": "^2.0.20",
+    "jsonc-parser": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^5.9.3"
   },
   "keywords": [
     "nuicss",
