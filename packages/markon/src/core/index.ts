@@ -20,3 +20,4 @@ export * from './callout';
 export * from './renderer';
 export * from './styleInjector';
 export * from './colorPicker';
+export * from './linkPopover';

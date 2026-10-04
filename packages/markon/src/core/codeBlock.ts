@@ -33,6 +33,104 @@ export const SUPPORTED_LANGUAGES = [
 
 export const MarkonCodeBlock =
   CodeBlockLowlight.extend<CodeBlockLowlightOptions>({
+    addKeyboardShortcuts() {
+      return {
+        Tab: () => {
+          if (!this.editor.isActive('codeBlock')) return false;
+
+          const { state, dispatch } = this.editor.view;
+          const { $from, $to, empty } = state.selection;
+          if ($from.parent.type.name !== 'codeBlock') return false;
+
+          if (empty) {
+            this.editor.commands.insertContent('  ');
+            return true;
+          }
+
+          // Multiline indentation
+          const blockStart = $from.start();
+          const text = $from.parent.textContent;
+          const selStart = $from.parentOffset;
+          const selEnd = $to.parentOffset;
+
+          const firstLineStart = text.lastIndexOf('\n', selStart - 1) + 1;
+          const lines = text.slice(firstLineStart, selEnd).split('\n');
+          const indented = lines.map((line) => '  ' + line).join('\n');
+
+          const tr = state.tr.replaceWith(
+            blockStart + firstLineStart,
+            blockStart + selEnd,
+            state.schema.text(indented)
+          );
+          dispatch(tr);
+          return true;
+        },
+        'Shift-Tab': () => {
+          if (!this.editor.isActive('codeBlock')) return false;
+
+          const { state, dispatch } = this.editor.view;
+          const { $from, $to, empty } = state.selection;
+          if ($from.parent.type.name !== 'codeBlock') return false;
+
+          const blockStart = $from.start();
+          const text = $from.parent.textContent;
+
+          if (empty) {
+            const pos = $from.parentOffset;
+            if (pos > 0) {
+              const sliceBefore = text.slice(Math.max(0, pos - 2), pos);
+              if (sliceBefore.endsWith('  ')) {
+                const tr = state.tr.delete(
+                  blockStart + pos - 2,
+                  blockStart + pos
+                );
+                dispatch(tr);
+                return true;
+              } else if (sliceBefore.endsWith(' ')) {
+                const tr = state.tr.delete(
+                  blockStart + pos - 1,
+                  blockStart + pos
+                );
+                dispatch(tr);
+                return true;
+              }
+            }
+            return true;
+          }
+
+          const selStart = $from.parentOffset;
+          const selEnd = $to.parentOffset;
+          const firstLineStart = text.lastIndexOf('\n', selStart - 1) + 1;
+          const lines = text.slice(firstLineStart, selEnd).split('\n');
+          const unindented = lines
+            .map((line) =>
+              line.startsWith('  ')
+                ? line.slice(2)
+                : line.startsWith(' ')
+                ? line.slice(1)
+                : line
+            )
+            .join('\n');
+
+          if (unindented.length > 0) {
+            const tr = state.tr.replaceWith(
+              blockStart + firstLineStart,
+              blockStart + selEnd,
+              state.schema.text(unindented)
+            );
+            dispatch(tr);
+          } else {
+            const tr = state.tr.delete(
+              blockStart + firstLineStart,
+              blockStart + selEnd
+            );
+            dispatch(tr);
+          }
+          return true;
+        },
+      };
+    },
+
     addNodeView() {
       return ({ node, getPos, editor }) => {
         let currentNode = node;

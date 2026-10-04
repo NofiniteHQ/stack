@@ -123,21 +123,30 @@ Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit
 
 ---
 
-### Phase 4: Code Block Tab Indentation & Interactive Link Popover
+### Phase 4: Code Block Tab Indentation & Interactive Link Popover [COMPLETED]
 
 **Goal:** Provide developer-grade code editing and effortless link management.
 
-- **Tasks:**
+- **Completed Deliverables:**
   1. Code Block Tab Indentation (`codeBlock.ts`):
-     - Intercept `Tab` key inside `MarkonCodeBlock` to insert 2 spaces (`'  '`) rather than losing focus to the browser window.
-     - Intercept `Shift+Tab` to unindent by 2 spaces.
-  2. Interactive Link Popover (`linkPopover.ts`):
-     - When the caret enters an existing link or clicks on it:
-       - Display a floating action card:
-         - Destination URL with external link icon (opens link in new tab).
-         - "Copy URL" button with brief "Copied!" feedback checkmark.
-         - "Edit Link" button opening URL modal.
-         - "Unlink" button to remove the hyperlink.
+     - Added `addKeyboardShortcuts()` to `MarkonCodeBlock`:
+       - `Tab` inside code block inserts 2 spaces without losing editor focus or blurring to browser window.
+       - `Shift-Tab` deletes up to 2 leading spaces before cursor to unindent cleanly.
+       - Supports both single-line and multiline indentation and unindentation with safe empty text node handling.
+  2. Interactive Link Popover (`linkPopover.ts` & `bubbleMenu.ts`):
+     - Automatically displays floating action card when caret enters an existing hyperlink or user clicks on it:
+       - Truncated display URL with external link icon opening in new tab (`target="_blank"`).
+       - "Copy URL" button with clipboard integration and checkmark feedback.
+       - "Edit Link" button opening URL modal.
+       - "Unlink" button immediately removing the link mark.
+     - Exported `formatDisplayUrl` and `renderLinkPopoverHtml` in core exports.
+  3. **Verification Passed:**
+     - 48/48 unit tests passing (`npx vitest run packages/markon`).
+     - Clean compilation with Vite (`npx vite build --config packages/markon/vite.config.ts`) and zero TypeScript declaration errors.
+     - Verified `npm pack --dry-run` contains all 76 expected files, bundles, and type definitions.
+     - Visual audit verified in Chromium via Playwright:
+       - `/temp/markon_link_popover_open.png`
+       - `/temp/markon_code_block_tab_indented.png`
 
 ---
 

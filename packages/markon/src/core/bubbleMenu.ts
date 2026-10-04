@@ -10,7 +10,7 @@ import {
 import { openMarkonModal } from './dialog';
 import { MarkonColorPicker } from './colorPicker';
 
-type BubbleContext = 'none' | 'text' | 'image' | 'video' | 'table';
+type BubbleContext = 'none' | 'text' | 'image' | 'video' | 'table' | 'link';
 
 function detectBubbleContext(
   editor: any,
@@ -28,6 +28,10 @@ function detectBubbleContext(
   if (editor.isActive('image')) return 'image';
   if (editor.isActive('videoBlock')) return 'video';
   if (editor.isActive('codeBlock')) return 'none';
+
+  if (editor.isActive('link') && editor.state.selection.empty) {
+    return 'link';
+  }
 
   if (editor.isActive('table')) {
     const sel = editor.state?.selection;
@@ -253,6 +257,38 @@ export function createBubbleMenuExtension() {
                     <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="3 6 5 6 21 6"/>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                `;
+              } else if (context === 'link') {
+                const href = editor.getAttributes('link').href || '';
+                const displayUrl = href.replace(/^https?:\/\//, '');
+                menuEl.innerHTML = `
+                  <a href="${href}" target="_blank" rel="noopener noreferrer" class="link text-primary font-medium flex items-center gap-1.5 px-2 py-0.5 max-w-[240px] truncate hover:underline text-xs" title="${href}">
+                    <span class="truncate">${displayUrl || href}</span>
+                    <svg width="12" height="12" class="w-3 h-3 shrink-0 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                  </a>
+                  <span class="w-px h-4 bg-border/60 mx-0.5 self-center shrink-0"></span>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-link-action="copy" title="Copy URL">
+                    <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-link-action="edit" title="Edit Link">
+                    <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs text-danger hover:bg-danger/10" data-link-action="unlink" title="Remove Link">
+                    <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      <line x1="2" y1="2" x2="22" y2="22"/>
                     </svg>
                   </button>
                 `;
@@ -564,6 +600,65 @@ export function createBubbleMenuExtension() {
                   }
                   return;
                 }
+
+                // 5. Link actions
+                const linkActionBtn =
+                  target.closest<HTMLButtonElement>('[data-link-action]');
+                if (linkActionBtn) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const action = linkActionBtn.getAttribute('data-link-action');
+                  const href = editor.getAttributes('link').href || '';
+
+                  if (action === 'copy') {
+                    if (
+                      typeof navigator !== 'undefined' &&
+                      navigator.clipboard
+                    ) {
+                      navigator.clipboard.writeText(href).then(() => {
+                        linkActionBtn.innerHTML = `
+                          <svg width="14" height="14" class="w-3.5 h-3.5 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        `;
+                        setTimeout(() => {
+                          linkActionBtn.innerHTML = `
+                            <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                            </svg>
+                          `;
+                        }, 1500);
+                      });
+                    }
+                  } else if (action === 'edit') {
+                    const { from, to } = editor.state.selection;
+                    openMarkonModal({
+                      title: 'Edit Link',
+                      label: 'Link URL',
+                      initialValue: href,
+                      placeholder: 'https://...',
+                      confirmText: 'Save Link',
+                      onConfirm: (url) => {
+                        const chain = editor.chain().focus();
+                        if (from !== undefined && to !== undefined) {
+                          chain.setTextSelection({ from, to });
+                        }
+                        if (url && url.trim()) {
+                          chain.setLink({ href: url.trim() }).run();
+                        } else {
+                          chain.unsetLink().run();
+                        }
+                      },
+                      onCancel: () => {
+                        editor.commands.focus();
+                      },
+                    });
+                  } else if (action === 'unlink') {
+                    editor.chain().focus().unsetLink().run();
+                  }
+                  return;
+                }
               });
             };
 
@@ -783,6 +878,18 @@ export function createBubbleMenuExtension() {
                       headerRowBtn.classList.remove('btn-active');
                     }
                   }
+                } else if (context === 'link') {
+                  const currentHref = editor.getAttributes('link').href || '';
+                  const anchor = menuEl?.querySelector('a.link');
+                  if (anchor) {
+                    anchor.setAttribute('href', currentHref);
+                    anchor.setAttribute('title', currentHref);
+                    const span = anchor.querySelector('span');
+                    if (span) {
+                      span.textContent =
+                        currentHref.replace(/^https?:\/\//, '') || currentHref;
+                    }
+                  }
                 }
 
                 menuEl.style.display = 'flex';
@@ -847,6 +954,46 @@ export function createBubbleMenuExtension() {
                       virtualRef = {
                         getBoundingClientRect: () =>
                           activeCellDOM!.getBoundingClientRect(),
+                      };
+                    } else {
+                      const coords = view.coordsAtPos(curSel.from);
+                      virtualRef = {
+                        getBoundingClientRect: () =>
+                          new DOMRect(
+                            coords.left,
+                            coords.top,
+                            Math.max(coords.right - coords.left, 40),
+                            Math.max(coords.bottom - coords.top, 24)
+                          ),
+                      };
+                    }
+                  } else if (context === 'link') {
+                    let linkDOM: HTMLElement | null = null;
+                    try {
+                      const domAtPos = view.domAtPos(curSel.from);
+                      const node = domAtPos?.node;
+                      const parentEl =
+                        node instanceof HTMLElement
+                          ? node
+                          : node?.parentElement;
+                      linkDOM = parentEl?.closest('a') as HTMLElement | null;
+                    } catch {
+                      // fallback
+                    }
+
+                    if (!linkDOM) {
+                      linkDOM = view.dom.querySelector(
+                        'a:focus-within, a:hover'
+                      ) as HTMLElement | null;
+                    }
+
+                    if (
+                      linkDOM &&
+                      typeof linkDOM.getBoundingClientRect === 'function'
+                    ) {
+                      virtualRef = {
+                        getBoundingClientRect: () =>
+                          linkDOM!.getBoundingClientRect(),
                       };
                     } else {
                       const coords = view.coordsAtPos(curSel.from);

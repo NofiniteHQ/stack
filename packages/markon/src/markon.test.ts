@@ -15,6 +15,8 @@ import {
   MarkonColorPicker,
   HIGHLIGHT_PRESETS,
   TEXT_COLOR_PRESETS,
+  formatDisplayUrl,
+  renderLinkPopoverHtml,
 } from './index';
 
 describe('@nofinite/markon', () => {
@@ -247,6 +249,105 @@ describe('@nofinite/markon', () => {
       expect(editor.getHTML()).not.toContain('<table');
 
       editor.destroy();
+    });
+
+    it('handles Tab and Shift-Tab indentation inside code blocks', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<pre><code>const x = 10;</code></pre>',
+      });
+
+      // Place cursor at the start of code block content
+      editor.tiptap.commands.focus();
+      editor.tiptap.commands.setTextSelection(1);
+      expect(editor.tiptap.isActive('codeBlock')).toBe(true);
+
+      // Trigger Tab keyboard shortcut via ProseMirror handleKeyDown
+      const tabEvent = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        bubbles: true,
+        cancelable: true,
+      });
+      const handledTab = editor.tiptap.view.someProp('handleKeyDown', (fn) =>
+        fn(editor.tiptap.view, tabEvent)
+      );
+      expect(handledTab).toBe(true);
+      expect(editor.getText()).toContain('  const x = 10;');
+
+      // Trigger Shift-Tab keyboard shortcut to unindent
+      const shiftTabEvent = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      const handledShiftTab = editor.tiptap.view.someProp(
+        'handleKeyDown',
+        (fn) => fn(editor.tiptap.view, shiftTabEvent)
+      );
+      expect(handledShiftTab).toBe(true);
+      expect(editor.getText()).toContain('const x = 10;');
+
+      editor.destroy();
+    });
+
+    it('renders interactive link popover with open, copy, edit, and unlink actions', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue:
+          '<p>Visit <a href="https://nofinite.com">Nofinite</a> platform.</p>',
+      });
+
+      // Focus caret inside the link text (collapsed selection)
+      editor.tiptap.commands.focus();
+      editor.tiptap.commands.setTextSelection(9);
+      expect(editor.tiptap.isActive('link')).toBe(true);
+      expect(editor.tiptap.state.selection.empty).toBe(true);
+
+      // Mock hasFocus in JSDOM
+      vi.spyOn(editor.tiptap.view, 'hasFocus').mockReturnValue(true);
+      editor.tiptap.view.dispatch(editor.tiptap.state.tr);
+
+      const bubbleMenu = document.querySelector('.markon-bubble-menu');
+      expect(bubbleMenu).toBeTruthy();
+
+      // Check link popover elements
+      const linkAnchor = bubbleMenu?.querySelector('a.link');
+      expect(linkAnchor).toBeTruthy();
+      expect(linkAnchor?.getAttribute('href')).toBe('https://nofinite.com');
+      expect(linkAnchor?.getAttribute('target')).toBe('_blank');
+
+      const copyBtn = bubbleMenu?.querySelector('[data-link-action="copy"]');
+      const editBtn = bubbleMenu?.querySelector('[data-link-action="edit"]');
+      const unlinkBtn = bubbleMenu?.querySelector(
+        '[data-link-action="unlink"]'
+      );
+
+      expect(copyBtn).toBeTruthy();
+      expect(editBtn).toBeTruthy();
+      expect(unlinkBtn).toBeTruthy();
+
+      // Click unlink button
+      unlinkBtn?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(editor.tiptap.isActive('link')).toBe(false);
+      expect(editor.getHTML()).not.toContain('<a href=');
+
+      editor.destroy();
+    });
+
+    it('formats display URLs and renders standalone link popover markup correctly', () => {
+      expect(formatDisplayUrl('https://nofinite.com/docs/')).toBe(
+        'nofinite.com/docs'
+      );
+      expect(formatDisplayUrl('http://github.com/')).toBe('github.com');
+      expect(formatDisplayUrl('')).toBe('');
+
+      const html = renderLinkPopoverHtml('https://example.com/test');
+      expect(html).toContain('href="https://example.com/test"');
+      expect(html).toContain('target="_blank"');
+      expect(html).toContain('data-link-action="copy"');
+      expect(html).toContain('data-link-action="edit"');
+      expect(html).toContain('data-link-action="unlink"');
     });
 
     it('inserts and manages video embeds', () => {
