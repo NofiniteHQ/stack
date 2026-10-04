@@ -96,7 +96,7 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
 - [x] Ran `npm pack --dry-run` to verify package contents (33 files bundled, all entry points, styles, declarations present).
 - [x] Built Storybook (`pnpm build:storybook`) with zero errors.
 - [x] Captured visual verification screenshots across all stories in `d:\stack\temp\screenshots/`.
-- **Commit:** `pending`
+- **Commit:** `2fc818c`
 
 ---
 
