@@ -610,6 +610,9 @@ importers:
       colorette:
         specifier: ^2.0.20
         version: 2.0.20
+      jiti:
+        specifier: ^2.7.0
+        version: 2.7.0
       jsonc-parser:
         specifier: ^3.3.1
         version: 3.3.1

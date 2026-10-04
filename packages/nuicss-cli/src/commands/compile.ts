@@ -120,12 +120,37 @@ const IGNORED_DIRS = new Set([
 ]);
 
 async function loadConfig(cwd: string, customConfigPath?: string) {
+  let jitiLoader: { import: (id: string) => Promise<unknown> } | null = null;
+  try {
+    const { createJiti } = await import('jiti');
+    jitiLoader = createJiti(import.meta.url) as unknown as {
+      import: (id: string) => Promise<unknown>;
+    };
+  } catch {
+    // Fallback to native dynamic import if jiti is unavailable
+  }
+
+  const tryLoad = async (filePath: string) => {
+    if (jitiLoader) {
+      try {
+        const mod = (await jitiLoader.import(filePath)) as Record<
+          string,
+          unknown
+        >;
+        return mod.default || mod;
+      } catch {
+        // Fallback to native import
+      }
+    }
+    const mod = await import(pathToFileURL(filePath).href);
+    return mod.default || mod;
+  };
+
   if (customConfigPath) {
     const absPath = path.resolve(cwd, customConfigPath);
     if (fs.existsSync(absPath)) {
       try {
-        const mod = await import(pathToFileURL(absPath).href);
-        return mod.default || mod;
+        return await tryLoad(absPath);
       } catch (e: unknown) {
         const message = e instanceof Error ? e.message : String(e);
         logger.warn(
@@ -140,13 +165,13 @@ async function loadConfig(cwd: string, customConfigPath?: string) {
     'nuicss.config.ts',
     'nuicss.config.js',
     'nuicss.config.mjs',
+    'nuicss.config.cjs',
   ];
   for (const name of candidateConfigs) {
     const full = path.join(cwd, name);
     if (fs.existsSync(full)) {
       try {
-        const mod = await import(pathToFileURL(full).href);
-        return mod.default || mod;
+        return await tryLoad(full);
       } catch {
         // Fallback to default preset
       }

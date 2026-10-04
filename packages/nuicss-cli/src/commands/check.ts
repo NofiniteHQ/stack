@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { bold, cyan, green, red, yellow, dim } from 'colorette';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { DEFAULT_MIGRATION_RULES } from '@nofinite/nuicss/migrate';
 
 export interface DiagnosticIssue {
   filePath: string;
@@ -10,7 +12,10 @@ export interface DiagnosticIssue {
   suggestion: string;
 }
 
-const HEX_COLOR_REGEX = /#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
+const STYLE_HEX_REGEX =
+  /(?:(?:bg|text|border|ring|outline|fill|stroke)-\[#(?:[0-9a-fA-F]{3,8})\]|(?:style|color|background|borderColor|fill|stroke)\s*[:=]\s*['"`]?\s*#(?:[0-9a-fA-F]{3,8})\b|:\s*[^;\r\n]*#(?:[0-9a-fA-F]{3,8})\b)/i;
+
+const EXTRACT_HEX_REGEX = /#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
 
 const DEFAULT_EXTENSIONS = new Set([
   '.html',
@@ -22,6 +27,20 @@ const DEFAULT_EXTENSIONS = new Set([
   '.astro',
   '.php',
   '.templ',
+  '.blade.php',
+  '.jinja',
+  '.jinja2',
+  '.liquid',
+  '.twig',
+  '.ejs',
+  '.erb',
+  '.hbs',
+  '.handlebars',
+  '.mdx',
+  '.md',
+  '.markdown',
+  '.pug',
+  '.haml',
 ]);
 
 const IGNORED_DIRS = new Set([
@@ -51,15 +70,16 @@ export async function checkCommand(
 
   if (targetPath) {
     const resolvedTarget = path.resolve(cwd, targetPath);
-    if (fs.existsSync(resolvedTarget)) {
-      const stat = fs.statSync(resolvedTarget);
-      if (stat.isFile()) {
-        filesToScan.push(resolvedTarget);
-      } else if (stat.isDirectory()) {
-        walkDirectory(resolvedTarget, filesToScan);
-      }
-    } else {
-      walkDirectory(cwd, filesToScan);
+    if (!fs.existsSync(resolvedTarget)) {
+      console.error(`\n${red('✖')} Path not found: ${cyan(targetPath)}\n`);
+      process.exitCode = 1;
+      return;
+    }
+    const stat = fs.statSync(resolvedTarget);
+    if (stat.isFile()) {
+      filesToScan.push(resolvedTarget);
+    } else if (stat.isDirectory()) {
+      walkDirectory(resolvedTarget, filesToScan);
     }
   } else {
     walkDirectory(cwd, filesToScan);
@@ -86,34 +106,36 @@ export async function checkCommand(
           continue;
         }
 
-        // 1. Check for hardcoded hex colors
-        const hexMatch = line.match(HEX_COLOR_REGEX);
-        if (hexMatch) {
-          issues.push({
-            filePath,
-            line: lineNum,
-            rule: 'no-hardcoded-hex',
-            message: `Hardcoded hex color literal ${yellow(
-              hexMatch[0]
-            )} detected`,
-            suggestion:
-              'Use a semantic NUICSS token (e.g. var(--color-primary), var(--bg-surface))',
-          });
+        // 1. Check for hardcoded hex colors only in styling contexts
+        if (STYLE_HEX_REGEX.test(line)) {
+          const hexMatch = line.match(EXTRACT_HEX_REGEX);
+          if (hexMatch) {
+            issues.push({
+              filePath,
+              line: lineNum,
+              rule: 'no-hardcoded-hex',
+              message: `Hardcoded hex color literal ${yellow(
+                hexMatch[0]
+              )} detected in styling context`,
+              suggestion:
+                'Use a semantic NUICSS token (e.g. var(--color-primary), var(--bg-surface))',
+            });
+          }
         }
 
-        // 2. Check for unmigrated legacy primary button utility clusters
-        if (
-          line.includes('bg-blue-600') &&
-          line.includes('text-white') &&
-          (line.includes('px-4') || line.includes('px-3'))
-        ) {
-          issues.push({
-            filePath,
-            line: lineNum,
-            rule: 'prefer-nuicss-superclass',
-            message: 'Legacy button utility cluster detected',
-            suggestion: "Run 'nuicss migrate' to convert to 'btn btn-primary'",
-          });
+        // 2. Check for all 15 unmigrated legacy utility clusters from DEFAULT_MIGRATION_RULES
+        for (const rule of DEFAULT_MIGRATION_RULES) {
+          const freshRe = new RegExp(rule.pattern.source, 'i');
+          if (freshRe.test(line)) {
+            issues.push({
+              filePath,
+              line: lineNum,
+              rule: 'prefer-nuicss-superclass',
+              message: `Legacy utility cluster detected (${rule.name})`,
+              suggestion: `Run 'nuicss migrate' to convert to '${rule.replacement}'`,
+            });
+            break;
+          }
         }
       }
     } catch {

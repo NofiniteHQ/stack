@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { bold, cyan, green, yellow, dim } from 'colorette';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { migrateMarkupToNuicss } from '@nofinite/nuicss/migrate';
 
 export interface MigrateOptions {
@@ -18,6 +19,20 @@ const DEFAULT_EXTENSIONS = new Set([
   '.astro',
   '.php',
   '.templ',
+  '.blade.php',
+  '.jinja',
+  '.jinja2',
+  '.liquid',
+  '.twig',
+  '.ejs',
+  '.erb',
+  '.hbs',
+  '.handlebars',
+  '.mdx',
+  '.md',
+  '.markdown',
+  '.pug',
+  '.haml',
 ]);
 
 const IGNORED_DIRS = new Set([
@@ -51,16 +66,18 @@ export async function migrateCommand(
 
   if (targetPath) {
     const resolvedTarget = path.resolve(cwd, targetPath);
-    if (fs.existsSync(resolvedTarget)) {
-      const stat = fs.statSync(resolvedTarget);
-      if (stat.isFile()) {
-        filesToScan.push(resolvedTarget);
-      } else if (stat.isDirectory()) {
-        walkDirectory(resolvedTarget, filesToScan);
-      }
-    } else {
-      // Try scanning current directory with glob filtering
-      walkDirectory(cwd, filesToScan);
+    if (!fs.existsSync(resolvedTarget)) {
+      console.error(
+        `  ${yellow('✖')} Target path not found: ${cyan(targetPath)}\n`
+      );
+      process.exitCode = 1;
+      return;
+    }
+    const stat = fs.statSync(resolvedTarget);
+    if (stat.isFile()) {
+      filesToScan.push(resolvedTarget);
+    } else if (stat.isDirectory()) {
+      walkDirectory(resolvedTarget, filesToScan);
     }
   } else {
     walkDirectory(cwd, filesToScan);
@@ -92,9 +109,11 @@ export async function migrateCommand(
           fs.writeFileSync(filePath, result, 'utf8');
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn(
-        `  ${yellow('⚠')} Skipped ${filePath}: ${err?.message || err}`
+        `  ${yellow('⚠')} Skipped ${filePath}: ${
+          (err as Error)?.message || String(err)
+        }`
       );
     }
   }
