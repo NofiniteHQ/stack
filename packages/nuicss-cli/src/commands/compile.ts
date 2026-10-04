@@ -14,6 +14,7 @@ export interface CompileOptions {
   input?: string;
   output?: string;
   watch?: boolean;
+  watchFiles?: string | string[];
   minify?: boolean;
   config?: string;
   patterns?: string[];
@@ -46,7 +47,42 @@ function extractCssLayers(fullBaseCss: string): {
   };
 }
 
-const DEFAULT_EXTENSIONS = new Set([
+export function globToRegExp(glob: string): RegExp {
+  const normalized = glob.replace(/\\/g, '/');
+  let re = '';
+  let inGroup = false;
+  for (let i = 0; i < normalized.length; i++) {
+    const c = normalized[i];
+    if (c === '*' && normalized[i + 1] === '*') {
+      if (normalized[i + 2] === '/') {
+        re += '(?:.*/)?';
+        i += 2;
+      } else {
+        re += '.*';
+        i++;
+      }
+    } else if (c === '*') {
+      re += '[^/]*';
+    } else if (c === '?') {
+      re += '[^/]';
+    } else if (c === '{') {
+      re += '(';
+      inGroup = true;
+    } else if (c === '}' && inGroup) {
+      re += ')';
+      inGroup = false;
+    } else if (c === ',' && inGroup) {
+      re += '|';
+    } else if (['.', '+', '^', '$', '(', ')', '[', ']', '|'].includes(c)) {
+      re += '\\' + c;
+    } else {
+      re += c;
+    }
+  }
+  return new RegExp(`^${re}$`, 'i');
+}
+
+export const DEFAULT_EXTENSIONS = new Set([
   '.html',
   '.htm',
   '.tsx',
@@ -57,6 +93,19 @@ const DEFAULT_EXTENSIONS = new Set([
   '.php',
   '.templ',
   '.blade.php',
+  '.jinja',
+  '.jinja2',
+  '.liquid',
+  '.twig',
+  '.ejs',
+  '.erb',
+  '.hbs',
+  '.handlebars',
+  '.mdx',
+  '.md',
+  '.markdown',
+  '.pug',
+  '.haml',
 ]);
 
 const IGNORED_DIRS = new Set([
@@ -110,17 +159,42 @@ async function loadConfig(cwd: string, customConfigPath?: string) {
   };
 }
 
-function collectTemplateFiles(dir: string, outFiles: string[]): void {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
+function collectTemplateFiles(
+  dir: string,
+  cwd: string,
+  outFiles: Set<string>,
+  userRegexes: RegExp[] = []
+): void {
+  let entries: fs.Dirent[] = [];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+
   for (const entry of entries) {
     if (entry.isDirectory()) {
       if (!IGNORED_DIRS.has(entry.name)) {
-        collectTemplateFiles(path.join(dir, entry.name), outFiles);
+        collectTemplateFiles(
+          path.join(dir, entry.name),
+          cwd,
+          outFiles,
+          userRegexes
+        );
       }
     } else if (entry.isFile()) {
+      const fullPath = path.join(dir, entry.name);
       const ext = path.extname(entry.name).toLowerCase();
-      if (DEFAULT_EXTENSIONS.has(ext)) {
-        outFiles.push(path.join(dir, entry.name));
+      const normPath = fullPath.replace(/\\/g, '/');
+      const relPath = path.relative(cwd, fullPath).replace(/\\/g, '/');
+
+      if (
+        DEFAULT_EXTENSIONS.has(ext) ||
+        userRegexes.some(
+          (re) => re.test(relPath) || re.test(normPath) || re.test(entry.name)
+        )
+      ) {
+        outFiles.add(fullPath);
       }
     }
   }
@@ -172,6 +246,65 @@ export async function compileCommand(
 
   const baseCss = getBaseStyles();
 
+  // Aggregate user patterns from CLI args, --watch-files, and config
+  const allUserPatterns: string[] = [...(patterns || [])];
+  if (options.watchFiles) {
+    const extra = Array.isArray(options.watchFiles)
+      ? options.watchFiles
+      : options.watchFiles
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+    allUserPatterns.push(...extra);
+  }
+  if (Array.isArray(config?.content)) {
+    allUserPatterns.push(...config.content);
+  }
+  if (Array.isArray(config?.watchFiles)) {
+    allUserPatterns.push(...config.watchFiles);
+  }
+
+  const userRegexes = allUserPatterns.map(globToRegExp);
+  const fileCache = new Map<string, string>();
+  const templateFiles = new Set<string>();
+
+  function discoverFiles(): void {
+    templateFiles.clear();
+    if (allUserPatterns.length > 0) {
+      for (const p of allUserPatterns) {
+        const full = path.resolve(cwd, p);
+        if (fs.existsSync(full)) {
+          const stat = fs.statSync(full);
+          if (stat.isFile()) {
+            templateFiles.add(full);
+          } else if (stat.isDirectory()) {
+            collectTemplateFiles(full, cwd, templateFiles, userRegexes);
+          }
+        } else {
+          // Glob pattern: extract root folder before first wildcard character
+          const basePart = p.split(/[*?{[]/)[0] || '.';
+          const resolvedBase = path.resolve(cwd, basePart);
+          if (fs.existsSync(resolvedBase)) {
+            const stat = fs.statSync(resolvedBase);
+            if (stat.isDirectory()) {
+              collectTemplateFiles(
+                resolvedBase,
+                cwd,
+                templateFiles,
+                userRegexes
+              );
+            }
+          }
+        }
+      }
+    } else {
+      collectTemplateFiles(cwd, cwd, templateFiles, userRegexes);
+    }
+  }
+
+  // Initial file discovery
+  discoverFiles();
+
   async function performBuild(): Promise<{
     durationMs: number;
     matchedCount: number;
@@ -187,35 +320,22 @@ export async function compileCommand(
       inputCss = fs.readFileSync(inputPath, 'utf8');
     }
 
-    // 2. Discover and scan template files
-    const templateFiles: string[] = [];
-    if (patterns && patterns.length > 0) {
-      for (const p of patterns) {
-        const full = path.resolve(cwd, p);
-        if (fs.existsSync(full)) {
-          const stat = fs.statSync(full);
-          if (stat.isFile()) templateFiles.push(full);
-          else if (stat.isDirectory())
-            collectTemplateFiles(full, templateFiles);
-        }
-      }
-    } else {
-      collectTemplateFiles(cwd, templateFiles);
-    }
-
-    // 3. Extract tokens from templates
+    // 2. Extract tokens from discovered templates using in-memory fileCache and applyExtractors
     const tokens = new Set<string>();
     for (const file of templateFiles) {
       try {
-        const content = fs.readFileSync(file, 'utf8');
-        const res = await uno.generate(content, { preflights: false });
-        res.matched.forEach((t) => tokens.add(t));
+        let content = fileCache.get(file);
+        if (content === undefined) {
+          content = fs.readFileSync(file, 'utf8');
+          fileCache.set(file, content);
+        }
+        await uno.applyExtractors(content, file, tokens);
       } catch {
         // Skip unreadable files
       }
     }
 
-    // 4. Generate utilities
+    // 3. Generate utilities
     const genResult = await uno.generate(tokens, {
       preflights: false,
       minify: isMinify,
@@ -223,7 +343,7 @@ export async function compileCommand(
 
     const generatedUtilities = genResult.css;
 
-    // 5. Expand directives into final CSS
+    // 4. Expand directives into final CSS
     let finalCss = '';
     const hasDirective = getDirectiveRegex().test(inputCss);
     if (hasDirective) {
@@ -254,7 +374,7 @@ export async function compileCommand(
       finalCss = minifyCss(finalCss);
     }
 
-    // 6. Write output
+    // 5. Write output
     if (isStdout) {
       process.stdout.write(finalCss);
     } else if (outputPath) {
@@ -300,8 +420,26 @@ export async function compileCommand(
     if (inputPath && fs.existsSync(inputPath)) {
       watchPaths.push(inputPath);
     }
-    // Watch template directory
-    watchPaths.push(cwd);
+    if (allUserPatterns.length > 0) {
+      for (const p of allUserPatterns) {
+        const full = path.resolve(cwd, p);
+        if (fs.existsSync(full)) {
+          watchPaths.push(full);
+        } else {
+          const basePart = p.split(/[*?{[]/)[0] || '.';
+          const resolvedBase = path.resolve(cwd, basePart);
+          if (fs.existsSync(resolvedBase)) {
+            watchPaths.push(resolvedBase);
+          }
+        }
+      }
+    }
+    if (
+      watchPaths.length === 0 ||
+      !watchPaths.some((p) => p === cwd || cwd.startsWith(p))
+    ) {
+      watchPaths.push(cwd);
+    }
 
     logger.info(
       `Watching for changes in ${cyan(
@@ -316,32 +454,76 @@ export async function compileCommand(
     });
 
     let isRebuilding = false;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const pendingChanges = new Set<string>();
 
-    watcher.on('all', async (event, filePath) => {
-      if (outputPath && path.resolve(filePath) === outputPath) return;
-      if (isRebuilding) return;
-
-      const ext = path.extname(filePath).toLowerCase();
-      if (!DEFAULT_EXTENSIONS.has(ext) && filePath !== inputPath) {
+    const triggerRebuild = async () => {
+      if (isRebuilding) {
+        if (!debounceTimer) {
+          debounceTimer = setTimeout(triggerRebuild, 50);
+        }
         return;
       }
-
       isRebuilding = true;
       try {
+        const changedFiles = Array.from(pendingChanges);
+        pendingChanges.clear();
         const res = await performBuild();
         const outRel = outputPath ? path.relative(cwd, outputPath) : 'stdout';
-        const fileRel = path.relative(cwd, filePath);
+        const changedRel = changedFiles
+          .map((f) => path.relative(cwd, f))
+          .filter(Boolean)
+          .join(', ');
         logger.log(
-          `⚡ Rebuilt ${cyan(outRel)} on ${dim(fileRel)} (${green(
-            res.durationMs.toFixed(2)
-          )}ms)`
+          `⚡ Rebuilt ${cyan(outRel)} on ${dim(
+            changedRel || 'file changes'
+          )} (${green(res.durationMs.toFixed(2))}ms)`
         );
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         logger.error(`Rebuild failed: ${message}`);
       } finally {
         isRebuilding = false;
+        if (pendingChanges.size > 0) {
+          debounceTimer = setTimeout(triggerRebuild, 50);
+        }
       }
+    };
+
+    watcher.on('all', async (event, filePath) => {
+      const absPath = path.resolve(filePath);
+      if (outputPath && absPath === outputPath) return;
+
+      const normPath = absPath.replace(/\\/g, '/');
+      const relPath = path.relative(cwd, absPath).replace(/\\/g, '/');
+      const ext = path.extname(absPath).toLowerCase();
+
+      const isMatch =
+        absPath === inputPath ||
+        DEFAULT_EXTENSIONS.has(ext) ||
+        userRegexes.some((re) => re.test(relPath) || re.test(normPath));
+
+      if (!isMatch) return;
+
+      if (event === 'unlink') {
+        fileCache.delete(absPath);
+        templateFiles.delete(absPath);
+      } else if (event === 'add' || event === 'change') {
+        try {
+          if (absPath !== inputPath) {
+            fileCache.set(absPath, fs.readFileSync(absPath, 'utf8'));
+            templateFiles.add(absPath);
+          }
+        } catch {
+          // Skip unreadable files
+        }
+      }
+
+      pendingChanges.add(absPath);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      debounceTimer = setTimeout(triggerRebuild, 50);
     });
 
     process.on('SIGINT', () => {

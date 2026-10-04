@@ -23,6 +23,10 @@ export async function runCli(argv = process.argv): Promise<void> {
       default: 'dist/output.css',
     })
     .option('-w, --watch', 'Watch for file changes and recompile instantly')
+    .option(
+      '--watch-files <files>',
+      'Additional files or glob patterns to watch (comma-separated)'
+    )
     .option('-m, --minify', 'Minify output CSS adhering to specifications')
     .option('-c, --config <file>', 'Config file (default: nuicss.config.ts)')
     .action(async (patterns, flags) => {
@@ -40,6 +44,10 @@ export async function runCli(argv = process.argv): Promise<void> {
       default: 'dist/output.css',
     })
     .option('-w, --watch', 'Watch for file changes and recompile instantly')
+    .option(
+      '--watch-files <files>',
+      'Additional files or glob patterns to watch (comma-separated)'
+    )
     .option('-m, --minify', 'Minify output CSS adhering to specifications')
     .option('-c, --config <file>', 'Config file (default: nuicss.config.ts)')
     .action(async (patterns, flags) => {
@@ -49,13 +57,15 @@ export async function runCli(argv = process.argv): Promise<void> {
   // Alias build command
   cli
     .command('build [...patterns]', 'Alias for compile')
-    .option('-i, --input <file>', 'Input CSS file path (use - for stdin)', {
-      default: 'input.css',
-    })
+    .option('-i, --input <file>', 'Input CSS file path (use - for stdin)')
     .option('-o, --output <file>', 'Output CSS file path (use - for stdout)', {
       default: 'dist/output.css',
     })
     .option('-w, --watch', 'Watch for file changes and recompile instantly')
+    .option(
+      '--watch-files <files>',
+      'Additional files or glob patterns to watch (comma-separated)'
+    )
     .option('-m, --minify', 'Minify output CSS adhering to specifications')
     .option('-c, --config <file>', 'Config file (default: nuicss.config.ts)')
     .action(async (patterns, flags) => {
