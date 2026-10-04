@@ -188,29 +188,37 @@ Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit
 
 ---
 
-### Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit
+### Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit [COMPLETED]
 
 **Goal:** Finalize design system compliance, ensure 100% test coverage, and visually verify every state.
 
-- **Tasks:**
+- **Completed Deliverables:**
   1. Design Token Purge:
-     - Replace all hardcoded `rgba(29, 78, 216, ...)` and hex literals in `styleInjector.ts` and `markon.css` with NUICSS semantic tokens (`var(--color-primary-subtle)`, `var(--bg-inset)`, `var(--fg-muted)`).
-     - Standardize OKLCH color-mix in `callout.ts`.
-  2. Unit Testing:
-     - Add tests in `markon.test.ts` covering:
-       - Custom Color Picker functions and hex validation.
-       - Markdown round-trip for highlights, subscript, and superscript.
-       - Table commands (add/delete row/col, merge/split).
-       - Code block Tab key handling.
-  3. Playwright Visual Verification:
-     - Capture high-resolution screenshots in `/temp/screenshots/` verifying:
-       - Custom color picker open in toolbar and bubble menu.
-       - Floating contextual table menu.
-       - Link action popover.
-       - Code block with highlighted code.
-       - Optimistic upload card.
-       - Light and dark themes.
-  4. Verify package build via `npx nx build markon` and `npm pack --dry-run`.
+     - Purged all hardcoded sRGB fallbacks (`rgba(29, 78, 216, ...)`, `#ffffff`, `#cbd5e1`, `#64748b`, `#0f172a`) across `colorPicker.ts`, `styleInjector.ts`, `callout.ts`, and `markon.css`.
+     - Standardized pure semantic NUICSS tokens (`var(--color-primary)`, `var(--bg-surface)`, `var(--border-default)`, `var(--fg-muted)`, `var(--fg-default)`, `var(--shadow-xl)`, `var(--shadow-sm)`).
+     - Standardized OKLCH / OKLAB `color-mix(in oklab, ...)` across callout alert themes and highlight palettes.
+  2. Comprehensive Unit Test Suite (`packages/markon/src/markon.test.ts`):
+     - Added comprehensive Phase 6 tests:
+       - `hslToHex` hue-to-hex conversion and normalization.
+       - Token purity assertions across `HIGHLIGHT_PRESETS` and `TEXT_COLOR_PRESETS`.
+       - `CALLOUT_THEMES` and `CALLOUT_ICONS` verification.
+       - Live callout type switching and DOM attribute synchronization.
+       - Block Drag Handle programmatic action APIs (`moveBlock('up')`, `moveBlock('down')`, `deleteBlock()`).
+       - Custom hex input validation and emission of OKLCH color-mix values on apply.
+     - Total unit test count expanded to **58/58 tests passing**.
+  3. High-Resolution Playwright Visual Audit:
+     - Built and executed `temp/verify-markon-phase6-audit.cjs`.
+     - Captured and verified 6 high-resolution screenshots across Light and Dark themes:
+       - `/temp/markon_phase6_light_overview.png` (Light mode full editor with OKLAB callouts & tables)
+       - `/temp/markon_phase6_light_colorpicker.png` (Light mode custom color picker with OKLCH palette & hue slider)
+       - `/temp/markon_phase6_light_block_actions.png` (Light mode block drag handle & floating actions menu)
+       - `/temp/markon_phase6_dark_overview.png` (Dark mode full editor with rich contrast & tokens)
+       - `/temp/markon_phase6_dark_colorpicker.png` (Dark mode custom color picker with dark surface & hex badge)
+       - `/temp/markon_phase6_dark_table_menu.png` (Dark mode contextual floating table bubble menu)
+  4. Package & Build Verification:
+     - TypeScript compiler check clean with zero errors (`npx tsc -p packages/markon/tsconfig.lib.json --noEmit`).
+     - Vite production build cleanly generated all ESM, CJS, and TypeScript declaration bundles (`dist/index.js`, `dist/index.cjs`, `dist/react/index.js`, `dist/markon.css`).
+     - `npm pack --dry-run` verified 78 package files present in tarball.
 
 ---
 

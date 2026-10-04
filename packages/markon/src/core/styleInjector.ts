@@ -21,7 +21,7 @@ export const MARKON_CORE_CSS = `
 
 .markon-editor:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-subtle, rgba(29, 78, 216, 0.15));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 15%, transparent);
 }
 
 .markon-editor .editor-toolbar {
@@ -117,7 +117,7 @@ export const MARKON_CORE_CSS = `
 
 .markon-editor .ProseMirror blockquote {
   border-left: 3px solid var(--color-primary);
-  background-color: var(--color-primary-subtle, rgba(29, 78, 216, 0.05));
+  background-color: color-mix(in oklab, var(--color-primary) 6%, transparent);
   border-radius: 0 var(--radius-md, 0.375rem) var(--radius-md, 0.375rem) 0;
   padding: 0.625rem 1rem;
   margin: 1rem 0;
@@ -231,7 +231,7 @@ export const MARKON_CORE_CSS = `
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl, 0.75rem);
-  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.15));
+  box-shadow: var(--shadow-xl);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   width: max-content;
@@ -269,7 +269,7 @@ export const MARKON_CORE_CSS = `
 }
 
 .markon-bubble-menu button.btn-active {
-  background-color: var(--color-primary-subtle, rgba(29, 78, 216, 0.15));
+  background-color: color-mix(in oklab, var(--color-primary) 15%, transparent);
   color: var(--color-primary);
   font-weight: var(--weight-bold, 700);
 }
@@ -283,7 +283,7 @@ export const MARKON_CORE_CSS = `
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl, 0.75rem);
-  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow-xl);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 4px;
@@ -302,12 +302,12 @@ export const MARKON_CORE_CSS = `
 }
 
 .markon-slash-menu::-webkit-scrollbar-thumb {
-  background: var(--border-strong, #94a3b8);
+  background: var(--border-default);
   border-radius: var(--radius-full, 9999px);
 }
 
 .markon-slash-menu::-webkit-scrollbar-thumb:hover {
-  background: var(--fg-muted, #64748b);
+  background: var(--fg-muted);
 }
 
 .markon-slash-menu .dropdown-item {
@@ -355,7 +355,7 @@ export const MARKON_CORE_CSS = `
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl, 0.75rem);
-  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow-xl);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 4px;
@@ -400,7 +400,7 @@ export const MARKON_CORE_CSS = `
   border-radius: var(--radius-full, 9999px);
   z-index: 30;
   pointer-events: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-50%);
 }
 
@@ -411,7 +411,7 @@ export const MARKON_CORE_CSS = `
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl, 0.75rem);
-  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow-xl);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 4px;
@@ -442,11 +442,11 @@ export const MARKON_CORE_CSS = `
 }
 
 .markon-block-actions-menu .dropdown-item.is-danger {
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger);
 }
 
 .markon-block-actions-menu .dropdown-item.is-danger:hover {
-  background-color: var(--bg-danger-subtle, rgba(239, 68, 68, 0.1));
+  background-color: var(--bg-danger-subtle, color-mix(in oklab, var(--color-danger) 10%, transparent));
 }
 
 .markon-block-actions-menu .menu-divider {
@@ -469,7 +469,7 @@ export const MARKON_CORE_CSS = `
   border-radius: var(--radius-xl, 0.75rem);
   border: 1px solid var(--border-default);
   background-color: var(--bg-surface);
-  box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  box-shadow: var(--shadow-sm);
   user-select: none;
   width: 100%;
   box-sizing: border-box;
@@ -477,12 +477,12 @@ export const MARKON_CORE_CSS = `
 }
 
 .markon-uploading-card.is-uploading {
-  border-color: var(--color-primary-subtle, var(--color-primary));
+  border-color: var(--color-primary);
 }
 
 .markon-uploading-card.is-error {
-  border-color: var(--color-danger, #ef4444);
-  background-color: var(--bg-danger-subtle, rgba(239, 68, 68, 0.04));
+  border-color: var(--color-danger);
+  background-color: var(--bg-danger-subtle, color-mix(in oklab, var(--color-danger) 6%, transparent));
 }
 
 @media (max-width: 480px) {

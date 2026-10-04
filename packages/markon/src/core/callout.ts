@@ -17,7 +17,7 @@ declare module '@tiptap/core' {
   }
 }
 
-const CALLOUT_ICONS: Record<CalloutType, string> = {
+export const CALLOUT_ICONS: Record<CalloutType, string> = {
   info: `
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
@@ -47,31 +47,31 @@ const CALLOUT_ICONS: Record<CalloutType, string> = {
   `,
 };
 
-const CALLOUT_THEMES: Record<
+export const CALLOUT_THEMES: Record<
   CalloutType,
   { border: string; bg: string; iconColor: string }
 > = {
   info: {
-    border: '1px solid color-mix(in srgb, var(--color-info) 30%, transparent)',
-    bg: 'color-mix(in srgb, var(--color-info) 8%, transparent)',
+    border: '1px solid color-mix(in oklab, var(--color-info) 30%, transparent)',
+    bg: 'color-mix(in oklab, var(--color-info) 8%, transparent)',
     iconColor: 'var(--color-info)',
   },
   success: {
     border:
-      '1px solid color-mix(in srgb, var(--color-success) 30%, transparent)',
-    bg: 'color-mix(in srgb, var(--color-success) 8%, transparent)',
+      '1px solid color-mix(in oklab, var(--color-success) 30%, transparent)',
+    bg: 'color-mix(in oklab, var(--color-success) 8%, transparent)',
     iconColor: 'var(--color-success)',
   },
   warning: {
     border:
-      '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
-    bg: 'color-mix(in srgb, var(--color-warning) 8%, transparent)',
+      '1px solid color-mix(in oklab, var(--color-warning) 30%, transparent)',
+    bg: 'color-mix(in oklab, var(--color-warning) 8%, transparent)',
     iconColor: 'var(--color-warning)',
   },
   danger: {
     border:
-      '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
-    bg: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
+      '1px solid color-mix(in oklab, var(--color-danger) 30%, transparent)',
+    bg: 'color-mix(in oklab, var(--color-danger) 8%, transparent)',
     iconColor: 'var(--color-danger)',
   },
 };

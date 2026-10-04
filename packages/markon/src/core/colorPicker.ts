@@ -28,82 +28,115 @@ export const HIGHLIGHT_PRESETS: ColorPreset[] = [
   {
     label: 'Yellow',
     color: 'var(--color-warning-subtle)',
-    previewBg: 'rgba(245, 158, 11, 0.25)',
+    previewBg: 'color-mix(in oklab, var(--color-warning) 25%, transparent)',
   },
   {
     label: 'Amber',
-    color: 'color-mix(in oklch, var(--amber-500, #f59e0b) 22%, transparent)',
-    previewBg: 'rgba(217, 119, 6, 0.25)',
+    color: 'color-mix(in oklab, var(--color-warning) 22%, transparent)',
+    previewBg: 'color-mix(in oklab, var(--color-warning) 30%, transparent)',
   },
   {
     label: 'Coral',
     color: 'var(--color-danger-subtle)',
-    previewBg: 'rgba(239, 68, 68, 0.22)',
+    previewBg: 'color-mix(in oklab, var(--color-danger) 22%, transparent)',
   },
   {
     label: 'Rose',
-    color: 'color-mix(in oklch, #ec4899 22%, transparent)',
-    previewBg: 'rgba(236, 72, 153, 0.22)',
+    color: 'color-mix(in oklab, var(--color-danger) 20%, transparent)',
+    previewBg: 'color-mix(in oklab, var(--color-danger) 25%, transparent)',
   },
   {
     label: 'Lavender',
-    color: 'color-mix(in oklch, #a855f7 22%, transparent)',
-    previewBg: 'rgba(168, 85, 247, 0.22)',
+    color: 'color-mix(in oklab, var(--color-primary) 22%, transparent)',
+    previewBg: 'color-mix(in oklab, var(--color-primary) 28%, transparent)',
   },
   {
     label: 'Violet',
-    color: 'color-mix(in oklch, #8b5cf6 22%, transparent)',
-    previewBg: 'rgba(139, 92, 246, 0.22)',
+    color: 'color-mix(in oklab, var(--color-primary) 30%, transparent)',
+    previewBg: 'color-mix(in oklab, var(--color-primary) 35%, transparent)',
   },
   {
     label: 'Sky',
     color: 'var(--color-info-subtle)',
-    previewBg: 'rgba(14, 165, 233, 0.22)',
+    previewBg: 'color-mix(in oklab, var(--color-info) 22%, transparent)',
   },
   {
     label: 'Teal',
-    color: 'color-mix(in oklch, #14b8a6 22%, transparent)',
-    previewBg: 'rgba(20, 184, 166, 0.22)',
+    color: 'color-mix(in oklab, var(--color-info) 18%, transparent)',
+    previewBg: 'color-mix(in oklab, var(--color-info) 25%, transparent)',
   },
   {
     label: 'Mint',
-    color: 'color-mix(in oklch, #84cc16 22%, transparent)',
-    previewBg: 'rgba(132, 204, 22, 0.22)',
+    color: 'color-mix(in oklab, var(--color-success) 18%, transparent)',
+    previewBg: 'color-mix(in oklab, var(--color-success) 25%, transparent)',
   },
   {
     label: 'Emerald',
     color: 'var(--color-success-subtle)',
-    previewBg: 'rgba(16, 185, 129, 0.22)',
+    previewBg: 'color-mix(in oklab, var(--color-success) 22%, transparent)',
   },
   {
     label: 'Slate',
-    color: 'color-mix(in oklch, var(--slate-500, #64748b) 22%, transparent)',
-    previewBg: 'rgba(100, 116, 139, 0.22)',
+    color: 'color-mix(in oklab, var(--fg-muted) 20%, transparent)',
+    previewBg: 'color-mix(in oklab, var(--fg-muted) 25%, transparent)',
   },
   {
     label: 'Brown',
-    color: 'color-mix(in oklch, #78350f 22%, transparent)',
-    previewBg: 'rgba(120, 53, 15, 0.22)',
+    color: 'color-mix(in oklab, var(--color-warning) 25%, var(--fg-default))',
+    previewBg:
+      'color-mix(in oklab, var(--color-warning) 30%, var(--fg-default))',
   },
 ];
 
 export const TEXT_COLOR_PRESETS: ColorPreset[] = [
   { label: 'Default', color: 'inherit', previewBg: 'transparent' },
-  { label: 'Muted', color: 'var(--fg-muted)', previewBg: '#64748b' },
-  { label: 'Dark', color: 'var(--slate-900, #0f172a)', previewBg: '#0f172a' },
-  { label: 'Amber', color: 'var(--color-warning)', previewBg: '#f59e0b' },
-  { label: 'Orange', color: '#ea580c', previewBg: '#ea580c' },
-  { label: 'Red', color: 'var(--color-danger)', previewBg: '#ef4444' },
-  { label: 'Rose', color: '#db2777', previewBg: '#db2777' },
-  { label: 'Purple', color: '#9333ea', previewBg: '#9333ea' },
+  { label: 'Muted', color: 'var(--fg-muted)', previewBg: 'var(--fg-muted)' },
+  { label: 'Dark', color: 'var(--fg-default)', previewBg: 'var(--fg-default)' },
+  {
+    label: 'Amber',
+    color: 'var(--color-warning)',
+    previewBg: 'var(--color-warning)',
+  },
+  {
+    label: 'Orange',
+    color: 'color-mix(in oklab, var(--color-warning) 60%, var(--color-danger))',
+    previewBg:
+      'color-mix(in oklab, var(--color-warning) 60%, var(--color-danger))',
+  },
+  {
+    label: 'Red',
+    color: 'var(--color-danger)',
+    previewBg: 'var(--color-danger)',
+  },
+  {
+    label: 'Rose',
+    color: 'color-mix(in oklab, var(--color-danger) 70%, var(--color-primary))',
+    previewBg:
+      'color-mix(in oklab, var(--color-danger) 70%, var(--color-primary))',
+  },
+  {
+    label: 'Purple',
+    color: 'color-mix(in oklab, var(--color-primary) 60%, var(--color-danger))',
+    previewBg:
+      'color-mix(in oklab, var(--color-primary) 60%, var(--color-danger))',
+  },
   {
     label: 'Brand',
-    color: 'var(--brand-primary, var(--color-primary))',
-    previewBg: '#2563eb',
+    color: 'var(--color-primary)',
+    previewBg: 'var(--color-primary)',
   },
-  { label: 'Blue', color: 'var(--color-info)', previewBg: '#0ea5e9' },
-  { label: 'Teal', color: '#0d9488', previewBg: '#0d9488' },
-  { label: 'Green', color: 'var(--color-success)', previewBg: '#10b981' },
+  { label: 'Blue', color: 'var(--color-info)', previewBg: 'var(--color-info)' },
+  {
+    label: 'Teal',
+    color: 'color-mix(in oklab, var(--color-info) 60%, var(--color-success))',
+    previewBg:
+      'color-mix(in oklab, var(--color-info) 60%, var(--color-success))',
+  },
+  {
+    label: 'Green',
+    color: 'var(--color-success)',
+    previewBg: 'var(--color-success)',
+  },
 ];
 
 export interface MarkonColorPickerOptions {
@@ -155,13 +188,13 @@ export class MarkonColorPicker implements ActivePopover {
     menu.style.padding = '10px';
     menu.style.width = '236px';
     menu.style.boxSizing = 'border-box';
-    menu.style.backgroundColor = 'var(--bg-surface, #ffffff)';
-    menu.style.border = '1px solid var(--border-default, #e2e8f0)';
+    menu.style.backgroundColor = 'var(--bg-surface)';
+    menu.style.border = '1px solid var(--border-default)';
     menu.style.borderRadius = 'var(--radius-xl, 0.75rem)';
-    menu.style.boxShadow =
-      'var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.15))';
+    menu.style.boxShadow = 'var(--shadow-xl)';
     menu.style.zIndex = '10001';
-    menu.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+    menu.style.fontFamily =
+      'var(--font-sans, system-ui, -apple-system, sans-serif)';
     menu.style.fontSize = '12px';
 
     // Header
@@ -171,8 +204,8 @@ export class MarkonColorPicker implements ActivePopover {
     header.style.justifyContent = 'space-between';
     header.style.padding = '0 2px 2px 2px';
     header.innerHTML = `
-      <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-muted, #64748b);">${titleText}</span>
-      <span style="font-size: 10px; font-weight: 500; color: var(--fg-muted, #94a3b8);">OKLCH</span>
+      <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-muted);">${titleText}</span>
+      <span style="font-size: 10px; font-weight: 500; color: var(--fg-muted);">OKLCH</span>
     `;
     menu.appendChild(header);
 
@@ -183,9 +216,10 @@ export class MarkonColorPicker implements ActivePopover {
     grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
     grid.style.gap = '6px';
     grid.style.padding = '6px';
-    grid.style.backgroundColor = 'var(--bg-subtle, rgba(0, 0, 0, 0.03))';
+    grid.style.backgroundColor =
+      'var(--bg-subtle, color-mix(in oklab, var(--fg-default) 3%, transparent))';
     grid.style.borderRadius = 'var(--radius-lg, 0.5rem)';
-    grid.style.border = '1px solid var(--border-subtle, rgba(0, 0, 0, 0.06))';
+    grid.style.border = '1px solid var(--border-subtle, var(--border-default))';
     grid.style.boxSizing = 'border-box';
 
     const currentVal = this.options.currentColor;
@@ -197,7 +231,7 @@ export class MarkonColorPicker implements ActivePopover {
       swatch.style.width = '100%';
       swatch.style.aspectRatio = '1 / 1';
       swatch.style.borderRadius = 'var(--radius-md, 0.375rem)';
-      swatch.style.border = '1px solid var(--border-default, #cbd5e1)';
+      swatch.style.border = '1px solid var(--border-default)';
       swatch.style.cursor = 'pointer';
       swatch.style.display = 'flex';
       swatch.style.alignItems = 'center';
@@ -209,9 +243,9 @@ export class MarkonColorPicker implements ActivePopover {
       swatch.title = preset.label;
 
       if (preset.color === 'inherit') {
-        swatch.style.backgroundColor = 'var(--bg-surface, #ffffff)';
+        swatch.style.backgroundColor = 'var(--bg-surface)';
         swatch.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-danger, #ef4444);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-danger);">
             <line x1="4" y1="4" x2="20" y2="20"></line>
             <circle cx="12" cy="12" r="9"></circle>
           </svg>
@@ -225,7 +259,7 @@ export class MarkonColorPicker implements ActivePopover {
         (!currentVal && preset.color === 'inherit');
 
       if (isCurrent) {
-        swatch.style.outline = '2px solid var(--color-primary, #2563eb)';
+        swatch.style.outline = '2px solid var(--color-primary)';
         swatch.style.outlineOffset = '1px';
       }
 
@@ -259,7 +293,7 @@ export class MarkonColorPicker implements ActivePopover {
     customSection.style.gap = '6px';
     customSection.style.paddingTop = '6px';
     customSection.style.borderTop =
-      '1px solid var(--border-subtle, rgba(0, 0, 0, 0.06))';
+      '1px solid var(--border-subtle, var(--border-default))';
 
     const customLabel = document.createElement('div');
     customLabel.style.display = 'flex';
@@ -268,8 +302,8 @@ export class MarkonColorPicker implements ActivePopover {
     customLabel.style.padding = '0 2px';
     customLabel.style.fontSize = '11px';
     customLabel.style.fontWeight = '500';
-    customLabel.style.color = 'var(--fg-muted, #64748b)';
-    customLabel.innerHTML = `<span>Custom Tone</span><span class="markon-custom-preview-code" style="font-family: monospace; font-size: 10px; font-weight: 600; color: var(--fg-default, #0f172a);">${this.customColor}</span>`;
+    customLabel.style.color = 'var(--fg-muted)';
+    customLabel.innerHTML = `<span>Custom Tone</span><span class="markon-custom-preview-code" style="font-family: monospace; font-size: 10px; font-weight: 600; color: var(--fg-default);">${this.customColor}</span>`;
     customSection.appendChild(customLabel);
 
     // Interactive Hue Slider Bar
@@ -286,8 +320,7 @@ export class MarkonColorPicker implements ActivePopover {
     hueSlider.style.cursor = 'pointer';
     hueSlider.style.outline = 'none';
     hueSlider.style.boxSizing = 'border-box';
-    hueSlider.style.border =
-      '1px solid var(--border-default, rgba(0, 0, 0, 0.15))';
+    hueSlider.style.border = '1px solid var(--border-default)';
     hueSlider.style.background =
       'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)';
 
@@ -302,10 +335,11 @@ export class MarkonColorPicker implements ActivePopover {
     previewBadge.style.width = '26px';
     previewBadge.style.height = '26px';
     previewBadge.style.borderRadius = 'var(--radius-md, 0.375rem)';
-    previewBadge.style.border = '1px solid var(--border-default, #cbd5e1)';
+    previewBadge.style.border = '1px solid var(--border-default)';
     previewBadge.style.backgroundColor = this.customColor;
     previewBadge.style.flexShrink = '0';
-    previewBadge.style.boxShadow = 'inset 0 1px 2px rgba(0, 0, 0, 0.1)';
+    previewBadge.style.boxShadow =
+      'inset 0 1px 2px color-mix(in oklab, var(--fg-default) 10%, transparent)';
 
     const hexInput = document.createElement('input');
     hexInput.type = 'text';
@@ -317,9 +351,9 @@ export class MarkonColorPicker implements ActivePopover {
     hexInput.style.fontFamily = 'monospace';
     hexInput.style.fontSize = '11px';
     hexInput.style.borderRadius = 'var(--radius-md, 0.375rem)';
-    hexInput.style.border = '1px solid var(--border-default, #cbd5e1)';
-    hexInput.style.backgroundColor = 'var(--bg-canvas, #ffffff)';
-    hexInput.style.color = 'var(--fg-default, #0f172a)';
+    hexInput.style.border = '1px solid var(--border-default)';
+    hexInput.style.backgroundColor = 'var(--bg-surface)';
+    hexInput.style.color = 'var(--fg-default)';
     hexInput.style.boxSizing = 'border-box';
     hexInput.value = this.customColor;
     hexInput.maxLength = 7;
@@ -402,11 +436,11 @@ export class MarkonColorPicker implements ActivePopover {
     clearBtn.style.padding = '6px 8px';
     clearBtn.style.fontSize = '11px';
     clearBtn.style.fontWeight = '500';
-    clearBtn.style.color = 'var(--fg-muted, #64748b)';
+    clearBtn.style.color = 'var(--fg-muted)';
     clearBtn.style.borderRadius = 'var(--radius-md, 0.375rem)';
     clearBtn.style.border = 'none';
     clearBtn.style.borderTop =
-      '1px solid var(--border-subtle, rgba(0, 0, 0, 0.06))';
+      '1px solid var(--border-subtle, var(--border-default))';
     clearBtn.style.cursor = 'pointer';
     clearBtn.style.marginTop = '2px';
     clearBtn.innerHTML = `
@@ -498,7 +532,7 @@ export class MarkonColorPicker implements ActivePopover {
 /**
  * Helper to convert HSL (Hue, Saturation %, Lightness %) to Hex string (#RRGGBB)
  */
-function hslToHex(h: number, s: number, l: number): string {
+export function hslToHex(h: number, s: number, l: number): string {
   l /= 100;
   const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n: number) => {

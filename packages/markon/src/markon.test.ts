@@ -15,6 +15,9 @@ import {
   MarkonColorPicker,
   HIGHLIGHT_PRESETS,
   TEXT_COLOR_PRESETS,
+  hslToHex,
+  CALLOUT_ICONS,
+  CALLOUT_THEMES,
   formatDisplayUrl,
   renderLinkPopoverHtml,
   UploadPlaceholder,
@@ -1666,6 +1669,193 @@ describe('@nofinite/markon', () => {
       expect(pCount).toBe(2);
 
       editor.destroy();
+    });
+  });
+
+  describe('Phase 6: Design Token Purity, OKLCH Color Systems & Comprehensive Engine Audit', () => {
+    let container: HTMLElement;
+
+    beforeEach(() => {
+      container = document.createElement('div');
+      document.body.appendChild(container);
+    });
+
+    afterEach(() => {
+      if (container && container.parentNode) {
+        document.body.removeChild(container);
+      }
+    });
+
+    it('accurately converts HSL values to standard hex strings using hslToHex', () => {
+      expect(hslToHex(0, 100, 50)).toBe('#ff0000');
+      expect(hslToHex(120, 100, 50)).toBe('#00ff00');
+      expect(hslToHex(240, 100, 50)).toBe('#0000ff');
+      expect(hslToHex(0, 0, 0)).toBe('#000000');
+      expect(hslToHex(0, 0, 100)).toBe('#ffffff');
+    });
+
+    it('enforces design token purity across highlight and text color preset registries', () => {
+      // Highlight presets must use semantic tokens or oklab/oklch color-mix
+      HIGHLIGHT_PRESETS.forEach((preset) => {
+        expect(
+          preset.color.startsWith('var(--') ||
+            preset.color.startsWith('color-mix(')
+        ).toBe(true);
+        expect(
+          preset.previewBg?.startsWith('var(--') ||
+            preset.previewBg?.startsWith('color-mix(')
+        ).toBe(true);
+      });
+
+      // Text color presets must use semantic tokens, color-mix, or inherit
+      TEXT_COLOR_PRESETS.forEach((preset) => {
+        expect(
+          preset.color === 'inherit' ||
+            preset.color.startsWith('var(--') ||
+            preset.color.startsWith('color-mix(')
+        ).toBe(true);
+      });
+    });
+
+    it('enforces OKLAB color-mix standards across callout themes', () => {
+      const types = ['info', 'success', 'warning', 'danger'] as const;
+      types.forEach((type) => {
+        const theme = CALLOUT_THEMES[type];
+        expect(theme).toBeDefined();
+        expect(theme.border).toContain('color-mix(in oklab');
+        expect(theme.bg).toContain('color-mix(in oklab');
+        expect(theme.iconColor).toBe(`var(--color-${type})`);
+        expect(CALLOUT_ICONS[type]).toContain('<svg');
+      });
+    });
+
+    it('supports live Callout type switching and DOM attribute synchronization', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '',
+      });
+
+      editor.execCommand('insertCallout', { type: 'warning' });
+      let html = editor.getHTML();
+      expect(html).toContain('data-callout-type="warning"');
+      expect(html).toContain('alert-warning');
+
+      // Switch callout type to danger
+      editor.tiptap.commands.setCalloutType('danger');
+      html = editor.getHTML();
+      expect(html).toContain('data-callout-type="danger"');
+      expect(html).toContain('alert-danger');
+
+      editor.destroy();
+    });
+
+    it('reorders and deletes blocks via MarkonDragHandle action APIs', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>First Item</p><p>Second Item</p><p>Third Item</p>',
+      });
+
+      const dragHandle = (editor as any).dragHandle as MarkonDragHandle;
+      expect(dragHandle).toBeDefined();
+
+      const paragraphsEl =
+        container.querySelectorAll<HTMLElement>('.editor-content p');
+      expect(paragraphsEl.length).toBe(3);
+
+      const p2 = paragraphsEl[1];
+      (dragHandle as any).currentBlock = p2;
+      (dragHandle as any).showHandleForBlock(p2);
+
+      // Move Second Item UP (before First Item)
+      dragHandle.moveBlock('up');
+      let paragraphs = Array.from(
+        container.querySelectorAll('.editor-content p')
+      ).map((p) => p.textContent);
+      expect(paragraphs[0]).toBe('Second Item');
+      expect(paragraphs[1]).toBe('First Item');
+      expect(paragraphs[2]).toBe('Third Item');
+
+      // Move it back DOWN
+      const pSecond =
+        container.querySelectorAll<HTMLElement>('.editor-content p')[0];
+      (dragHandle as any).currentBlock = pSecond;
+      dragHandle.moveBlock('down');
+      paragraphs = Array.from(
+        container.querySelectorAll('.editor-content p')
+      ).map((p) => p.textContent);
+      expect(paragraphs[0]).toBe('First Item');
+      expect(paragraphs[1]).toBe('Second Item');
+      expect(paragraphs[2]).toBe('Third Item');
+
+      // Delete block
+      (dragHandle as any).currentBlock =
+        container.querySelectorAll('.editor-content p')[1];
+      dragHandle.deleteBlock();
+      paragraphs = Array.from(
+        container.querySelectorAll('.editor-content p')
+      ).map((p) => p.textContent);
+      expect(paragraphs.length).toBe(2);
+      expect(paragraphs).not.toContain('Second Item');
+
+      editor.destroy();
+    });
+
+    it('validates custom hex inputs and emits oklch color values on apply', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+
+      let selectedColor = '';
+      let cleared = false;
+
+      const picker = new MarkonColorPicker({
+        mode: 'highlight',
+        trigger,
+        onSelect: (color) => {
+          selectedColor = color;
+        },
+        onClear: () => {
+          cleared = true;
+        },
+      });
+
+      picker.open();
+      expect(picker.isOpen).toBe(true);
+
+      const menu = document.querySelector<HTMLElement>('.markon-color-picker');
+      expect(menu).not.toBeNull();
+
+      // Test custom hex input
+      const hexInput = menu?.querySelector<HTMLInputElement>('input.input-xs');
+      expect(hexInput).not.toBeNull();
+
+      // Enter valid hex
+      hexInput!.value = '#10b981';
+      hexInput!.dispatchEvent(new Event('input', { bubbles: true }));
+
+      const applyBtn =
+        menu?.querySelector<HTMLButtonElement>('button.btn-primary');
+      expect(applyBtn).not.toBeNull();
+
+      applyBtn!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      // Highlight mode should produce color-mix with oklch
+      expect(selectedColor).toBe(
+        'color-mix(in oklch, #10b981 24%, transparent)'
+      );
+      expect(picker.isOpen).toBe(false);
+
+      // Re-open and test clear
+      picker.open();
+      const clearBtn = document.querySelector<HTMLButtonElement>(
+        '.markon-color-picker button.btn-ghost'
+      );
+      expect(clearBtn).not.toBeNull();
+      clearBtn!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(cleared).toBe(true);
+      expect(picker.isOpen).toBe(false);
+
+      picker.destroy();
+      trigger.remove();
     });
   });
 });
