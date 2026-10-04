@@ -11,12 +11,16 @@ import {
 import clsx from 'clsx';
 import {
   type KanbanColumn as CoreColumn,
+  type KanbanItem as CoreItem,
   type KanbanBadge,
   type KanbanAssignee,
   type KanbanSubtasks,
   type CardMoveEvent,
   type ColumnMoveEvent,
   type KanbanBoardInstance,
+  type KanbanFilterOptions,
+  matchCardFilter,
+  hasActiveFilter,
   moveCardBetweenColumns,
   reorderColumns,
 } from '../core';
@@ -49,7 +53,8 @@ export interface KanbanColumnProps {
 }
 
 export interface KanbanProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>,
+    KanbanFilterOptions {
   columns: KanbanColumnProps[];
   onChange?: (columns: KanbanColumnProps[]) => void;
   onCardMove?: (event: CardMoveEvent) => void;
@@ -549,6 +554,7 @@ interface ColumnComponentProps {
   headerActions?: boolean;
   enforceWipLimit?: boolean;
   canMoveCard?: (event: CardMoveEvent) => boolean;
+  filterOptions?: KanbanFilterOptions;
   onCardMove: (event: CardMoveEvent) => void;
   onColumnMove: (event: ColumnMoveEvent) => void;
   onCardAdd?: (columnId: string) => void;
@@ -571,6 +577,7 @@ function KanbanColumnComponent({
   headerActions,
   enforceWipLimit,
   canMoveCard,
+  filterOptions,
   onCardMove,
   onColumnMove,
   onCardAdd,
@@ -615,6 +622,17 @@ function KanbanColumnComponent({
   const showOptions = column.headerActions ?? headerActions ?? true;
   const isOverWip =
     column.wipLimit != null && column.items.length > column.wipLimit;
+
+  const isFiltered = hasActiveFilter(filterOptions);
+  const visibleItems = isFiltered
+    ? column.items.filter((item) =>
+        matchCardFilter(
+          item as unknown as CoreItem,
+          column as unknown as CoreColumn,
+          filterOptions
+        )
+      )
+    : column.items;
 
   useEffect(() => {
     const colEl = colRef.current;
@@ -778,7 +796,9 @@ function KanbanColumnComponent({
                 {column.title}
               </span>
               <span className="badge badge-subtle px-1.5 py-0.5 rounded-full text-[11px] font-mono font-semibold text-muted bg-surface border border-default">
-                {column.items.length}
+                {isFiltered && visibleItems.length !== column.items.length
+                  ? `${visibleItems.length}/${column.items.length}`
+                  : column.items.length}
               </span>
               {isOverWip && (
                 <span className="badge badge-danger text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">
@@ -881,18 +901,18 @@ function KanbanColumnComponent({
         ref={cardListRef}
         className="kanban-card-list p-3 flex flex-col gap-2.5 overflow-y-auto flex-1 min-h-[140px]"
       >
-        {column.items.length === 0 ? (
+        {visibleItems.length === 0 ? (
           <div className="kanban-empty-placeholder h-24 border border-dashed border-default/60 rounded-xl flex items-center justify-center text-xs text-muted/60 select-none pointer-events-none">
-            No cards
+            {column.items.length > 0 ? 'No matching cards' : 'No cards'}
           </div>
         ) : (
-          column.items.map((item, itemIdx) => (
+          visibleItems.map((item, itemIdx) => (
             <KanbanCardItem
               key={item.id}
               item={item}
               columnId={column.id}
               index={itemIdx}
-              totalCards={column.items.length}
+              totalCards={visibleItems.length}
               columnIndex={index}
               totalColumns={totalColumns}
               allColumns={allColumns}
@@ -960,6 +980,10 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
       headerActions = true,
       enforceWipLimit = false,
       canMoveCard,
+      filterQuery,
+      filterAssignee,
+      filterBadge,
+      filterCard,
       className,
       columnClassName,
       renderCard,
@@ -972,6 +996,21 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
     const [announcement, setAnnouncement] = useState<string>('');
     const boardRef = useRef<HTMLDivElement | null>(null);
     const dataRef = useRef<KanbanColumnProps[]>(columns);
+    const [filterState, setFilterState] = useState<KanbanFilterOptions>({
+      filterQuery,
+      filterAssignee,
+      filterBadge,
+      filterCard,
+    });
+
+    useEffect(() => {
+      setFilterState({
+        filterQuery,
+        filterAssignee,
+        filterBadge,
+        filterCard,
+      });
+    }, [filterQuery, filterAssignee, filterBadge, filterCard]);
 
     useEffect(() => {
       setData(columns);
@@ -1143,6 +1182,10 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
         focusCard: (cardId: string) => {
           focusCard(cardId);
         },
+        setFilter: (newFilter: KanbanFilterOptions) => {
+          setFilterState(newFilter);
+        },
+        getFilter: () => ({ ...filterState }),
       }),
       [
         canMoveCard,
@@ -1151,6 +1194,7 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
         onCardMove,
         onColumnMove,
         onColumnClear,
+        filterState,
       ]
     );
 
@@ -1178,6 +1222,7 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
             headerActions={headerActions}
             enforceWipLimit={enforceWipLimit}
             canMoveCard={canMoveCard}
+            filterOptions={filterState}
             onCardMove={handleCardMove}
             onColumnMove={handleColumnMove}
             onCardAdd={onCardAdd}

@@ -13,8 +13,11 @@ import type {
   ColumnMoveEvent,
   KanbanBoardOptions,
   KanbanBoardInstance,
+  KanbanFilterOptions,
+  KanbanRenderOptions,
 } from './types';
 import { createKanbanStore } from './store';
+import { matchCardFilter, hasActiveFilter } from './filter';
 
 /**
  * Escapes unsafe HTML characters to prevent XSS.
@@ -163,26 +166,22 @@ export function renderCardHTML(
 /**
  * Generates semantic HTML markup for a Kanban board using @nofinite/nuicss tokens and superclasses.
  */
-export function renderKanbanHTML(options: {
-  columns: KanbanColumn[];
-  allowAdd?: boolean;
-  allowAddColumn?: boolean;
-  onColumnAdd?: () => void;
-  addColumnLabel?: string;
-  headerActions?: boolean;
-  className?: string;
-  columnClassName?: string;
-}): string {
+export function renderKanbanHTML(options: KanbanRenderOptions): string {
   const columns = options.columns || [];
   const globalAllowAdd = options.allowAdd !== false;
   const globalHeaderActions = options.headerActions !== false;
+  const isFiltered = hasActiveFilter(options);
 
   const columnsHtml = columns
     .map((col, colIndex) => {
       const showAdd = col.allowAdd ?? globalAllowAdd;
       const showOptions = col.headerActions ?? globalHeaderActions;
 
-      const cardsHtml = col.items
+      const matchingItems = isFiltered
+        ? col.items.filter((item) => matchCardFilter(item, col, options))
+        : col.items;
+
+      const cardsHtml = matchingItems
         .map((item, itemIndex) =>
           renderCardHTML(item, col, itemIndex, colIndex)
         )
@@ -201,9 +200,11 @@ export function renderKanbanHTML(options: {
               <span class="font-bold text-sm text-default tracking-tight truncate">${escapeHtml(
                 col.title || ''
               )}</span>
-              <span class="badge badge-subtle px-1.5 py-0.5 rounded-full text-[11px] font-mono font-semibold text-muted bg-surface border border-default">
-                ${col.items.length}
-              </span>
+              <span class="badge badge-subtle px-1.5 py-0.5 rounded-full text-[11px] font-mono font-semibold text-muted bg-surface border border-default">${
+                isFiltered && matchingItems.length !== col.items.length
+                  ? `${matchingItems.length}/${col.items.length}`
+                  : col.items.length
+              }</span>
               ${
                 col.wipLimit != null && col.items.length > col.wipLimit
                   ? `<span class="badge badge-danger text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">Max ${col.wipLimit}</span>`
@@ -236,7 +237,7 @@ export function renderKanbanHTML(options: {
               cardsHtml ||
               `
               <div class="kanban-empty-placeholder h-24 border border-dashed border-default/60 rounded-xl flex items-center justify-center text-xs text-muted/60 select-none pointer-events-none">
-                No cards
+                ${col.items.length > 0 ? 'No matching cards' : 'No cards'}
               </div>
             `
             }
@@ -608,6 +609,12 @@ export function createKanbanBoard(
     canMoveCard: options.canMoveCard,
   });
   let cleanups: (() => void)[] = [];
+  let currentFilter: KanbanFilterOptions = {
+    filterQuery: options.filterQuery,
+    filterAssignee: options.filterAssignee,
+    filterBadge: options.filterBadge,
+    filterCard: options.filterCard,
+  };
 
   function isMoveAllowed(
     sourceCard: { cardId: string; columnId: string; index: number },
@@ -864,8 +871,17 @@ export function createKanbanBoard(
       const counterBadge = colEl.querySelector<HTMLElement>(
         '.kanban-column-header .badge-subtle'
       );
+      const isFiltered = hasActiveFilter(currentFilter);
+      const matchingCount = col.items.filter((i) =>
+        matchCardFilter(i, col, currentFilter)
+      ).length;
+
       if (counterBadge) {
-        counterBadge.textContent = String(col.items.length);
+        if (isFiltered && matchingCount !== col.items.length) {
+          counterBadge.textContent = `${matchingCount}/${col.items.length}`;
+        } else {
+          counterBadge.textContent = String(col.items.length);
+        }
       }
 
       // WIP limit badge
@@ -919,6 +935,10 @@ export function createKanbanBoard(
 
         if (!cardEl) return;
 
+        // Toggle visibility based on active filter
+        const isMatching = matchCardFilter(item, col, currentFilter);
+        cardEl.style.display = isMatching ? '' : 'none';
+
         // Update attributes in-place without rebuilding DOM
         cardEl.setAttribute('data-column-id', col.id);
         cardEl.setAttribute('data-column-index', String(colIdx));
@@ -945,15 +965,25 @@ export function createKanbanBoard(
     boardEl.querySelectorAll<HTMLElement>('.kanban-column').forEach((cEl) => {
       const listEl = cEl.querySelector<HTMLElement>('.kanban-card-list');
       if (!listEl) return;
-      const cards = listEl.querySelectorAll<HTMLElement>('.kanban-card');
-      const placeholder = listEl.querySelector('.kanban-empty-placeholder');
-      if (cards.length === 0) {
+      const colId = cEl.getAttribute('data-column-id') || '';
+      const col = newColumns.find((c) => c.id === colId);
+      const visibleCards = Array.from(
+        listEl.querySelectorAll<HTMLElement>('.kanban-card')
+      ).filter((c) => c.style.display !== 'none');
+      const placeholder = listEl.querySelector<HTMLElement>(
+        '.kanban-empty-placeholder'
+      );
+      if (visibleCards.length === 0) {
+        const msg =
+          col && col.items.length > 0 ? 'No matching cards' : 'No cards';
         if (!placeholder) {
           const p = document.createElement('div');
           p.className =
             'kanban-empty-placeholder h-24 border border-dashed border-default/60 rounded-xl flex items-center justify-center text-xs text-muted/60 select-none pointer-events-none';
-          p.textContent = 'No cards';
+          p.textContent = msg;
           listEl.appendChild(p);
+        } else {
+          placeholder.textContent = msg;
         }
       } else if (placeholder) {
         placeholder.remove();
@@ -1363,5 +1393,10 @@ export function createKanbanBoard(
     removeColumn: (columnId: string) => store.removeColumn(columnId),
     clearColumn: (columnId: string) => store.clearColumn(columnId),
     focusCard: (cardId: string) => restoreCardFocus(cardId),
+    setFilter: (newFilter: KanbanFilterOptions) => {
+      currentFilter = { ...newFilter };
+      reconcileDOM(store.getState());
+    },
+    getFilter: () => ({ ...currentFilter }),
   };
 }

@@ -105,7 +105,27 @@ export interface KanbanBoardEvents {
   canMoveCard?: (event: CardMoveEvent) => boolean;
 }
 
-export interface KanbanBoardOptions extends KanbanBoardEvents {
+export interface KanbanFilterOptions {
+  filterQuery?: string;
+  filterAssignee?: string;
+  filterBadge?: string;
+  filterCard?: (item: KanbanItem, column: KanbanColumn) => boolean;
+}
+
+export interface KanbanRenderOptions extends KanbanFilterOptions {
+  columns: KanbanColumn[];
+  allowAdd?: boolean;
+  allowAddColumn?: boolean;
+  onColumnAdd?: () => void;
+  addColumnLabel?: string;
+  headerActions?: boolean;
+  className?: string;
+  columnClassName?: string;
+}
+
+export interface KanbanBoardOptions
+  extends KanbanBoardEvents,
+    KanbanFilterOptions {
   container: HTMLElement;
   columns: KanbanColumn[];
   allowAdd?: boolean;
@@ -135,4 +155,6 @@ export interface KanbanBoardInstance {
   removeColumn?: (columnId: string) => void;
   clearColumn?: (columnId: string) => void;
   focusCard?: (cardId: string) => void;
+  setFilter?: (filter: KanbanFilterOptions) => void;
+  getFilter?: () => KanbanFilterOptions;
 }

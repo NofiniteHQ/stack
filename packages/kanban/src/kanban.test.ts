@@ -13,6 +13,9 @@ import {
   type KanbanColumn,
   Kanban,
   type KanbanHandle,
+  matchCardFilter,
+  hasActiveFilter,
+  type KanbanFilterOptions,
 } from './index';
 
 describe('@nofinite/kanban reordering engine', () => {
@@ -997,6 +1000,222 @@ describe('@nofinite/kanban Phase 5: Column management, imperative APIs & React f
       ref.current?.removeColumn('c2');
     });
     expect(ref.current?.getColumns().length).toBe(1);
+
+    flushSync(() => {
+      root.unmount();
+    });
+    container.remove();
+  });
+});
+
+describe('@nofinite/kanban Phase 6: Search & Filter Suite', () => {
+  const sampleColumn: KanbanColumn = {
+    id: 'col-dev',
+    title: 'In Development',
+    items: [
+      {
+        id: 't1',
+        title: 'Implement AES-GCM Key Vault',
+        description: 'Hardware key isolation and cryptographic validation.',
+        badge: { label: 'Security', variant: 'primary' },
+        assignee: { name: 'Elena Rostova', initials: 'ER' },
+      },
+      {
+        id: 't2',
+        title: 'Optimize WebGL OKLCH Shaders',
+        description: 'SIMD batching for ultra-fast canvas renders.',
+        badge: { label: 'Performance', variant: 'warning' },
+        assignee: { name: 'Sophia Miller', initials: 'SM' },
+      },
+      {
+        id: 't3',
+        title: 'E2E Cypress Test Suite',
+        description: 'Full integration tests for task board drag operations.',
+        badge: { label: 'QA', variant: 'info' },
+        assignee: { name: 'Marcus Chen', initials: 'MC' },
+      },
+    ],
+  };
+
+  it('matchCardFilter accurately matches text queries, assignees, badges, and custom predicates', () => {
+    // 1. Title search (case-insensitive)
+    expect(
+      matchCardFilter(sampleColumn.items[0], sampleColumn, {
+        filterQuery: 'aes-gcm',
+      })
+    ).toBe(true);
+    expect(
+      matchCardFilter(sampleColumn.items[1], sampleColumn, {
+        filterQuery: 'aes-gcm',
+      })
+    ).toBe(false);
+
+    // 2. Description search
+    expect(
+      matchCardFilter(sampleColumn.items[1], sampleColumn, {
+        filterQuery: 'simd batching',
+      })
+    ).toBe(true);
+
+    // 3. Assignee search (by name or initials)
+    expect(
+      matchCardFilter(sampleColumn.items[0], sampleColumn, {
+        filterAssignee: 'elena',
+      })
+    ).toBe(true);
+    expect(
+      matchCardFilter(sampleColumn.items[0], sampleColumn, {
+        filterAssignee: 'er',
+      })
+    ).toBe(true);
+    expect(
+      matchCardFilter(sampleColumn.items[1], sampleColumn, {
+        filterAssignee: 'elena',
+      })
+    ).toBe(false);
+
+    // 4. Badge search
+    expect(
+      matchCardFilter(sampleColumn.items[0], sampleColumn, {
+        filterBadge: 'security',
+      })
+    ).toBe(true);
+    expect(
+      matchCardFilter(sampleColumn.items[1], sampleColumn, {
+        filterBadge: 'security',
+      })
+    ).toBe(false);
+
+    // 5. Custom predicate
+    expect(
+      matchCardFilter(sampleColumn.items[0], sampleColumn, {
+        filterCard: (item) => item.id === 't1',
+      })
+    ).toBe(true);
+    expect(
+      matchCardFilter(sampleColumn.items[1], sampleColumn, {
+        filterCard: (item) => item.id === 't1',
+      })
+    ).toBe(false);
+
+    // 6. hasActiveFilter helper
+    expect(hasActiveFilter(undefined)).toBe(false);
+    expect(hasActiveFilter({})).toBe(false);
+    expect(hasActiveFilter({ filterQuery: '  ' })).toBe(false);
+    expect(hasActiveFilter({ filterQuery: 'vault' })).toBe(true);
+    expect(hasActiveFilter({ filterAssignee: 'sophia' })).toBe(true);
+    expect(hasActiveFilter({ filterBadge: 'qa' })).toBe(true);
+  });
+
+  it('renderKanbanHTML applies filters, updates counter badges and empty placeholders', () => {
+    const htmlFiltered = renderKanbanHTML({
+      columns: [sampleColumn],
+      filterQuery: 'Shaders',
+    });
+
+    expect(htmlFiltered).toContain('Optimize WebGL OKLCH Shaders');
+    expect(htmlFiltered).not.toContain('Implement AES-GCM Key Vault');
+    expect(htmlFiltered).toContain('1/3'); // Filtered badge count
+
+    const htmlNoMatch = renderKanbanHTML({
+      columns: [sampleColumn],
+      filterQuery: 'NonExistentKeywordXYZ',
+    });
+
+    expect(htmlNoMatch).toContain('No matching cards');
+    expect(htmlNoMatch).toContain('0/3');
+  });
+
+  it('createKanbanBoard dynamically toggles card visibility and badge counts via setFilter', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: [sampleColumn],
+    });
+
+    const badgeEl = container.querySelector<HTMLElement>(
+      '.kanban-column-header .badge-subtle'
+    );
+    expect(badgeEl?.textContent?.trim()).toBe('3');
+
+    // Apply filterQuery
+    board.setFilter!({ filterQuery: 'Shaders' });
+    expect(badgeEl?.textContent).toBe('1/3');
+
+    const t1El = container.querySelector<HTMLElement>('[data-item-id="t1"]');
+    const t2El = container.querySelector<HTMLElement>('[data-item-id="t2"]');
+    expect(t1El?.style.display).toBe('none');
+    expect(t2El?.style.display).toBe('');
+
+    // Apply filterAssignee
+    board.setFilter!({ filterAssignee: 'Elena' });
+    expect(badgeEl?.textContent).toBe('1/3');
+    expect(t1El?.style.display).toBe('');
+    expect(t2El?.style.display).toBe('none');
+
+    // Filter resulting in 0 matches shows "No matching cards"
+    board.setFilter!({ filterQuery: 'UnknownNonMatchingText' });
+    expect(badgeEl?.textContent).toBe('0/3');
+    const placeholder = container.querySelector<HTMLElement>(
+      '.kanban-empty-placeholder'
+    );
+    expect(placeholder?.textContent).toBe('No matching cards');
+
+    // Clear filter
+    board.setFilter!({});
+    expect(badgeEl?.textContent).toBe('3');
+    expect(t1El?.style.display).toBe('');
+    expect(t2El?.style.display).toBe('');
+    expect(container.querySelector('.kanban-empty-placeholder')).toBeNull();
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('React <Kanban> filters cards via props and imperative ref setFilter', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    const ref = createRef<KanbanHandle>();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(Kanban, {
+          ref,
+          columns: [sampleColumn],
+          filterQuery: 'AES-GCM',
+        })
+      );
+    });
+
+    const badgeEl = container.querySelector<HTMLElement>(
+      '.kanban-column-header .badge-subtle'
+    );
+    expect(badgeEl?.textContent).toBe('1/3');
+    expect(container.textContent).toContain('Implement AES-GCM Key Vault');
+    expect(container.textContent).not.toContain('Optimize WebGL OKLCH Shaders');
+
+    // Imperative setFilter via ref
+    flushSync(() => {
+      ref.current?.setFilter?.({ filterBadge: 'Performance' });
+    });
+
+    expect(badgeEl?.textContent).toBe('1/3');
+    expect(container.textContent).toContain('Optimize WebGL OKLCH Shaders');
+    expect(container.textContent).not.toContain('Implement AES-GCM Key Vault');
+
+    // Reset filter via ref
+    flushSync(() => {
+      ref.current?.setFilter?.({});
+    });
+
+    expect(badgeEl?.textContent).toBe('3');
+    expect(container.textContent).toContain('Implement AES-GCM Key Vault');
+    expect(container.textContent).toContain('Optimize WebGL OKLCH Shaders');
+    expect(container.textContent).toContain('E2E Cypress Test Suite');
 
     flushSync(() => {
       root.unmount();
