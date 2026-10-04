@@ -26,7 +26,14 @@ export interface AudioPlayerProps {
   controls?: boolean;
   theme?: MediaTheme;
   className?: string;
+  style?: React.CSSProperties;
   tracks?: MediaTrack[];
+  playbackRates?: number[] | { min: number; max: number; step: number };
+  seekStep?: number;
+  crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
+  load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom';
+  preload?: 'none' | 'metadata' | 'auto';
+  slots?: any;
   // Event Callbacks
   onPlay?: () => void;
   onPause?: () => void;
@@ -52,7 +59,14 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
       controls = true,
       theme = 'auto',
       className,
+      style,
       tracks,
+      playbackRates,
+      seekStep,
+      crossOrigin = 'anonymous',
+      load,
+      preload,
+      slots,
       onPlay,
       onPause,
       onEnded,
@@ -68,6 +82,12 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
     if (!mediaSrc) return null;
 
     const colorScheme = theme === 'auto' ? undefined : theme;
+    const resolvedCrossOrigin =
+      crossOrigin === false
+        ? undefined
+        : crossOrigin === true
+        ? 'anonymous'
+        : crossOrigin;
 
     return (
       <div
@@ -75,6 +95,7 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
           'w-full rounded-xl border border-default shadow-sm bg-surface backdrop-blur-sm p-3 relative select-none',
           className
         )}
+        style={style}
         contentEditable={false}
       >
         {(title || artist || artwork) && (
@@ -108,7 +129,9 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
           loop={loop}
           muted={muted}
           viewType="audio"
-          load="play"
+          load={load ?? (autoPlay ? 'eager' : 'visible')}
+          preload={preload}
+          crossorigin={resolvedCrossOrigin}
           className={clsx(
             'w-full nui-vidstack-audio-player',
             colorScheme === 'dark'
@@ -181,7 +204,14 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
               />
             ))}
           </MediaProvider>
-          {controls && <DefaultAudioLayout icons={defaultLayoutIcons} />}
+          {controls && (
+            <DefaultAudioLayout
+              icons={defaultLayoutIcons}
+              playbackRates={playbackRates}
+              seekStep={seekStep}
+              slots={slots}
+            />
+          )}
         </MediaPlayer>
       </div>
     );

@@ -27,9 +27,15 @@ export interface VideoPlayerProps {
   theme?: MediaTheme;
   aspectRatio?: string;
   className?: string;
+  style?: React.CSSProperties;
   tracks?: MediaTrack[];
   thumbnails?: string;
-  playbackRates?: number[];
+  playbackRates?: number[] | { min: number; max: number; step: number };
+  seekStep?: number;
+  crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
+  load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom';
+  preload?: 'none' | 'metadata' | 'auto';
+  slots?: any;
   // Event Callbacks
   onPlay?: () => void;
   onPause?: () => void;
@@ -57,9 +63,15 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
       theme = 'auto',
       aspectRatio = '16/9',
       className,
+      style,
       tracks,
       thumbnails,
       playbackRates,
+      seekStep,
+      crossOrigin = 'anonymous',
+      load,
+      preload,
+      slots,
       onPlay,
       onPause,
       onEnded,
@@ -76,6 +88,12 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
     if (!mediaSrc) return null;
 
     const colorScheme = theme === 'auto' ? undefined : theme;
+    const resolvedCrossOrigin =
+      crossOrigin === false
+        ? undefined
+        : crossOrigin === true
+        ? 'anonymous'
+        : crossOrigin;
 
     return (
       <div
@@ -83,7 +101,7 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
           'w-full aspect-video rounded-xl overflow-hidden border border-default shadow-sm bg-black group relative select-none',
           className
         )}
-        style={{ aspectRatio }}
+        style={{ aspectRatio, ...style }}
         contentEditable={false}
       >
         <MediaPlayer
@@ -95,7 +113,9 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
           loop={loop}
           muted={muted}
           playsinline={playsInline}
-          load="play"
+          load={load ?? (autoPlay ? 'eager' : 'visible')}
+          preload={preload}
+          crossorigin={resolvedCrossOrigin}
           className={clsx(
             'w-full h-full nui-vidstack-player',
             colorScheme === 'dark'
@@ -179,6 +199,9 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
             <DefaultVideoLayout
               icons={defaultLayoutIcons}
               thumbnails={thumbnails}
+              playbackRates={playbackRates}
+              seekStep={seekStep}
+              slots={slots}
             />
           )}
         </MediaPlayer>
