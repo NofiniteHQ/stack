@@ -1,0 +1,6 @@
+{
+  "name": "nuicss-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nuicss-cli/src",
+  "projectType": "application"
+}

@@ -1,5 +1,5 @@
 import { cac } from 'cac';
-import { bold, cyan, green, dim, yellow } from 'colorette';
+import { bold, cyan } from 'colorette';
 import { compileCommand } from './commands/compile.js';
 import { initCommand } from './commands/init.js';
 import { migrateCommand } from './commands/migrate.js';
@@ -18,9 +18,7 @@ export async function runCli(argv = process.argv): Promise<void> {
   // Default command: Compile
   cli
     .command('[...patterns]', 'Compile stylesheets into production-ready CSS')
-    .option('-i, --input <file>', 'Input CSS file path (use - for stdin)', {
-      default: 'input.css',
-    })
+    .option('-i, --input <file>', 'Input CSS file path (use - for stdin)')
     .option('-o, --output <file>', 'Output CSS file path (use - for stdout)', {
       default: 'dist/output.css',
     })
@@ -37,9 +35,7 @@ export async function runCli(argv = process.argv): Promise<void> {
       'compile [...patterns]',
       'Compile stylesheets into production-ready CSS'
     )
-    .option('-i, --input <file>', 'Input CSS file path (use - for stdin)', {
-      default: 'input.css',
-    })
+    .option('-i, --input <file>', 'Input CSS file path (use - for stdin)')
     .option('-o, --output <file>', 'Output CSS file path (use - for stdout)', {
       default: 'dist/output.css',
     })
@@ -131,9 +127,22 @@ export async function runCli(argv = process.argv): Promise<void> {
   await cli.runMatchedCommand();
 }
 
-runCli().catch((err) => {
-  console.error(
-    `\n${bold(cyan('[NUICSS]'))} ✖ Error: ${err?.message || err}\n`
+const isMain =
+  (typeof import.meta !== 'undefined' &&
+    Boolean((import.meta as unknown as Record<string, unknown>).main)) ||
+  Boolean(
+    process.argv[1] &&
+      (process.argv[1].endsWith('dist/index.js') ||
+        process.argv[1].endsWith('dist\\index.js') ||
+        process.argv[1].endsWith('src/index.ts') ||
+        process.argv[1].endsWith('src\\index.ts'))
   );
-  process.exit(1);
-});
+
+if (isMain) {
+  runCli().catch((err) => {
+    console.error(
+      `\n${bold(cyan('[NUICSS]'))} ✖ Error: ${err?.message || err}\n`
+    );
+    process.exit(1);
+  });
+}

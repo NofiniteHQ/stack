@@ -2,11 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createGenerator } from '@unocss/core';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { nuicssPreset } from '@nofinite/nuicss';
 import { watch } from 'chokidar';
-import { bold, cyan, green, yellow, dim } from 'colorette';
+import { cyan, green, dim } from 'colorette';
 import { getBaseStyles } from '../embedded/index.js';
 import { installBrandShield, logger } from '../utils/shield.js';
+import { minifyCss } from '../utils/minifier.js';
 
 export interface CompileOptions {
   input?: string;
@@ -18,8 +20,31 @@ export interface CompileOptions {
   cwd?: string;
 }
 
-const DIRECTIVE_REGEX =
-  /@(?:nuicss(?:\s+([a-zA-Z0-9_-]+))?|import\s+["'](?:@nofinite\/)?nuicss(?:\/([a-zA-Z0-9_-]+))?["'])\s*;?/g;
+function getDirectiveRegex(): RegExp {
+  return /@(?:nuicss(?:\s+([a-zA-Z0-9_-]+))?|import\s+["'](?:@nofinite\/)?nuicss(?:\/([a-zA-Z0-9_-]+))?["'])\s*;?/g;
+}
+
+function extractCssLayers(fullBaseCss: string): {
+  tokens: string;
+  components: string;
+} {
+  const layerDecl = '@layer base, components, utilities;\n\n';
+  const compMarker = '@layer components';
+  const compIndex = fullBaseCss.indexOf(compMarker);
+  if (compIndex === -1) {
+    return { tokens: fullBaseCss, components: '' };
+  }
+  const tokensPart = fullBaseCss.slice(0, compIndex).trim();
+  const compPart = fullBaseCss.slice(compIndex).trim();
+  return {
+    tokens: tokensPart.startsWith('@layer')
+      ? tokensPart
+      : layerDecl + tokensPart,
+    components: compPart.startsWith('@layer base')
+      ? compPart
+      : layerDecl + compPart,
+  };
+}
 
 const DEFAULT_EXTENSIONS = new Set([
   '.html',
@@ -52,9 +77,10 @@ async function loadConfig(cwd: string, customConfigPath?: string) {
       try {
         const mod = await import(pathToFileURL(absPath).href);
         return mod.default || mod;
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
         logger.warn(
-          `Could not load custom config ${customConfigPath}: ${e?.message}`
+          `Could not load custom config ${customConfigPath}: ${message}`
         );
       }
     }
@@ -120,8 +146,21 @@ export async function compileCommand(
   const isWatch = Boolean(options.watch);
   const isMinify = Boolean(options.minify);
 
-  const inputPath =
-    options.input && !isStdin ? path.resolve(cwd, options.input) : null;
+  let inputPath: string | null = null;
+  if (options.input && !isStdin) {
+    inputPath = path.resolve(cwd, options.input);
+    if (!fs.existsSync(inputPath)) {
+      logger.error(`Input file not found: ${cyan(options.input)}`);
+      process.exitCode = 1;
+      return;
+    }
+  } else if (!isStdin) {
+    const defaultInput = path.resolve(cwd, 'input.css');
+    if (fs.existsSync(defaultInput)) {
+      inputPath = defaultInput;
+    }
+  }
+
   const outputPath =
     options.output && !isStdout
       ? path.resolve(cwd, options.output || 'dist/output.css')
@@ -186,22 +225,33 @@ export async function compileCommand(
 
     // 5. Expand directives into final CSS
     let finalCss = '';
-    if (DIRECTIVE_REGEX.test(inputCss)) {
-      finalCss = inputCss.replace(DIRECTIVE_REGEX, (_match, group1, group2) => {
-        const directive = group1 || group2 || '';
-        if (directive === 'utilities') {
-          return generatedUtilities;
-        } else if (directive === 'tokens') {
-          return '/* NUICSS Design Tokens */\n';
-        } else if (directive === 'components') {
-          return '/* NUICSS Component Superclasses */\n';
+    const hasDirective = getDirectiveRegex().test(inputCss);
+    if (hasDirective) {
+      const layers = extractCssLayers(baseCss);
+
+      finalCss = inputCss.replace(
+        getDirectiveRegex(),
+        (_match, group1, group2) => {
+          const directive = group1 || group2 || '';
+          if (directive === 'utilities') {
+            return generatedUtilities;
+          } else if (directive === 'tokens') {
+            return layers.tokens;
+          } else if (directive === 'components') {
+            return layers.components;
+          }
+          return baseCss + '\n\n' + generatedUtilities;
         }
-        return baseCss + '\n\n' + generatedUtilities;
-      });
+      );
     } else if (inputCss.trim() === '') {
       finalCss = baseCss + '\n\n' + generatedUtilities;
     } else {
       finalCss = baseCss + '\n\n' + inputCss + '\n\n' + generatedUtilities;
+    }
+
+    // Apply full CSS minification when requested
+    if (isMinify) {
+      finalCss = minifyCss(finalCss);
     }
 
     // 6. Write output
@@ -235,8 +285,9 @@ export async function compileCommand(
         )}ms`
       );
     }
-  } catch (err: any) {
-    logger.error(`Build failed: ${err?.message || err}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error(`Build failed: ${message}`);
     if (!isWatch) {
       process.exitCode = 1;
       return;
@@ -285,8 +336,9 @@ export async function compileCommand(
             res.durationMs.toFixed(2)
           )}ms)`
         );
-      } catch (err: any) {
-        logger.error(`Rebuild failed: ${err?.message || err}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error(`Rebuild failed: ${message}`);
       } finally {
         isRebuilding = false;
       }
