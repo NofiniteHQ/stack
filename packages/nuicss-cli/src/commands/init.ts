@@ -1,12 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire } from 'node:module';
 import { bold, green, cyan } from 'colorette';
 import { getHtmlData, getCssData } from '../embedded/index.js';
-
-import * as jsonc from 'jsonc-parser';
-
-const { parse, modify, applyEdits } = (jsonc as any).default || jsonc;
+import { parse, modify, applyEdits } from 'jsonc-parser';
 
 export interface InitOptions {
   cwd?: string;

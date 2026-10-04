@@ -1,4 +1,4 @@
-import { cyan, green, yellow, red, dim, bold } from 'colorette';
+import { cyan, green, yellow, red, bold } from 'colorette';
 
 let isShieldInstalled = false;
 
@@ -48,8 +48,10 @@ export function installBrandShield(): void {
   const originalStdoutWrite = process.stdout.write.bind(process.stdout);
   const originalStderrWrite = process.stderr.write.bind(process.stderr);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (process.stdout as any).write = (
     chunk: string | Uint8Array,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any[]
   ) => {
     const text =
@@ -59,8 +61,10 @@ export function installBrandShield(): void {
     return originalStdoutWrite(filtered, ...args);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (process.stderr as any).write = (
     chunk: string | Uint8Array,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any[]
   ) => {
     const text =
