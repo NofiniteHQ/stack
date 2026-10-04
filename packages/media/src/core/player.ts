@@ -373,30 +373,46 @@ export function createMediaPlayer(
       }
     },
     enterFullscreen: async () => {
-      if (typeof player.enterFullscreen === 'function') {
-        return player.enterFullscreen();
-      } else if (typeof container.requestFullscreen === 'function') {
-        return container.requestFullscreen();
+      try {
+        if (typeof player.enterFullscreen === 'function') {
+          return await player.enterFullscreen();
+        } else if (typeof container.requestFullscreen === 'function') {
+          return await container.requestFullscreen();
+        }
+      } catch {
+        // Handled: Browser permissions or unsupported fullscreen
       }
     },
     exitFullscreen: async () => {
-      if (typeof player.exitFullscreen === 'function') {
-        return player.exitFullscreen();
-      } else if (
-        typeof document.exitFullscreen === 'function' &&
-        document.fullscreenElement
-      ) {
-        return document.exitFullscreen();
+      try {
+        if (typeof player.exitFullscreen === 'function') {
+          return await player.exitFullscreen();
+        } else if (
+          typeof document.exitFullscreen === 'function' &&
+          document.fullscreenElement
+        ) {
+          return await document.exitFullscreen();
+        }
+      } catch {
+        // Handled: Active fullscreen state mismatch
       }
     },
     enterPictureInPicture: async () => {
-      if (typeof player.enterPictureInPicture === 'function') {
-        return player.enterPictureInPicture();
+      try {
+        if (typeof player.enterPictureInPicture === 'function') {
+          return await player.enterPictureInPicture();
+        }
+      } catch {
+        // Handled: Browser permissions or unsupported PiP
       }
     },
     exitPictureInPicture: async () => {
-      if (typeof player.exitPictureInPicture === 'function') {
-        return player.exitPictureInPicture();
+      try {
+        if (typeof player.exitPictureInPicture === 'function') {
+          return await player.exitPictureInPicture();
+        }
+      } catch {
+        // Handled: Active PiP state mismatch
       }
     },
     setPlaybackRate: (rate: number) => {

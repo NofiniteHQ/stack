@@ -98,6 +98,17 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
 - [x] Captured visual verification screenshots across all stories in `d:\stack\temp\screenshots/`.
 - **Commit:** `2fc818c`
 
+### Phase 6: Enterprise Publishing Polish & Tarball Hygiene (Completed)
+
+- [x] Added `"license": "Apache-2.0"`, `"author"`, `"homepage"`, `"bugs"`, and `"publishConfig.provenance: true"` to `packages/media/package.json`.
+- [x] Configured `sideEffects` in `package.json` to explicitly protect `./dist/styles.js` and `./dist/styles.cjs` from aggressive tree-shaking.
+- [x] Excluded `src/**/*.stories.*` from `packages/media/tsconfig.lib.json` so dev stories types are not shipped in npm distribution tarballs.
+- [x] Prevented nested `dist/package.json` from being packed via `!dist/package.json` in `files` array.
+- [x] Rewrote `packages/media/README.md` with complete style import guide (`import '@nofinite/media/styles'`), props tables, and imperative instance method reference.
+- [x] Added safe promise error handling to `enterFullscreen` / `enterPictureInPicture` in `player.ts`.
+- [x] Verified with `publint` and `npm pack --dry-run` (exactly 30 clean distribution files, 0 missing files).
+- **Commit:** `pending`
+
 ---
 
 ## 4. Affected Files & Modules

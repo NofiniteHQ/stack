@@ -2,13 +2,21 @@
   "name": "@nofinite/media",
   "version": "1.0.0",
   "description": "Universal, framework-agnostic audio and video streaming media player suite powered by Vidstack and styled with @nofinite/nuicss design tokens.",
+  "license": "Apache-2.0",
+  "author": "Nofinite HQ",
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
+  },
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "./dist/styles.js",
+    "./dist/styles.cjs"
   ],
   "exports": {
     ".": {
@@ -34,6 +42,7 @@
   },
   "files": [
     "dist",
+    "!dist/package.json",
     "README.md",
     "LICENSE"
   ],
@@ -70,7 +79,8 @@
     "vanilla-media"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@vidstack/react": "^1.15.6",
