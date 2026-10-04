@@ -38,6 +38,10 @@ export interface MediaPlayerOptions {
   tracks?: MediaTrack[];
   thumbnails?: string;
   playbackRates?: number[];
+  seekStep?: number;
+  crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
+  load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom';
+  preload?: 'none' | 'metadata' | 'auto';
 }
 
 export interface MediaPlayerState {
@@ -59,6 +63,14 @@ export interface MediaPlayerInstance {
   pause: () => void;
   destroy: () => void;
   setSrc: (src: string) => void;
+  seek: (time: number) => void;
+  setVolume: (volume: number) => void;
+  setMuted: (muted: boolean) => void;
+  enterFullscreen: () => Promise<void>;
+  exitFullscreen: () => Promise<void>;
+  enterPictureInPicture: () => Promise<void>;
+  exitPictureInPicture: () => Promise<void>;
+  setPlaybackRate: (rate: number) => void;
   getState: () => MediaPlayerState;
   on: (
     event: string,
@@ -71,6 +83,15 @@ interface CustomMediaPlayerElement extends HTMLElement {
   play?: () => Promise<void>;
   pause?: () => void;
   destroy?: () => void;
+  enterFullscreen?: (target?: string) => Promise<void>;
+  exitFullscreen?: (target?: string) => Promise<void>;
+  enterPictureInPicture?: () => Promise<void>;
+  exitPictureInPicture?: () => Promise<void>;
+  currentTime?: number;
+  volume?: number;
+  muted?: boolean;
+  playbackRate?: number;
+  src?: any;
   state?: Record<string, any>;
 }
 
@@ -124,6 +145,14 @@ export function createMediaPlayer(
       pause: noop,
       destroy: noop,
       setSrc: noop,
+      seek: noop,
+      setVolume: noop,
+      setMuted: noop,
+      enterFullscreen: asyncNoop,
+      exitFullscreen: asyncNoop,
+      enterPictureInPicture: asyncNoop,
+      exitPictureInPicture: asyncNoop,
+      setPlaybackRate: noop,
       getState: () => emptyState,
       on: () => noop,
       off: noop,
@@ -190,7 +219,24 @@ export function createMediaPlayer(
   ) as CustomMediaPlayerElement;
   player.setAttribute('src', options.src);
   player.setAttribute('view-type', isAudio ? 'audio' : 'video');
-  player.setAttribute('load', 'play');
+  player.setAttribute(
+    'load',
+    options.load ?? (options.autoplay ? 'eager' : 'play')
+  );
+
+  const resolvedCrossOrigin =
+    options.crossOrigin === false
+      ? undefined
+      : options.crossOrigin === true
+      ? 'anonymous'
+      : options.crossOrigin ?? 'anonymous';
+
+  if (resolvedCrossOrigin) {
+    player.setAttribute('crossorigin', resolvedCrossOrigin);
+  }
+  if (options.preload) {
+    player.setAttribute('preload', options.preload);
+  }
 
   if (options.poster) player.setAttribute('poster', options.poster);
   if (options.title) player.setAttribute('title', options.title);
@@ -215,11 +261,14 @@ export function createMediaPlayer(
   if (Array.isArray(options.tracks)) {
     for (const track of options.tracks) {
       const trackEl = document.createElement('track');
-      trackEl.src = track.src;
-      trackEl.label = track.label;
-      trackEl.srclang = track.language;
-      trackEl.kind = track.kind || 'subtitles';
-      if (track.default) trackEl.default = true;
+      trackEl.setAttribute('src', track.src);
+      trackEl.setAttribute('label', track.label);
+      trackEl.setAttribute('srclang', track.language);
+      trackEl.setAttribute('kind', track.kind || 'subtitles');
+      if (track.default) {
+        trackEl.setAttribute('default', '');
+        trackEl.default = true;
+      }
       provider.appendChild(trackEl);
     }
   }
@@ -230,17 +279,51 @@ export function createMediaPlayer(
   if (options.controls !== false) {
     if (isAudio) {
       const audioLayout = document.createElement('media-audio-layout');
+      if (options.seekStep) {
+        audioLayout.setAttribute('seek-step', String(options.seekStep));
+      }
       player.appendChild(audioLayout);
     } else {
       const videoLayout = document.createElement('media-video-layout');
       if (options.thumbnails) {
         videoLayout.setAttribute('thumbnails', options.thumbnails);
       }
+      if (options.seekStep) {
+        videoLayout.setAttribute('seek-step', String(options.seekStep));
+      }
       player.appendChild(videoLayout);
     }
   }
 
   container.appendChild(player);
+
+  // Listener registry to guarantee clean disposal without memory leaks
+  const listeners: Array<{
+    event: string;
+    handler: EventListenerOrEventListenerObject;
+  }> = [];
+
+  const on = (
+    event: string,
+    handler: EventListenerOrEventListenerObject
+  ): (() => void) => {
+    player.addEventListener(event, handler);
+    listeners.push({ event, handler });
+    return () => off(event, handler);
+  };
+
+  const off = (
+    event: string,
+    handler: EventListenerOrEventListenerObject
+  ): void => {
+    player.removeEventListener(event, handler);
+    const index = listeners.findIndex(
+      (l) => l.event === event && l.handler === handler
+    );
+    if (index !== -1) {
+      listeners.splice(index, 1);
+    }
+  };
 
   return {
     element: container,
@@ -256,34 +339,86 @@ export function createMediaPlayer(
       }
     },
     destroy: () => {
+      // Detach all listeners to prevent memory leaks in single-page apps
+      for (const { event, handler } of listeners) {
+        player.removeEventListener(event, handler);
+      }
+      listeners.length = 0;
+
       if (typeof player.destroy === 'function') {
         player.destroy();
       }
       container.remove();
     },
     setSrc: (newSrc: string) => {
-      player.setAttribute('src', newSrc);
+      player.src = newSrc;
+      player.setAttribute('src', typeof newSrc === 'string' ? newSrc : '');
+    },
+    seek: (time: number) => {
+      if (typeof time === 'number' && !isNaN(time)) {
+        player.currentTime = time;
+      }
+    },
+    setVolume: (volume: number) => {
+      if (typeof volume === 'number' && !isNaN(volume)) {
+        player.volume = Math.max(0, Math.min(1, volume));
+      }
+    },
+    setMuted: (muted: boolean) => {
+      player.muted = Boolean(muted);
+      if (muted) {
+        player.setAttribute('muted', '');
+      } else {
+        player.removeAttribute('muted');
+      }
+    },
+    enterFullscreen: async () => {
+      if (typeof player.enterFullscreen === 'function') {
+        return player.enterFullscreen();
+      } else if (typeof container.requestFullscreen === 'function') {
+        return container.requestFullscreen();
+      }
+    },
+    exitFullscreen: async () => {
+      if (typeof player.exitFullscreen === 'function') {
+        return player.exitFullscreen();
+      } else if (
+        typeof document.exitFullscreen === 'function' &&
+        document.fullscreenElement
+      ) {
+        return document.exitFullscreen();
+      }
+    },
+    enterPictureInPicture: async () => {
+      if (typeof player.enterPictureInPicture === 'function') {
+        return player.enterPictureInPicture();
+      }
+    },
+    exitPictureInPicture: async () => {
+      if (typeof player.exitPictureInPicture === 'function') {
+        return player.exitPictureInPicture();
+      }
+    },
+    setPlaybackRate: (rate: number) => {
+      if (typeof rate === 'number' && rate > 0) {
+        player.playbackRate = rate;
+      }
     },
     getState: (): MediaPlayerState => {
       const state = player.state || {};
       return {
-        currentTime: state.currentTime ?? 0,
+        currentTime: state.currentTime ?? player.currentTime ?? 0,
         duration: state.duration ?? 0,
         paused: state.paused ?? true,
         playing: state.playing ?? false,
-        volume: state.volume ?? 1,
-        muted: state.muted ?? false,
+        volume: state.volume ?? player.volume ?? 1,
+        muted: state.muted ?? player.muted ?? false,
         buffered: state.bufferedEnd ?? 0,
         fullscreen: state.fullscreen ?? false,
         seeking: state.seeking ?? false,
       };
     },
-    on: (event: string, handler: EventListenerOrEventListenerObject) => {
-      player.addEventListener(event, handler);
-      return () => player.removeEventListener(event, handler);
-    },
-    off: (event: string, handler: EventListenerOrEventListenerObject) => {
-      player.removeEventListener(event, handler);
-    },
+    on,
+    off,
   };
 }
