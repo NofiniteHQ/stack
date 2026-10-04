@@ -29,6 +29,138 @@ function escapeHtml(str: string): string {
 }
 
 /**
+ * Generates semantic HTML markup for a single Kanban card.
+ */
+export function renderCardHTML(
+  item: KanbanItem,
+  col: KanbanColumn,
+  itemIndex: number,
+  colIndex: number
+): string {
+  const assigneeInitials =
+    item.assignee?.initials ||
+    (item.assignee?.name
+      ? item.assignee.name
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase()
+      : '');
+
+  const hasFooter = item.dueDate || item.subtasks || item.assignee;
+
+  const titleContent = item.title
+    ? `<div class="kanban-card-title font-semibold text-sm leading-snug text-default group-hover:text-primary transition-colors break-words">${escapeHtml(
+        item.title
+      )}</div>`
+    : item.content != null
+    ? String(item.content)
+    : '';
+
+  return `
+    <div class="kanban-card p-3.5 rounded-xl border border-default bg-surface text-default shadow-xs cursor-grab active:cursor-grabbing hover:border-primary/40 hover:shadow-md transition-all select-none group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+         role="button"
+         tabindex="0"
+         aria-roledescription="Kanban card"
+         aria-label="${escapeHtml(item.title || 'Kanban card')}, item ${
+    itemIndex + 1
+  } of ${col.items.length}"
+         data-item-id="${escapeHtml(item.id)}"
+         data-column-id="${escapeHtml(col.id)}"
+         data-column-index="${colIndex}"
+         data-index="${itemIndex}">
+      ${
+        item.badge
+          ? `
+        <div class="mb-2">
+          <span class="badge ${
+            item.badge.variant
+              ? `badge-${escapeHtml(item.badge.variant)}`
+              : 'badge-primary'
+          } px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+            ${escapeHtml(item.badge.label)}
+          </span>
+        </div>
+      `
+          : ''
+      }
+      ${titleContent}
+      ${
+        item.description
+          ? `<div class="kanban-card-desc text-xs text-muted mt-1 leading-relaxed line-clamp-2">${escapeHtml(
+              item.description
+            )}</div>`
+          : ''
+      }
+
+      ${
+        hasFooter
+          ? `
+        <div class="kanban-card-footer flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-default/40 text-xs text-muted">
+          <div class="kanban-card-meta flex items-center gap-2.5">
+            ${
+              item.dueDate
+                ? `
+              <span class="kanban-meta-item flex items-center gap-1 text-[11px] font-medium ${
+                item.isOverdue
+                  ? 'kanban-meta-overdue text-danger font-semibold'
+                  : ''
+              }">
+                <svg class="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>${escapeHtml(item.dueDate)}</span>
+              </span>
+            `
+                : ''
+            }
+            ${
+              item.subtasks
+                ? `
+              <span class="kanban-meta-item flex items-center gap-1 text-[11px] font-medium">
+                <svg class="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>${item.subtasks.completed}/${item.subtasks.total}</span>
+              </span>
+            `
+                : ''
+            }
+          </div>
+          ${
+            item.assignee
+              ? `
+            <div class="kanban-card-assignee shrink-0" title="${escapeHtml(
+              item.assignee.name
+            )}">
+              ${
+                item.assignee.avatar
+                  ? `<img src="${escapeHtml(
+                      item.assignee.avatar
+                    )}" alt="${escapeHtml(
+                      item.assignee.name
+                    )}" class="w-5 h-5 rounded-full object-cover border border-default" />`
+                  : `<div class="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center border border-primary/30">${escapeHtml(
+                      assigneeInitials
+                    )}</div>`
+              }
+            </div>
+          `
+              : ''
+          }
+        </div>
+      `
+          : ''
+      }
+    </div>
+  `.trim();
+}
+
+/**
  * Generates semantic HTML markup for a Kanban board using @nofinite/nuicss tokens and superclasses.
  */
 export function renderKanbanHTML(options: {
@@ -48,129 +180,9 @@ export function renderKanbanHTML(options: {
       const showOptions = col.headerActions ?? globalHeaderActions;
 
       const cardsHtml = col.items
-        .map((item, itemIndex) => {
-          const assigneeInitials =
-            item.assignee?.initials ||
-            (item.assignee?.name
-              ? item.assignee.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase()
-              : '');
-
-          const hasFooter = item.dueDate || item.subtasks || item.assignee;
-
-          const titleContent = item.title
-            ? `<div class="kanban-card-title font-semibold text-sm leading-snug text-default group-hover:text-primary transition-colors break-words">${escapeHtml(
-                item.title
-              )}</div>`
-            : item.content != null
-            ? String(item.content)
-            : '';
-
-          return `
-            <div class="kanban-card p-3.5 rounded-xl border border-default bg-surface text-default shadow-xs cursor-grab active:cursor-grabbing hover:border-primary/40 hover:shadow-md transition-all select-none group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                 role="button"
-                 tabindex="0"
-                 aria-roledescription="Kanban card"
-                 aria-label="${escapeHtml(item.title || 'Kanban card')}, item ${
-            itemIndex + 1
-          } of ${col.items.length}"
-                 data-item-id="${escapeHtml(item.id)}"
-                 data-column-id="${escapeHtml(col.id)}"
-                 data-column-index="${colIndex}"
-                 data-index="${itemIndex}">
-              ${
-                item.badge
-                  ? `
-                <div class="mb-2">
-                  <span class="badge ${
-                    item.badge.variant
-                      ? `badge-${escapeHtml(item.badge.variant)}`
-                      : 'badge-primary'
-                  } px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                    ${escapeHtml(item.badge.label)}
-                  </span>
-                </div>
-              `
-                  : ''
-              }
-              ${titleContent}
-              ${
-                item.description
-                  ? `<div class="kanban-card-desc text-xs text-muted mt-1 leading-relaxed line-clamp-2">${escapeHtml(
-                      item.description
-                    )}</div>`
-                  : ''
-              }
-
-              ${
-                hasFooter
-                  ? `
-                <div class="kanban-card-footer flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-default/40 text-xs text-muted">
-                  <div class="kanban-card-meta flex items-center gap-2.5">
-                    ${
-                      item.dueDate
-                        ? `
-                      <span class="kanban-meta-item flex items-center gap-1 text-[11px] font-medium ${
-                        item.isOverdue
-                          ? 'kanban-meta-overdue text-danger font-semibold'
-                          : ''
-                      }">
-                        <svg class="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                          <line x1="16" y1="2" x2="16" y2="6"></line>
-                          <line x1="8" y1="2" x2="8" y2="6"></line>
-                          <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        <span>${escapeHtml(item.dueDate)}</span>
-                      </span>
-                    `
-                        : ''
-                    }
-                    ${
-                      item.subtasks
-                        ? `
-                      <span class="kanban-meta-item flex items-center gap-1 text-[11px] font-medium">
-                        <svg class="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                        <span>${item.subtasks.completed}/${item.subtasks.total}</span>
-                      </span>
-                    `
-                        : ''
-                    }
-                  </div>
-                  ${
-                    item.assignee
-                      ? `
-                    <div class="kanban-card-assignee shrink-0" title="${escapeHtml(
-                      item.assignee.name
-                    )}">
-                      ${
-                        item.assignee.avatar
-                          ? `<img src="${escapeHtml(
-                              item.assignee.avatar
-                            )}" alt="${escapeHtml(
-                              item.assignee.name
-                            )}" class="w-5 h-5 rounded-full object-cover border border-default" />`
-                          : `<div class="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center border border-primary/30">${escapeHtml(
-                              assigneeInitials
-                            )}</div>`
-                      }
-                    </div>
-                  `
-                      : ''
-                  }
-                </div>
-              `
-                  : ''
-              }
-            </div>
-          `;
-        })
+        .map((item, itemIndex) =>
+          renderCardHTML(item, col, itemIndex, colIndex)
+        )
         .join('');
 
       return `
@@ -267,7 +279,22 @@ export function bindCardDraggable(
 ): () => void {
   return draggable({
     element,
-    getInitialData: () => ({ type: 'card', cardId, columnId, index }),
+    canDrag: ({ element: el }) =>
+      !el.closest('button, a, input, select, textarea'),
+    getInitialData: () => {
+      const currentCardId = element.getAttribute('data-item-id') || cardId;
+      const currentColId = element.getAttribute('data-column-id') || columnId;
+      const currentIndex = parseInt(
+        element.getAttribute('data-index') || String(index),
+        10
+      );
+      return {
+        type: 'card',
+        cardId: currentCardId,
+        columnId: currentColId,
+        index: currentIndex,
+      };
+    },
     onDragStart: () => {
       element.classList.add('opacity-40', 'scale-95');
     },
@@ -298,11 +325,22 @@ export function bindCardDropTarget(
   return dropTargetForElements({
     element,
     canDrop: ({ source }) => source.data.type === 'card',
-    getData: ({ input, element }) => {
-      const data = { type: 'card', cardId, columnId, index };
+    getData: ({ input, element: el }) => {
+      const currentCardId = el.getAttribute('data-item-id') || cardId;
+      const currentColId = el.getAttribute('data-column-id') || columnId;
+      const currentIndex = parseInt(
+        el.getAttribute('data-index') || String(index),
+        10
+      );
+      const data = {
+        type: 'card',
+        cardId: currentCardId,
+        columnId: currentColId,
+        index: currentIndex,
+      };
       return attachClosestEdge(data, {
         input,
-        element,
+        element: el,
         allowedEdges: ['top', 'bottom'],
       });
     },
@@ -351,12 +389,17 @@ export function bindCardDropTarget(
         source.data.type === 'card'
       ) {
         const edge = extractClosestEdge(self.data);
+        const targetColId = element.getAttribute('data-column-id') || columnId;
+        const targetIndex = parseInt(
+          element.getAttribute('data-index') || String(index),
+          10
+        );
         onDrop?.({
           cardId: source.data.cardId as string,
           sourceColumnId: source.data.columnId as string,
-          targetColumnId: columnId,
+          targetColumnId: targetColId,
           sourceIndex: source.data.index as number,
-          targetIndex: index,
+          targetIndex,
           edge,
         });
       }
@@ -385,11 +428,20 @@ export function bindColumnDropTarget(
 
   return dropTargetForElements({
     element,
-    getData: ({ input, element }) => {
-      const data = { type: 'column', columnId, columnIndex };
+    getData: ({ input, element: el }) => {
+      const currentColumnId = el.getAttribute('data-column-id') || columnId;
+      const currentColumnIndex = parseInt(
+        el.getAttribute('data-column-index') || String(columnIndex),
+        10
+      );
+      const data = {
+        type: 'column',
+        columnId: currentColumnId,
+        columnIndex: currentColumnIndex,
+      };
       return attachClosestEdge(data, {
         input,
-        element,
+        element: el,
         allowedEdges: ['left', 'right'],
       });
     },
@@ -439,6 +491,12 @@ export function bindColumnDropTarget(
     onDrop: ({ source, location, self }) => {
       clearColumnIndicators();
       const innerTarget = location.current.dropTargets[0];
+      const currentColumnId =
+        element.getAttribute('data-column-id') || columnId;
+      const currentColumnIndex = parseInt(
+        element.getAttribute('data-column-index') || String(columnIndex),
+        10
+      );
 
       if (source.data.type === 'card') {
         // Only append to end if dropped onto the column container / empty space (NOT an individual card)
@@ -451,7 +509,7 @@ export function bindColumnDropTarget(
           onCardDrop?.({
             cardId: source.data.cardId as string,
             sourceColumnId: source.data.columnId as string,
-            targetColumnId: columnId,
+            targetColumnId: currentColumnId,
             sourceIndex: source.data.index as number,
             targetIndex: 9999,
           });
@@ -459,11 +517,11 @@ export function bindColumnDropTarget(
       } else if (source.data.type === 'column') {
         const sourceIndex = source.data.columnIndex as number;
         const edge = extractClosestEdge(self.data);
-        if (sourceIndex !== columnIndex || edge != null) {
+        if (sourceIndex !== currentColumnIndex || edge != null) {
           onColumnDrop?.({
             columnId: source.data.columnId as string,
             sourceIndex,
-            targetIndex: columnIndex,
+            targetIndex: currentColumnIndex,
             edge,
           });
         }
@@ -481,6 +539,94 @@ export function createKanbanBoard(
   const container = options.container;
   const store = createKanbanStore(options.columns);
   let cleanups: (() => void)[] = [];
+
+  function bindCard(cardEl: HTMLElement) {
+    if (cardEl.dataset.dndBound === 'true') return;
+    cardEl.dataset.dndBound = 'true';
+    const cardId = cardEl.getAttribute('data-item-id') || '';
+    const colId = cardEl.getAttribute('data-column-id') || '';
+    const itemIdx = parseInt(cardEl.getAttribute('data-index') || '0', 10);
+
+    const cardDragCleanup = bindCardDraggable(cardEl, cardId, colId, itemIdx);
+    const cardDropCleanup = bindCardDropTarget(
+      cardEl,
+      cardId,
+      colId,
+      itemIdx,
+      (event) => handleCardMove(event)
+    );
+
+    cleanups.push(cardDragCleanup);
+    cleanups.push(cardDropCleanup);
+  }
+
+  function bindColumn(colEl: HTMLElement) {
+    if (colEl.dataset.dndBound === 'true') return;
+    colEl.dataset.dndBound = 'true';
+    const colId = colEl.getAttribute('data-column-id') || '';
+    const colIdx = parseInt(colEl.getAttribute('data-column-index') || '0', 10);
+
+    // 1. Column drag handle
+    const headerHandle = colEl.querySelector<HTMLElement>(
+      '[data-column-handle]'
+    );
+    if (headerHandle) {
+      const colDragCleanup = draggable({
+        element: headerHandle,
+        getInitialData: () => ({
+          type: 'column',
+          columnId: colEl.getAttribute('data-column-id') || colId,
+          columnIndex: parseInt(
+            colEl.getAttribute('data-column-index') || String(colIdx),
+            10
+          ),
+        }),
+        onDragStart: () => colEl.classList.add('opacity-40', 'scale-95'),
+        onDrop: () => colEl.classList.remove('opacity-40', 'scale-95'),
+      });
+      cleanups.push(colDragCleanup);
+    }
+
+    // 2. Column drop target
+    const colDropCleanup = bindColumnDropTarget(
+      colEl,
+      colId,
+      colIdx,
+      (cardEvent) => handleCardMove(cardEvent),
+      (colEvent) => handleColumnMove(colEvent)
+    );
+    cleanups.push(colDropCleanup);
+
+    // 3. Card list drop target
+    const cardListEl = colEl.querySelector<HTMLElement>('.kanban-card-list');
+    if (cardListEl) {
+      const listDropCleanup = dropTargetForElements({
+        element: cardListEl,
+        getData: () => ({
+          type: 'column',
+          columnId: colEl.getAttribute('data-column-id') || colId,
+          columnIndex: parseInt(
+            colEl.getAttribute('data-column-index') || String(colIdx),
+            10
+          ),
+        }),
+        onDrop: ({ source, location }) => {
+          const inner = location.current.dropTargets[0];
+          if (inner?.element === cardListEl && source.data.type === 'card') {
+            const targetColId = colEl.getAttribute('data-column-id') || colId;
+            handleCardMove({
+              cardId: source.data.cardId as string,
+              sourceColumnId: source.data.columnId as string,
+              targetColumnId: targetColId,
+              sourceIndex: source.data.index as number,
+              targetIndex: 9999,
+            });
+          }
+        },
+      });
+      cleanups.push(listDropCleanup);
+    }
+  }
 
   function setupDOM(columns: KanbanColumn[]) {
     // Clear previous DnD listeners
@@ -505,93 +651,217 @@ export function createKanbanBoard(
     );
 
     colElements.forEach((colEl) => {
-      const colId = colEl.getAttribute('data-column-id') || '';
-      const colIdx = parseInt(
-        colEl.getAttribute('data-column-index') || '0',
-        10
-      );
-
-      // 1. Column drag handle
-      const headerHandle = colEl.querySelector<HTMLElement>(
-        '[data-column-handle]'
-      );
-      if (headerHandle) {
-        const colDragCleanup = draggable({
-          element: headerHandle,
-          getInitialData: () => ({
-            type: 'column',
-            columnId: colId,
-            columnIndex: colIdx,
-          }),
-          onDragStart: () => colEl.classList.add('opacity-40', 'scale-95'),
-          onDrop: () => colEl.classList.remove('opacity-40', 'scale-95'),
-        });
-        cleanups.push(colDragCleanup);
-      }
-
-      // 2. Column drop target
-      const colDropCleanup = bindColumnDropTarget(
-        colEl,
-        colId,
-        colIdx,
-        (cardEvent) => handleCardMove(cardEvent),
-        (colEvent) => handleColumnMove(colEvent)
-      );
-      cleanups.push(colDropCleanup);
-
-      // 3. Card list drop target
-      const cardListEl = colEl.querySelector<HTMLElement>('.kanban-card-list');
-      if (cardListEl) {
-        const listDropCleanup = dropTargetForElements({
-          element: cardListEl,
-          getData: () => ({
-            type: 'column',
-            columnId: colId,
-            columnIndex: colIdx,
-          }),
-          onDrop: ({ source, location }) => {
-            const inner = location.current.dropTargets[0];
-            if (inner?.element === cardListEl && source.data.type === 'card') {
-              handleCardMove({
-                cardId: source.data.cardId as string,
-                sourceColumnId: source.data.columnId as string,
-                targetColumnId: colId,
-                sourceIndex: source.data.index as number,
-                targetIndex: 9999,
-              });
-            }
-          },
-        });
-        cleanups.push(listDropCleanup);
-      }
-
-      // 4. Bind Card Elements
+      bindColumn(colEl);
       const cardElements = Array.from(
         colEl.querySelectorAll<HTMLElement>('.kanban-card')
       );
-
       cardElements.forEach((cardEl) => {
-        const cardId = cardEl.getAttribute('data-item-id') || '';
-        const itemIdx = parseInt(cardEl.getAttribute('data-index') || '0', 10);
-
-        const cardDragCleanup = bindCardDraggable(
-          cardEl,
-          cardId,
-          colId,
-          itemIdx
-        );
-        const cardDropCleanup = bindCardDropTarget(
-          cardEl,
-          cardId,
-          colId,
-          itemIdx,
-          (event) => handleCardMove(event)
-        );
-
-        cleanups.push(cardDragCleanup);
-        cleanups.push(cardDropCleanup);
+        bindCard(cardEl);
       });
     });
+  }
+
+  function reconcileDOM(newColumns: KanbanColumn[]) {
+    const boardEl = container.querySelector('.kanban-board') as HTMLElement;
+    if (!boardEl) {
+      setupDOM(newColumns);
+      return;
+    }
+
+    // 1. Capture scroll positions of all current card lists & active element
+    const scrollMap = new Map<string, number>();
+    const activeEl = document.activeElement as HTMLElement | null;
+    const activeCardId = activeEl?.getAttribute('data-item-id') || null;
+
+    boardEl.querySelectorAll<HTMLElement>('.kanban-column').forEach((colEl) => {
+      const colId = colEl.getAttribute('data-column-id');
+      const listEl = colEl.querySelector<HTMLElement>('.kanban-card-list');
+      if (colId && listEl) {
+        scrollMap.set(colId, listEl.scrollTop);
+      }
+    });
+
+    // 2. Reconcile Columns
+    const existingColMap = new Map<string, HTMLElement>();
+    boardEl.querySelectorAll<HTMLElement>('.kanban-column').forEach((colEl) => {
+      const colId = colEl.getAttribute('data-column-id');
+      if (colId) existingColMap.set(colId, colEl);
+    });
+
+    // Remove cards no longer present in any column
+    const allValidItemIds = new Set(
+      newColumns.flatMap((c) => c.items.map((i) => i.id))
+    );
+    boardEl.querySelectorAll<HTMLElement>('.kanban-card').forEach((c) => {
+      const cid = c.getAttribute('data-item-id');
+      if (cid && !allValidItemIds.has(cid)) {
+        c.remove();
+      }
+    });
+
+    newColumns.forEach((col, colIdx) => {
+      let colEl = existingColMap.get(col.id);
+
+      if (!colEl) {
+        // Create new column element if it didn't exist before
+        const temp = document.createElement('div');
+        temp.innerHTML = renderKanbanHTML({
+          columns: [col],
+          allowAdd: options.allowAdd,
+          headerActions: options.headerActions,
+          columnClassName: options.columnClassName,
+        });
+        const createdCol = temp.querySelector<HTMLElement>('.kanban-column');
+        if (createdCol) {
+          colEl = createdCol;
+          boardEl.appendChild(colEl);
+          bindColumn(colEl);
+          colEl
+            .querySelectorAll<HTMLElement>('.kanban-card')
+            .forEach((c) => bindCard(c));
+        }
+      }
+
+      if (!colEl) return;
+
+      // Update column index attribute
+      colEl.setAttribute('data-column-index', String(colIdx));
+
+      // Ensure column order in boardEl
+      const nonLiveChildren = Array.from(boardEl.children).filter(
+        (c) => !c.classList.contains('kanban-live-region')
+      );
+      const targetChild = nonLiveChildren[colIdx];
+      if (targetChild !== colEl) {
+        boardEl.insertBefore(colEl, targetChild || null);
+      }
+
+      // Update header: title, card counter, WIP badge
+      const headerTitle = colEl.querySelector<HTMLElement>(
+        '.kanban-column-header .truncate'
+      );
+      if (headerTitle && headerTitle.textContent !== col.title) {
+        headerTitle.textContent = col.title;
+      }
+
+      const counterBadge = colEl.querySelector<HTMLElement>(
+        '.kanban-column-header .badge-subtle'
+      );
+      if (counterBadge) {
+        counterBadge.textContent = String(col.items.length);
+      }
+
+      // WIP limit badge
+      const isOverWip = col.wipLimit != null && col.items.length > col.wipLimit;
+      const headerRow = colEl.querySelector<HTMLElement>(
+        '.kanban-column-header > div'
+      );
+      let wipBadge = colEl.querySelector<HTMLElement>(
+        '.kanban-column-header .badge-danger'
+      );
+
+      if (isOverWip) {
+        if (!wipBadge && headerRow) {
+          wipBadge = document.createElement('span');
+          wipBadge.className =
+            'badge badge-danger text-[10px] px-1.5 py-0.5 rounded font-mono font-bold';
+          headerRow.appendChild(wipBadge);
+        }
+        if (wipBadge) {
+          wipBadge.textContent = `Max ${col.wipLimit}`;
+        }
+      } else if (wipBadge) {
+        wipBadge.remove();
+      }
+
+      // Reconcile cards in this column's card-list
+      const cardListEl = colEl.querySelector<HTMLElement>('.kanban-card-list');
+      if (!cardListEl) return;
+
+      col.items.forEach((item, itemIdx) => {
+        let cardEl = boardEl.querySelector<HTMLElement>(
+          `[data-item-id="${item.id}"]`
+        );
+
+        if (!cardEl) {
+          const temp = document.createElement('div');
+          temp.innerHTML = renderCardHTML(item, col, itemIdx, colIdx);
+          cardEl = temp.firstElementChild as HTMLElement;
+          if (cardEl) {
+            cardListEl.appendChild(cardEl);
+            bindCard(cardEl);
+          }
+        }
+
+        if (!cardEl) return;
+
+        // Update attributes in-place without rebuilding DOM
+        cardEl.setAttribute('data-column-id', col.id);
+        cardEl.setAttribute('data-column-index', String(colIdx));
+        cardEl.setAttribute('data-index', String(itemIdx));
+        cardEl.setAttribute(
+          'aria-label',
+          `${item.title || 'Kanban card'}, item ${itemIdx + 1} of ${
+            col.items.length
+          }`
+        );
+
+        // Position card at the correct child index within cardListEl
+        const currentCards = Array.from(
+          cardListEl.querySelectorAll<HTMLElement>('.kanban-card')
+        );
+        const currentTarget = currentCards[itemIdx];
+        if (currentTarget !== cardEl) {
+          cardListEl.insertBefore(cardEl, currentTarget || null);
+        }
+      });
+    });
+
+    // Update empty placeholders for all columns
+    boardEl.querySelectorAll<HTMLElement>('.kanban-column').forEach((cEl) => {
+      const listEl = cEl.querySelector<HTMLElement>('.kanban-card-list');
+      if (!listEl) return;
+      const cards = listEl.querySelectorAll<HTMLElement>('.kanban-card');
+      const placeholder = listEl.querySelector('.kanban-empty-placeholder');
+      if (cards.length === 0) {
+        if (!placeholder) {
+          const p = document.createElement('div');
+          p.className =
+            'kanban-empty-placeholder h-24 border border-dashed border-default/60 rounded-xl flex items-center justify-center text-xs text-muted/60 select-none pointer-events-none';
+          p.textContent = 'No cards';
+          listEl.appendChild(p);
+        }
+      } else if (placeholder) {
+        placeholder.remove();
+      }
+    });
+
+    // Remove columns that are no longer in newColumns
+    const validColIds = new Set(newColumns.map((c) => c.id));
+    existingColMap.forEach((colEl, colId) => {
+      if (!validColIds.has(colId)) {
+        colEl.remove();
+      }
+    });
+
+    // 3. Restore scroll positions
+    scrollMap.forEach((scrollTop, colId) => {
+      const colEl = boardEl.querySelector<HTMLElement>(
+        `[data-column-id="${colId}"]`
+      );
+      const listEl = colEl?.querySelector<HTMLElement>('.kanban-card-list');
+      if (listEl) {
+        listEl.scrollTop = scrollTop;
+      }
+    });
+
+    // 4. Restore active focus if it was on a card
+    if (activeCardId) {
+      const targetCard = boardEl.querySelector<HTMLElement>(
+        `[data-item-id="${activeCardId}"]`
+      );
+      targetCard?.focus();
+    }
   }
 
   function handleCardMove(event: CardMoveEvent) {
@@ -839,9 +1109,9 @@ export function createKanbanBoard(
   container.addEventListener('click', handleClick);
   container.addEventListener('keydown', handleKeyDown);
 
-  // Subscribe to store updates to re-render DOM
+  // Subscribe to store updates to reconcile DOM
   const unsubscribeStore = store.subscribe((newColumns) => {
-    setupDOM(newColumns);
+    reconcileDOM(newColumns);
   });
 
   // Initial render

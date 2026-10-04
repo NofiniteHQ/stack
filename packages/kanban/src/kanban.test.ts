@@ -464,3 +464,129 @@ describe('@nofinite/kanban keyboard accessibility & ARIA live announcer', () => 
     container.remove();
   });
 });
+
+describe('@nofinite/kanban targeted DOM reconciliation & scroll preservation', () => {
+  it('preserves existing card DOM node references across mutations', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: [
+        {
+          id: 'col-1',
+          title: 'To Do',
+          items: [{ id: 'card-1', title: 'Task 1' }],
+        },
+        {
+          id: 'col-2',
+          title: 'In Progress',
+          items: [{ id: 'card-2', title: 'Task 2' }],
+        },
+      ],
+    });
+
+    const card1El = container.querySelector<HTMLElement>(
+      '[data-item-id="card-1"]'
+    );
+    const card2El = container.querySelector<HTMLElement>(
+      '[data-item-id="card-2"]'
+    );
+    expect(card1El).not.toBeNull();
+    expect(card2El).not.toBeNull();
+
+    // Move card-1 to col-2
+    board.moveCard({
+      cardId: 'card-1',
+      sourceColumnId: 'col-1',
+      targetColumnId: 'col-2',
+      sourceIndex: 0,
+      targetIndex: 1,
+    });
+
+    // The DOM element reference must be strictly identical (not destroyed & recreated)
+    const card1AfterMove = container.querySelector<HTMLElement>(
+      '[data-item-id="card-1"]'
+    );
+    const card2AfterMove = container.querySelector<HTMLElement>(
+      '[data-item-id="card-2"]'
+    );
+    expect(card1AfterMove).toBe(card1El);
+    expect(card2AfterMove).toBe(card2El);
+
+    // Verify parent column and attributes updated
+    expect(card1AfterMove?.getAttribute('data-column-id')).toBe('col-2');
+    expect(card1AfterMove?.parentElement?.getAttribute('data-column-id')).toBe(
+      'col-2'
+    );
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('preserves scroll position in card lists across card mutations', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: [
+        {
+          id: 'col-1',
+          title: 'Backlog',
+          items: [
+            { id: 'c1', title: '1' },
+            { id: 'c2', title: '2' },
+            { id: 'c3', title: '3' },
+          ],
+        },
+      ],
+    });
+
+    const listEl = container.querySelector<HTMLElement>('.kanban-card-list')!;
+    // Simulate scroll offset
+    listEl.scrollTop = 120;
+
+    // Add another card
+    board.addCard('col-1', { id: 'c4', title: '4' });
+
+    // Scroll position should be retained after mutation
+    expect(listEl.scrollTop).toBe(120);
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('dynamically toggles WIP limit badge in column header', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: [
+        {
+          id: 'col-1',
+          title: 'WIP Column',
+          wipLimit: 1,
+          items: [{ id: 'c1', title: 'Card 1' }],
+        },
+      ],
+    });
+
+    // Initially at capacity (1 <= 1), no danger badge
+    expect(container.querySelector('.badge-danger')).toBeNull();
+
+    // Add a second card, exceeding capacity (2 > 1)
+    board.addCard('col-1', { id: 'c2', title: 'Card 2' });
+    const badge = container.querySelector<HTMLElement>('.badge-danger');
+    expect(badge).not.toBeNull();
+    expect(badge?.textContent).toBe('Max 1');
+
+    // Remove card to bring it back within capacity
+    board.removeCard('col-1', 'c2');
+    expect(container.querySelector('.badge-danger')).toBeNull();
+
+    board.destroy();
+    container.remove();
+  });
+});

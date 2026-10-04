@@ -84,20 +84,24 @@ Phase 6: Search & Filter Suite, Test Suite Expansion & Package Verification
 
 ---
 
-### Phase 3: Vanilla DOM Scroll & Focus Preservation (Targeted DOM Reconciliation)
+### Phase 3: Vanilla DOM Scroll & Focus Preservation (Targeted DOM Reconciliation) [COMPLETED & VERIFIED]
 
+- **Status:** Complete & verified (16/16 tests green, build passing).
 - **Files Affected:**
   - `packages/kanban/src/core/board.ts`
-- **Actions:**
-  1. Replace blunt `container.innerHTML = renderKanbanHTML(...)` on store updates with targeted DOM updates:
-     - Maintain existing column and card DOM elements across mutations.
-     - Reposition card nodes within or across lists using native DOM `appendChild` / `insertBefore` without destroying untouched elements.
-     - Update card counters and WIP limit badges in headers.
-  2. Preserve scroll position (`scrollTop`) in `.kanban-card-list` during reordering.
-  3. Preserve active focus on the card element after keyboard reordering.
-  4. Render WIP limit badge (`Max {wipLimit}`) in `renderKanbanHTML` when over capacity in Vanilla DOM to match React parity.
-- **Verification:**
-  - Vitest tests verifying DOM node reference preservation after card moves, and verify scroll position retention on multi-card columns.
+  - `packages/kanban/src/kanban.test.ts`
+- **Actions Completed:**
+  1. Extracted `renderCardHTML` to eliminate duplicate markup between initial board render and card creation.
+  2. Updated drag-and-drop bindings to dynamically read card/column attributes (`data-item-id`, `data-column-id`, `data-index`) from elements so moved nodes report accurate drag data without rebound closures.
+  3. Added `bindCard(cardEl)` and `bindColumn(colEl)` with `data-dnd-bound="true"` guard against duplicate listeners.
+  4. Implemented `reconcileDOM(newColumns)` in place of blunt `container.innerHTML = ...`:
+     - Captures column list `scrollTop` values before reconciliation.
+     - Moves existing card elements across columns with native DOM `insertBefore`, preserving DOM node references and state.
+     - Updates attributes in-place, dynamically creates new cards, and removes deleted cards.
+     - Toggles empty state placeholders dynamically.
+     - Updates header counters and `Max {wipLimit}` badges.
+     - Restores scroll positions and active card focus.
+  5. Expanded test suite in `src/kanban.test.ts` verifying node reference equality across column moves, scroll offset retention across card insertions, and dynamic toggling of `Max {wipLimit}` header badge (16/16 tests passing).
 
 ---
 
