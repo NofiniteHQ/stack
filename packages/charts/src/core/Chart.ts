@@ -26,13 +26,41 @@ export class Chart {
   public element: HTMLElement;
   public options: ChartOptions;
   private abortController: AbortController | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private rafId: number | null = null;
 
   constructor(options: ChartInstanceOptions) {
     this.options = options;
     if (options.element) {
       this.element = options.element;
+      if (!options.width && options.element.clientWidth > 0) {
+        this.options.width = options.element.clientWidth;
+      }
     } else {
       this.element = document.createElement('div');
+    }
+
+    if (
+      typeof ResizeObserver !== 'undefined' &&
+      !options.width &&
+      options.element
+    ) {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const newWidth = Math.round(entry.contentRect.width);
+        if (
+          newWidth > 0 &&
+          Math.abs(newWidth - (this.options.width || 0)) >= 2
+        ) {
+          if (this.rafId) cancelAnimationFrame(this.rafId);
+          this.rafId = requestAnimationFrame(() => {
+            this.options.width = newWidth;
+            this.render();
+          });
+        }
+      });
+      this.resizeObserver.observe(this.element);
     }
 
     this.render();
@@ -54,6 +82,9 @@ export class Chart {
     const overlay = container.querySelector<SVGRectElement>(
       '.chart-scrub-overlay'
     );
+    if (overlay) {
+      overlay.style.touchAction = 'none';
+    }
     const crosshair =
       container.querySelector<SVGLineElement>('.chart-crosshair');
     const activeDot =
@@ -380,35 +411,40 @@ export class Chart {
         );
       });
     } else if (variant === 'scatter') {
-      const pointEls =
-        container.querySelectorAll<SVGCircleElement>('.chart-point');
+      const hitTargetEls = container.querySelectorAll<SVGCircleElement>(
+        '.chart-scatter-hit-target'
+      );
       const normalized = normalizeData(seriesList[0].data, {
         xAccessor: this.options.xAccessor,
         yAccessor: this.options.yAccessor,
       });
 
-      pointEls.forEach((pointEl, i) => {
+      hitTargetEls.forEach((hitEl, i) => {
         const d = normalized[i];
         if (!d) return;
+        const visualDot =
+          hitEl.parentElement?.querySelector<SVGCircleElement>('.chart-point');
 
-        pointEl.addEventListener(
+        hitEl.addEventListener(
           'pointerenter',
           () => {
+            if (visualDot) visualDot.setAttribute('r', '6');
             if (tooltipEl && this.options.showTooltip !== false) {
               const payload = this.options.tooltipFormatter
                 ? this.options.tooltipFormatter(d)
                 : defaultTooltipPayload(d, d.color || color);
               tooltipEl.innerHTML = renderTooltipHtml(payload);
-              positionTooltip(pointEl, tooltipEl);
+              positionTooltip(hitEl, tooltipEl);
               tooltipEl.style.opacity = '1';
             }
           },
           { signal }
         );
 
-        pointEl.addEventListener(
+        hitEl.addEventListener(
           'pointerleave',
           () => {
+            if (visualDot) visualDot.setAttribute('r', '4');
             if (tooltipEl) tooltipEl.style.opacity = '0';
           },
           { signal }
@@ -435,6 +471,10 @@ export class Chart {
   }
 
   public destroy(): void {
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    this.rafId = null;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     this.abortController?.abort();
     this.abortController = null;
     this.element.innerHTML = '';

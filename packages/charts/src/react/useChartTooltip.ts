@@ -3,7 +3,7 @@
  * Powered by @floating-ui/dom and styled with @nofinite/nuicss tokens.
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   positionTooltip,
   defaultTooltipPayload,
@@ -28,6 +28,9 @@ export function useChartTooltip(options: UseChartTooltipOptions = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const pendingReferenceRef = useRef<
+    Element | { getBoundingClientRect: () => DOMRect } | null
+  >(null);
 
   const show = useCallback(
     (
@@ -37,6 +40,7 @@ export function useChartTooltip(options: UseChartTooltipOptions = {}) {
     ) => {
       if (!enabled) return;
       setActivePoint(point);
+      pendingReferenceRef.current = reference;
       const payload =
         customPayload !== undefined
           ? customPayload
@@ -45,17 +49,20 @@ export function useChartTooltip(options: UseChartTooltipOptions = {}) {
           : defaultTooltipPayload(point, defaultColor);
       setTooltipHtml(renderTooltipHtml(payload));
       setIsOpen(true);
-
-      if (tooltipRef.current) {
-        positionTooltip(reference, tooltipRef.current);
-      }
     },
     [enabled, formatter, defaultColor]
   );
 
+  useEffect(() => {
+    if (isOpen && pendingReferenceRef.current && tooltipRef.current) {
+      positionTooltip(pendingReferenceRef.current, tooltipRef.current);
+    }
+  }, [isOpen, tooltipHtml]);
+
   const hide = useCallback(() => {
     setIsOpen(false);
     setActivePoint(null);
+    pendingReferenceRef.current = null;
   }, []);
 
   return {

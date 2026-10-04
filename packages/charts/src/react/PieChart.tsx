@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { calculatePieSegments, type DataPoint } from '../core/math';
 import { useChartTooltip } from './useChartTooltip';
+import { useChartDimensions } from './useChartDimensions';
 import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
@@ -18,8 +19,8 @@ export interface PieChartProps<T = DataPoint> {
 
 export function PieChart<T = DataPoint>({
   data,
-  width = 300,
-  height = 300,
+  width: propWidth,
+  height: propHeight = 300,
   donutCutout = 0,
   className,
   showTooltip = true,
@@ -40,7 +41,15 @@ export function PieChart<T = DataPoint>({
     formatter: tooltipFormatter,
   });
 
-  const radius = Math.min(width, height) / 2 - 16;
+  const { width, height } = useChartDimensions(containerRef, {
+    width: propWidth,
+    height: propHeight,
+    defaultWidth: 300,
+    defaultHeight: 300,
+  });
+
+  const size = Math.min(width, height);
+  const radius = Math.max(10, size / 2 - 16);
 
   const segments = useMemo(() => {
     return calculatePieSegments(data, radius, donutCutout, {
@@ -49,20 +58,20 @@ export function PieChart<T = DataPoint>({
     });
   }, [data, radius, donutCutout, labelAccessor, valueAccessor]);
 
-  const centerX = width / 2;
-  const centerY = height / 2;
+  const centerX = size / 2;
+  const centerY = size / 2;
 
   return (
     <div
       ref={containerRef}
       className={clsx(
-        'chart-container nui-chart-container relative flex items-center justify-center select-none font-sans',
+        'chart-container chart-container-circular nui-chart-container relative flex items-center justify-center select-none font-sans',
         className
       )}
       style={{ width: '100%', height }}
     >
       <svg
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${size} ${size}`}
         className="w-full h-full overflow-visible"
         preserveAspectRatio="xMidYMid meet"
       >

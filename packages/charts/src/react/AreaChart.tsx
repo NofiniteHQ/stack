@@ -9,6 +9,7 @@ import {
 } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
 import { useChartTooltip } from './useChartTooltip';
+import { useChartDimensions } from './useChartDimensions';
 import { ChartLegend } from './ChartLegend';
 import type { TooltipFormatter, TooltipPayload } from '../core/tooltip';
 import clsx from 'clsx';
@@ -42,8 +43,8 @@ export function AreaChart<T = DataPoint>({
   showLegend,
   xAccessor,
   yAccessor,
-  width = 500,
-  height = 300,
+  width: propWidth,
+  height: propHeight = 300,
   margin = defaultMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
@@ -60,6 +61,27 @@ export function AreaChart<T = DataPoint>({
   const [internalHidden, setInternalHidden] = useState<Record<string, boolean>>(
     {}
   );
+
+  const {
+    isOpen,
+    activePoint,
+    tooltipHtml,
+    tooltipRef,
+    containerRef,
+    show,
+    hide,
+  } = useChartTooltip({
+    enabled: showTooltip,
+    formatter: tooltipFormatter,
+    defaultColor: color,
+  });
+
+  const { width, height } = useChartDimensions(containerRef, {
+    width: propWidth,
+    height: propHeight,
+    defaultWidth: 500,
+    defaultHeight: 300,
+  });
 
   const seriesList: ChartSeries<T>[] = useMemo(() => {
     if (propSeries && propSeries.length > 0) {
@@ -81,20 +103,6 @@ export function AreaChart<T = DataPoint>({
   }, [propSeries, data, color, internalHidden]);
 
   const isMulti = seriesList.length > 1;
-
-  const {
-    isOpen,
-    activePoint,
-    tooltipHtml,
-    tooltipRef,
-    containerRef,
-    show,
-    hide,
-  } = useChartTooltip({
-    enabled: showTooltip,
-    formatter: tooltipFormatter,
-    defaultColor: color,
-  });
 
   const multiResult = useMemo(() => {
     if (!isMulti) return null;
@@ -459,7 +467,7 @@ export function AreaChart<T = DataPoint>({
             width={innerWidth}
             height={innerHeight}
             fill="transparent"
-            style={{ cursor: 'crosshair' }}
+            style={{ cursor: 'crosshair', touchAction: 'none' }}
             pointerEvents="all"
             onPointerMove={handlePointerMove}
             onPointerLeave={handlePointerLeave}

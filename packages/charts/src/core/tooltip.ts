@@ -3,7 +3,13 @@
  * Powered by @floating-ui/dom and styled with @nofinite/nuicss design tokens.
  */
 
-import { computePosition, flip, shift, offset } from '@floating-ui/dom';
+import {
+  computePosition,
+  flip,
+  shift,
+  offset,
+  limitShift,
+} from '@floating-ui/dom';
 import type { NormalizedDataPoint } from './math';
 import { formatMetricNumber } from './axis';
 
@@ -59,31 +65,31 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
   }
 
   const titleHtml = payload.title
-    ? `<div class="chart-tooltip-title text-[11px] font-medium text-muted mb-1 opacity-80">${payload.title}</div>`
+    ? `<div class="chart-tooltip-title">${payload.title}</div>`
     : '';
 
   const itemsHtml = payload.items
     .map(
       (item) => `
-    <div class="chart-tooltip-item flex items-center justify-between gap-3 text-xs leading-tight">
-      <div class="flex items-center gap-1.5 min-w-0">
-        <span class="chart-tooltip-swatch w-2 h-2 rounded-full flex-shrink-0" style="background-color: ${item.color};"></span>
-        <span class="chart-tooltip-label text-muted truncate opacity-90">${item.label}</span>
+    <div class="chart-tooltip-item">
+      <div class="chart-tooltip-label-group">
+        <span class="chart-tooltip-swatch" style="background-color: ${item.color};"></span>
+        <span class="chart-tooltip-label">${item.label}</span>
       </div>
-      <span class="chart-tooltip-value font-semibold text-default tabular-nums">${item.value}</span>
+      <span class="chart-tooltip-value">${item.value}</span>
     </div>
   `
     )
     .join('');
 
   return `
-    <div class="flex flex-col gap-1 min-w-[100px]">
+    <div class="chart-tooltip-container">
       ${titleHtml}
-      <div class="flex flex-col gap-1">
+      <div class="chart-tooltip-items">
         ${itemsHtml}
       </div>
     </div>
-  `;
+  `.trim();
 }
 
 export interface PositionTooltipOptions {
@@ -104,7 +110,7 @@ export async function positionTooltip(
     middleware: [
       offset(offsetDistance),
       flip({ fallbackPlacements: ['bottom', 'top', 'right', 'left'] }),
-      shift({ padding: 8 }),
+      shift({ padding: 8, limiter: limitShift() }),
     ],
   });
 

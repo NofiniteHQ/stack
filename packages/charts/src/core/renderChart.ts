@@ -251,25 +251,29 @@ export function renderChart(options: ChartOptions): string {
               : ''
           }
           <circle class="chart-active-dot" cx="0" cy="0" r="5.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2.5" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />
-          <rect class="chart-scrub-overlay" x="0" y="0" width="${innerWidth}" height="${innerHeight}" fill="transparent" pointer-events="all" style="cursor: crosshair;" />
+          <rect class="chart-scrub-overlay" x="0" y="0" width="${innerWidth}" height="${innerHeight}" fill="transparent" pointer-events="all" style="cursor: crosshair; touch-action: none;" />
         </g>
       `;
     }
   } else if (variant === 'bar') {
     const layout = options.barLayout || 'grouped';
-    const { bars, xScale, yScale, categories } = calculateMultiBarLayout(
-      seriesList,
-      { width, height, margin },
-      layout,
-      { xAccessor: options.xAccessor, yAccessor: options.yAccessor }
-    );
-
+    const {
+      bars,
+      xScale,
+      yScale,
+      categories,
+      margin: layoutMargin,
+    } = calculateMultiBarLayout(seriesList, { width, height, margin }, layout, {
+      xAccessor: options.xAccessor,
+      yAccessor: options.yAccessor,
+    });
+    const activeMargin = layoutMargin || margin;
     const isHorizontal = layout === 'horizontal';
 
     const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
       width,
       height,
-      margin,
+      margin: activeMargin,
       xScale,
       yScale,
       showAxes,
@@ -282,11 +286,11 @@ export function renderChart(options: ChartOptions): string {
     const refLinesSvg = renderReferenceLinesSvg(
       options.referenceLines,
       yScale,
-      innerWidth
+      Math.max(0, width - activeMargin.left - activeMargin.right)
     );
 
     contentSvg = `
-      <g transform="translate(${margin.left}, ${margin.top})">
+      <g transform="translate(${activeMargin.left}, ${activeMargin.top})">
         ${gridSvg}
         ${yAxisSvg}
         ${xAxisSvg}
@@ -302,14 +306,15 @@ export function renderChart(options: ChartOptions): string {
       </g>
     `;
   } else if (variant === 'pie' || variant === 'donut') {
-    const radius = Math.min(innerWidth, innerHeight) / 2 - 8;
+    const size = Math.min(width, height);
+    const radius = size / 2 - 16;
     const cutout = variant === 'donut' ? options.donutCutout ?? 0.6 : 0;
     const segments = calculatePieSegments(seriesList[0].data, radius, cutout, {
       xAccessor: options.xAccessor,
       yAccessor: options.yAccessor,
     });
-    const centerX = width / 2;
-    const centerY = height / 2;
+    const centerX = size / 2;
+    const centerY = size / 2;
 
     contentSvg = `
       <g transform="translate(${centerX}, ${centerY})">
@@ -374,15 +379,22 @@ export function renderChart(options: ChartOptions): string {
         ${normalized
           .map(
             (d) => `
-          <circle cx="${xScale(
-            typeof d.x === 'number' ? d.x : 0
-          )}" cy="${yScale(d.y)}" r="4"
-                  fill="${
-                    d.color || color
-                  }" stroke="var(--bg-surface)" stroke-width="2"
-                  class="chart-point transition-transform hover:scale-125" data-label="${
-                    d.label
-                  }" data-value="${d.y}" />
+          <g class="chart-scatter-point-group">
+            <circle cx="${xScale(
+              typeof d.x === 'number' ? d.x : 0
+            )}" cy="${yScale(d.y)}" r="4"
+                    fill="${
+                      d.color || color
+                    }" stroke="var(--bg-surface)" stroke-width="2"
+                    class="chart-point pointer-events-none transition-all duration-150" />
+            <circle cx="${xScale(
+              typeof d.x === 'number' ? d.x : 0
+            )}" cy="${yScale(d.y)}" r="14"
+                    fill="transparent"
+                    style="pointer-events: all; cursor: pointer;"
+                    class="chart-scatter-hit-target"
+                    data-label="${d.label}" data-value="${d.y}" />
+          </g>
         `
           )
           .join('')}
@@ -391,6 +403,10 @@ export function renderChart(options: ChartOptions): string {
   }
 
   const isCircular = variant === 'pie' || variant === 'donut';
+  const circularSize = Math.min(width, height);
+  const viewBoxAttr = isCircular
+    ? `0 0 ${circularSize} ${circularSize}`
+    : `0 0 ${width} ${height}`;
   const preserveAspect = isCircular ? 'xMidYMid meet' : 'none';
 
   const legendHtml =
@@ -409,7 +425,7 @@ export function renderChart(options: ChartOptions): string {
     <div class="chart-container nui-chart-container ${
       isCircular ? 'chart-container-circular' : ''
     } relative w-full font-sans select-none" style="height: ${height}px;">
-      <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible" preserveAspectRatio="${preserveAspect}">
+      <svg viewBox="${viewBoxAttr}" class="w-full h-full overflow-visible" preserveAspectRatio="${preserveAspect}">
         <defs>
           ${defsSvg}
         </defs>

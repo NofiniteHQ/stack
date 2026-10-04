@@ -3,6 +3,7 @@ import { scaleLinear } from 'd3-scale';
 import { defaultMargin, normalizeData } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
 import { useChartTooltip } from './useChartTooltip';
+import { useChartDimensions } from './useChartDimensions';
 import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
@@ -27,8 +28,8 @@ export function ScatterChart<T = any>({
   data,
   xAccessor,
   yAccessor,
-  width = 500,
-  height = 300,
+  width: propWidth,
+  height: propHeight = 300,
   margin = defaultMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
@@ -51,6 +52,13 @@ export function ScatterChart<T = any>({
     enabled: showTooltip,
     formatter: tooltipFormatter,
     defaultColor: color,
+  });
+
+  const { width, height } = useChartDimensions(containerRef, {
+    width: propWidth,
+    height: propHeight,
+    defaultWidth: 500,
+    defaultHeight: 300,
   });
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
@@ -153,22 +161,36 @@ export function ScatterChart<T = any>({
                 );
               })}
 
-          {normalized.map((d, i) => (
-            <circle
-              key={i}
-              cx={xScale(typeof d.x === 'number' ? d.x : 0)}
-              cy={yScale(d.y)}
-              r={activePoint === d ? 6 : 4}
-              fill={d.color || color}
-              stroke="var(--bg-surface)"
-              strokeWidth={2}
-              className="chart-point transition-all duration-150 cursor-pointer hover:scale-125"
-              onPointerEnter={(e) => {
-                show(d, e.currentTarget);
-              }}
-              onPointerLeave={hide}
-            />
-          ))}
+          {normalized.map((d, i) => {
+            const cx = xScale(typeof d.x === 'number' ? d.x : 0);
+            const cy = yScale(d.y);
+            const isActive = activePoint === d;
+            return (
+              <g key={i} className="chart-scatter-point-group">
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={isActive ? 6 : 4}
+                  fill={d.color || color}
+                  stroke="var(--bg-surface)"
+                  strokeWidth={2}
+                  className="chart-point pointer-events-none transition-all duration-150"
+                />
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={14}
+                  fill="transparent"
+                  className="cursor-pointer"
+                  style={{ pointerEvents: 'all' }}
+                  onPointerEnter={(e) => {
+                    show(d, e.currentTarget);
+                  }}
+                  onPointerLeave={hide}
+                />
+              </g>
+            );
+          })}
         </g>
       </svg>
 

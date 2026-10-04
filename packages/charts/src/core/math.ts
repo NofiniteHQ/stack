@@ -377,6 +377,7 @@ export type BarLayoutMode = 'grouped' | 'stacked' | 'horizontal';
 export interface MultiBarResult {
   xScale: any;
   yScale: any;
+  margin?: { top: number; right: number; bottom: number; left: number };
   bars: Array<{
     x: number;
     y: number;
@@ -395,12 +396,8 @@ export function calculateMultiBarLayout(
   layout: BarLayoutMode = 'grouped',
   options?: DataAccessorOptions
 ): MultiBarResult {
-  const margin = dimensions.margin || defaultMargin;
-  const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
-  const innerHeight = Math.max(
-    0,
-    dimensions.height - margin.top - margin.bottom
-  );
+  const rawMargin = dimensions.margin || defaultMargin;
+  const margin = { ...rawMargin };
 
   const normalizedSeries = seriesList.map((s, i) => ({
     name: s.name || `Series ${i + 1}`,
@@ -420,12 +417,31 @@ export function calculateMultiBarLayout(
     }
   }
 
+  if (
+    layout === 'horizontal' &&
+    !dimensions.margin?.left &&
+    categoryLabels.length > 0
+  ) {
+    const maxLen = Math.max(...categoryLabels.map((l) => l.length));
+    margin.left = Math.max(
+      margin.left,
+      Math.min(160, Math.round(maxLen * 7 + 16))
+    );
+  }
+
+  const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
+  const innerHeight = Math.max(
+    0,
+    dimensions.height - margin.top - margin.bottom
+  );
+
   if (categoryLabels.length === 0 || activeSeries.length === 0) {
     const dummyScale = scaleBand().range([0, innerWidth]);
     const dummyLinear = scaleLinear().range([innerHeight, 0]);
     return {
       xScale: dummyScale,
       yScale: dummyLinear,
+      margin,
       bars: [],
       categories: [],
     };
@@ -480,7 +496,7 @@ export function calculateMultiBarLayout(
       width: innerWidth,
     }));
 
-    return { xScale, yScale, bars, categories };
+    return { xScale, yScale, margin, bars, categories };
   }
 
   // Vertical: 'grouped' or 'stacked'
@@ -578,7 +594,7 @@ export function calculateMultiBarLayout(
     }
   }
 
-  return { xScale, yScale, bars, categories };
+  return { xScale, yScale, margin, bars, categories };
 }
 
 function zeroY_or_diff(y0: number, y1: number): number {

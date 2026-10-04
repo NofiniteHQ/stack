@@ -9,6 +9,7 @@ import {
 } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
 import { useChartTooltip } from './useChartTooltip';
+import { useChartDimensions } from './useChartDimensions';
 import { ChartLegend } from './ChartLegend';
 import type { TooltipFormatter, TooltipPayload } from '../core/tooltip';
 import clsx from 'clsx';
@@ -42,8 +43,8 @@ export function LineChart<T = DataPoint>({
   showLegend,
   xAccessor,
   yAccessor,
-  width = 500,
-  height = 300,
+  width: propWidth,
+  height: propHeight = 300,
   margin = defaultMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
@@ -93,6 +94,13 @@ export function LineChart<T = DataPoint>({
     enabled: showTooltip,
     formatter: tooltipFormatter,
     defaultColor: color,
+  });
+
+  const { width, height } = useChartDimensions(containerRef, {
+    width: propWidth,
+    height: propHeight,
+    defaultWidth: 500,
+    defaultHeight: 300,
   });
 
   const multiResult = useMemo(() => {
@@ -423,7 +431,7 @@ export function LineChart<T = DataPoint>({
             width={innerWidth}
             height={innerHeight}
             fill="transparent"
-            style={{ cursor: 'crosshair' }}
+            style={{ cursor: 'crosshair', touchAction: 'none' }}
             pointerEvents="all"
             onPointerMove={handlePointerMove}
             onPointerLeave={handlePointerLeave}

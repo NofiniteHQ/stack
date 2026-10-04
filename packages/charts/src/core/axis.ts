@@ -117,11 +117,15 @@ export function generateAxisSvg(options: AxisOptions): {
       xAxisSvg = categories
         .map((cat) => {
           const cx = cat.x + cat.width / 2;
+          const displayLabel =
+            cat.width < 55 && cat.label.length > 8
+              ? `${cat.label.slice(0, 6)}…`
+              : cat.label;
           return `
             <text x="${cx}" y="${innerHeight + 18}" text-anchor="middle"
                   class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                   fill="var(--fg-muted, currentColor)" opacity="0.75">
-              ${cat.label}
+              ${displayLabel}
             </text>
           `;
         })

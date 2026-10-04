@@ -9,6 +9,7 @@ import {
 } from '../core/math';
 import { formatMetricNumber } from '../core/axis';
 import { useChartTooltip } from './useChartTooltip';
+import { useChartDimensions } from './useChartDimensions';
 import { ChartLegend } from './ChartLegend';
 import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
@@ -43,9 +44,9 @@ export function BarChart<T = DataPoint>({
   showLegend,
   xAccessor,
   yAccessor,
-  width = 500,
-  height = 300,
-  margin = defaultMargin,
+  width: propWidth,
+  height: propHeight = 300,
+  margin: propMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
   showGrid = true,
@@ -93,15 +94,29 @@ export function BarChart<T = DataPoint>({
     defaultColor: color,
   });
 
-  const { bars, xScale, yScale, categories } = useMemo(() => {
+  const { width, height } = useChartDimensions(containerRef, {
+    width: propWidth,
+    height: propHeight,
+    defaultWidth: 500,
+    defaultHeight: 300,
+  });
+
+  const {
+    bars,
+    xScale,
+    yScale,
+    categories,
+    margin: layoutMargin,
+  } = useMemo(() => {
     return calculateMultiBarLayout(
       seriesList,
-      { width, height, margin },
+      { width, height, margin: propMargin },
       barLayout,
       { xAccessor: xAccessor as any, yAccessor: yAccessor as any }
     );
-  }, [seriesList, width, height, margin, barLayout, xAccessor, yAccessor]);
+  }, [seriesList, width, height, propMargin, barLayout, xAccessor, yAccessor]);
 
+  const margin = layoutMargin || propMargin || defaultMargin;
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
   const isHorizontal = barLayout === 'horizontal';
