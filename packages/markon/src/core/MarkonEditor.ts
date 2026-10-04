@@ -549,6 +549,27 @@ export class MarkonEditor {
     setBtnActive('insertDetails', this.tiptap.isActive('details'));
     setBtnActive('createLink', this.tiptap.isActive('link'));
 
+    // Sync Undo and Redo availability states
+    const setBtnDisabled = (cmd: string, canExecute: boolean) => {
+      const btn = toolbar.querySelector<HTMLButtonElement>(
+        `.editor-btn[data-command="${cmd}"]`
+      );
+      if (btn) {
+        if (canExecute) {
+          btn.removeAttribute('disabled');
+          btn.removeAttribute('aria-disabled');
+          btn.classList.remove('opacity-40', 'cursor-not-allowed');
+        } else {
+          btn.setAttribute('disabled', 'true');
+          btn.setAttribute('aria-disabled', 'true');
+          btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+      }
+    };
+
+    setBtnDisabled('undo', Boolean(this.tiptap.can?.().undo?.()));
+    setBtnDisabled('redo', Boolean(this.tiptap.can?.().redo?.()));
+
     // Sync Custom Typography Selector
     this.typographyMenu?.updateTriggerState();
   }
@@ -586,6 +607,7 @@ export class MarkonEditor {
         '.editor-btn'
       );
       if (!btn) return;
+      if (btn.disabled || btn.getAttribute('aria-disabled') === 'true') return;
       if (btn.classList.contains('editor-table-trigger')) return;
       e.preventDefault();
 
@@ -1002,6 +1024,36 @@ export class MarkonEditor {
 
   public async handleUploadedFile(file: File): Promise<void> {
     const isImage = file.type.startsWith('image/');
+    const uploadId =
+      'upload-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now();
+    let previewUrl = '';
+    if (isImage && typeof URL !== 'undefined' && URL.createObjectURL) {
+      try {
+        previewUrl = URL.createObjectURL(file);
+      } catch {
+        previewUrl = '';
+      }
+    }
+
+    const formattedSize = formatFileSize(file.size);
+
+    // Optimistically insert upload placeholder card into editor
+    this.tiptap
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'uploadPlaceholder',
+        attrs: {
+          uploadId,
+          name: file.name,
+          size: formattedSize,
+          type: file.type || 'file',
+          previewUrl,
+          status: 'uploading',
+        },
+      })
+      .run();
+
     if (this.options.onUploadFile) {
       try {
         const res = await this.options.onUploadFile(file);
@@ -1012,26 +1064,30 @@ export class MarkonEditor {
             ? typeof res.size === 'number'
               ? formatFileSize(res.size)
               : res.size
-            : formatFileSize(file.size);
+            : formattedSize;
 
-        if (isImage) {
-          this.tiptap.chain().focus().setImage({ src: url }).run();
-        } else {
-          this.tiptap
-            .chain()
-            .focus()
-            .insertFileAttachment({
-              src: url,
-              name,
-              size,
-              type: file.type || 'file',
-            })
-            .run();
+        this.replaceUploadPlaceholder(uploadId, {
+          isImage,
+          url,
+          name,
+          size,
+          type: file.type || 'file',
+        });
+        if (previewUrl && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+          try {
+            URL.revokeObjectURL(previewUrl);
+          } catch {
+            // ignore
+          }
         }
-        this.updateToolbarState();
         return;
-      } catch (err) {
+      } catch (err: any) {
         console.error('File upload failed', err);
+        this.setUploadPlaceholderError(
+          uploadId,
+          err?.message || 'Upload failed. Click to remove.'
+        );
+        return;
       }
     }
 
@@ -1040,24 +1096,114 @@ export class MarkonEditor {
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
       if (dataUrl) {
-        if (isImage) {
-          this.tiptap.chain().focus().setImage({ src: dataUrl }).run();
-        } else {
-          this.tiptap
-            .chain()
-            .focus()
-            .insertFileAttachment({
-              src: dataUrl,
-              name: file.name,
-              size: formatFileSize(file.size),
-              type: file.type || 'file',
-            })
-            .run();
+        this.replaceUploadPlaceholder(uploadId, {
+          isImage,
+          url: dataUrl,
+          name: file.name,
+          size: formattedSize,
+          type: file.type || 'file',
+        });
+        if (previewUrl && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+          try {
+            URL.revokeObjectURL(previewUrl);
+          } catch {
+            // ignore
+          }
         }
-        this.updateToolbarState();
       }
     };
+    reader.onerror = () => {
+      this.setUploadPlaceholderError(uploadId, 'Failed to read file locally.');
+    };
     reader.readAsDataURL(file);
+  }
+
+  private replaceUploadPlaceholder(
+    uploadId: string,
+    data: {
+      isImage: boolean;
+      url: string;
+      name: string;
+      size: string;
+      type: string;
+    }
+  ): void {
+    let targetPos: number | null = null;
+    let targetNodeSize = 1;
+
+    this.tiptap.state.doc.descendants((node, pos) => {
+      if (
+        node.type.name === 'uploadPlaceholder' &&
+        node.attrs.uploadId === uploadId
+      ) {
+        targetPos = pos;
+        targetNodeSize = node.nodeSize;
+        return false;
+      }
+      return true;
+    });
+
+    if (targetPos !== null) {
+      const fromPos: number = targetPos;
+      const toPos: number = targetPos + targetNodeSize;
+      const tr = this.tiptap.state.tr;
+      if (data.isImage) {
+        const imageType = this.tiptap.schema.nodes.image;
+        if (imageType) {
+          tr.replaceWith(
+            fromPos,
+            toPos,
+            imageType.create({ src: data.url, alt: data.name })
+          );
+        }
+      } else {
+        const fileType = this.tiptap.schema.nodes.fileAttachment;
+        if (fileType) {
+          tr.replaceWith(
+            fromPos,
+            toPos,
+            fileType.create({
+              src: data.url,
+              name: data.name,
+              size: data.size,
+              type: data.type,
+            })
+          );
+        }
+      }
+      this.tiptap.view.dispatch(tr);
+      this.updateToolbarState();
+    }
+  }
+
+  private setUploadPlaceholderError(
+    uploadId: string,
+    errorMessage: string
+  ): void {
+    let targetPos: number | null = null;
+    let targetNode: any = null;
+
+    this.tiptap.state.doc.descendants((node, pos) => {
+      if (
+        node.type.name === 'uploadPlaceholder' &&
+        node.attrs.uploadId === uploadId
+      ) {
+        targetPos = pos;
+        targetNode = node;
+        return false;
+      }
+      return true;
+    });
+
+    if (targetPos !== null && targetNode) {
+      const tr = this.tiptap.state.tr.setNodeMarkup(targetPos, undefined, {
+        ...targetNode.attrs,
+        status: 'error',
+        errorMessage,
+      });
+      this.tiptap.view.dispatch(tr);
+      this.updateToolbarState();
+    }
   }
 
   public setSaveStatus(status: SaveStatusState, message?: string): void {

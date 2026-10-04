@@ -150,20 +150,41 @@ Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit
 
 ---
 
-### Phase 5: Optimistic Upload Placeholders, History Sync & Touch Support
+### Phase 5: Optimistic Upload Placeholders, History Sync & Touch Support [COMPLETED]
 
 **Goal:** Eliminate silent UI freezes during file uploads and improve history/mobile UX.
 
-- **Tasks:**
-  1. Optimistic Upload Placeholders (`MarkonEditor.ts`):
-     - When `onUploadFile(file)` begins, insert a temporary placeholder node (`<div class="markon-uploading-card">`) displaying the file name, animated NUICSS spinner, and upload status.
-     - Upon promise resolution, replace the placeholder atomically with the final image or file attachment node.
-     - On error, display clear error badge and remove placeholder.
-  2. Dynamic Undo / Redo State Sync:
-     - In `updateToolbarState()`, check `this.tiptap.can().undo()` and `this.tiptap.can().redo()`.
-     - Dynamically set/remove `disabled` attribute and `opacity-50` class on history buttons.
-  3. Mobile & Touch Drag Handle Fallback:
-     - On touch devices or viewports where drag-and-drop is unsupported, provide a tap-to-select / block action menu so blocks can still be moved or deleted cleanly.
+- **Completed Deliverables:**
+  1. Optimistic Upload Placeholders (`uploadPlaceholder.ts` & `MarkonEditor.ts`):
+     - Created `UploadPlaceholder` TipTap Node extension with `uploadId`, `name`, `size`, `type`, `previewUrl`, `status`, and `errorMessage` attributes.
+     - Interactive NodeView featuring live animated spinner, file icon / image thumbnail, file size metadata, in-progress badge, and error dismissal.
+     - When `handleUploadedFile(file)` is called, immediately inserts optimistic placeholder card into the document.
+     - Atomically swaps placeholder with final `image` or `fileAttachment` node when promise resolves, or transitions to red warning error card on network failure.
+     - Lossless markdown serializer cleanly ignores transient upload placeholder cards.
+  2. Dynamic Undo / Redo State Sync (`MarkonEditor.ts`):
+     - In `updateToolbarState()`, inspects `this.tiptap.can().undo()` and `this.tiptap.can().redo()`.
+     - Dynamically applies `disabled`, `aria-disabled="true"`, and `opacity-40 cursor-not-allowed` to `button[data-command="undo"]` and `button[data-command="redo"]`.
+     - Toolbar click listener defensively ignores clicks on disabled history buttons.
+  3. Mobile & Touch Drag Handle Fallback (`dragHandle.ts`):
+     - Added `touchstart` gesture detection on editor blocks so tapping on mobile/touch screens reveals the drag handle without needing desktop mouse hover.
+     - Enlarged touch hit target (`28x28px`) on touch viewports (`@media (pointer: coarse)`).
+     - Added floating **Block Actions Menu** anchored to drag handle with Floating UI (`computePosition`, `flip`, `shift`, `offset`, `autoUpdate`) offering 1-tap block actions:
+       - Move Up (automatically disabled for top block)
+       - Move Down (automatically disabled for bottom block)
+       - Duplicate
+       - Select Block
+       - Delete Block
+     - Suppressed text bubble menu when block `NodeSelection` is active to eliminate UI clash.
+  4. **Verification Passed:**
+     - 52/52 unit tests passing (`npx vitest run packages/markon`).
+     - TypeScript compiler check passing with zero errors (`npx tsc -p packages/markon/tsconfig.lib.json --noEmit`).
+     - Clean compilation with Vite (`npx vite build --config packages/markon/vite.config.ts`) and zero declaration errors.
+     - Verified `npm pack --dry-run` contains all 78 expected assets and types.
+     - Visual audit verified in Chromium via Playwright:
+       - `/temp/markon_phase5_initial_history_and_uploads.png` (disabled undo/redo buttons + optimistic upload & error cards)
+       - `/temp/markon_phase5_undo_button_enabled.png` (undo button becomes active upon content edit)
+       - `/temp/markon_phase5_block_actions_menu_open.png` (contextual block actions popover menu open)
+       - `/temp/markon_phase5_mobile_touch_view.png` (mobile 390px viewport touch layout)
 
 ---
 

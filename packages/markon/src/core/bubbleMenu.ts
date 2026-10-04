@@ -46,6 +46,10 @@ function detectBubbleContext(
     return 'table';
   }
 
+  if (editor.state.selection instanceof NodeSelection) {
+    return 'none';
+  }
+
   if (!editor.state.selection.empty) return 'text';
   return 'none';
 }

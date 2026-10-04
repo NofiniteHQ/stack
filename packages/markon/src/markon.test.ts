@@ -17,6 +17,8 @@ import {
   TEXT_COLOR_PRESETS,
   formatDisplayUrl,
   renderLinkPopoverHtml,
+  UploadPlaceholder,
+  MarkonDragHandle,
 } from './index';
 
 describe('@nofinite/markon', () => {
@@ -1480,6 +1482,190 @@ describe('@nofinite/markon', () => {
 
       picker.destroy();
       document.body.removeChild(trigger);
+    });
+  });
+
+  describe('Phase 5: Optimistic Uploads, History Sync & Touch Block Actions', () => {
+    let container: HTMLElement;
+
+    beforeEach(() => {
+      container = document.createElement('div');
+      document.body.appendChild(container);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(container);
+    });
+
+    it('dynamically synchronizes Undo and Redo button disabled states', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Initial text</p>',
+      });
+
+      const undoBtn = container.querySelector<HTMLButtonElement>(
+        'button[data-command="undo"]'
+      );
+      const redoBtn = container.querySelector<HTMLButtonElement>(
+        'button[data-command="redo"]'
+      );
+
+      expect(undoBtn).not.toBeNull();
+      expect(redoBtn).not.toBeNull();
+
+      // Initially with no mutations, both undo and redo should be disabled
+      expect(undoBtn?.disabled).toBe(true);
+      expect(undoBtn?.getAttribute('aria-disabled')).toBe('true');
+      expect(undoBtn?.classList.contains('opacity-40')).toBe(true);
+
+      expect(redoBtn?.disabled).toBe(true);
+      expect(redoBtn?.getAttribute('aria-disabled')).toBe('true');
+
+      // Make a change: add new paragraph
+      editor.tiptap.chain().focus().insertContent('<p>Second line</p>').run();
+      editor.updateToolbarState();
+
+      // Undo should now be enabled
+      expect(undoBtn?.disabled).toBe(false);
+      expect(undoBtn?.getAttribute('aria-disabled')).toBeNull();
+      expect(undoBtn?.classList.contains('opacity-40')).toBe(false);
+
+      // Execute undo command
+      editor.execCommand('undo');
+      editor.updateToolbarState();
+
+      // Redo should now be enabled
+      expect(redoBtn?.disabled).toBe(false);
+      expect(redoBtn?.getAttribute('aria-disabled')).toBeNull();
+      expect(redoBtn?.classList.contains('opacity-40')).toBe(false);
+
+      editor.destroy();
+    });
+
+    it('optimistically inserts upload placeholder and replaces with image on upload success', async () => {
+      let uploadResolve: (res: any) => void;
+      const onUploadFile = vi.fn().mockImplementation(() => {
+        return new Promise((resolve) => {
+          uploadResolve = resolve;
+        });
+      });
+
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Some text</p>',
+        onUploadFile,
+      });
+
+      const file = new File(['dummy-image-bytes'], 'photo.png', {
+        type: 'image/png',
+      });
+
+      const uploadPromise = editor.handleUploadedFile(file);
+
+      // Verify that upload placeholder node is immediately inserted in the doc
+      const htmlBefore = editor.getHTML();
+      expect(htmlBefore).toContain('data-upload-placeholder');
+      expect(htmlBefore).toContain('photo.png');
+
+      // Verify that markdown serialization ignores the temporary placeholder
+      const mdBefore = editor.getMarkdown();
+      expect(mdBefore).not.toContain('photo.png');
+
+      // Now resolve the upload
+      uploadResolve!({
+        url: 'https://cdn.example.com/photo.png',
+        name: 'photo.png',
+      });
+      await uploadPromise;
+
+      // Verify atomic replacement with image node
+      const htmlAfter = editor.getHTML();
+      expect(htmlAfter).not.toContain('data-upload-placeholder');
+      expect(htmlAfter).toContain('https://cdn.example.com/photo.png');
+
+      editor.destroy();
+    });
+
+    it('renders error state on upload failure with dismiss capability', async () => {
+      const onUploadFile = vi
+        .fn()
+        .mockRejectedValue(new Error('Network error 500'));
+
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Content</p>',
+        onUploadFile,
+      });
+
+      const file = new File(['test-bytes'], 'document.pdf', {
+        type: 'application/pdf',
+      });
+
+      await editor.handleUploadedFile(file);
+
+      // Placeholder node should remain in error state
+      const html = editor.getHTML();
+      expect(html).toContain('data-upload-placeholder');
+      expect(html).toContain('data-status="error"');
+      expect(html).toContain('data-error-message="Network error 500"');
+
+      editor.destroy();
+    });
+
+    it('mounts drag handle and opens contextual block actions menu on click', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<h1>First Header</h1><p>Second Paragraph</p>',
+      });
+
+      const dragHandle = (editor as any).dragHandle as MarkonDragHandle;
+      expect(dragHandle).toBeDefined();
+
+      const handleEl = container.querySelector<HTMLElement>(
+        '.markon-drag-handle'
+      );
+      expect(handleEl).not.toBeNull();
+
+      const pEl = container.querySelector<HTMLElement>('.editor-content p');
+      expect(pEl).not.toBeNull();
+
+      // Trigger hover / touch on paragraph
+      (dragHandle as any).currentBlock = pEl;
+      (dragHandle as any).showHandleForBlock(pEl!);
+
+      expect(handleEl?.style.display).toBe('flex');
+      expect(handleEl?.style.opacity).toBe('1');
+
+      // Click the handle to open block action menu
+      handleEl?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      const menu = document.querySelector<HTMLElement>(
+        '.markon-block-actions-menu'
+      );
+      expect(menu).not.toBeNull();
+      expect(menu?.style.display).toBe('flex');
+
+      // Menu contains block action buttons
+      const moveUpBtn = menu?.querySelector('button[data-action="move-up"]');
+      const moveDownBtn = menu?.querySelector(
+        'button[data-action="move-down"]'
+      );
+      const dupBtn = menu?.querySelector('button[data-action="duplicate"]');
+      const deleteBtn = menu?.querySelector('button[data-action="delete"]');
+
+      expect(moveUpBtn).not.toBeNull();
+      expect(moveDownBtn).not.toBeNull();
+      expect(dupBtn).not.toBeNull();
+      expect(deleteBtn).not.toBeNull();
+
+      // Test duplicate block action
+      dupBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      // Paragraph count should increase to 2
+      const pCount = container.querySelectorAll('.editor-content p').length;
+      expect(pCount).toBe(2);
+
+      editor.destroy();
     });
   });
 });

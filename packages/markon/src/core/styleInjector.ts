@@ -366,8 +366,8 @@ export const MARKON_CORE_CSS = `
 .markon-drag-handle {
   position: absolute;
   z-index: 20;
-  width: 18px;
-  height: 22px;
+  width: 20px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -375,7 +375,15 @@ export const MARKON_CORE_CSS = `
   color: var(--fg-muted);
   border-radius: var(--radius-sm, 0.25rem);
   user-select: none;
+  touch-action: manipulation;
   transition: opacity var(--transition-fast, 0.15s) ease, background-color var(--transition-fast, 0.15s) ease, color var(--transition-fast, 0.15s) ease;
+}
+
+@media (pointer: coarse) {
+  .markon-drag-handle {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .markon-drag-handle:hover {
@@ -394,6 +402,95 @@ export const MARKON_CORE_CSS = `
   pointer-events: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   transform: translateY(-50%);
+}
+
+/* Block Actions Popover Menu */
+.markon-block-actions-menu {
+  position: fixed;
+  z-index: 10001;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl, 0.75rem);
+  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.18));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 4px;
+  min-width: 140px;
+  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, sans-serif);
+}
+
+.markon-block-actions-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--radius-md, 0.375rem);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--fg-default);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
+  transition: background-color var(--transition-fast, 0.15s) ease, color var(--transition-fast, 0.15s) ease;
+}
+
+.markon-block-actions-menu .dropdown-item:hover {
+  background-color: var(--bg-subtle);
+}
+
+.markon-block-actions-menu .dropdown-item.is-danger {
+  color: var(--color-danger, #ef4444);
+}
+
+.markon-block-actions-menu .dropdown-item.is-danger:hover {
+  background-color: var(--bg-danger-subtle, rgba(239, 68, 68, 0.1));
+}
+
+.markon-block-actions-menu .menu-divider {
+  height: 1px;
+  background-color: var(--border-default);
+  margin: 4px 0;
+  opacity: 0.6;
+}
+
+/* Optimistic Upload Card */
+.markon-uploading-card {
+  position: relative;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  border-radius: var(--radius-xl, 0.75rem);
+  border: 1px solid var(--border-default);
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  user-select: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast, 0.15s) ease, box-shadow var(--transition-fast, 0.15s) ease;
+}
+
+.markon-uploading-card.is-uploading {
+  border-color: var(--color-primary-subtle, var(--color-primary));
+}
+
+.markon-uploading-card.is-error {
+  border-color: var(--color-danger, #ef4444);
+  background-color: var(--bg-danger-subtle, rgba(239, 68, 68, 0.04));
+}
+
+@media (max-width: 480px) {
+  .markon-uploading-card {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
 }
 `;
 

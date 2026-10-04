@@ -42,6 +42,14 @@ export function htmlToMarkdown(html: string): string {
     const el = node as HTMLElement;
     const tag = el.tagName.toLowerCase();
 
+    // Ignore temporary optimistic upload placeholders
+    if (
+      el.hasAttribute('data-upload-placeholder') ||
+      el.classList.contains('markon-uploading-card')
+    ) {
+      return '';
+    }
+
     // Check for custom math block
     if (
       el.hasAttribute('data-math-block') ||

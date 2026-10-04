@@ -21,3 +21,4 @@ export * from './renderer';
 export * from './styleInjector';
 export * from './colorPicker';
 export * from './linkPopover';
+export * from './uploadPlaceholder';
