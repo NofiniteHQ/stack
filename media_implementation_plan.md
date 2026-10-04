@@ -79,12 +79,15 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
 - [x] Updated `packages/media/src/media.test.ts` to test all new imperative instance methods and cleanup logic.
 - **Commit:** `9b62843`
 
-### Phase 4: NUICSS Design Token & Theme Cascading Polish
+### Phase 4: NUICSS Design Token & Theme Cascading Polish (Completed)
 
-- Add `[data-theme='light'] .nui-vidstack-player`, `[data-theme='light'] .nui-vidstack-audio-player`, and `[data-theme='light'] .nui-media-container media-player` to `packages/media/src/styles/media.css`.
-- Ensure all token fallbacks use standard OKLCH formats matching `@nofinite/nuicss`.
-- Verify computed styles and visual harmony in testbed with Playwright.
-- **Gate:** STOP and wait for user approval.
+- [x] Added `[data-theme='light']` cascading selectors to `packages/media/src/styles/media.css` for video player, audio player, and custom media container.
+- [x] Wrapped root default light selectors in `:where()` to eliminate specificity escalation, allowing nested dark scopes (`[data-theme='dark']`, `.dark`) to cascade naturally.
+- [x] Replaced hardcoded hex values with canonical `@nofinite/nuicss` OKLCH token fallbacks (`oklch(.546 .285 262.881)`, `oklch(.623 .214 259.815)`, `oklch(1 0 0)`, `oklch(.208 .042 265.755)`, `oklch(.984 .006 247.858)`).
+- [x] Fixed invalid focus-ring box-shadow by configuring `--media-focus-ring-color` and valid 3px box-shadow strings.
+- [x] Supported canonical `--fg-default` token alongside fallback `--text-default`.
+- [x] Verified computed styles and visual harmony across light and dark theme boundaries with Playwright screenshots.
+- **Commit:** `pending`
 
 ### Phase 5: Component Tests, Storybook Showcase & Final Verification
 
