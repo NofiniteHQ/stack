@@ -63,9 +63,9 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
 - [x] Re-exported essential Vidstack hooks and components in `packages/media/src/react/index.ts` (`useActiveTextTrack`, `useVideoQualityOptions`, `useAudioOptions`, `useCaptionOptions`, `usePlaybackRateOptions`, `Track`, `DefaultVideoLayout`, `DefaultAudioLayout`, `defaultLayoutIcons`).
 - **Commit:** `64677b6`
 
-### Phase 3: Core Framework-Agnostic Player Engine Enhancements
+### Phase 3: Core Framework-Agnostic Player Engine Enhancements (Completed)
 
-- Expand `MediaPlayerInstance` in `packages/media/src/core/player.ts` with complete programmatic controls:
+- [x] Expanded `MediaPlayerInstance` in `packages/media/src/core/player.ts` with complete programmatic controls:
   - `seek(time: number): void`
   - `setVolume(volume: number): void`
   - `setMuted(muted: boolean): void`
@@ -74,10 +74,10 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
   - `enterPictureInPicture(): Promise<void>`
   - `exitPictureInPicture(): Promise<void>`
   - `setPlaybackRate(rate: number): void`
-- Maintain internal listener registry in `createMediaPlayer` to automatically detach all listeners and clean references on `destroy()`.
-- Synchronize both element attributes and DOM custom element properties when `setSrc()` is called.
-- Update `packages/media/src/media.test.ts` to test all new imperative instance methods.
-- **Gate:** STOP and wait for user approval.
+- [x] Maintained internal listener registry in `createMediaPlayer` to automatically detach all listeners and clean references on `destroy()`.
+- [x] Synchronized both element attributes and DOM custom element properties when `setSrc()` is called.
+- [x] Updated `packages/media/src/media.test.ts` to test all new imperative instance methods and cleanup logic.
+- **Commit:** `9b62843`
 
 ### Phase 4: NUICSS Design Token & Theme Cascading Polish
 
