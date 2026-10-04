@@ -70,9 +70,16 @@ export function renderKanbanHTML(options: {
             : '';
 
           return `
-            <div class="kanban-card p-3.5 rounded-xl border border-default bg-surface text-default shadow-xs cursor-grab active:cursor-grabbing hover:border-primary/40 hover:shadow-md transition-all select-none group relative"
+            <div class="kanban-card p-3.5 rounded-xl border border-default bg-surface text-default shadow-xs cursor-grab active:cursor-grabbing hover:border-primary/40 hover:shadow-md transition-all select-none group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                 role="button"
+                 tabindex="0"
+                 aria-roledescription="Kanban card"
+                 aria-label="${escapeHtml(item.title || 'Kanban card')}, item ${
+            itemIndex + 1
+          } of ${col.items.length}"
                  data-item-id="${escapeHtml(item.id)}"
                  data-column-id="${escapeHtml(col.id)}"
+                 data-column-index="${colIndex}"
                  data-index="${itemIndex}">
               ${
                 item.badge
@@ -246,6 +253,7 @@ export function renderKanbanHTML(options: {
     <div class="kanban kanban-board flex items-start gap-4 overflow-x-auto pb-4 pt-1 font-sans select-none min-h-[400px] ${
       options.className || ''
     }">
+      <div class="sr-only kanban-live-region" aria-live="polite" aria-atomic="true"></div>
       ${columnsHtml}
     </div>
   `.trim();
@@ -662,7 +670,174 @@ export function createKanbanBoard(
     }
   }
 
+  function announce(message: string) {
+    const liveEl = container.querySelector<HTMLElement>('.kanban-live-region');
+    if (liveEl) {
+      liveEl.textContent = message;
+    }
+  }
+
+  function restoreCardFocus(cardId: string) {
+    requestAnimationFrame(() => {
+      const el = container.querySelector<HTMLElement>(
+        `[data-item-id="${cardId}"]`
+      );
+      el?.focus();
+    });
+  }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    const target = e.target as HTMLElement | null;
+    const cardEl = target?.closest<HTMLElement>('.kanban-card');
+    if (!cardEl) return;
+
+    const cardId = cardEl.getAttribute('data-item-id') || '';
+    const colId = cardEl.getAttribute('data-column-id') || '';
+    const itemIdx = parseInt(cardEl.getAttribute('data-index') || '0', 10);
+    const colIdx = parseInt(
+      cardEl.getAttribute('data-column-index') || '0',
+      10
+    );
+
+    const columns = store.getState();
+    const currentCol = columns[colIdx] || columns.find((c) => c.id === colId);
+    if (!currentCol) return;
+    const currentItem =
+      currentCol.items[itemIdx] ||
+      currentCol.items.find((i) => i.id === cardId);
+    const totalCards = currentCol.items.length;
+
+    // Card activation via Enter or Space
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (!target?.closest('button, a, input, select, textarea')) {
+        e.preventDefault();
+        if (currentItem) {
+          options.onCardClick?.({ cardId, columnId: colId, item: currentItem });
+          container.dispatchEvent(
+            new CustomEvent('kanban:card-click', {
+              detail: { cardId, columnId: colId, item: currentItem },
+              bubbles: true,
+            })
+          );
+        }
+      }
+      return;
+    }
+
+    // Accessible keyboard reordering with Alt + Arrow keys
+    if (e.altKey) {
+      if (e.key === 'ArrowUp' && itemIdx > 0) {
+        e.preventDefault();
+        const targetIndex = itemIdx - 1;
+        handleCardMove({
+          cardId,
+          sourceColumnId: colId,
+          targetColumnId: colId,
+          sourceIndex: itemIdx,
+          targetIndex,
+          edge: 'top',
+        });
+        announce(
+          `Moved card '${currentItem?.title || 'Card'}' to position ${
+            targetIndex + 1
+          } of ${totalCards} in ${currentCol.title}`
+        );
+        restoreCardFocus(cardId);
+      } else if (e.key === 'ArrowDown' && itemIdx < totalCards - 1) {
+        e.preventDefault();
+        const targetIndex = itemIdx + 1;
+        handleCardMove({
+          cardId,
+          sourceColumnId: colId,
+          targetColumnId: colId,
+          sourceIndex: itemIdx,
+          targetIndex,
+          edge: 'bottom',
+        });
+        announce(
+          `Moved card '${currentItem?.title || 'Card'}' to position ${
+            targetIndex + 1
+          } of ${totalCards} in ${currentCol.title}`
+        );
+        restoreCardFocus(cardId);
+      } else if (e.key === 'ArrowLeft' && colIdx > 0) {
+        e.preventDefault();
+        const targetCol = columns[colIdx - 1];
+        if (targetCol) {
+          const targetIndex = Math.min(itemIdx, targetCol.items.length);
+          handleCardMove({
+            cardId,
+            sourceColumnId: colId,
+            targetColumnId: targetCol.id,
+            sourceIndex: itemIdx,
+            targetIndex,
+            edge: 'bottom',
+          });
+          announce(
+            `Moved card '${currentItem?.title || 'Card'}' to column '${
+              targetCol.title
+            }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
+          );
+          restoreCardFocus(cardId);
+        }
+      } else if (e.key === 'ArrowRight' && colIdx < columns.length - 1) {
+        e.preventDefault();
+        const targetCol = columns[colIdx + 1];
+        if (targetCol) {
+          const targetIndex = Math.min(itemIdx, targetCol.items.length);
+          handleCardMove({
+            cardId,
+            sourceColumnId: colId,
+            targetColumnId: targetCol.id,
+            sourceIndex: itemIdx,
+            targetIndex,
+            edge: 'bottom',
+          });
+          announce(
+            `Moved card '${currentItem?.title || 'Card'}' to column '${
+              targetCol.title
+            }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
+          );
+          restoreCardFocus(cardId);
+        }
+      } else if (e.key === 'Home' && itemIdx > 0) {
+        e.preventDefault();
+        handleCardMove({
+          cardId,
+          sourceColumnId: colId,
+          targetColumnId: colId,
+          sourceIndex: itemIdx,
+          targetIndex: 0,
+          edge: 'top',
+        });
+        announce(
+          `Moved card '${currentItem?.title || 'Card'}' to top of column '${
+            currentCol.title
+          }'`
+        );
+        restoreCardFocus(cardId);
+      } else if (e.key === 'End' && itemIdx < totalCards - 1) {
+        e.preventDefault();
+        handleCardMove({
+          cardId,
+          sourceColumnId: colId,
+          targetColumnId: colId,
+          sourceIndex: itemIdx,
+          targetIndex: totalCards - 1,
+          edge: 'bottom',
+        });
+        announce(
+          `Moved card '${currentItem?.title || 'Card'}' to bottom of column '${
+            currentCol.title
+          }'`
+        );
+        restoreCardFocus(cardId);
+      }
+    }
+  }
+
   container.addEventListener('click', handleClick);
+  container.addEventListener('keydown', handleKeyDown);
 
   // Subscribe to store updates to re-render DOM
   const unsubscribeStore = store.subscribe((newColumns) => {
@@ -678,6 +853,7 @@ export function createKanbanBoard(
       cleanups = [];
       unsubscribeStore();
       container.removeEventListener('click', handleClick);
+      container.removeEventListener('keydown', handleKeyDown);
       container.innerHTML = '';
     },
     update: (newColumns: KanbanColumn[]) => {

@@ -68,9 +68,12 @@ interface CardProps {
   totalCards: number;
   columnIndex: number;
   totalColumns: number;
+  allColumns: KanbanColumnProps[];
   onCardMove: (event: CardMoveEvent) => void;
   onCardClick?: (cardId: string, columnId: string, item: KanbanItem) => void;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
+  onAnnounce?: (message: string) => void;
+  onFocusCard?: (cardId: string) => void;
 }
 
 function KanbanCardItem({
@@ -78,9 +81,14 @@ function KanbanCardItem({
   columnId,
   index,
   totalCards,
+  columnIndex,
+  totalColumns,
+  allColumns,
   onCardMove,
   onCardClick,
   renderCard,
+  onAnnounce,
+  onFocusCard,
 }: CardProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -162,34 +170,127 @@ function KanbanCardItem({
   const hasFooter = item.dueDate || item.subtasks || item.assignee;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    // Keyboard accessibility for card reordering & activation
+    // Keyboard accessibility for card activation
     if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onCardClick?.(item.id, columnId, item);
+      if (
+        !(e.target as HTMLElement).closest('button, a, input, select, textarea')
+      ) {
+        e.preventDefault();
+        onCardClick?.(item.id, columnId, item);
+      }
       return;
     }
 
     if (e.altKey) {
+      const currentColumn = allColumns[columnIndex];
+      const currentColTitle = currentColumn?.title || 'column';
+
       if (e.key === 'ArrowUp' && index > 0) {
         e.preventDefault();
+        const targetIndex = index - 1;
         onCardMove({
           cardId: item.id,
           sourceColumnId: columnId,
           targetColumnId: columnId,
           sourceIndex: index,
-          targetIndex: index - 1,
+          targetIndex,
           edge: 'top',
         });
+        onAnnounce?.(
+          `Moved card '${item.title || 'Card'}' to position ${
+            targetIndex + 1
+          } of ${totalCards} in ${currentColTitle}`
+        );
+        onFocusCard?.(item.id);
       } else if (e.key === 'ArrowDown' && index < totalCards - 1) {
+        e.preventDefault();
+        const targetIndex = index + 1;
+        onCardMove({
+          cardId: item.id,
+          sourceColumnId: columnId,
+          targetColumnId: columnId,
+          sourceIndex: index,
+          targetIndex,
+          edge: 'bottom',
+        });
+        onAnnounce?.(
+          `Moved card '${item.title || 'Card'}' to position ${
+            targetIndex + 1
+          } of ${totalCards} in ${currentColTitle}`
+        );
+        onFocusCard?.(item.id);
+      } else if (e.key === 'ArrowLeft' && columnIndex > 0) {
+        e.preventDefault();
+        const targetCol = allColumns[columnIndex - 1];
+        if (targetCol) {
+          const targetIndex = Math.min(index, targetCol.items.length);
+          onCardMove({
+            cardId: item.id,
+            sourceColumnId: columnId,
+            targetColumnId: targetCol.id,
+            sourceIndex: index,
+            targetIndex,
+            edge: 'bottom',
+          });
+          onAnnounce?.(
+            `Moved card '${item.title || 'Card'}' to column '${
+              targetCol.title
+            }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
+          );
+          onFocusCard?.(item.id);
+        }
+      } else if (e.key === 'ArrowRight' && columnIndex < totalColumns - 1) {
+        e.preventDefault();
+        const targetCol = allColumns[columnIndex + 1];
+        if (targetCol) {
+          const targetIndex = Math.min(index, targetCol.items.length);
+          onCardMove({
+            cardId: item.id,
+            sourceColumnId: columnId,
+            targetColumnId: targetCol.id,
+            sourceIndex: index,
+            targetIndex,
+            edge: 'bottom',
+          });
+          onAnnounce?.(
+            `Moved card '${item.title || 'Card'}' to column '${
+              targetCol.title
+            }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
+          );
+          onFocusCard?.(item.id);
+        }
+      } else if (e.key === 'Home' && index > 0) {
         e.preventDefault();
         onCardMove({
           cardId: item.id,
           sourceColumnId: columnId,
           targetColumnId: columnId,
           sourceIndex: index,
-          targetIndex: index + 1,
+          targetIndex: 0,
+          edge: 'top',
+        });
+        onAnnounce?.(
+          `Moved card '${
+            item.title || 'Card'
+          }' to top of column '${currentColTitle}'`
+        );
+        onFocusCard?.(item.id);
+      } else if (e.key === 'End' && index < totalCards - 1) {
+        e.preventDefault();
+        onCardMove({
+          cardId: item.id,
+          sourceColumnId: columnId,
+          targetColumnId: columnId,
+          sourceIndex: index,
+          targetIndex: totalCards - 1,
           edge: 'bottom',
         });
+        onAnnounce?.(
+          `Moved card '${
+            item.title || 'Card'
+          }' to bottom of column '${currentColTitle}'`
+        );
+        onFocusCard?.(item.id);
       }
     }
   };
@@ -199,6 +300,9 @@ function KanbanCardItem({
       ref={ref}
       role="button"
       tabIndex={0}
+      data-item-id={item.id}
+      data-column-id={columnId}
+      aria-roledescription="Kanban card"
       aria-label={`${item.title || 'Kanban card'}, item ${
         index + 1
       } of ${totalCards}`}
@@ -335,6 +439,7 @@ interface ColumnComponentProps {
   column: KanbanColumnProps;
   index: number;
   totalColumns: number;
+  allColumns: KanbanColumnProps[];
   columnClassName?: string;
   allowAdd?: boolean;
   headerActions?: boolean;
@@ -345,12 +450,15 @@ interface ColumnComponentProps {
   onColumnOptions?: (columnId: string) => void;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
   renderHeader?: (column: KanbanColumnProps) => React.ReactNode;
+  onAnnounce?: (message: string) => void;
+  onFocusCard?: (cardId: string) => void;
 }
 
 function KanbanColumnComponent({
   column,
   index,
   totalColumns,
+  allColumns,
   columnClassName,
   allowAdd,
   headerActions,
@@ -361,6 +469,8 @@ function KanbanColumnComponent({
   onColumnOptions,
   renderCard,
   renderHeader,
+  onAnnounce,
+  onFocusCard,
 }: ColumnComponentProps) {
   const colRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
@@ -556,9 +666,12 @@ function KanbanColumnComponent({
               totalCards={column.items.length}
               columnIndex={index}
               totalColumns={totalColumns}
+              allColumns={allColumns}
               onCardMove={onCardMove}
               onCardClick={onCardClick}
               renderCard={renderCard}
+              onAnnounce={onAnnounce}
+              onFocusCard={onFocusCard}
             />
           ))
         )}
@@ -615,10 +728,21 @@ export function Kanban({
   ...props
 }: KanbanProps) {
   const [data, setData] = useState<KanbanColumnProps[]>(columns);
+  const [announcement, setAnnouncement] = useState<string>('');
+  const boardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setData(columns);
   }, [columns]);
+
+  const focusCard = (cardId: string) => {
+    requestAnimationFrame(() => {
+      const el = boardRef.current?.querySelector<HTMLElement>(
+        `[data-item-id="${cardId}"]`
+      );
+      el?.focus();
+    });
+  };
 
   const handleCardMove = (event: CardMoveEvent) => {
     setData((prev) => {
@@ -646,18 +770,23 @@ export function Kanban({
 
   return (
     <div
+      ref={boardRef}
       className={clsx(
         'kanban kanban-board flex gap-4 overflow-x-auto p-4 items-start select-none font-sans min-h-[400px]',
         className
       )}
       {...props}
     >
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </div>
       {data.map((col, idx) => (
         <KanbanColumnComponent
           key={col.id}
           column={col}
           index={idx}
           totalColumns={data.length}
+          allColumns={data}
           columnClassName={columnClassName}
           allowAdd={allowAdd}
           headerActions={headerActions}
@@ -668,6 +797,8 @@ export function Kanban({
           onColumnOptions={onColumnOptions}
           renderCard={renderCard}
           renderHeader={renderHeader}
+          onAnnounce={setAnnouncement}
+          onFocusCard={focusCard}
         />
       ))}
     </div>

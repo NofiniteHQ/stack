@@ -277,3 +277,190 @@ describe('@nofinite/kanban DOM renderer and binder', () => {
     expect(movedToBottom[0].items.map((i) => i.id)).toEqual(['c2', 'c3', 'c1']);
   });
 });
+
+describe('@nofinite/kanban keyboard accessibility & ARIA live announcer', () => {
+  it('renders cards with accessible roles and attributes', () => {
+    const html = renderKanbanHTML({
+      columns: [
+        {
+          id: 'todo',
+          title: 'To Do',
+          items: [{ id: 'task-1', title: 'Accessible Task' }],
+        },
+      ],
+    });
+
+    expect(html).toContain('role="button"');
+    expect(html).toContain('tabindex="0"');
+    expect(html).toContain('aria-roledescription="Kanban card"');
+    expect(html).toContain('aria-label="Accessible Task, item 1 of 1"');
+    expect(html).toContain('kanban-live-region');
+  });
+
+  it('moves cards across columns with Alt+ArrowRight and Alt+ArrowLeft via keyboard', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    let movedEvent: any = null;
+    const board = createKanbanBoard({
+      container,
+      columns: [
+        {
+          id: 'col-1',
+          title: 'To Do',
+          items: [{ id: 'card-1', title: 'Task 1' }],
+        },
+        {
+          id: 'col-2',
+          title: 'Done',
+          items: [{ id: 'card-2', title: 'Task 2' }],
+        },
+      ],
+      onCardMove: (e) => {
+        movedEvent = e;
+      },
+    });
+
+    const card1 = container.querySelector<HTMLElement>(
+      '[data-item-id="card-1"]'
+    )!;
+    expect(card1).not.toBeNull();
+
+    // Trigger Alt+ArrowRight on card1
+    card1.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowRight',
+        altKey: true,
+        bubbles: true,
+      })
+    );
+
+    expect(movedEvent).not.toBeNull();
+    expect(movedEvent.sourceColumnId).toBe('col-1');
+    expect(movedEvent.targetColumnId).toBe('col-2');
+    expect(board.getColumns()[0].items.length).toBe(0);
+    expect(board.getColumns()[1].items.length).toBe(2);
+
+    // Verify live region announcement
+    const liveEl = container.querySelector('.kanban-live-region');
+    expect(liveEl?.textContent).toContain(
+      "Moved card 'Task 1' to column 'Done'"
+    );
+
+    // Trigger Alt+ArrowLeft on card1 in col-2 to move it back
+    const card1Moved = container.querySelector<HTMLElement>(
+      '[data-item-id="card-1"]'
+    )!;
+    card1Moved.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowLeft',
+        altKey: true,
+        bubbles: true,
+      })
+    );
+
+    expect(board.getColumns()[0].items.length).toBe(1);
+    expect(board.getColumns()[0].items[0].id).toBe('card-1');
+    expect(board.getColumns()[1].items.length).toBe(1);
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('reorders cards within a column with Alt+ArrowDown and Alt+ArrowUp', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: [
+        {
+          id: 'col-1',
+          title: 'To Do',
+          items: [
+            { id: 'card-1', title: 'Task 1' },
+            { id: 'card-2', title: 'Task 2' },
+          ],
+        },
+      ],
+    });
+
+    const card1 = container.querySelector<HTMLElement>(
+      '[data-item-id="card-1"]'
+    )!;
+    card1.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        altKey: true,
+        bubbles: true,
+      })
+    );
+
+    expect(board.getColumns()[0].items.map((c) => c.id)).toEqual([
+      'card-2',
+      'card-1',
+    ]);
+
+    const card1AtBottom = container.querySelector<HTMLElement>(
+      '[data-item-id="card-1"]'
+    )!;
+    card1AtBottom.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowUp',
+        altKey: true,
+        bubbles: true,
+      })
+    );
+
+    expect(board.getColumns()[0].items.map((c) => c.id)).toEqual([
+      'card-1',
+      'card-2',
+    ]);
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('triggers onCardClick on Enter and Space keypress', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    let clickedCardId: string | null = null;
+    const board = createKanbanBoard({
+      container,
+      columns: [
+        {
+          id: 'col-1',
+          title: 'To Do',
+          items: [{ id: 'card-1', title: 'Task 1' }],
+        },
+      ],
+      onCardClick: ({ cardId }) => {
+        clickedCardId = cardId;
+      },
+    });
+
+    const card1 = container.querySelector<HTMLElement>(
+      '[data-item-id="card-1"]'
+    )!;
+    card1.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+      })
+    );
+    expect(clickedCardId).toBe('card-1');
+
+    clickedCardId = null;
+    card1.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: ' ',
+        bubbles: true,
+      })
+    );
+    expect(clickedCardId).toBe('card-1');
+
+    board.destroy();
+    container.remove();
+  });
+});

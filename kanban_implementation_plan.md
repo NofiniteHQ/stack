@@ -49,44 +49,38 @@ Phase 6: Search & Filter Suite, Test Suite Expansion & Package Verification
 
 ## 3. Detailed Phase Breakdown
 
-### Phase 1: Self-Contained Stylesheet & 300px Monster SVG Fix
+#### Phase 1: Self-Contained Stylesheet & 300px Monster SVG Fix [COMPLETED & COMMITTED: 98c69a2]
 
-- **Files Affected:**
-  - `packages/kanban/src/styles.css`
-  - `packages/kanban/src/core/board.ts`
-  - `packages/kanban/src/react/Kanban.tsx`
-- **Actions:**
-  1. Add explicit `width` and `height` attributes to all SVGs in `board.ts` and `Kanban.tsx` (`width="14" height="14"` on meta icons, `width="16" height="16"` on button icons).
-  2. Expand `packages/kanban/src/styles.css` into a self-contained stylesheet anchored in `@nofinite/nuicss` tokens:
-     - Explicit sizing and alignment for `.kanban-card svg`, `.kanban-add-btn svg`, `.kanban-column-options svg`.
-     - Layout rules for `.kanban-column-header`, `.kanban-card-title`, `.kanban-card-footer`, `.kanban-card-meta`, `.kanban-card-assignee`, `.kanban-empty-placeholder`.
-     - Pure token bridges: `.text-muted`, `.text-default`, `.text-primary`, `.text-danger`, `.text-success`, `.text-warning`, `.bg-surface`, `.bg-subtle`, `.border-default`.
-     - Remove hardcoded `#6366f1` and use pure `var(--color-primary)` for focus ring.
-     - Style drop indicators using `var(--color-primary)` with glowing edge lines.
-  3. Align spacing between React and Vanilla DOM so columns have identical spatial harmony.
-- **Verification:**
-  - Run Playwright visual script (`temp/audit-kanban.cjs`), inspect screenshots in light and dark mode, and verify that icons are crisp 14px elements and cards format into clean horizontal meta rows.
+- **Status:** Complete & verified with Playwright snapshots (`temp/screenshots/kanban-audit-light.png`, `temp/screenshots/kanban-audit-dark.png`).
 
 ---
 
-### Phase 2: Full Keyboard A11y (Cross-Column Reordering) & ARIA Live Region
+### Phase 2: Full Keyboard A11y (Cross-Column Reordering) & ARIA Live Region [COMPLETED & VERIFIED]
 
+- **Status:** Complete & verified.
 - **Files Affected:**
+  - `packages/kanban/src/styles.css`
   - `packages/kanban/src/react/Kanban.tsx`
   - `packages/kanban/src/core/board.ts`
-  - `packages/kanban/src/core/types.ts`
-- **Actions:**
-  1. In `src/react/Kanban.tsx`:
-     - Implement `Alt+ArrowLeft` and `Alt+ArrowRight` to move a card to the previous/next column at the corresponding or clamped index.
-     - Implement `Home` and `End` (with `Alt`) to jump to the top and bottom of the column.
-  2. In `src/core/board.ts`:
-     - Add `tabindex="0"`, `role="button"`, and ARIA attributes (`aria-label`, `aria-roledescription="Kanban card"`) to card markup.
-     - Add keyboard event listener to card elements handling `Enter`, `Space`, `Alt+ArrowUp`, `Alt+ArrowDown`, `Alt+ArrowLeft`, `Alt+ArrowRight`.
-  3. Implement ARIA live announcer:
-     - Add an `aria-live="polite"` element that announces card movements:
-       `"Moved card '{title}' to column '{columnTitle}', position {index + 1} of {total}"`.
-- **Verification:**
-  - Automated unit test verifying `Alt+ArrowRight` cross-column moves, plus Playwright verification testing keyboard focus rings and movement.
+  - `packages/kanban/src/kanban.test.ts`
+- **Actions Completed:**
+  1. In `src/styles.css`: Added self-contained `.sr-only` utility for visually hidden ARIA live regions.
+  2. In `src/react/Kanban.tsx`:
+     - Added `Alt+ArrowLeft` and `Alt+ArrowRight` cross-column card reordering with clamped index positioning.
+     - Added `Alt+Home` and `Alt+End` to jump to column boundaries.
+     - Added `focusCard` helper and active focus retention across DOM re-renders.
+     - Added `<div className="sr-only" aria-live="polite" aria-atomic="true">` announcer.
+     - Added `role="button"`, `tabindex="0"`, `aria-roledescription="Kanban card"`, `aria-label`, and `data-item-id`.
+  3. In `src/core/board.ts`:
+     - Rendered `<div class="sr-only kanban-live-region" aria-live="polite" aria-atomic="true"></div>`.
+     - Added `role="button"`, `tabindex="0"`, `aria-roledescription="Kanban card"`, `aria-label`, and `data-column-index` to cards.
+     - Attached `handleKeyDown` on board container supporting `Enter`, `Space`, `Alt+ArrowUp`, `Alt+ArrowDown`, `Alt+ArrowLeft`, `Alt+ArrowRight`, `Alt+Home`, and `Alt+End`.
+     - Implemented `restoreCardFocus` with `requestAnimationFrame` and screen reader announcements.
+  4. Expanded test suite in `src/kanban.test.ts` verifying accessible roles, keyboard cross-column moves, intra-column reordering, and card click activation (100% green).
+  5. Playwright verified via `temp/verify-phase2.cjs` capturing:
+     - `temp/screenshots/phase2-focused-task-a.png` (crisp `var(--color-primary)` focus ring)
+     - `temp/screenshots/phase2-moved-to-progress.png` (cross-column move + retained focus)
+     - `temp/screenshots/phase2-moved-to-completed.png` (move to empty column + retained focus + ARIA live announcement text verified).
 
 ---
 
