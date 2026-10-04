@@ -41,24 +41,32 @@ Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit
 
 ---
 
-### Phase 1: Custom Color Picker Component & Expanded OKLCH Palettes
+### Phase 1: Custom Color Picker Component & Expanded OKLCH Palettes [COMPLETED - commit `260dd09`]
 
 **Goal:** Provide an enterprise-grade color selection experience for both highlights and text colors, accessible from both the main toolbar and the floating bubble menu.
 
-- **Tasks:**
-  1. Build `MarkonColorPicker` (`packages/markon/src/core/colorPicker.ts`):
-     - Interactive Hue slider bar + Saturation/Lightness picker area (or interactive 2D gradient selector).
-     - Hex input field (`#RRGGBB`) with real-time swatch preview, validation, and paste support.
-     - Zero reliance on native `<input type="color">`.
-  2. Expanded **Highlight Palette (12+ OKLCH Pastel Tones)**:
-     - Yellow, Amber/Orange, Coral/Red, Rose/Pink, Purple/Lavender, Violet, Blue/Sky, Cyan/Teal, Emerald/Green, Lime/Mint, Slate/Gray, Warm Brown.
-     - "Remove Highlight" clear action button.
-  3. Expanded **Text Color Palette (12+ OKLCH Chromatic Hues)**:
-     - Default (inherit with clear icon), Slate/Muted, Amber, Orange, Red, Rose, Purple, Indigo, Blue, Teal, Green, Dark Neutral.
+- **Completed Deliverables:**
+  1. Built `MarkonColorPicker` (`packages/markon/src/core/colorPicker.ts`):
+     - Interactive Hue slider bar with continuous gradient preview (`linear-gradient(to right, ...)`).
+     - Live Hex input field (`#RRGGBB`) with real-time swatch preview badge, validation, and Apply action.
+     - Zero reliance on native OS `<input type="color">`.
+     - Standardized popover coordination via `popoverManager.ts` with `zIndex: 10001` and Floating UI collision avoidance.
+  2. Expanded **Highlight Palette (12 OKLCH Pastel Tones)**:
+     - Yellow, Amber, Coral, Rose, Lavender, Violet, Sky, Teal, Mint, Emerald, Slate, Brown.
+     - "Remove Highlight" action button.
+  3. Expanded **Text Color Palette (12 OKLCH Chromatic Hues)**:
+     - Default (clear slash icon), Muted, Dark, Amber, Orange, Red, Rose, Purple, Brand, Blue, Teal, Green.
      - "Reset to Default" action button.
-  4. Bubble Menu Color Integration:
-     - Update `bubbleMenu.ts` so clicking "Highlight" or "Text Color" opens the custom color picker popover directly over the user's selected text.
-  5. Update `toolbarMenus.ts` to consume the new `MarkonColorPicker`.
+  4. Bubble Menu Color Integration (`bubbleMenu.ts`):
+     - Added dedicated `Text Color` button beside `Highlight`.
+     - Live swatch and color bar indicator previews directly on bubble buttons.
+     - Context retention: Popover interaction prevents bubble menu dismissal while picking colors.
+     - Selection preservation: Caches and restores `{ from, to }` range when colors are selected or cleared.
+  5. Updated `toolbarMenus.ts` to delegate to `MarkonColorPicker`.
+  6. **Verification Passed:**
+     - 40/40 unit tests passing (`npx vitest run packages/markon`).
+     - `npm pack --dry-run` tarball verified (all types and bundles present).
+     - Visual audit verified in Chromium (`/temp/markon_toolbar_highlight_picker.png`, `/temp/markon_toolbar_textcolor_picker.png`, `/temp/markon_bubble_menu_with_colors.png`, `/temp/markon_bubble_highlight_picker_open.png`, `/temp/markon_highlight_applied.png`, `/temp/markon_bubble_textcolor_picker_open.png`).
 
 ---
 
