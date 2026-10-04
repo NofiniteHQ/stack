@@ -332,39 +332,21 @@ export class MarkonFontSizeMenu {
 }
 
 // --- HIGHLIGHT COLOR MENU ---
-export interface HighlightPreset {
-  label: string;
-  color: string;
-}
+import {
+  MarkonColorPicker,
+  HIGHLIGHT_PRESETS,
+  TEXT_COLOR_PRESETS,
+  type ColorPreset,
+} from './colorPicker';
 
-export const HIGHLIGHT_PRESETS: HighlightPreset[] = [
-  {
-    label: 'Yellow',
-    color: 'var(--color-warning-subtle)',
-  },
-  {
-    label: 'Green',
-    color: 'var(--color-success-subtle)',
-  },
-  { label: 'Blue', color: 'var(--color-info-subtle)' },
-  { label: 'Pink', color: 'var(--color-danger-subtle)' },
-  {
-    label: 'Primary',
-    color: 'var(--color-primary-subtle)',
-  },
-  {
-    label: 'Secondary',
-    color: 'var(--color-secondary-subtle)',
-  },
-];
+export { HIGHLIGHT_PRESETS, TEXT_COLOR_PRESETS };
+export type HighlightPreset = ColorPreset;
+export type TextColorPreset = ColorPreset;
 
 export class MarkonHighlightMenu {
   private editor: Editor;
   private trigger: HTMLElement;
-  private menuEl: HTMLElement | null = null;
-  private isOpen = false;
-  private cleanupAutoUpdate: (() => void) | null = null;
-  private cleanupOutsideClick: (() => void) | null = null;
+  private picker: MarkonColorPicker | null = null;
   private cleanupTriggerEvents: (() => void) | null = null;
 
   constructor(editor: Editor, trigger: HTMLElement) {
@@ -391,147 +373,33 @@ export class MarkonHighlightMenu {
   }
 
   public toggle(): void {
-    if (this.isOpen) this.close();
-    else this.open();
+    if (this.picker?.isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
   }
 
   public open(): void {
-    if (this.isOpen) return;
-    registerActivePopover(this);
-    this.isOpen = true;
-    this.trigger.setAttribute('aria-expanded', 'true');
-    this.trigger.classList.add('btn-active');
-
-    const menu = document.createElement('div');
-    menu.className =
-      'markon-highlight-menu dropdown-menu card bg-surface border border-default rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-2 min-w-[160px] animate-in fade-in zoom-in-95 duration-100';
-    menu.setAttribute('role', 'dialog');
-    menu.setAttribute('data-state', 'open');
-    menu.style.position = 'fixed';
-    menu.style.display = 'flex';
-    menu.style.zIndex = '9999';
-
-    const header = document.createElement('div');
-    header.className =
-      'text-xs font-semibold text-muted px-1 uppercase tracking-wider';
-    header.textContent = 'Highlight Color';
-    menu.appendChild(header);
-
-    // Color Swatch Grid
-    const grid = document.createElement('div');
-    grid.className =
-      'grid grid-cols-6 gap-1.5 p-1 bg-subtle/50 rounded-lg border border-default/50';
-
     const currentColor = this.editor.getAttributes('highlight').color;
-
-    HIGHLIGHT_PRESETS.forEach((preset) => {
-      const swatch = document.createElement('button');
-      swatch.type = 'button';
-      swatch.className =
-        'rounded-md border border-black/10 cursor-pointer transition-transform hover:scale-110 flex items-center justify-center shrink-0';
-      swatch.style.width = '22px';
-      swatch.style.height = '22px';
-      swatch.style.minWidth = '22px';
-      swatch.style.minHeight = '22px';
-      swatch.style.backgroundColor = preset.color;
-      swatch.title = preset.label;
-
-      if (currentColor === preset.color) {
-        swatch.classList.add('ring-2', 'ring-primary', 'ring-offset-1');
-      }
-
-      swatch.addEventListener('mousedown', (e) => e.preventDefault());
-      swatch.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.editor
-          .chain()
-          .focus()
-          .toggleHighlight({ color: preset.color })
-          .run();
-        this.close();
-        this.editor.commands.focus();
-      });
-
-      grid.appendChild(swatch);
+    this.picker = new MarkonColorPicker({
+      mode: 'highlight',
+      title: 'Highlight Color',
+      trigger: this.trigger,
+      currentColor,
+      onSelect: (color) => {
+        this.editor.chain().focus().setHighlight({ color }).run();
+      },
+      onClear: () => {
+        this.editor.chain().focus().unsetHighlight().run();
+      },
     });
-    menu.appendChild(grid);
-
-    // Remove Highlight button
-    const clearBtn = document.createElement('button');
-    clearBtn.type = 'button';
-    clearBtn.className =
-      'btn btn-ghost btn-sm w-full justify-start text-xs text-muted hover:text-danger gap-2';
-    clearBtn.innerHTML = `
-      <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-      <span>Remove Highlight</span>
-    `;
-    clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
-    clearBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.editor.chain().focus().unsetHighlight().run();
-      this.close();
-      this.editor.commands.focus();
-    });
-    menu.appendChild(clearBtn);
-
-    document.body.appendChild(menu);
-    this.menuEl = menu;
-
-    this.cleanupAutoUpdate = autoUpdate(this.trigger, menu, () => {
-      computePosition(this.trigger, menu, {
-        strategy: 'fixed',
-        placement: 'bottom-start',
-        middleware: [offset(4), flip(), shift({ padding: 8 })],
-      }).then(({ x, y }) => {
-        menu.style.left = `${x}px`;
-        menu.style.top = `${y}px`;
-      });
-    });
-
-    const handleOutsideClick = (e: MouseEvent | PointerEvent) => {
-      if (
-        !this.trigger.contains(e.target as Node) &&
-        !menu.contains(e.target as Node)
-      ) {
-        this.close();
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        this.close();
-      }
-    };
-    document.addEventListener('pointerdown', handleOutsideClick);
-    document.addEventListener('keydown', handleKeyDown);
-    this.cleanupOutsideClick = () => {
-      document.removeEventListener('pointerdown', handleOutsideClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    this.picker.open();
   }
 
   public close(): void {
-    if (!this.isOpen) return;
-    unregisterActivePopover(this);
-    this.isOpen = false;
-    this.trigger.setAttribute('aria-expanded', 'false');
-    this.trigger.classList.remove('btn-active');
-
-    if (this.cleanupAutoUpdate) {
-      this.cleanupAutoUpdate();
-      this.cleanupAutoUpdate = null;
-    }
-    if (this.cleanupOutsideClick) {
-      this.cleanupOutsideClick();
-      this.cleanupOutsideClick = null;
-    }
-    if (this.menuEl) {
-      this.menuEl.remove();
-      this.menuEl = null;
+    if (this.picker?.isOpen) {
+      this.picker.close();
     }
   }
 
@@ -545,29 +413,10 @@ export class MarkonHighlightMenu {
 }
 
 // --- TEXT COLOR MENU ---
-export interface TextColorPreset {
-  label: string;
-  color: string;
-}
-
-export const TEXT_COLOR_PRESETS: TextColorPreset[] = [
-  { label: 'Default', color: 'inherit' },
-  { label: 'Primary', color: 'var(--color-primary)' },
-  { label: 'Brand', color: 'var(--brand-700)' },
-  { label: 'Success', color: 'var(--color-success)' },
-  { label: 'Danger', color: 'var(--color-danger)' },
-  { label: 'Warning', color: 'var(--color-warning)' },
-  { label: 'Info', color: 'var(--color-info)' },
-  { label: 'Muted', color: 'var(--fg-muted)' },
-];
-
 export class MarkonTextColorMenu {
   private editor: Editor;
   private trigger: HTMLElement;
-  private menuEl: HTMLElement | null = null;
-  private isOpen = false;
-  private cleanupAutoUpdate: (() => void) | null = null;
-  private cleanupOutsideClick: (() => void) | null = null;
+  private picker: MarkonColorPicker | null = null;
   private cleanupTriggerEvents: (() => void) | null = null;
 
   constructor(editor: Editor, trigger: HTMLElement) {
@@ -594,150 +443,33 @@ export class MarkonTextColorMenu {
   }
 
   public toggle(): void {
-    if (this.isOpen) this.close();
-    else this.open();
+    if (this.picker?.isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
   }
 
   public open(): void {
-    if (this.isOpen) return;
-    registerActivePopover(this);
-    this.isOpen = true;
-    this.trigger.setAttribute('aria-expanded', 'true');
-    this.trigger.classList.add('btn-active');
-
-    const menu = document.createElement('div');
-    menu.className =
-      'markon-color-menu dropdown-menu card bg-surface border border-default rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-2 min-w-[170px] animate-in fade-in zoom-in-95 duration-100';
-    menu.setAttribute('role', 'dialog');
-    menu.setAttribute('data-state', 'open');
-    menu.style.position = 'fixed';
-    menu.style.display = 'flex';
-    menu.style.zIndex = '9999';
-
-    const header = document.createElement('div');
-    header.className =
-      'text-xs font-semibold text-muted px-1 uppercase tracking-wider';
-    header.textContent = 'Text Color';
-    menu.appendChild(header);
-
-    const grid = document.createElement('div');
-    grid.className =
-      'grid grid-cols-4 gap-2 p-1.5 bg-subtle/50 rounded-lg border border-default/50';
-
     const currentColor = this.editor.getAttributes('textStyle').color;
-
-    TEXT_COLOR_PRESETS.forEach((preset) => {
-      const swatch = document.createElement('button');
-      swatch.type = 'button';
-      swatch.className =
-        'rounded-md border border-default cursor-pointer transition-transform hover:scale-110 flex items-center justify-center shrink-0';
-      swatch.style.width = '22px';
-      swatch.style.height = '22px';
-      swatch.style.minWidth = '22px';
-      swatch.style.minHeight = '22px';
-      swatch.style.backgroundColor =
-        preset.color === 'inherit' ? 'var(--fg-default)' : preset.color;
-      swatch.title = preset.label;
-
-      if (
-        currentColor === preset.color ||
-        (!currentColor && preset.color === 'inherit')
-      ) {
-        swatch.classList.add('ring-2', 'ring-primary', 'ring-offset-1');
-      }
-
-      swatch.addEventListener('mousedown', (e) => e.preventDefault());
-      swatch.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (preset.color === 'inherit') {
-          this.editor.chain().focus().unsetColor().run();
-        } else {
-          this.editor.chain().focus().setColor(preset.color).run();
-        }
-        this.close();
-        this.editor.commands.focus();
-      });
-
-      grid.appendChild(swatch);
+    this.picker = new MarkonColorPicker({
+      mode: 'textColor',
+      title: 'Text Color',
+      trigger: this.trigger,
+      currentColor,
+      onSelect: (color) => {
+        this.editor.chain().focus().setColor(color).run();
+      },
+      onClear: () => {
+        this.editor.chain().focus().unsetColor().run();
+      },
     });
-    menu.appendChild(grid);
-
-    // Reset color button
-    const clearBtn = document.createElement('button');
-    clearBtn.type = 'button';
-    clearBtn.className =
-      'btn btn-ghost btn-sm w-full justify-start text-xs text-muted hover:text-danger gap-2';
-    clearBtn.innerHTML = `
-      <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-      <span>Reset to Default</span>
-    `;
-    clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
-    clearBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.editor.chain().focus().unsetColor().run();
-      this.close();
-      this.editor.commands.focus();
-    });
-    menu.appendChild(clearBtn);
-
-    document.body.appendChild(menu);
-    this.menuEl = menu;
-
-    this.cleanupAutoUpdate = autoUpdate(this.trigger, menu, () => {
-      computePosition(this.trigger, menu, {
-        strategy: 'fixed',
-        placement: 'bottom-start',
-        middleware: [offset(4), flip(), shift({ padding: 8 })],
-      }).then(({ x, y }) => {
-        menu.style.left = `${x}px`;
-        menu.style.top = `${y}px`;
-      });
-    });
-
-    const handleOutsideClick = (e: MouseEvent | PointerEvent) => {
-      if (
-        !this.trigger.contains(e.target as Node) &&
-        !menu.contains(e.target as Node)
-      ) {
-        this.close();
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        this.close();
-      }
-    };
-    document.addEventListener('pointerdown', handleOutsideClick);
-    document.addEventListener('keydown', handleKeyDown);
-    this.cleanupOutsideClick = () => {
-      document.removeEventListener('pointerdown', handleOutsideClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    this.picker.open();
   }
 
   public close(): void {
-    if (!this.isOpen) return;
-    unregisterActivePopover(this);
-    this.isOpen = false;
-    this.trigger.setAttribute('aria-expanded', 'false');
-    this.trigger.classList.remove('btn-active');
-
-    if (this.cleanupAutoUpdate) {
-      this.cleanupAutoUpdate();
-      this.cleanupAutoUpdate = null;
-    }
-    if (this.cleanupOutsideClick) {
-      this.cleanupOutsideClick();
-      this.cleanupOutsideClick = null;
-    }
-    if (this.menuEl) {
-      this.menuEl.remove();
-      this.menuEl = null;
+    if (this.picker?.isOpen) {
+      this.picker.close();
     }
   }
 

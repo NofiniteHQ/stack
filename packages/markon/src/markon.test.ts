@@ -12,6 +12,9 @@ import {
   renderMarkon,
   extractTOC,
   calculateReadingTime,
+  MarkonColorPicker,
+  HIGHLIGHT_PRESETS,
+  TEXT_COLOR_PRESETS,
 } from './index';
 
 describe('@nofinite/markon', () => {
@@ -1148,6 +1151,76 @@ describe('@nofinite/markon', () => {
 
       cleanup();
       document.body.removeChild(container);
+    });
+  });
+
+  describe('MarkonColorPicker & Color Palettes', () => {
+    it('defines 12 distinct highlight presets with OKLCH pastel tokens', () => {
+      expect(HIGHLIGHT_PRESETS.length).toBe(12);
+      const labels = HIGHLIGHT_PRESETS.map((p) => p.label);
+      expect(labels).toContain('Yellow');
+      expect(labels).toContain('Amber');
+      expect(labels).toContain('Coral');
+      expect(labels).toContain('Rose');
+      expect(labels).toContain('Lavender');
+      expect(labels).toContain('Sky');
+      expect(labels).toContain('Teal');
+      expect(labels).toContain('Emerald');
+    });
+
+    it('defines 12 distinct text color presets', () => {
+      expect(TEXT_COLOR_PRESETS.length).toBe(12);
+      const labels = TEXT_COLOR_PRESETS.map((p) => p.label);
+      expect(labels).toContain('Default');
+      expect(labels).toContain('Muted');
+      expect(labels).toContain('Brand');
+      expect(labels).toContain('Blue');
+      expect(labels).toContain('Green');
+    });
+
+    it('mounts MarkonColorPicker popover and handles selection, hex input, and clear', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+
+      const onSelect = vi.fn();
+      const onClear = vi.fn();
+
+      const picker = new MarkonColorPicker({
+        mode: 'highlight',
+        trigger,
+        onSelect,
+        onClear,
+      });
+
+      picker.open();
+      expect(picker.isOpen).toBe(true);
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+      const menu = document.querySelector('.markon-color-picker');
+      expect(menu).not.toBeNull();
+      expect(menu?.getAttribute('role')).toBe('dialog');
+
+      // Click a swatch
+      const swatches = menu?.querySelectorAll('button[title]');
+      expect(swatches?.length).toBe(12);
+      const firstSwatch = swatches?.[0] as HTMLButtonElement;
+      firstSwatch.click();
+
+      expect(onSelect).toHaveBeenCalledWith(HIGHLIGHT_PRESETS[0].color);
+      expect(picker.isOpen).toBe(false);
+
+      // Re-open and test clear button
+      picker.open();
+      const reopenedMenu = document.querySelector('.markon-color-picker');
+      const clearBtn = reopenedMenu?.lastElementChild as HTMLButtonElement;
+      expect(clearBtn?.textContent).toContain('Remove Highlight');
+      clearBtn?.click();
+
+      expect(onClear).toHaveBeenCalled();
+      expect(picker.isOpen).toBe(false);
+
+      picker.destroy();
+      document.body.removeChild(trigger);
     });
   });
 });

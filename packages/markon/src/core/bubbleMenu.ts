@@ -8,10 +8,14 @@ import {
   offset,
 } from '@floating-ui/dom';
 import { openMarkonModal } from './dialog';
+import { MarkonColorPicker } from './colorPicker';
 
 type BubbleContext = 'none' | 'text' | 'image' | 'video';
 
-function detectBubbleContext(editor: any): BubbleContext {
+function detectBubbleContext(
+  editor: any,
+  isPopoverOpen = false
+): BubbleContext {
   if (!editor.isEditable) return 'none';
   if (
     typeof document !== 'undefined' &&
@@ -19,6 +23,7 @@ function detectBubbleContext(editor: any): BubbleContext {
   ) {
     return 'none';
   }
+  if (isPopoverOpen) return 'text';
   if (!editor.view?.hasFocus()) return 'none';
   if (editor.isActive('image')) return 'image';
   if (editor.isActive('videoBlock')) return 'video';
@@ -31,6 +36,7 @@ export function createBubbleMenuExtension() {
   let menuEl: HTMLElement | null = null;
   let cleanupAutoUpdate: (() => void) | null = null;
   let activeContext: BubbleContext = 'none';
+  let activeColorPicker: MarkonColorPicker | null = null;
 
   return Extension.create({
     name: 'markonBubbleMenu',
@@ -58,7 +64,15 @@ export function createBubbleMenuExtension() {
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="italic" title="Italic"><em>I</em></button>
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="underline" title="Underline"><span class="underline">U</span></button>
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="strike" title="Strikethrough"><span class="line-through">S</span></button>
-                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="highlight" title="Highlight"><span class="px-1 rounded text-xs leading-none font-bold bg-warning/20 text-warning">H</span></button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="textColor" title="Text Color">
+                    <span class="flex flex-col items-center justify-center leading-none">
+                      <span class="font-bold text-xs">A</span>
+                      <span class="markon-bubble-color-indicator w-3 h-0.5 mt-0.5 rounded-full bg-primary"></span>
+                    </span>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="highlight" title="Highlight Color">
+                    <span class="markon-bubble-highlight-swatch px-1 rounded text-xs leading-none font-bold bg-warning/20 text-warning">H</span>
+                  </button>
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="code" title="Code">&lt;/&gt;</button>
                   <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-bubble-cmd="link" title="Link">
                     <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -147,6 +161,10 @@ export function createBubbleMenuExtension() {
                   '[data-bubble-block]'
                 );
                 if (blockBtn) {
+                  if (activeColorPicker?.isOpen) {
+                    activeColorPicker.close();
+                    activeColorPicker = null;
+                  }
                   e.preventDefault();
                   e.stopPropagation();
                   const blk = blockBtn.getAttribute('data-bubble-block');
@@ -186,6 +204,90 @@ export function createBubbleMenuExtension() {
                   e.preventDefault();
                   e.stopPropagation();
                   const cmd = textBtn.getAttribute('data-bubble-cmd');
+
+                  if (cmd === 'highlight' || cmd === 'textColor') {
+                    if (activeColorPicker?.isOpen) {
+                      const isSameTrigger =
+                        activeColorPicker.trigger === textBtn;
+                      activeColorPicker.close();
+                      activeColorPicker = null;
+                      if (isSameTrigger) return;
+                    }
+
+                    const { from, to } = editor.state.selection;
+                    if (cmd === 'highlight') {
+                      const currentColor =
+                        editor.getAttributes('highlight').color;
+                      activeColorPicker = new MarkonColorPicker({
+                        mode: 'highlight',
+                        title: 'Highlight Color',
+                        trigger: textBtn,
+                        currentColor,
+                        onSelect: (color) => {
+                          editor
+                            .chain()
+                            .focus()
+                            .setTextSelection({ from, to })
+                            .setHighlight({ color })
+                            .run();
+                        },
+                        onClear: () => {
+                          editor
+                            .chain()
+                            .focus()
+                            .setTextSelection({ from, to })
+                            .unsetHighlight()
+                            .run();
+                        },
+                        onClose: () => {
+                          activeColorPicker = null;
+                          if (editor.view) {
+                            editor.view.dispatch(editor.state.tr);
+                          }
+                        },
+                      });
+                      activeColorPicker.open();
+                    } else if (cmd === 'textColor') {
+                      const currentColor =
+                        editor.getAttributes('textStyle').color;
+                      activeColorPicker = new MarkonColorPicker({
+                        mode: 'textColor',
+                        title: 'Text Color',
+                        trigger: textBtn,
+                        currentColor,
+                        onSelect: (color) => {
+                          editor
+                            .chain()
+                            .focus()
+                            .setTextSelection({ from, to })
+                            .setColor(color)
+                            .run();
+                        },
+                        onClear: () => {
+                          editor
+                            .chain()
+                            .focus()
+                            .setTextSelection({ from, to })
+                            .unsetColor()
+                            .run();
+                        },
+                        onClose: () => {
+                          activeColorPicker = null;
+                          if (editor.view) {
+                            editor.view.dispatch(editor.state.tr);
+                          }
+                        },
+                      });
+                      activeColorPicker.open();
+                    }
+                    return;
+                  }
+
+                  if (activeColorPicker?.isOpen) {
+                    activeColorPicker.close();
+                    activeColorPicker = null;
+                  }
+
                   if (cmd === 'bold') editor.chain().focus().toggleBold().run();
                   else if (cmd === 'italic')
                     editor.chain().focus().toggleItalic().run();
@@ -193,8 +295,6 @@ export function createBubbleMenuExtension() {
                     editor.chain().focus().toggleUnderline().run();
                   else if (cmd === 'strike')
                     editor.chain().focus().toggleStrike().run();
-                  else if (cmd === 'highlight')
-                    editor.chain().focus().toggleHighlight().run();
                   else if (cmd === 'code')
                     editor.chain().focus().toggleCode().run();
                   else if (cmd === 'link') {
@@ -347,7 +447,10 @@ export function createBubbleMenuExtension() {
 
             return {
               update: (view) => {
-                const context = detectBubbleContext(editor);
+                const context = detectBubbleContext(
+                  editor,
+                  Boolean(activeColorPicker?.isOpen)
+                );
 
                 if (context === 'none') {
                   if (cleanupAutoUpdate) {
@@ -437,9 +540,40 @@ export function createBubbleMenuExtension() {
                   updateActive('italic', editor.isActive('italic'));
                   updateActive('underline', editor.isActive('underline'));
                   updateActive('strike', editor.isActive('strike'));
+                  updateActive(
+                    'textColor',
+                    Boolean(editor.getAttributes('textStyle').color)
+                  );
                   updateActive('highlight', editor.isActive('highlight'));
                   updateActive('code', editor.isActive('code'));
                   updateActive('link', editor.isActive('link'));
+
+                  const hlColor = editor.getAttributes('highlight').color;
+                  const hlSwatch = menuEl?.querySelector(
+                    '.markon-bubble-highlight-swatch'
+                  ) as HTMLElement | null;
+                  if (hlSwatch) {
+                    if (editor.isActive('highlight') && hlColor) {
+                      hlSwatch.style.backgroundColor = hlColor;
+                      hlSwatch.style.color = 'inherit';
+                    } else {
+                      hlSwatch.style.backgroundColor = '';
+                      hlSwatch.style.color = '';
+                    }
+                  }
+
+                  const txtColor = editor.getAttributes('textStyle').color;
+                  const colorIndicator = menuEl?.querySelector(
+                    '.markon-bubble-color-indicator'
+                  ) as HTMLElement | null;
+                  if (colorIndicator) {
+                    if (txtColor) {
+                      colorIndicator.style.backgroundColor = txtColor;
+                    } else {
+                      colorIndicator.style.backgroundColor =
+                        'var(--color-primary)';
+                    }
+                  }
                 } else if (context === 'image') {
                   const align =
                     editor.getAttributes('image').alignment || 'center';
@@ -576,6 +710,10 @@ export function createBubbleMenuExtension() {
                 updatePosition();
               },
               destroy: () => {
+                if (activeColorPicker) {
+                  activeColorPicker.destroy();
+                  activeColorPicker = null;
+                }
                 if (cleanupAutoUpdate) {
                   cleanupAutoUpdate();
                   cleanupAutoUpdate = null;
