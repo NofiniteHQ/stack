@@ -45,23 +45,23 @@ Elevate `@nofinite/media` to an enterprise, production-grade media player suite 
 
 _Execution Rule: Work is strictly executed one phase at a time. After completing each phase, work stops, commits locally, and waits for user approval ("next") before proceeding._
 
-### Phase 1: Next.js / RSC Bundle Hardening & Subpath Exports
+### Phase 1: Next.js / RSC Bundle Hardening & Subpath Exports (Completed)
 
-- Add `'use client';` directive to `packages/media/src/react/index.ts`, `VideoPlayer.tsx`, and `AudioPlayer.tsx`.
-- Configure Rollup banner in `packages/media/vite.config.ts` for the `react/index` entry chunk to guarantee `"use client";` appears at byte 0 of both `dist/react/index.js` and `dist/react/index.cjs`.
-- Add `"./styles"` to `package.json` `exports` mapping to `./dist/styles.js` and `./dist/styles.css`.
-- Verification: Build `media` and verify `dist/react/index.js` header and test import in Node.js.
-- **Gate:** STOP and wait for user approval.
+- [x] Add `'use client';` directive to `packages/media/src/react/index.ts`, `VideoPlayer.tsx`, and `AudioPlayer.tsx`.
+- [x] Configure Rollup banner in `packages/media/vite.config.ts` for the `react/index` entry chunk to guarantee `"use client";` appears at byte 0 of both `dist/react/index.js` and `dist/react/index.cjs`.
+- [x] Add `"./styles"` to `package.json` `exports` mapping to `./dist/styles.js` and `./dist/styles.css`.
+- [x] Verification: Built `media` and verified `dist/react/index.js` header and tested import in Node.js.
+- **Commit:** `6bda8a6`
 
-### Phase 2: React Player Suite Feature Parity & CDN CORS Support
+### Phase 2: React Player Suite Feature Parity & CDN CORS Support (Completed)
 
-- Pass `playbackRates` to `<DefaultVideoLayout playbackRates={playbackRates} />`.
-- Add `playbackRates?: number[] | { min: number; max: number; step: number }` and `seekStep?: number` to `AudioPlayerProps` and pass to `<DefaultAudioLayout />`.
-- Add `crossOrigin?: 'anonymous' | 'use-credentials' | boolean` to `VideoPlayerProps` and `AudioPlayerProps`, defaulting to `'anonymous'`.
-- Add `load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom'` (defaulting to `autoPlay ? 'eager' : 'visible'`) and `preload?: 'none' | 'metadata' | 'auto'` to optimize performance and prevent viewport lag.
-- Add `slots?: any` and `style?: React.CSSProperties` to props.
-- Re-export essential Vidstack hooks and components in `packages/media/src/react/index.ts` (`useActiveTextTrack`, `useVideoQualityOptions`, `useAudioOptions`, `useCaptionOptions`, `usePlaybackRateOptions`, `Track`, `DefaultVideoLayout`, `DefaultAudioLayout`, `defaultLayoutIcons`).
-- **Gate:** STOP and wait for user approval.
+- [x] Passed `playbackRates` to `<DefaultVideoLayout playbackRates={playbackRates} />`.
+- [x] Added `playbackRates?: number[] | { min: number; max: number; step: number }` and `seekStep?: number` to `AudioPlayerProps` and forwarded to `<DefaultAudioLayout />`.
+- [x] Added `crossOrigin?: 'anonymous' | 'use-credentials' | boolean` to `VideoPlayerProps` and `AudioPlayerProps`, defaulting to `'anonymous'`.
+- [x] Added `load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom'` (defaulting to `autoPlay ? 'eager' : 'visible'`) and `preload?: 'none' | 'metadata' | 'auto'` to optimize performance and prevent viewport lag.
+- [x] Added `slots?: any` and `style?: React.CSSProperties` to props.
+- [x] Re-exported essential Vidstack hooks and components in `packages/media/src/react/index.ts` (`useActiveTextTrack`, `useVideoQualityOptions`, `useAudioOptions`, `useCaptionOptions`, `usePlaybackRateOptions`, `Track`, `DefaultVideoLayout`, `DefaultAudioLayout`, `defaultLayoutIcons`).
+- **Commit:** `64677b6`
 
 ### Phase 3: Core Framework-Agnostic Player Engine Enhancements
 
