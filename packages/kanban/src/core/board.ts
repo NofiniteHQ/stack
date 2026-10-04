@@ -166,6 +166,9 @@ export function renderCardHTML(
 export function renderKanbanHTML(options: {
   columns: KanbanColumn[];
   allowAdd?: boolean;
+  allowAddColumn?: boolean;
+  onColumnAdd?: () => void;
+  addColumnLabel?: string;
   headerActions?: boolean;
   className?: string;
   columnClassName?: string;
@@ -196,7 +199,7 @@ export function renderKanbanHTML(options: {
                data-column-handle="${escapeHtml(col.id)}">
             <div class="flex items-center gap-2 min-w-0">
               <span class="font-bold text-sm text-default tracking-tight truncate">${escapeHtml(
-                col.title
+                col.title || ''
               )}</span>
               <span class="badge badge-subtle px-1.5 py-0.5 rounded-full text-[11px] font-mono font-semibold text-muted bg-surface border border-default">
                 ${col.items.length}
@@ -261,12 +264,32 @@ export function renderKanbanHTML(options: {
     })
     .join('');
 
+  const addColumnHtml =
+    options.allowAddColumn || options.onColumnAdd
+      ? `
+    <div class="kanban-add-column-container shrink-0 w-80">
+      <button type="button" class="kanban-add-column-btn group flex flex-col items-center justify-center gap-2 w-full h-32 rounded-2xl border-2 border-dashed border-default hover:border-primary/60 bg-surface/40 hover:bg-surface text-muted hover:text-default transition-all p-4 select-none cursor-pointer">
+        <div class="w-8 h-8 rounded-full bg-subtle group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+          <svg class="kanban-icon w-4 h-4 text-muted group-hover:text-primary transition-colors shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </div>
+        <span class="text-xs font-semibold">${escapeHtml(
+          options.addColumnLabel || 'Add Column'
+        )}</span>
+      </button>
+    </div>
+  `
+      : '';
+
   return `
     <div class="kanban kanban-board flex items-start gap-4 overflow-x-auto pb-4 pt-1 font-sans select-none min-h-[400px] ${
       options.className || ''
     }">
       <div class="sr-only kanban-live-region" aria-live="polite" aria-atomic="true"></div>
       ${columnsHtml}
+      ${addColumnHtml}
     </div>
   `.trim();
 }
@@ -728,6 +751,9 @@ export function createKanbanBoard(
     container.innerHTML = renderKanbanHTML({
       columns,
       allowAdd: options.allowAdd,
+      allowAddColumn: options.allowAddColumn,
+      onColumnAdd: options.onColumnAdd,
+      addColumnLabel: options.addColumnLabel,
       headerActions: options.headerActions,
       className: options.className,
       columnClassName: options.columnClassName,
@@ -831,8 +857,8 @@ export function createKanbanBoard(
       const headerTitle = colEl.querySelector<HTMLElement>(
         '.kanban-column-header .truncate'
       );
-      if (headerTitle && headerTitle.textContent !== col.title) {
-        headerTitle.textContent = col.title;
+      if (headerTitle && headerTitle.textContent !== (col.title || '')) {
+        headerTitle.textContent = col.title || '';
       }
 
       const counterBadge = colEl.querySelector<HTMLElement>(
@@ -881,6 +907,13 @@ export function createKanbanBoard(
           if (cardEl) {
             cardListEl.appendChild(cardEl);
             bindCard(cardEl);
+          }
+        } else {
+          const temp = document.createElement('div');
+          temp.innerHTML = renderCardHTML(item, col, itemIdx, colIdx);
+          const newCardEl = temp.firstElementChild as HTMLElement;
+          if (newCardEl && cardEl.innerHTML !== newCardEl.innerHTML) {
+            cardEl.innerHTML = newCardEl.innerHTML;
           }
         }
 
@@ -946,6 +979,14 @@ export function createKanbanBoard(
       }
     });
 
+    // Ensure add-column container stays at the end of the board
+    const addColContainer = boardEl.querySelector(
+      '.kanban-add-column-container'
+    );
+    if (addColContainer) {
+      boardEl.appendChild(addColContainer);
+    }
+
     // 4. Restore active focus if it was on a card
     if (activeCardId) {
       const targetCard = boardEl.querySelector<HTMLElement>(
@@ -985,6 +1026,21 @@ export function createKanbanBoard(
   function handleClick(e: MouseEvent) {
     const target = e.target as HTMLElement | null;
     if (!target) return;
+
+    // 0. Add column button
+    const addColBtn = target.closest<HTMLButtonElement>(
+      '.kanban-add-column-btn'
+    );
+    if (addColBtn) {
+      e.preventDefault();
+      options.onColumnAdd?.();
+      container.dispatchEvent(
+        new CustomEvent('kanban:column-add', {
+          bubbles: true,
+        })
+      );
+      return;
+    }
 
     // 1. Add task button
     const addBtn = target.closest<HTMLButtonElement>('.kanban-add-btn');
@@ -1289,11 +1345,23 @@ export function createKanbanBoard(
       store.setState(newColumns);
     },
     getColumns: () => store.getState(),
+    setColumns: (newColumns: KanbanColumn[]) => {
+      store.setState(newColumns);
+    },
     moveCard: (event: CardMoveEvent) => store.moveCard(event),
     moveColumn: (event: ColumnMoveEvent) => store.moveColumn(event),
     addCard: (columnId: string, item: KanbanItem) =>
       store.addCard(columnId, item),
     removeCard: (columnId: string, cardId: string) =>
       store.removeCard(columnId, cardId),
+    updateCard: (
+      columnId: string,
+      cardId: string,
+      partial: Partial<KanbanItem>
+    ) => store.updateCard(columnId, cardId, partial),
+    addColumn: (column: KanbanColumn) => store.addColumn(column),
+    removeColumn: (columnId: string) => store.removeColumn(columnId),
+    clearColumn: (columnId: string) => store.clearColumn(columnId),
+    focusCard: (cardId: string) => restoreCardFocus(cardId),
   };
 }

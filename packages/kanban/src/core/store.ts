@@ -20,6 +20,9 @@ export interface KanbanStore {
     cardId: string,
     partial: Partial<KanbanItem>
   ) => void;
+  addColumn: (column: KanbanColumn) => void;
+  removeColumn: (columnId: string) => void;
+  clearColumn: (columnId: string) => void;
 }
 
 export function createKanbanStore(
@@ -108,6 +111,23 @@ export function createKanbanStore(
       const newItems = Array.from(col.items);
       newItems[itemIndex] = { ...newItems[itemIndex], ...partial };
       const newCol = { ...col, items: newItems };
+      const newState = Array.from(state);
+      newState[colIndex] = newCol;
+      state = newState;
+      notify();
+    },
+    addColumn: (column: KanbanColumn) => {
+      state = [...state, column];
+      notify();
+    },
+    removeColumn: (columnId: string) => {
+      state = state.filter((c) => c.id !== columnId);
+      notify();
+    },
+    clearColumn: (columnId: string) => {
+      const colIndex = state.findIndex((c) => c.id === columnId);
+      if (colIndex === -1) return;
+      const newCol = { ...state[colIndex], items: [] };
       const newState = Array.from(state);
       newState[colIndex] = newCol;
       state = newState;

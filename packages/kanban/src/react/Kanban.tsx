@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
 import {
   draggable,
   dropTargetForElements,
@@ -16,9 +16,12 @@ import {
   type KanbanSubtasks,
   type CardMoveEvent,
   type ColumnMoveEvent,
+  type KanbanBoardInstance,
   moveCardBetweenColumns,
   reorderColumns,
 } from '../core';
+
+export type KanbanHandle = KanbanBoardInstance;
 
 export interface KanbanItem {
   id: string;
@@ -54,7 +57,11 @@ export interface KanbanProps
   onCardAdd?: (columnId: string) => void;
   onCardClick?: (cardId: string, columnId: string, item: KanbanItem) => void;
   onColumnOptions?: (columnId: string) => void;
+  onColumnAdd?: () => void;
+  onColumnClear?: (columnId: string) => void;
   allowAdd?: boolean;
+  allowAddColumn?: boolean;
+  addColumnLabel?: string;
   headerActions?: boolean;
   enforceWipLimit?: boolean;
   canMoveCard?: (event: CardMoveEvent) => boolean;
@@ -547,6 +554,7 @@ interface ColumnComponentProps {
   onCardAdd?: (columnId: string) => void;
   onCardClick?: (cardId: string, columnId: string, item: KanbanItem) => void;
   onColumnOptions?: (columnId: string) => void;
+  onColumnClear?: (columnId: string) => void;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
   renderHeader?: (column: KanbanColumnProps) => React.ReactNode;
   onAnnounce?: (message: string) => void;
@@ -568,6 +576,7 @@ function KanbanColumnComponent({
   onCardAdd,
   onCardClick,
   onColumnOptions,
+  onColumnClear,
   renderCard,
   renderHeader,
   onAnnounce,
@@ -576,9 +585,31 @@ function KanbanColumnComponent({
   const colRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const cardListRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const [isColDragging, setIsColDragging] = useState(false);
   const [isColOver, setIsColOver] = useState(false);
   const [closestColEdge, setClosestColEdge] = useState<Edge | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [menuOpen]);
 
   const showAdd = column.allowAdd ?? allowAdd ?? true;
   const showOptions = column.headerActions ?? headerActions ?? true;
@@ -734,7 +765,7 @@ function KanbanColumnComponent({
       {/* Column Header */}
       <div
         ref={headerRef}
-        className="p-3 font-semibold text-sm flex items-center justify-between border-b border-default select-none cursor-grab active:cursor-grabbing"
+        className="kanban-column-header p-3 font-semibold text-sm flex items-center justify-between border-b border-default select-none cursor-grab active:cursor-grabbing"
       >
         {renderHeader ? (
           renderHeader(column)
@@ -757,29 +788,89 @@ function KanbanColumnComponent({
             </div>
 
             {showOptions && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onColumnOptions?.(column.id);
-                }}
-                className="kanban-column-options btn btn-ghost btn-xs btn-icon text-muted hover:text-default"
-                title="Column options"
-              >
-                <svg
-                  className="kanban-icon w-4 h-4 shrink-0"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen((prev) => !prev);
+                    onColumnOptions?.(column.id);
+                  }}
+                  className="kanban-column-options btn btn-ghost btn-xs btn-icon text-muted hover:text-default"
+                  title="Column options"
                 >
-                  <circle cx="12" cy="12" r="1" />
-                  <circle cx="19" cy="12" r="1" />
-                  <circle cx="5" cy="12" r="1" />
-                </svg>
-              </button>
+                  <svg
+                    className="kanban-icon w-4 h-4 shrink-0"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="19" cy="12" r="1" />
+                    <circle cx="5" cy="12" r="1" />
+                  </svg>
+                </button>
+                {menuOpen && (
+                  <div
+                    role="menu"
+                    className="kanban-column-menu absolute right-0 top-full mt-1 w-44 rounded-xl border border-default bg-surface shadow-lg py-1.5 z-30 font-sans"
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        onCardAdd?.(column.id);
+                      }}
+                      className="w-full text-left px-3 py-1.5 text-xs text-default hover:bg-subtle flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <svg
+                        className="kanban-icon w-3.5 h-3.5 text-muted shrink-0"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                      <span>Add Card</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        onColumnClear?.(column.id);
+                      }}
+                      className="w-full text-left px-3 py-1.5 text-xs text-danger hover:bg-danger/10 flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <svg
+                        className="kanban-icon w-3.5 h-3.5 text-danger shrink-0"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                      <span>Clear Cards</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </>
         )}
@@ -851,118 +942,281 @@ function KanbanColumnComponent({
   );
 }
 
-export function Kanban({
-  columns,
-  onChange,
-  onCardMove,
-  onColumnMove,
-  onCardAdd,
-  onCardClick,
-  onColumnOptions,
-  allowAdd = true,
-  headerActions = true,
-  enforceWipLimit = false,
-  canMoveCard,
-  className,
-  columnClassName,
-  renderCard,
-  renderHeader,
-  ...props
-}: KanbanProps) {
-  const [data, setData] = useState<KanbanColumnProps[]>(columns);
-  const [announcement, setAnnouncement] = useState<string>('');
-  const boardRef = useRef<HTMLDivElement | null>(null);
+export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
+  function Kanban(
+    {
+      columns,
+      onChange,
+      onCardMove,
+      onColumnMove,
+      onCardAdd,
+      onCardClick,
+      onColumnOptions,
+      onColumnAdd,
+      onColumnClear,
+      allowAdd = true,
+      allowAddColumn = false,
+      addColumnLabel = '+ Add Column',
+      headerActions = true,
+      enforceWipLimit = false,
+      canMoveCard,
+      className,
+      columnClassName,
+      renderCard,
+      renderHeader,
+      ...props
+    },
+    ref
+  ) {
+    const [data, setData] = useState<KanbanColumnProps[]>(columns);
+    const [announcement, setAnnouncement] = useState<string>('');
+    const boardRef = useRef<HTMLDivElement | null>(null);
+    const dataRef = useRef<KanbanColumnProps[]>(columns);
 
-  useEffect(() => {
-    setData(columns);
-  }, [columns]);
+    useEffect(() => {
+      setData(columns);
+      dataRef.current = columns;
+    }, [columns]);
 
-  const focusCard = (cardId: string) => {
-    requestAnimationFrame(() => {
-      const el = boardRef.current?.querySelector<HTMLElement>(
-        `[data-item-id="${cardId}"]`
-      );
-      el?.focus();
-    });
-  };
+    const focusCard = (cardId: string) => {
+      requestAnimationFrame(() => {
+        const el = boardRef.current?.querySelector<HTMLElement>(
+          `[data-item-id="${cardId}"]`
+        );
+        el?.focus();
+      });
+    };
 
-  const handleCardMove = (event: CardMoveEvent) => {
-    if (canMoveCard && !canMoveCard(event)) {
-      return;
-    }
-    if (enforceWipLimit && event.sourceColumnId !== event.targetColumnId) {
-      const targetCol = data.find((c) => c.id === event.targetColumnId);
-      if (
-        targetCol &&
-        typeof targetCol.wipLimit === 'number' &&
-        targetCol.wipLimit > 0 &&
-        targetCol.items.length >= targetCol.wipLimit
-      ) {
-        return;
+    const handleColumnClear = (columnId: string) => {
+      setData((prev) => {
+        const updated = prev.map((col) =>
+          col.id === columnId ? { ...col, items: [] } : col
+        );
+        dataRef.current = updated;
+        onChange?.(updated);
+        onColumnClear?.(columnId);
+        return updated;
+      });
+    };
+
+    const handleCardMove = (event: CardMoveEvent): boolean => {
+      if (canMoveCard && !canMoveCard(event)) {
+        return false;
       }
-    }
-    setData((prev) => {
-      const updated = moveCardBetweenColumns(
-        prev as unknown as CoreColumn[],
-        event,
-        { enforceWipLimit, canMoveCard }
-      ) as unknown as KanbanColumnProps[];
-      if (updated === (prev as unknown as CoreColumn[])) {
-        return prev;
+      if (enforceWipLimit && event.sourceColumnId !== event.targetColumnId) {
+        const targetCol = data.find((c) => c.id === event.targetColumnId);
+        if (
+          targetCol &&
+          typeof targetCol.wipLimit === 'number' &&
+          targetCol.wipLimit > 0 &&
+          targetCol.items.length >= targetCol.wipLimit
+        ) {
+          return false;
+        }
       }
-      onChange?.(updated);
-      onCardMove?.(event);
-      return updated;
-    });
-  };
+      let moved = false;
+      setData((prev) => {
+        const updated = moveCardBetweenColumns(
+          prev as unknown as CoreColumn[],
+          event,
+          { enforceWipLimit, canMoveCard }
+        ) as unknown as KanbanColumnProps[];
+        if (updated === (prev as unknown as CoreColumn[])) {
+          return prev;
+        }
+        moved = true;
+        dataRef.current = updated;
+        onChange?.(updated);
+        onCardMove?.(event);
+        return updated;
+      });
+      return moved;
+    };
 
-  const handleColumnMove = (event: ColumnMoveEvent) => {
-    setData((prev) => {
-      const updated = reorderColumns(
-        prev as unknown as CoreColumn[],
-        event
-      ) as unknown as KanbanColumnProps[];
-      onChange?.(updated);
-      onColumnMove?.(event);
-      return updated;
-    });
-  };
+    const handleColumnMove = (event: ColumnMoveEvent) => {
+      setData((prev) => {
+        const updated = reorderColumns(
+          prev as unknown as CoreColumn[],
+          event
+        ) as unknown as KanbanColumnProps[];
+        dataRef.current = updated;
+        onChange?.(updated);
+        onColumnMove?.(event);
+        return updated;
+      });
+    };
 
-  return (
-    <div
-      ref={boardRef}
-      className={clsx(
-        'kanban kanban-board flex gap-4 overflow-x-auto p-4 items-start select-none font-sans min-h-[400px]',
-        className
-      )}
-      {...props}
-    >
-      <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {announcement}
+    useImperativeHandle(
+      ref,
+      () => ({
+        destroy: () => {
+          setData([]);
+          dataRef.current = [];
+        },
+        update: (newColumns: CoreColumn[]) => {
+          const mapped = newColumns as unknown as KanbanColumnProps[];
+          setData(mapped);
+          dataRef.current = mapped;
+          onChange?.(mapped);
+        },
+        getColumns: () => dataRef.current as unknown as CoreColumn[],
+        setColumns: (newColumns: CoreColumn[]) => {
+          const mapped = newColumns as unknown as KanbanColumnProps[];
+          setData(mapped);
+          dataRef.current = mapped;
+          onChange?.(mapped);
+        },
+        moveCard: (event: CardMoveEvent): boolean => {
+          return handleCardMove(event);
+        },
+        moveColumn: (event: ColumnMoveEvent) => {
+          handleColumnMove(event);
+        },
+        addCard: (columnId: string, item: any) => {
+          setData((prev) => {
+            const col = prev.find((c) => c.id === columnId);
+            if (
+              enforceWipLimit &&
+              col &&
+              typeof col.wipLimit === 'number' &&
+              col.wipLimit > 0 &&
+              col.items.length >= col.wipLimit
+            ) {
+              return prev;
+            }
+            const updated = prev.map((c) =>
+              c.id === columnId ? { ...c, items: [...c.items, item] } : c
+            );
+            dataRef.current = updated;
+            onChange?.(updated);
+            return updated;
+          });
+        },
+        removeCard: (columnId: string, cardId: string) => {
+          setData((prev) => {
+            const updated = prev.map((c) =>
+              c.id === columnId
+                ? { ...c, items: c.items.filter((i) => i.id !== cardId) }
+                : c
+            );
+            dataRef.current = updated;
+            onChange?.(updated);
+            return updated;
+          });
+        },
+        updateCard: (columnId: string, cardId: string, partial: any) => {
+          setData((prev) => {
+            const updated = prev.map((c) =>
+              c.id === columnId
+                ? {
+                    ...c,
+                    items: c.items.map((i) =>
+                      i.id === cardId ? { ...i, ...partial } : i
+                    ),
+                  }
+                : c
+            );
+            dataRef.current = updated;
+            onChange?.(updated);
+            return updated;
+          });
+        },
+        addColumn: (column: CoreColumn) => {
+          setData((prev) => {
+            const updated = [...prev, column as unknown as KanbanColumnProps];
+            dataRef.current = updated;
+            onChange?.(updated);
+            return updated;
+          });
+        },
+        removeColumn: (columnId: string) => {
+          setData((prev) => {
+            const updated = prev.filter((c) => c.id !== columnId);
+            dataRef.current = updated;
+            onChange?.(updated);
+            return updated;
+          });
+        },
+        clearColumn: (columnId: string) => {
+          handleColumnClear(columnId);
+        },
+        focusCard: (cardId: string) => {
+          focusCard(cardId);
+        },
+      }),
+      [
+        canMoveCard,
+        enforceWipLimit,
+        onChange,
+        onCardMove,
+        onColumnMove,
+        onColumnClear,
+      ]
+    );
+
+    return (
+      <div
+        ref={boardRef}
+        className={clsx(
+          'kanban kanban-board flex gap-4 overflow-x-auto p-4 items-start select-none font-sans min-h-[400px]',
+          className
+        )}
+        {...props}
+      >
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {announcement}
+        </div>
+        {data.map((col, idx) => (
+          <KanbanColumnComponent
+            key={col.id}
+            column={col}
+            index={idx}
+            totalColumns={data.length}
+            allColumns={data}
+            columnClassName={columnClassName}
+            allowAdd={allowAdd}
+            headerActions={headerActions}
+            enforceWipLimit={enforceWipLimit}
+            canMoveCard={canMoveCard}
+            onCardMove={handleCardMove}
+            onColumnMove={handleColumnMove}
+            onCardAdd={onCardAdd}
+            onCardClick={onCardClick}
+            onColumnOptions={onColumnOptions}
+            onColumnClear={handleColumnClear}
+            renderCard={renderCard}
+            renderHeader={renderHeader}
+            onAnnounce={setAnnouncement}
+            onFocusCard={focusCard}
+          />
+        ))}
+
+        {allowAddColumn && (
+          <div className="kanban-add-column-container shrink-0 w-80">
+            <button
+              type="button"
+              onClick={() => onColumnAdd?.()}
+              className="kanban-add-column-btn group flex flex-col items-center justify-center gap-2 w-full h-32 rounded-2xl border-2 border-dashed border-default hover:border-primary/60 bg-surface/40 hover:bg-surface text-muted hover:text-default transition-all p-4 select-none cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-full bg-subtle group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg
+                  className="kanban-icon w-4 h-4 text-muted group-hover:text-primary transition-colors shrink-0"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </div>
+              <span className="text-xs font-semibold">{addColumnLabel}</span>
+            </button>
+          </div>
+        )}
       </div>
-      {data.map((col, idx) => (
-        <KanbanColumnComponent
-          key={col.id}
-          column={col}
-          index={idx}
-          totalColumns={data.length}
-          allColumns={data}
-          columnClassName={columnClassName}
-          allowAdd={allowAdd}
-          headerActions={headerActions}
-          enforceWipLimit={enforceWipLimit}
-          canMoveCard={canMoveCard}
-          onCardMove={handleCardMove}
-          onColumnMove={handleColumnMove}
-          onCardAdd={onCardAdd}
-          onCardClick={onCardClick}
-          onColumnOptions={onColumnOptions}
-          renderCard={renderCard}
-          renderHeader={renderHeader}
-          onAnnounce={setAnnouncement}
-          onFocusCard={focusCard}
-        />
-      ))}
-    </div>
-  );
-}
+    );
+  }
+);

@@ -36,13 +36,13 @@ export interface KanbanItem {
   dueDate?: string;
   isOverdue?: boolean;
   subtasks?: KanbanSubtasks;
-  content?: unknown;
+  content?: any;
   [key: string]: unknown;
 }
 
 export interface KanbanColumn {
   id: string;
-  title: string;
+  title?: string;
   items: KanbanItem[];
   allowAdd?: boolean;
   headerActions?: boolean;
@@ -100,6 +100,8 @@ export interface KanbanBoardEvents {
   onCardAdd?: (event: CardAddEvent) => void;
   onCardClick?: (event: CardClickEvent) => void;
   onColumnOptions?: (event: ColumnOptionsEvent) => void;
+  onColumnAdd?: () => void;
+  onColumnClear?: (columnId: string) => void;
   canMoveCard?: (event: CardMoveEvent) => boolean;
 }
 
@@ -107,6 +109,8 @@ export interface KanbanBoardOptions extends KanbanBoardEvents {
   container: HTMLElement;
   columns: KanbanColumn[];
   allowAdd?: boolean;
+  allowAddColumn?: boolean;
+  addColumnLabel?: string;
   headerActions?: boolean;
   enforceWipLimit?: boolean;
   className?: string;
@@ -117,8 +121,18 @@ export interface KanbanBoardInstance {
   destroy: () => void;
   update: (columns: KanbanColumn[]) => void;
   getColumns: () => KanbanColumn[];
+  setColumns?: (columns: KanbanColumn[]) => void;
   moveCard: (event: CardMoveEvent) => boolean;
   moveColumn: (event: ColumnMoveEvent) => void;
   addCard: (columnId: string, item: KanbanItem) => void;
   removeCard: (columnId: string, cardId: string) => void;
+  updateCard?: (
+    columnId: string,
+    cardId: string,
+    partial: Partial<KanbanItem>
+  ) => void;
+  addColumn?: (column: KanbanColumn) => void;
+  removeColumn?: (columnId: string) => void;
+  clearColumn?: (columnId: string) => void;
+  focusCard?: (cardId: string) => void;
 }

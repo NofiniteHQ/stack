@@ -1,4 +1,7 @@
 // @vitest-environment happy-dom
+import React, { createRef } from 'react';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import { describe, it, expect } from 'vitest';
 import {
   reorderArray,
@@ -8,6 +11,8 @@ import {
   createKanbanStore,
   renderKanbanHTML,
   type KanbanColumn,
+  Kanban,
+  type KanbanHandle,
 } from './index';
 
 describe('@nofinite/kanban reordering engine', () => {
@@ -813,6 +818,189 @@ describe('@nofinite/kanban Phase 4: Enforceable WIP limits & validation hooks', 
     );
 
     board.destroy();
+    container.remove();
+  });
+});
+
+describe('@nofinite/kanban Phase 5: Column management, imperative APIs & React forwardRef', () => {
+  it('KanbanStore imperatively manages columns and updates cards', () => {
+    const store = createKanbanStore([
+      { id: 'c1', title: 'To Do', items: [{ id: 't1', title: 'Task 1' }] },
+    ]);
+
+    // addColumn
+    store.addColumn({ id: 'c2', title: 'Done', items: [] });
+    expect(store.getState().length).toBe(2);
+    expect(store.getState()[1].id).toBe('c2');
+
+    // updateCard
+    store.updateCard('c1', 't1', { title: 'Task 1 Updated', isOverdue: true });
+    expect(store.getState()[0].items[0].title).toBe('Task 1 Updated');
+    expect(store.getState()[0].items[0].isOverdue).toBe(true);
+
+    // clearColumn
+    store.clearColumn('c1');
+    expect(store.getState()[0].items.length).toBe(0);
+
+    // removeColumn
+    store.removeColumn('c2');
+    expect(store.getState().length).toBe(1);
+    expect(store.getState()[0].id).toBe('c1');
+  });
+
+  it('createKanbanBoard renders Add Column button and handles click events', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    let addColumnCalled = false;
+    let customEventFired = false;
+
+    container.addEventListener('kanban:column-add', () => {
+      customEventFired = true;
+    });
+
+    const board = createKanbanBoard({
+      container,
+      columns: [{ id: 'c1', title: 'To Do', items: [] }],
+      allowAddColumn: true,
+      addColumnLabel: '+ Create New List',
+      onColumnAdd: () => {
+        addColumnCalled = true;
+      },
+    });
+
+    const addColBtn = container.querySelector<HTMLButtonElement>(
+      '.kanban-add-column-btn'
+    );
+    expect(addColBtn).not.toBeNull();
+    expect(addColBtn?.textContent).toContain('+ Create New List');
+
+    addColBtn?.click();
+    expect(addColumnCalled).toBe(true);
+    expect(customEventFired).toBe(true);
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('createKanbanBoard exposes imperative methods and dynamically updates DOM', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: [
+        { id: 'c1', title: 'Col 1', items: [{ id: 't1', title: 'Card 1' }] },
+      ],
+    });
+
+    // addColumn
+    board.addColumn({ id: 'c2', title: 'Col 2', items: [] });
+    expect(board.getColumns().length).toBe(2);
+    expect(container.querySelectorAll('.kanban-column').length).toBe(2);
+
+    // updateCard
+    board.updateCard('c1', 't1', { title: 'Card 1 Renamed' });
+    const cardTitleEl = container.querySelector('.kanban-card-title');
+    expect(cardTitleEl?.textContent).toBe('Card 1 Renamed');
+
+    // clearColumn
+    board.clearColumn('c1');
+    expect(board.getColumns()[0].items.length).toBe(0);
+    const placeholder = container.querySelector('.kanban-empty-placeholder');
+    expect(placeholder).not.toBeNull();
+
+    // removeColumn
+    board.removeColumn('c2');
+    expect(board.getColumns().length).toBe(1);
+    expect(container.querySelectorAll('.kanban-column').length).toBe(1);
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('React <Kanban> forwardRef exposes imperative handle methods and column options popover', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    const ref = createRef<KanbanHandle>();
+    let colClearCalled = false;
+    let colAddCalled = false;
+
+    flushSync(() => {
+      root.render(
+        React.createElement(Kanban, {
+          ref,
+          columns: [
+            {
+              id: 'c1',
+              title: 'Backlog',
+              items: [{ id: 'k1', title: 'Card K1' }],
+            },
+          ],
+          allowAddColumn: true,
+          onColumnClear: () => {
+            colClearCalled = true;
+          },
+          onColumnAdd: () => {
+            colAddCalled = true;
+          },
+        })
+      );
+    });
+
+    expect(ref.current).toBeDefined();
+    expect(typeof ref.current?.getColumns).toBe('function');
+    expect(typeof ref.current?.addCard).toBe('function');
+    expect(typeof ref.current?.updateCard).toBe('function');
+    expect(typeof ref.current?.clearColumn).toBe('function');
+    expect(typeof ref.current?.addColumn).toBe('function');
+
+    // Verify Add Column button exists and works
+    const addColBtn = container.querySelector<HTMLButtonElement>(
+      '.kanban-add-column-btn'
+    );
+    expect(addColBtn).not.toBeNull();
+    addColBtn?.click();
+    expect(colAddCalled).toBe(true);
+
+    // Imperatively add card via ref
+    flushSync(() => {
+      ref.current?.addCard('c1', { id: 'k2', title: 'Imperative Card' });
+    });
+    expect(ref.current?.getColumns()[0].items.length).toBe(2);
+
+    // Imperatively update card via ref
+    flushSync(() => {
+      ref.current?.updateCard('c1', 'k2', { title: 'Updated Imperative Card' });
+    });
+    expect(ref.current?.getColumns()[0].items[1].title).toBe(
+      'Updated Imperative Card'
+    );
+
+    // Imperatively clear column via ref
+    flushSync(() => {
+      ref.current?.clearColumn('c1');
+    });
+    expect(ref.current?.getColumns()[0].items.length).toBe(0);
+    expect(colClearCalled).toBe(true);
+
+    // Imperatively add column via ref
+    flushSync(() => {
+      ref.current?.addColumn({ id: 'c2', title: 'In Progress', items: [] });
+    });
+    expect(ref.current?.getColumns().length).toBe(2);
+
+    // Imperatively remove column via ref
+    flushSync(() => {
+      ref.current?.removeColumn('c2');
+    });
+    expect(ref.current?.getColumns().length).toBe(1);
+
+    flushSync(() => {
+      root.unmount();
+    });
     container.remove();
   });
 });

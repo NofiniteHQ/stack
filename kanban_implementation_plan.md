@@ -131,26 +131,24 @@ Phase 6: Search & Filter Suite, Test Suite Expansion & Package Verification
 
 ### Phase 5: React Imperative Handle (forwardRef) & Add Column Management
 
+- **Status:** Complete & verified (27/27 unit tests green, clean build, visual Playwright validation in screenshots 01 to 04).
 - **Files Affected:**
   - `packages/kanban/src/react/Kanban.tsx`
   - `packages/kanban/src/react/index.ts`
   - `packages/kanban/src/core/types.ts`
-- **Actions:**
-  1. Wrap `Kanban` in `React.forwardRef<KanbanBoardInstance, KanbanProps>()`.
-  2. Expose `useImperativeHandle` with:
-     - `addCard(columnId, item)`
-     - `removeCard(columnId, cardId)`
-     - `updateCard(columnId, cardId, partial)`
-     - `moveCard(event)`
-     - `moveColumn(event)`
-     - `getColumns()`
-     - `focusCard(cardId)`
-  3. Add "+ Add Column" feature:
-     - Add `allowAddColumn?: boolean` and `onColumnAdd?: () => void`.
-     - Render a dashed, interactive "+ Add Column" button at the end of the horizontal board.
-  4. Add built-in column header actions popover/menu with default actions (Add Card, Clear All Cards).
-- **Verification:**
-  - Unit test verifying imperative ref methods (`ref.current.addCard`, etc.) and Add Column click handler.
+  - `packages/kanban/src/core/store.ts`
+  - `packages/kanban/src/core/board.ts`
+  - `packages/kanban/src/styles.css`
+  - `packages/kanban/src/kanban.test.ts`
+- **Actions Completed:**
+  1. Wrapped React `Kanban` in `React.forwardRef<KanbanBoardInstance, KanbanProps>()`.
+  2. Exposed full imperative API via `useImperativeHandle`: `getColumns()`, `setColumns()`, `update()`, `destroy()`, `moveCard(event)`, `moveColumn(event)`, `addCard(columnId, item)`, `removeCard(columnId, cardId)`, `updateCard(columnId, cardId, partial)`, `addColumn(column)`, `removeColumn(columnId)`, `clearColumn(columnId)`, `focusCard(cardId)`.
+  3. Added interactive dashed `+ Add Column` CTA at the end of the board with `allowAddColumn?: boolean` and `addColumnLabel?: string`, plus click delegation dispatching `onColumnAdd` and `kanban:column-add`.
+  4. Added built-in column options popover dropdown with `Add Card` and `Clear Cards` (danger) actions and outside-click/escape key dismissal.
+  5. Updated `reconcileDOM()` in `board.ts` to update card content in-place without unmounting outer node references.
+  6. Added dedicated CSS rules in `packages/kanban/src/styles.css` for `.kanban-add-column-container`, `.kanban-add-column-btn`, `.kanban-column-header`, and `.kanban-column-menu` with explicit 14px icon constraints.
+  7. Added 4 unit tests covering store column management, board DOM updates, Add Column click events, and React imperative ref handle methods (27/27 tests green).
+  8. Verified visually using Playwright in `temp/screenshots/phase5-*.png` confirming layout alignment, popover styling, and CTA appearance.
 
 ---
 
