@@ -62,7 +62,7 @@ export function renderKanbanHTML(options: {
           const hasFooter = item.dueDate || item.subtasks || item.assignee;
 
           const titleContent = item.title
-            ? `<div class="font-semibold text-sm leading-snug text-default group-hover:text-primary transition-colors break-words">${escapeHtml(
+            ? `<div class="kanban-card-title font-semibold text-sm leading-snug text-default group-hover:text-primary transition-colors break-words">${escapeHtml(
                 item.title
               )}</div>`
             : item.content != null
@@ -92,7 +92,7 @@ export function renderKanbanHTML(options: {
               ${titleContent}
               ${
                 item.description
-                  ? `<div class="text-xs text-muted mt-1 leading-relaxed line-clamp-2">${escapeHtml(
+                  ? `<div class="kanban-card-desc text-xs text-muted mt-1 leading-relaxed line-clamp-2">${escapeHtml(
                       item.description
                     )}</div>`
                   : ''
@@ -101,21 +101,23 @@ export function renderKanbanHTML(options: {
               ${
                 hasFooter
                   ? `
-                <div class="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-default/40 text-xs text-muted">
-                  <div class="flex items-center gap-2.5">
+                <div class="kanban-card-footer flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-default/40 text-xs text-muted">
+                  <div class="kanban-card-meta flex items-center gap-2.5">
                     ${
                       item.dueDate
                         ? `
-                      <span class="flex items-center gap-1 text-[11px] font-medium ${
-                        item.isOverdue ? 'text-danger font-semibold' : ''
+                      <span class="kanban-meta-item flex items-center gap-1 text-[11px] font-medium ${
+                        item.isOverdue
+                          ? 'kanban-meta-overdue text-danger font-semibold'
+                          : ''
                       }">
-                        <svg class="w-3 h-3 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg class="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                           <line x1="16" y1="2" x2="16" y2="6"></line>
                           <line x1="8" y1="2" x2="8" y2="6"></line>
                           <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        ${escapeHtml(item.dueDate)}
+                        <span>${escapeHtml(item.dueDate)}</span>
                       </span>
                     `
                         : ''
@@ -123,12 +125,12 @@ export function renderKanbanHTML(options: {
                     ${
                       item.subtasks
                         ? `
-                      <span class="flex items-center gap-1 text-[11px] font-medium">
-                        <svg class="w-3 h-3 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <span class="kanban-meta-item flex items-center gap-1 text-[11px] font-medium">
+                        <svg class="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                           <polyline points="22 4 12 14.01 9 11.01"></polyline>
                         </svg>
-                        ${item.subtasks.completed}/${item.subtasks.total}
+                        <span>${item.subtasks.completed}/${item.subtasks.total}</span>
                       </span>
                     `
                         : ''
@@ -137,7 +139,7 @@ export function renderKanbanHTML(options: {
                   ${
                     item.assignee
                       ? `
-                    <div class="shrink-0" title="${escapeHtml(
+                    <div class="kanban-card-assignee shrink-0" title="${escapeHtml(
                       item.assignee.name
                     )}">
                       ${
@@ -180,6 +182,11 @@ export function renderKanbanHTML(options: {
               <span class="badge badge-subtle px-1.5 py-0.5 rounded-full text-[11px] font-mono font-semibold text-muted bg-surface border border-default">
                 ${col.items.length}
               </span>
+              ${
+                col.wipLimit != null && col.items.length > col.wipLimit
+                  ? `<span class="badge badge-danger text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">Max ${col.wipLimit}</span>`
+                  : ''
+              }
             </div>
             ${
               showOptions
@@ -188,7 +195,7 @@ export function renderKanbanHTML(options: {
                       data-column-id="${escapeHtml(
                         col.id
                       )}" title="Column options">
-                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="kanban-icon w-4 h-4 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="1"></circle>
                   <circle cx="19" cy="12" r="1"></circle>
                   <circle cx="5" cy="12" r="1"></circle>
@@ -220,7 +227,7 @@ export function renderKanbanHTML(options: {
             <div class="pt-2 border-t border-default/50 mt-1">
               <button type="button" class="kanban-add-btn flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-default hover:bg-subtle transition-colors group"
                       data-column-id="${escapeHtml(col.id)}">
-                <svg class="w-3.5 h-3.5 text-muted group-hover:text-primary transition-colors shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="kanban-icon w-3.5 h-3.5 text-muted group-hover:text-primary transition-colors shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
@@ -271,6 +278,8 @@ export function bindCardDropTarget(
 ): () => void {
   function clearIndicators() {
     element.classList.remove(
+      'kanban-card-drop-top',
+      'kanban-card-drop-bottom',
       'border-t-2',
       'border-b-2',
       'border-t-primary',
@@ -293,18 +302,34 @@ export function bindCardDropTarget(
       const edge = extractClosestEdge(args.self.data);
       clearIndicators();
       if (edge === 'top') {
-        element.classList.add('border-t-2', 'border-t-primary');
+        element.classList.add(
+          'kanban-card-drop-top',
+          'border-t-2',
+          'border-t-primary'
+        );
       } else if (edge === 'bottom') {
-        element.classList.add('border-b-2', 'border-b-primary');
+        element.classList.add(
+          'kanban-card-drop-bottom',
+          'border-b-2',
+          'border-b-primary'
+        );
       }
     },
     onDrag: (args) => {
       const edge = extractClosestEdge(args.self.data);
       clearIndicators();
       if (edge === 'top') {
-        element.classList.add('border-t-2', 'border-t-primary');
+        element.classList.add(
+          'kanban-card-drop-top',
+          'border-t-2',
+          'border-t-primary'
+        );
       } else if (edge === 'bottom') {
-        element.classList.add('border-b-2', 'border-b-primary');
+        element.classList.add(
+          'kanban-card-drop-bottom',
+          'border-b-2',
+          'border-b-primary'
+        );
       }
     },
     onDragLeave: () => {
@@ -340,6 +365,8 @@ export function bindColumnDropTarget(
 ): () => void {
   function clearColumnIndicators() {
     element.classList.remove(
+      'kanban-col-drop-left',
+      'kanban-col-drop-right',
       'border-l-2',
       'border-r-2',
       'border-l-primary',
@@ -363,9 +390,17 @@ export function bindColumnDropTarget(
         const edge = extractClosestEdge(args.self.data);
         clearColumnIndicators();
         if (edge === 'left') {
-          element.classList.add('border-l-2', 'border-l-primary');
+          element.classList.add(
+            'kanban-col-drop-left',
+            'border-l-2',
+            'border-l-primary'
+          );
         } else if (edge === 'right') {
-          element.classList.add('border-r-2', 'border-r-primary');
+          element.classList.add(
+            'kanban-col-drop-right',
+            'border-r-2',
+            'border-r-primary'
+          );
         }
       } else if (args.source.data.type === 'card') {
         element.classList.add('border-primary/40');
@@ -376,9 +411,17 @@ export function bindColumnDropTarget(
         const edge = extractClosestEdge(args.self.data);
         clearColumnIndicators();
         if (edge === 'left') {
-          element.classList.add('border-l-2', 'border-l-primary');
+          element.classList.add(
+            'kanban-col-drop-left',
+            'border-l-2',
+            'border-l-primary'
+          );
         } else if (edge === 'right') {
-          element.classList.add('border-r-2', 'border-r-primary');
+          element.classList.add(
+            'kanban-col-drop-right',
+            'border-r-2',
+            'border-r-primary'
+          );
         }
       }
     },

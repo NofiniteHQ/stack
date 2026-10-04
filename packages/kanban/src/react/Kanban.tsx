@@ -218,7 +218,7 @@ function KanbanCardItem({
       )}
     >
       {closestEdge === 'top' && (
-        <div className="absolute -top-1.5 left-1 right-1 h-1 bg-primary rounded-full z-20 pointer-events-none" />
+        <div className="kanban-drop-indicator-top absolute -top-1.5 left-1 right-1 h-1 bg-primary rounded-full z-20 pointer-events-none" />
       )}
 
       {renderCard ? (
@@ -240,28 +240,31 @@ function KanbanCardItem({
             </div>
           )}
 
-          <div className="font-semibold text-sm leading-snug text-default group-hover:text-primary transition-colors break-words">
+          <div className="kanban-card-title font-semibold text-sm leading-snug text-default group-hover:text-primary transition-colors break-words">
             {item.title}
           </div>
 
           {item.description && (
-            <div className="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
+            <div className="kanban-card-desc text-xs text-muted mt-1 leading-relaxed line-clamp-2">
               {item.description}
             </div>
           )}
 
           {hasFooter && (
-            <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-default/40 text-xs text-muted">
-              <div className="flex items-center gap-2.5">
+            <div className="kanban-card-footer flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-default/40 text-xs text-muted">
+              <div className="kanban-card-meta flex items-center gap-2.5">
                 {item.dueDate && (
                   <span
                     className={clsx(
-                      'flex items-center gap-1 text-[11px] font-medium',
-                      item.isOverdue && 'text-danger font-semibold'
+                      'kanban-meta-item flex items-center gap-1 text-[11px] font-medium',
+                      item.isOverdue &&
+                        'kanban-meta-overdue text-danger font-semibold'
                     )}
                   >
                     <svg
-                      className="w-3 h-3 text-muted shrink-0"
+                      className="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0"
+                      width="14"
+                      height="14"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -272,13 +275,15 @@ function KanbanCardItem({
                       <line x1="8" y1="2" x2="8" y2="6" />
                       <line x1="3" y1="10" x2="21" y2="10" />
                     </svg>
-                    {item.dueDate}
+                    <span>{item.dueDate}</span>
                   </span>
                 )}
                 {item.subtasks && (
-                  <span className="flex items-center gap-1 text-[11px] font-medium">
+                  <span className="kanban-meta-item flex items-center gap-1 text-[11px] font-medium">
                     <svg
-                      className="w-3 h-3 text-muted shrink-0"
+                      className="kanban-meta-icon w-3.5 h-3.5 text-muted shrink-0"
+                      width="14"
+                      height="14"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -287,13 +292,18 @@ function KanbanCardItem({
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                       <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
-                    {item.subtasks.completed}/{item.subtasks.total}
+                    <span>
+                      {item.subtasks.completed}/{item.subtasks.total}
+                    </span>
                   </span>
                 )}
               </div>
 
               {item.assignee && (
-                <div className="shrink-0" title={item.assignee.name}>
+                <div
+                  className="kanban-card-assignee shrink-0"
+                  title={item.assignee.name}
+                >
                   {item.assignee.avatar ? (
                     <img
                       src={item.assignee.avatar}
@@ -315,7 +325,7 @@ function KanbanCardItem({
       )}
 
       {closestEdge === 'bottom' && (
-        <div className="absolute -bottom-1.5 left-1 right-1 h-1 bg-primary rounded-full z-20 pointer-events-none" />
+        <div className="kanban-drop-indicator-bottom absolute -bottom-1.5 left-1 right-1 h-1 bg-primary rounded-full z-20 pointer-events-none" />
       )}
     </div>
   );
@@ -467,10 +477,10 @@ function KanbanColumnComponent({
       )}
     >
       {closestColEdge === 'left' && (
-        <div className="absolute -left-2 top-0 bottom-0 w-1 bg-primary rounded-full z-20 pointer-events-none" />
+        <div className="kanban-drop-indicator-left absolute -left-1.5 top-0 bottom-0 w-0.5 bg-primary rounded-full z-20 pointer-events-none" />
       )}
       {closestColEdge === 'right' && (
-        <div className="absolute -right-2 top-0 bottom-0 w-1 bg-primary rounded-full z-20 pointer-events-none" />
+        <div className="kanban-drop-indicator-right absolute -right-1.5 top-0 bottom-0 w-0.5 bg-primary rounded-full z-20 pointer-events-none" />
       )}
 
       {/* Column Header */}
@@ -509,7 +519,9 @@ function KanbanColumnComponent({
                 title="Column options"
               >
                 <svg
-                  className="w-4 h-4 shrink-0"
+                  className="kanban-icon w-4 h-4 shrink-0"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -566,7 +578,9 @@ function KanbanColumnComponent({
               className="kanban-add-btn flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-default hover:bg-subtle transition-colors group cursor-pointer"
             >
               <svg
-                className="w-3.5 h-3.5 text-muted group-hover:text-primary transition-colors shrink-0"
+                className="kanban-icon w-3.5 h-3.5 text-muted group-hover:text-primary transition-colors shrink-0"
+                width="14"
+                height="14"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
