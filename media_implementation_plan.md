@@ -87,7 +87,7 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
 - [x] Fixed invalid focus-ring box-shadow by configuring `--media-focus-ring-color` and valid 3px box-shadow strings.
 - [x] Supported canonical `--fg-default` token alongside fallback `--text-default`.
 - [x] Verified computed styles and visual harmony across light and dark theme boundaries with Playwright screenshots.
-- **Commit:** `pending`
+- **Commit:** `9a0973e`
 
 ### Phase 5: Component Tests, Storybook Showcase & Final Verification
 
