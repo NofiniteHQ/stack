@@ -309,7 +309,12 @@ export function bindCardDropTarget(
   cardId: string,
   columnId: string,
   index: number,
-  onDrop?: (event: CardMoveEvent) => void
+  onDrop?: (event: CardMoveEvent) => void,
+  canDropCard?: (
+    source: { cardId: string; columnId: string; index: number },
+    targetColId: string,
+    targetIndex: number
+  ) => boolean
 ): () => void {
   function clearIndicators() {
     element.classList.remove(
@@ -324,7 +329,23 @@ export function bindCardDropTarget(
 
   return dropTargetForElements({
     element,
-    canDrop: ({ source }) => source.data.type === 'card',
+    canDrop: ({ source }) => {
+      if (source.data.type !== 'card') return false;
+      if (canDropCard) {
+        const targetColId = element.getAttribute('data-column-id') || columnId;
+        const targetIndex = parseInt(
+          element.getAttribute('data-index') || String(index),
+          10
+        );
+        const sourceCard = {
+          cardId: source.data.cardId as string,
+          columnId: source.data.columnId as string,
+          index: source.data.index as number,
+        };
+        return canDropCard(sourceCard, targetColId, targetIndex);
+      }
+      return true;
+    },
     getData: ({ input, element: el }) => {
       const currentCardId = el.getAttribute('data-item-id') || cardId;
       const currentColId = el.getAttribute('data-column-id') || columnId;
@@ -412,7 +433,12 @@ export function bindColumnDropTarget(
   columnId: string,
   columnIndex: number,
   onCardDrop?: (event: CardMoveEvent) => void,
-  onColumnDrop?: (event: ColumnMoveEvent) => void
+  onColumnDrop?: (event: ColumnMoveEvent) => void,
+  canDropCard?: (
+    source: { cardId: string; columnId: string; index: number },
+    targetColId: string,
+    targetIndex: number
+  ) => boolean
 ): () => void {
   function clearColumnIndicators() {
     element.classList.remove(
@@ -428,6 +454,23 @@ export function bindColumnDropTarget(
 
   return dropTargetForElements({
     element,
+    canDrop: ({ source }) => {
+      if (source.data.type === 'column') return true;
+      if (source.data.type === 'card') {
+        if (canDropCard) {
+          const currentColumnId =
+            element.getAttribute('data-column-id') || columnId;
+          const sourceCard = {
+            cardId: source.data.cardId as string,
+            columnId: source.data.columnId as string,
+            index: source.data.index as number,
+          };
+          return canDropCard(sourceCard, currentColumnId, 9999);
+        }
+        return true;
+      }
+      return false;
+    },
     getData: ({ input, element: el }) => {
       const currentColumnId = el.getAttribute('data-column-id') || columnId;
       const currentColumnIndex = parseInt(
@@ -537,8 +580,44 @@ export function createKanbanBoard(
   options: KanbanBoardOptions
 ): KanbanBoardInstance {
   const container = options.container;
-  const store = createKanbanStore(options.columns);
+  const store = createKanbanStore(options.columns, {
+    enforceWipLimit: options.enforceWipLimit,
+    canMoveCard: options.canMoveCard,
+  });
   let cleanups: (() => void)[] = [];
+
+  function isMoveAllowed(
+    sourceCard: { cardId: string; columnId: string; index: number },
+    targetColumnId: string,
+    targetIndex: number
+  ): boolean {
+    if (options.canMoveCard) {
+      const moveEvent: CardMoveEvent = {
+        cardId: sourceCard.cardId,
+        sourceColumnId: sourceCard.columnId,
+        targetColumnId,
+        sourceIndex: sourceCard.index,
+        targetIndex,
+      };
+      if (!options.canMoveCard(moveEvent)) {
+        return false;
+      }
+    }
+    if (sourceCard.columnId !== targetColumnId) {
+      if (options.enforceWipLimit) {
+        const targetCol = store.getState().find((c) => c.id === targetColumnId);
+        if (
+          targetCol &&
+          typeof targetCol.wipLimit === 'number' &&
+          targetCol.wipLimit > 0 &&
+          targetCol.items.length >= targetCol.wipLimit
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 
   function bindCard(cardEl: HTMLElement) {
     if (cardEl.dataset.dndBound === 'true') return;
@@ -553,7 +632,8 @@ export function createKanbanBoard(
       cardId,
       colId,
       itemIdx,
-      (event) => handleCardMove(event)
+      (event) => handleCardMove(event),
+      isMoveAllowed
     );
 
     cleanups.push(cardDragCleanup);
@@ -593,7 +673,8 @@ export function createKanbanBoard(
       colId,
       colIdx,
       (cardEvent) => handleCardMove(cardEvent),
-      (colEvent) => handleColumnMove(colEvent)
+      (colEvent) => handleColumnMove(colEvent),
+      isMoveAllowed
     );
     cleanups.push(colDropCleanup);
 
@@ -602,6 +683,16 @@ export function createKanbanBoard(
     if (cardListEl) {
       const listDropCleanup = dropTargetForElements({
         element: cardListEl,
+        canDrop: ({ source }) => {
+          if (source.data.type !== 'card') return false;
+          const currentColumnId = colEl.getAttribute('data-column-id') || colId;
+          const sourceCard = {
+            cardId: source.data.cardId as string,
+            columnId: source.data.columnId as string,
+            index: source.data.index as number,
+          };
+          return isMoveAllowed(sourceCard, currentColumnId, 9999);
+        },
         getData: () => ({
           type: 'column',
           columnId: colEl.getAttribute('data-column-id') || colId,
@@ -864,15 +955,19 @@ export function createKanbanBoard(
     }
   }
 
-  function handleCardMove(event: CardMoveEvent) {
-    store.moveCard(event);
-    options.onCardMove?.(event);
-    container.dispatchEvent(
-      new CustomEvent('kanban:card-move', {
-        detail: event,
-        bubbles: true,
-      })
-    );
+  function handleCardMove(event: CardMoveEvent): boolean {
+    const moved = store.moveCard(event);
+    if (moved) {
+      options.onCardMove?.(event);
+      container.dispatchEvent(
+        new CustomEvent('kanban:card-move', {
+          detail: event,
+          bubbles: true,
+        })
+      );
+      return true;
+    }
+    return false;
   }
 
   function handleColumnMove(event: ColumnMoveEvent) {
@@ -999,109 +1094,173 @@ export function createKanbanBoard(
       if (e.key === 'ArrowUp' && itemIdx > 0) {
         e.preventDefault();
         const targetIndex = itemIdx - 1;
-        handleCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId,
           sourceColumnId: colId,
           targetColumnId: colId,
           sourceIndex: itemIdx,
           targetIndex,
           edge: 'top',
-        });
-        announce(
-          `Moved card '${currentItem?.title || 'Card'}' to position ${
-            targetIndex + 1
-          } of ${totalCards} in ${currentCol.title}`
-        );
-        restoreCardFocus(cardId);
+        };
+        if (options.canMoveCard && !options.canMoveCard(moveEvent)) {
+          announce('Cannot move card: move is not permitted.');
+          return;
+        }
+        const moved = handleCardMove(moveEvent);
+        if (moved) {
+          announce(
+            `Moved card '${currentItem?.title || 'Card'}' to position ${
+              targetIndex + 1
+            } of ${totalCards} in ${currentCol.title}`
+          );
+          restoreCardFocus(cardId);
+        }
       } else if (e.key === 'ArrowDown' && itemIdx < totalCards - 1) {
         e.preventDefault();
         const targetIndex = itemIdx + 1;
-        handleCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId,
           sourceColumnId: colId,
           targetColumnId: colId,
           sourceIndex: itemIdx,
           targetIndex,
           edge: 'bottom',
-        });
-        announce(
-          `Moved card '${currentItem?.title || 'Card'}' to position ${
-            targetIndex + 1
-          } of ${totalCards} in ${currentCol.title}`
-        );
-        restoreCardFocus(cardId);
+        };
+        if (options.canMoveCard && !options.canMoveCard(moveEvent)) {
+          announce('Cannot move card: move is not permitted.');
+          return;
+        }
+        const moved = handleCardMove(moveEvent);
+        if (moved) {
+          announce(
+            `Moved card '${currentItem?.title || 'Card'}' to position ${
+              targetIndex + 1
+            } of ${totalCards} in ${currentCol.title}`
+          );
+          restoreCardFocus(cardId);
+        }
       } else if (e.key === 'ArrowLeft' && colIdx > 0) {
         e.preventDefault();
         const targetCol = columns[colIdx - 1];
         if (targetCol) {
           const targetIndex = Math.min(itemIdx, targetCol.items.length);
-          handleCardMove({
+          const moveEvent: CardMoveEvent = {
             cardId,
             sourceColumnId: colId,
             targetColumnId: targetCol.id,
             sourceIndex: itemIdx,
             targetIndex,
             edge: 'bottom',
-          });
-          announce(
-            `Moved card '${currentItem?.title || 'Card'}' to column '${
-              targetCol.title
-            }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
-          );
-          restoreCardFocus(cardId);
+          };
+          if (options.canMoveCard && !options.canMoveCard(moveEvent)) {
+            announce('Cannot move card: move is not permitted.');
+            return;
+          }
+          if (
+            options.enforceWipLimit &&
+            typeof targetCol.wipLimit === 'number' &&
+            targetCol.wipLimit > 0 &&
+            targetCol.items.length >= targetCol.wipLimit
+          ) {
+            announce(
+              `Cannot move card: column "${targetCol.title}" has reached its limit of ${targetCol.wipLimit} cards.`
+            );
+            return;
+          }
+          const moved = handleCardMove(moveEvent);
+          if (moved) {
+            announce(
+              `Moved card '${currentItem?.title || 'Card'}' to column '${
+                targetCol.title
+              }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
+            );
+            restoreCardFocus(cardId);
+          }
         }
       } else if (e.key === 'ArrowRight' && colIdx < columns.length - 1) {
         e.preventDefault();
         const targetCol = columns[colIdx + 1];
         if (targetCol) {
           const targetIndex = Math.min(itemIdx, targetCol.items.length);
-          handleCardMove({
+          const moveEvent: CardMoveEvent = {
             cardId,
             sourceColumnId: colId,
             targetColumnId: targetCol.id,
             sourceIndex: itemIdx,
             targetIndex,
             edge: 'bottom',
-          });
-          announce(
-            `Moved card '${currentItem?.title || 'Card'}' to column '${
-              targetCol.title
-            }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
-          );
-          restoreCardFocus(cardId);
+          };
+          if (options.canMoveCard && !options.canMoveCard(moveEvent)) {
+            announce('Cannot move card: move is not permitted.');
+            return;
+          }
+          if (
+            options.enforceWipLimit &&
+            typeof targetCol.wipLimit === 'number' &&
+            targetCol.wipLimit > 0 &&
+            targetCol.items.length >= targetCol.wipLimit
+          ) {
+            announce(
+              `Cannot move card: column "${targetCol.title}" has reached its limit of ${targetCol.wipLimit} cards.`
+            );
+            return;
+          }
+          const moved = handleCardMove(moveEvent);
+          if (moved) {
+            announce(
+              `Moved card '${currentItem?.title || 'Card'}' to column '${
+                targetCol.title
+              }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
+            );
+            restoreCardFocus(cardId);
+          }
         }
       } else if (e.key === 'Home' && itemIdx > 0) {
         e.preventDefault();
-        handleCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId,
           sourceColumnId: colId,
           targetColumnId: colId,
           sourceIndex: itemIdx,
           targetIndex: 0,
           edge: 'top',
-        });
-        announce(
-          `Moved card '${currentItem?.title || 'Card'}' to top of column '${
-            currentCol.title
-          }'`
-        );
-        restoreCardFocus(cardId);
+        };
+        if (options.canMoveCard && !options.canMoveCard(moveEvent)) {
+          announce('Cannot move card: move is not permitted.');
+          return;
+        }
+        const moved = handleCardMove(moveEvent);
+        if (moved) {
+          announce(
+            `Moved card '${currentItem?.title || 'Card'}' to top of column '${
+              currentCol.title
+            }'`
+          );
+          restoreCardFocus(cardId);
+        }
       } else if (e.key === 'End' && itemIdx < totalCards - 1) {
         e.preventDefault();
-        handleCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId,
           sourceColumnId: colId,
           targetColumnId: colId,
           sourceIndex: itemIdx,
           targetIndex: totalCards - 1,
           edge: 'bottom',
-        });
-        announce(
-          `Moved card '${currentItem?.title || 'Card'}' to bottom of column '${
-            currentCol.title
-          }'`
-        );
-        restoreCardFocus(cardId);
+        };
+        if (options.canMoveCard && !options.canMoveCard(moveEvent)) {
+          announce('Cannot move card: move is not permitted.');
+          return;
+        }
+        const moved = handleCardMove(moveEvent);
+        if (moved) {
+          announce(
+            `Moved card '${
+              currentItem?.title || 'Card'
+            }' to bottom of column '${currentCol.title}'`
+          );
+          restoreCardFocus(cardId);
+        }
       }
     }
   }

@@ -590,3 +590,229 @@ describe('@nofinite/kanban targeted DOM reconciliation & scroll preservation', (
     container.remove();
   });
 });
+
+describe('@nofinite/kanban Phase 4: Enforceable WIP limits & validation hooks', () => {
+  const initialColumns: KanbanColumn[] = [
+    {
+      id: 'col-todo',
+      title: 'To Do',
+      items: [
+        { id: 'c1', title: 'Task 1' },
+        { id: 'c2', title: 'Task 2' },
+      ],
+    },
+    {
+      id: 'col-doing',
+      title: 'In Progress',
+      wipLimit: 2,
+      items: [
+        { id: 'c3', title: 'Task 3' },
+        { id: 'c4', title: 'Task 4' },
+      ],
+    },
+    {
+      id: 'col-done',
+      title: 'Done',
+      wipLimit: 3,
+      items: [{ id: 'c5', title: 'Task 5' }],
+    },
+  ];
+
+  it('pure moveCardBetweenColumns blocks moves into over-capacity columns when enforceWipLimit is true', () => {
+    // col-doing has 2 items and wipLimit is 2
+    const resultBlocked = moveCardBetweenColumns(
+      initialColumns,
+      {
+        cardId: 'c1',
+        sourceColumnId: 'col-todo',
+        targetColumnId: 'col-doing',
+        sourceIndex: 0,
+        targetIndex: 0,
+      },
+      { enforceWipLimit: true }
+    );
+
+    // Columns should remain unchanged
+    expect(resultBlocked).toBe(initialColumns);
+    expect(resultBlocked[0].items.length).toBe(2);
+    expect(resultBlocked[1].items.length).toBe(2);
+
+    // If enforceWipLimit is false/omitted, move is permitted
+    const resultAllowed = moveCardBetweenColumns(initialColumns, {
+      cardId: 'c1',
+      sourceColumnId: 'col-todo',
+      targetColumnId: 'col-doing',
+      sourceIndex: 0,
+      targetIndex: 0,
+    });
+    expect(resultAllowed[0].items.length).toBe(1);
+    expect(resultAllowed[1].items.length).toBe(3);
+  });
+
+  it('allows moving into target column that has remaining capacity under WIP limit', () => {
+    // col-done has 1 item and wipLimit is 3 -> capacity available
+    const result = moveCardBetweenColumns(
+      initialColumns,
+      {
+        cardId: 'c1',
+        sourceColumnId: 'col-todo',
+        targetColumnId: 'col-done',
+        sourceIndex: 0,
+        targetIndex: 1,
+      },
+      { enforceWipLimit: true }
+    );
+
+    expect(result[0].items.length).toBe(1);
+    expect(result[2].items.length).toBe(2);
+    expect(result[2].items.map((i) => i.id)).toContain('c1');
+  });
+
+  it('allows intra-column reordering within a column at WIP capacity', () => {
+    // col-doing is at capacity (2/2), but reordering inside col-doing does not increase its count
+    const result = moveCardBetweenColumns(
+      initialColumns,
+      {
+        cardId: 'c3',
+        sourceColumnId: 'col-doing',
+        targetColumnId: 'col-doing',
+        sourceIndex: 0,
+        targetIndex: 1,
+      },
+      { enforceWipLimit: true }
+    );
+
+    expect(result[1].items.length).toBe(2);
+    expect(result[1].items[0].id).toBe('c4');
+    expect(result[1].items[1].id).toBe('c3');
+  });
+
+  it('blocks moves when custom canMoveCard returns false', () => {
+    // Only allow moves for card 'c1', reject everything else
+    const canMoveCard = (e: { cardId: string }) => e.cardId === 'c1';
+
+    const blocked = moveCardBetweenColumns(
+      initialColumns,
+      {
+        cardId: 'c2',
+        sourceColumnId: 'col-todo',
+        targetColumnId: 'col-done',
+        sourceIndex: 1,
+        targetIndex: 0,
+      },
+      { canMoveCard }
+    );
+    expect(blocked).toBe(initialColumns);
+
+    const allowed = moveCardBetweenColumns(
+      initialColumns,
+      {
+        cardId: 'c1',
+        sourceColumnId: 'col-todo',
+        targetColumnId: 'col-done',
+        sourceIndex: 0,
+        targetIndex: 0,
+      },
+      { canMoveCard }
+    );
+    expect(allowed[2].items.map((i) => i.id)).toContain('c1');
+  });
+
+  it('createKanbanStore enforces WIP limit on moveCard and addCard', () => {
+    const store = createKanbanStore(initialColumns, { enforceWipLimit: true });
+
+    // Attempt moving into full column (col-doing at 2/2)
+    const success = store.moveCard({
+      cardId: 'c1',
+      sourceColumnId: 'col-todo',
+      targetColumnId: 'col-doing',
+      sourceIndex: 0,
+      targetIndex: 0,
+    });
+    expect(success).toBe(false);
+    expect(store.getState()[1].items.length).toBe(2);
+
+    // Attempt addCard into full column
+    store.addCard('col-doing', { id: 'c-new', title: 'Overflow' });
+    expect(store.getState()[1].items.length).toBe(2);
+
+    // Move into column with capacity (col-done at 1/3)
+    const moveSuccess = store.moveCard({
+      cardId: 'c1',
+      sourceColumnId: 'col-todo',
+      targetColumnId: 'col-done',
+      sourceIndex: 0,
+      targetIndex: 0,
+    });
+    expect(moveSuccess).toBe(true);
+    expect(store.getState()[2].items.length).toBe(2);
+  });
+
+  it('createKanbanBoard blocks keyboard moves and announces WIP limit refusal', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: initialColumns,
+      enforceWipLimit: true,
+    });
+
+    const liveRegion = container.querySelector<HTMLElement>(
+      '.kanban-live-region'
+    )!;
+    const c1Card = container.querySelector<HTMLElement>('[data-item-id="c1"]')!;
+
+    // Alt + ArrowRight from col-todo (idx 0) to col-doing (idx 1, full at 2/2)
+    c1Card.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowRight',
+        altKey: true,
+        bubbles: true,
+      })
+    );
+
+    // Announcement must reflect WIP limit block
+    expect(liveRegion.textContent).toBe(
+      'Cannot move card: column "In Progress" has reached its limit of 2 cards.'
+    );
+
+    // Card c1 must still be in col-todo
+    expect(c1Card.getAttribute('data-column-id')).toBe('col-todo');
+
+    board.destroy();
+    container.remove();
+  });
+
+  it('createKanbanBoard blocks keyboard moves when canMoveCard returns false', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const board = createKanbanBoard({
+      container,
+      columns: initialColumns,
+      canMoveCard: () => false, // reject all moves
+    });
+
+    const liveRegion = container.querySelector<HTMLElement>(
+      '.kanban-live-region'
+    )!;
+    const c1Card = container.querySelector<HTMLElement>('[data-item-id="c1"]')!;
+
+    // Attempt Alt + ArrowDown within column
+    c1Card.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        altKey: true,
+        bubbles: true,
+      })
+    );
+
+    expect(liveRegion.textContent).toBe(
+      'Cannot move card: move is not permitted.'
+    );
+
+    board.destroy();
+    container.remove();
+  });
+});

@@ -84,12 +84,23 @@ export interface ColumnOptionsEvent {
   columnId: string;
 }
 
+export interface MoveCardOptions {
+  enforceWipLimit?: boolean;
+  canMoveCard?: (event: CardMoveEvent) => boolean;
+}
+
+export interface KanbanStoreOptions {
+  enforceWipLimit?: boolean;
+  canMoveCard?: (event: CardMoveEvent) => boolean;
+}
+
 export interface KanbanBoardEvents {
   onCardMove?: (event: CardMoveEvent) => void;
   onColumnMove?: (event: ColumnMoveEvent) => void;
   onCardAdd?: (event: CardAddEvent) => void;
   onCardClick?: (event: CardClickEvent) => void;
   onColumnOptions?: (event: ColumnOptionsEvent) => void;
+  canMoveCard?: (event: CardMoveEvent) => boolean;
 }
 
 export interface KanbanBoardOptions extends KanbanBoardEvents {
@@ -97,6 +108,7 @@ export interface KanbanBoardOptions extends KanbanBoardEvents {
   columns: KanbanColumn[];
   allowAdd?: boolean;
   headerActions?: boolean;
+  enforceWipLimit?: boolean;
   className?: string;
   columnClassName?: string;
 }
@@ -105,7 +117,7 @@ export interface KanbanBoardInstance {
   destroy: () => void;
   update: (columns: KanbanColumn[]) => void;
   getColumns: () => KanbanColumn[];
-  moveCard: (event: CardMoveEvent) => void;
+  moveCard: (event: CardMoveEvent) => boolean;
   moveColumn: (event: ColumnMoveEvent) => void;
   addCard: (columnId: string, item: KanbanItem) => void;
   removeCard: (columnId: string, cardId: string) => void;

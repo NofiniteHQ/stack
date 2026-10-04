@@ -105,23 +105,27 @@ Phase 6: Search & Filter Suite, Test Suite Expansion & Package Verification
 
 ---
 
-### Phase 4: Enforceable WIP Limits & Validation Hooks
+### Phase 4: Enforceable WIP Limits & Validation Hooks [COMPLETED & VERIFIED]
 
+- **Status:** Complete & verified (23/23 unit tests green, clean build, visual Playwright verification verified).
 - **Files Affected:**
   - `packages/kanban/src/core/types.ts`
   - `packages/kanban/src/core/store.ts`
   - `packages/kanban/src/core/reorder.ts`
   - `packages/kanban/src/core/board.ts`
   - `packages/kanban/src/react/Kanban.tsx`
-- **Actions:**
-  1. Add `enforceWipLimit?: boolean` option to both Core store options and React `KanbanProps`.
-  2. Add `canMoveCard?: (event: CardMoveEvent) => boolean` custom validation callback.
-  3. In `store.moveCard()` and `moveCardBetweenColumns()`:
-     - If `enforceWipLimit` is true and target column is already at capacity, or if `canMoveCard(event)` returns false, abort the move and leave state intact.
-  4. In DnD drop targets (`dropTargetForElements`):
-     - Check `canDrop` against WIP limits to prevent dropping onto an over-capacity column and display a blocked cursor.
-- **Verification:**
-  - Unit tests verifying that dropping a card into an over-capacity column with `enforceWipLimit: true` is strictly blocked.
+  - `packages/kanban/src/kanban.test.ts`
+- **Actions Completed:**
+  1. Added `enforceWipLimit?: boolean` and `canMoveCard?: (event: CardMoveEvent) => boolean` to `MoveCardOptions`, `KanbanStoreOptions`, `KanbanBoardOptions`, and React `KanbanProps`.
+  2. Implemented WIP limit enforcement and `canMoveCard` validation inside pure `moveCardBetweenColumns`:
+     - Cross-column moves into full columns are strictly aborted when `enforceWipLimit: true`.
+     - Intra-column reordering remains permitted within full columns without count inflation.
+     - Custom validator `canMoveCard` is checked before moving and aborts the move when returning false.
+  3. Integrated validation with `store.moveCard` (returning boolean) and `store.addCard` (preventing capacity overflow).
+  4. Wired `canDrop` guards on DnD drop targets in both Vanilla DOM (`bindCardDropTarget`, `bindColumnDropTarget`, `.kanban-card-list`) and React (`KanbanCardItem`, `KanbanColumnComponent`), preventing hover indicators and drop events onto full columns.
+  5. Implemented keyboard accessibility guards (`Alt+ArrowLeft/Right`, `Alt+ArrowUp/Down`, `Alt+Home/End`) announcing refusal messages to screen reader live regions (`Cannot move card: column "..." has reached its limit of ... cards.` or `Cannot move card: move is not permitted.`).
+  6. Added 7 unit tests covering all WIP and validation scenarios (23/23 tests green).
+  7. Visual validation captured via Playwright in `temp/screenshots/` verifying live announcement banner and blocked state.
 
 ---
 

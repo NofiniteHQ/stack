@@ -56,6 +56,8 @@ export interface KanbanProps
   onColumnOptions?: (columnId: string) => void;
   allowAdd?: boolean;
   headerActions?: boolean;
+  enforceWipLimit?: boolean;
+  canMoveCard?: (event: CardMoveEvent) => boolean;
   columnClassName?: string;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
   renderHeader?: (column: KanbanColumnProps) => React.ReactNode;
@@ -74,6 +76,8 @@ interface CardProps {
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
   onAnnounce?: (message: string) => void;
   onFocusCard?: (cardId: string) => void;
+  enforceWipLimit?: boolean;
+  canMoveCard?: (event: CardMoveEvent) => boolean;
 }
 
 function KanbanCardItem({
@@ -89,6 +93,8 @@ function KanbanCardItem({
   renderCard,
   onAnnounce,
   onFocusCard,
+  enforceWipLimit,
+  canMoveCard,
 }: CardProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -114,7 +120,34 @@ function KanbanCardItem({
 
     const cleanupDrop = dropTargetForElements({
       element: el,
-      canDrop: ({ source }) => source.data.type === 'card',
+      canDrop: ({ source }) => {
+        if (source.data.type !== 'card') return false;
+        const sourceColId = source.data.columnId as string;
+        if (sourceColId !== columnId) {
+          if (enforceWipLimit) {
+            const targetCol = allColumns.find((c) => c.id === columnId);
+            if (
+              targetCol &&
+              typeof targetCol.wipLimit === 'number' &&
+              targetCol.wipLimit > 0 &&
+              targetCol.items.length >= targetCol.wipLimit
+            ) {
+              return false;
+            }
+          }
+          if (canMoveCard) {
+            const allowed = canMoveCard({
+              cardId: source.data.cardId as string,
+              sourceColumnId: sourceColId,
+              targetColumnId: columnId,
+              sourceIndex: source.data.index as number,
+              targetIndex: index,
+            });
+            if (!allowed) return false;
+          }
+        }
+        return true;
+      },
       getData: ({ input, element }) => {
         const data = { type: 'card', cardId: item.id, columnId, index };
         return attachClosestEdge(data, {
@@ -155,7 +188,15 @@ function KanbanCardItem({
       cleanupDrag();
       cleanupDrop();
     };
-  }, [item.id, columnId, index, onCardMove]);
+  }, [
+    item.id,
+    columnId,
+    index,
+    onCardMove,
+    enforceWipLimit,
+    canMoveCard,
+    allColumns,
+  ]);
 
   const assigneeInitials =
     item.assignee?.initials ||
@@ -188,14 +229,19 @@ function KanbanCardItem({
       if (e.key === 'ArrowUp' && index > 0) {
         e.preventDefault();
         const targetIndex = index - 1;
-        onCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId: item.id,
           sourceColumnId: columnId,
           targetColumnId: columnId,
           sourceIndex: index,
           targetIndex,
           edge: 'top',
-        });
+        };
+        if (canMoveCard && !canMoveCard(moveEvent)) {
+          onAnnounce?.('Cannot move card: move is not permitted.');
+          return;
+        }
+        onCardMove(moveEvent);
         onAnnounce?.(
           `Moved card '${item.title || 'Card'}' to position ${
             targetIndex + 1
@@ -205,14 +251,19 @@ function KanbanCardItem({
       } else if (e.key === 'ArrowDown' && index < totalCards - 1) {
         e.preventDefault();
         const targetIndex = index + 1;
-        onCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId: item.id,
           sourceColumnId: columnId,
           targetColumnId: columnId,
           sourceIndex: index,
           targetIndex,
           edge: 'bottom',
-        });
+        };
+        if (canMoveCard && !canMoveCard(moveEvent)) {
+          onAnnounce?.('Cannot move card: move is not permitted.');
+          return;
+        }
+        onCardMove(moveEvent);
         onAnnounce?.(
           `Moved card '${item.title || 'Card'}' to position ${
             targetIndex + 1
@@ -224,17 +275,35 @@ function KanbanCardItem({
         const targetCol = allColumns[columnIndex - 1];
         if (targetCol) {
           const targetIndex = Math.min(index, targetCol.items.length);
-          onCardMove({
+          const moveEvent: CardMoveEvent = {
             cardId: item.id,
             sourceColumnId: columnId,
             targetColumnId: targetCol.id,
             sourceIndex: index,
             targetIndex,
             edge: 'bottom',
-          });
+          };
+          if (canMoveCard && !canMoveCard(moveEvent)) {
+            onAnnounce?.('Cannot move card: move is not permitted.');
+            return;
+          }
+          if (
+            enforceWipLimit &&
+            typeof targetCol.wipLimit === 'number' &&
+            targetCol.wipLimit > 0 &&
+            targetCol.items.length >= targetCol.wipLimit
+          ) {
+            onAnnounce?.(
+              `Cannot move card: column "${
+                targetCol.title || 'column'
+              }" has reached its limit of ${targetCol.wipLimit} cards.`
+            );
+            return;
+          }
+          onCardMove(moveEvent);
           onAnnounce?.(
             `Moved card '${item.title || 'Card'}' to column '${
-              targetCol.title
+              targetCol.title || 'column'
             }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
           );
           onFocusCard?.(item.id);
@@ -244,31 +313,54 @@ function KanbanCardItem({
         const targetCol = allColumns[columnIndex + 1];
         if (targetCol) {
           const targetIndex = Math.min(index, targetCol.items.length);
-          onCardMove({
+          const moveEvent: CardMoveEvent = {
             cardId: item.id,
             sourceColumnId: columnId,
             targetColumnId: targetCol.id,
             sourceIndex: index,
             targetIndex,
             edge: 'bottom',
-          });
+          };
+          if (canMoveCard && !canMoveCard(moveEvent)) {
+            onAnnounce?.('Cannot move card: move is not permitted.');
+            return;
+          }
+          if (
+            enforceWipLimit &&
+            typeof targetCol.wipLimit === 'number' &&
+            targetCol.wipLimit > 0 &&
+            targetCol.items.length >= targetCol.wipLimit
+          ) {
+            onAnnounce?.(
+              `Cannot move card: column "${
+                targetCol.title || 'column'
+              }" has reached its limit of ${targetCol.wipLimit} cards.`
+            );
+            return;
+          }
+          onCardMove(moveEvent);
           onAnnounce?.(
             `Moved card '${item.title || 'Card'}' to column '${
-              targetCol.title
+              targetCol.title || 'column'
             }', position ${targetIndex + 1} of ${targetCol.items.length + 1}`
           );
           onFocusCard?.(item.id);
         }
       } else if (e.key === 'Home' && index > 0) {
         e.preventDefault();
-        onCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId: item.id,
           sourceColumnId: columnId,
           targetColumnId: columnId,
           sourceIndex: index,
           targetIndex: 0,
           edge: 'top',
-        });
+        };
+        if (canMoveCard && !canMoveCard(moveEvent)) {
+          onAnnounce?.('Cannot move card: move is not permitted.');
+          return;
+        }
+        onCardMove(moveEvent);
         onAnnounce?.(
           `Moved card '${
             item.title || 'Card'
@@ -277,14 +369,19 @@ function KanbanCardItem({
         onFocusCard?.(item.id);
       } else if (e.key === 'End' && index < totalCards - 1) {
         e.preventDefault();
-        onCardMove({
+        const moveEvent: CardMoveEvent = {
           cardId: item.id,
           sourceColumnId: columnId,
           targetColumnId: columnId,
           sourceIndex: index,
           targetIndex: totalCards - 1,
           edge: 'bottom',
-        });
+        };
+        if (canMoveCard && !canMoveCard(moveEvent)) {
+          onAnnounce?.('Cannot move card: move is not permitted.');
+          return;
+        }
+        onCardMove(moveEvent);
         onAnnounce?.(
           `Moved card '${
             item.title || 'Card'
@@ -443,6 +540,8 @@ interface ColumnComponentProps {
   columnClassName?: string;
   allowAdd?: boolean;
   headerActions?: boolean;
+  enforceWipLimit?: boolean;
+  canMoveCard?: (event: CardMoveEvent) => boolean;
   onCardMove: (event: CardMoveEvent) => void;
   onColumnMove: (event: ColumnMoveEvent) => void;
   onCardAdd?: (columnId: string) => void;
@@ -462,6 +561,8 @@ function KanbanColumnComponent({
   columnClassName,
   allowAdd,
   headerActions,
+  enforceWipLimit,
+  canMoveCard,
   onCardMove,
   onColumnMove,
   onCardAdd,
@@ -507,6 +608,34 @@ function KanbanColumnComponent({
     // Entire column body acts as drop target with hitbox
     const cleanupDrop = dropTargetForElements({
       element: colEl,
+      canDrop: ({ source }) => {
+        if (source.data.type === 'column') return true;
+        if (source.data.type === 'card') {
+          const sourceColId = source.data.columnId as string;
+          if (sourceColId !== column.id) {
+            if (
+              enforceWipLimit &&
+              typeof column.wipLimit === 'number' &&
+              column.wipLimit > 0 &&
+              column.items.length >= column.wipLimit
+            ) {
+              return false;
+            }
+            if (canMoveCard) {
+              const allowed = canMoveCard({
+                cardId: source.data.cardId as string,
+                sourceColumnId: sourceColId,
+                targetColumnId: column.id,
+                sourceIndex: source.data.index as number,
+                targetIndex: 9999,
+              });
+              if (!allowed) return false;
+            }
+          }
+          return true;
+        }
+        return false;
+      },
       getData: ({ input, element }) => {
         const data = {
           type: 'column',
@@ -574,7 +703,16 @@ function KanbanColumnComponent({
       cleanupDrag();
       cleanupDrop();
     };
-  }, [column.id, column.items.length, index, onCardMove, onColumnMove]);
+  }, [
+    column.id,
+    column.items.length,
+    column.wipLimit,
+    index,
+    onCardMove,
+    onColumnMove,
+    enforceWipLimit,
+    canMoveCard,
+  ]);
 
   return (
     <div
@@ -672,6 +810,8 @@ function KanbanColumnComponent({
               renderCard={renderCard}
               onAnnounce={onAnnounce}
               onFocusCard={onFocusCard}
+              enforceWipLimit={enforceWipLimit}
+              canMoveCard={canMoveCard}
             />
           ))
         )}
@@ -721,6 +861,8 @@ export function Kanban({
   onColumnOptions,
   allowAdd = true,
   headerActions = true,
+  enforceWipLimit = false,
+  canMoveCard,
   className,
   columnClassName,
   renderCard,
@@ -745,11 +887,29 @@ export function Kanban({
   };
 
   const handleCardMove = (event: CardMoveEvent) => {
+    if (canMoveCard && !canMoveCard(event)) {
+      return;
+    }
+    if (enforceWipLimit && event.sourceColumnId !== event.targetColumnId) {
+      const targetCol = data.find((c) => c.id === event.targetColumnId);
+      if (
+        targetCol &&
+        typeof targetCol.wipLimit === 'number' &&
+        targetCol.wipLimit > 0 &&
+        targetCol.items.length >= targetCol.wipLimit
+      ) {
+        return;
+      }
+    }
     setData((prev) => {
       const updated = moveCardBetweenColumns(
         prev as unknown as CoreColumn[],
-        event
+        event,
+        { enforceWipLimit, canMoveCard }
       ) as unknown as KanbanColumnProps[];
+      if (updated === (prev as unknown as CoreColumn[])) {
+        return prev;
+      }
       onChange?.(updated);
       onCardMove?.(event);
       return updated;
@@ -790,6 +950,8 @@ export function Kanban({
           columnClassName={columnClassName}
           allowAdd={allowAdd}
           headerActions={headerActions}
+          enforceWipLimit={enforceWipLimit}
+          canMoveCard={canMoveCard}
           onCardMove={handleCardMove}
           onColumnMove={handleColumnMove}
           onCardAdd={onCardAdd}

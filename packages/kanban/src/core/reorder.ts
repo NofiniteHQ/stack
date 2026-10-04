@@ -3,6 +3,7 @@ import type {
   CardMoveEvent,
   ColumnMoveEvent,
   Edge,
+  MoveCardOptions,
 } from './types';
 
 /**
@@ -64,7 +65,8 @@ export function reorderWithEdge<T>({
  */
 export function moveCardBetweenColumns(
   columns: KanbanColumn[],
-  event: CardMoveEvent
+  event: CardMoveEvent,
+  options?: MoveCardOptions
 ): KanbanColumn[] {
   const {
     sourceColumnId,
@@ -84,6 +86,11 @@ export function moveCardBetweenColumns(
   const sourceCol = columns[sourceColIndex];
   const targetCol = columns[targetColIndex];
 
+  // Check custom validation hook if provided
+  if (options?.canMoveCard && !options.canMoveCard(event)) {
+    return columns;
+  }
+
   // Moving within the same column
   if (sourceColumnId === targetColumnId) {
     const newItems = reorderWithEdge({
@@ -96,6 +103,17 @@ export function moveCardBetweenColumns(
     const newColumns = Array.from(columns);
     newColumns[sourceColIndex] = { ...sourceCol, items: newItems };
     return newColumns;
+  }
+
+  // Moving across columns
+  // Check WIP limit on target column if enforceWipLimit is enabled
+  if (
+    options?.enforceWipLimit &&
+    typeof targetCol.wipLimit === 'number' &&
+    targetCol.wipLimit > 0 &&
+    targetCol.items.length >= targetCol.wipLimit
+  ) {
+    return columns;
   }
 
   // Moving across columns

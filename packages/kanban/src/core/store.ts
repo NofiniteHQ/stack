@@ -3,6 +3,7 @@ import type {
   KanbanItem,
   CardMoveEvent,
   ColumnMoveEvent,
+  KanbanStoreOptions,
 } from './types';
 import { moveCardBetweenColumns, reorderColumns } from './reorder';
 
@@ -10,7 +11,7 @@ export interface KanbanStore {
   getState: () => KanbanColumn[];
   setState: (columns: KanbanColumn[]) => void;
   subscribe: (listener: (columns: KanbanColumn[]) => void) => () => void;
-  moveCard: (event: CardMoveEvent) => void;
+  moveCard: (event: CardMoveEvent) => boolean;
   moveColumn: (event: ColumnMoveEvent) => void;
   addCard: (columnId: string, item: KanbanItem) => void;
   removeCard: (columnId: string, cardId: string) => void;
@@ -22,7 +23,8 @@ export interface KanbanStore {
 }
 
 export function createKanbanStore(
-  initialColumns: KanbanColumn[] = []
+  initialColumns: KanbanColumn[] = [],
+  options?: KanbanStoreOptions
 ): KanbanStore {
   let state = Array.from(initialColumns);
   const listeners = new Set<(columns: KanbanColumn[]) => void>();
@@ -45,9 +47,14 @@ export function createKanbanStore(
         listeners.delete(listener);
       };
     },
-    moveCard: (event: CardMoveEvent) => {
-      state = moveCardBetweenColumns(state, event);
+    moveCard: (event: CardMoveEvent): boolean => {
+      const nextState = moveCardBetweenColumns(state, event, options);
+      if (nextState === state) {
+        return false;
+      }
+      state = nextState;
       notify();
+      return true;
     },
     moveColumn: (event: ColumnMoveEvent) => {
       state = reorderColumns(state, event);
@@ -57,6 +64,14 @@ export function createKanbanStore(
       const colIndex = state.findIndex((c) => c.id === columnId);
       if (colIndex === -1) return;
       const col = state[colIndex];
+      if (
+        options?.enforceWipLimit &&
+        typeof col.wipLimit === 'number' &&
+        col.wipLimit > 0 &&
+        col.items.length >= col.wipLimit
+      ) {
+        return;
+      }
       const newCol = {
         ...col,
         items: [...col.items, item],
