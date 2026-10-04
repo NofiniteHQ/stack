@@ -89,13 +89,14 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
 - [x] Verified computed styles and visual harmony across light and dark theme boundaries with Playwright screenshots.
 - **Commit:** `9a0973e`
 
-### Phase 5: Component Tests, Storybook Showcase & Final Verification
+### Phase 5: Component Tests, Storybook Showcase & Final Verification (Completed)
 
-- Add React component tests in `packages/media/src/react.test.tsx` verifying prop forwarding, `playbackRates`, `crossOrigin`, event callbacks, and ref methods.
-- Update `packages/media/src/react/MediaPlayer.stories.tsx` showcasing playback speed rates, slots, and CORS subtitles.
-- Run `npm pack --dry-run` to verify package contents.
-- Capture final visual verification screenshots in `d:\stack\temp\screenshots/`.
-- **Gate:** Final Review & Completion.
+- [x] Added React component tests in `packages/media/src/react.test.tsx` verifying prop forwarding, `playbackRates`, `crossOrigin`, `load`, `preload`, `theme`, metadata header cards, and `MediaPlayerInstance` ref assignment.
+- [x] Updated `packages/media/src/react/MediaPlayer.stories.tsx` showcasing playback speed rates, seek steps, CORS subtitles, and custom slot overlays (`VideoWithCustomSlots`).
+- [x] Ran `npm pack --dry-run` to verify package contents (33 files bundled, all entry points, styles, declarations present).
+- [x] Built Storybook (`pnpm build:storybook`) with zero errors.
+- [x] Captured visual verification screenshots across all stories in `d:\stack\temp\screenshots/`.
+- **Commit:** `pending`
 
 ---
 

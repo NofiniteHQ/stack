@@ -51,6 +51,9 @@ export const VideoMp4WithCaptions: StoryObj = {
         poster="https://files.vidstack.io/sprite-fight/poster.webp"
         thumbnails="https://files.vidstack.io/sprite-fight/thumbnails.vtt"
         aspectRatio="16/9"
+        crossOrigin="anonymous"
+        playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 2]}
+        seekStep={10}
         tracks={[
           {
             src: 'https://files.vidstack.io/sprite-fight/subs/english.vtt',
@@ -59,7 +62,40 @@ export const VideoMp4WithCaptions: StoryObj = {
             kind: 'subtitles',
             default: true,
           },
+          {
+            src: 'https://files.vidstack.io/sprite-fight/subs/spanish.vtt',
+            label: 'Spanish',
+            language: 'es-ES',
+            kind: 'subtitles',
+          },
         ]}
+      />
+    </div>
+  ),
+};
+
+export const VideoWithCustomSlots: StoryObj = {
+  render: () => (
+    <div className="w-[640px] max-w-full">
+      <VideoPlayer
+        title="Enterprise Keynote Presentation"
+        src="https://files.vidstack.io/sprite-fight/720p.mp4"
+        poster="https://files.vidstack.io/sprite-fight/poster.webp"
+        playbackRates={[0.8, 1, 1.2, 1.5, 2]}
+        seekStep={5}
+        crossOrigin="anonymous"
+        slots={{
+          topChrome: (
+            <div className="flex items-center justify-between p-3 pointer-events-auto">
+              <span className="badge badge-primary text-xs font-semibold px-2 py-0.5 rounded-full">
+                HD 1080p Stream
+              </span>
+              <span className="text-xs text-white/80 font-mono">
+                CDN: Edge-Fast
+              </span>
+            </div>
+          ),
+        }}
       />
     </div>
   ),
