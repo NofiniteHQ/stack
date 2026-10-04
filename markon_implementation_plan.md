@@ -93,22 +93,33 @@ Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit
 
 ---
 
-### Phase 3: Interactive Table Suite & Contextual Floating Table Menu
+### Phase 3: Interactive Table Suite & Contextual Floating Table Menu [COMPLETED]
 
 **Goal:** Remove table clutter from the static toolbar and provide a modern Notion/Google Docs style contextual table experience.
 
-- **Tasks:**
-  1. Contextual Table Bubble Menu (`tableBubbleMenu.ts`):
-     - Floating toolbar that automatically appears when the caret or selection enters a table cell.
-     - Clean icon buttons with tooltips for:
+- **Completed Deliverables:**
+  1. Contextual Table Bubble Menu (`bubbleMenu.ts`):
+     - Floating toolbar that automatically appears anchored directly above the active cell when the caret enters a table cell.
+     - Clean SVG icon buttons with tooltips for:
        - Row: Add Above (`addRowBefore`), Add Below (`addRowAfter`), Delete Row (`deleteRow`).
        - Column: Add Left (`addColumnBefore`), Add Right (`addColumnAfter`), Delete Column (`deleteColumn`).
-       - Cells: Merge Cells (`mergeCells`), Split Cell (`splitCell`).
        - Headers: Toggle Header Row (`toggleHeaderRow`), Toggle Header Column (`toggleHeaderColumn`).
+       - Cells: Merge Cells (`mergeCells`), Split Cell (`splitCell`) with active capability detection (`can().mergeCells()`, `can().splitCell()`).
        - Danger: Delete Entire Table (`deleteTable`).
+     - Automatic seamless switching: when text is selected within a table cell, smoothly switches to the text formatting bubble menu; when selection collapses, returns to table controls.
   2. Toolbar Cleanup:
-     - Remove the static `+Row`, `-Row`, `+Col`, `-Col`, `Del Table` text buttons from the top toolbar in `MarkonEditor.ts`.
-     - Retain only the initial "Insert Table" dimension grid trigger in the main toolbar.
+     - Removed static `.editor-table-tools` text buttons (`+Row`, `-Row`, `+Col`, `-Col`, `Del Table`) from the main editor toolbar, preserving a clean and uncluttered header.
+     - Maintained programmatic table commands in `execCommand` and dimension picker in `MarkonTableMenu`.
+  3. Cell Selection Highlight:
+     - Styled `.selectedCell:after` with OKLCH primary mix token in `styleInjector.ts`.
+  4. **Verification Passed:**
+     - 45/45 unit tests passing (`npx vitest run packages/markon`).
+     - Clean compilation with Vite (`npx vite build --config packages/markon/vite.config.ts`) and zero declaration errors.
+     - Verified `npm pack --dry-run` contains all 74 expected assets and types.
+     - Visual audit verified in Chromium via Playwright:
+       - `/temp/markon_table_bubble_menu_open.png`
+       - `/temp/markon_table_row_added.png`
+       - `/temp/markon_table_cell_text_selected.png`
 
 ---
 

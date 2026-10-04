@@ -10,7 +10,7 @@ import {
 import { openMarkonModal } from './dialog';
 import { MarkonColorPicker } from './colorPicker';
 
-type BubbleContext = 'none' | 'text' | 'image' | 'video';
+type BubbleContext = 'none' | 'text' | 'image' | 'video' | 'table';
 
 function detectBubbleContext(
   editor: any,
@@ -28,6 +28,20 @@ function detectBubbleContext(
   if (editor.isActive('image')) return 'image';
   if (editor.isActive('videoBlock')) return 'video';
   if (editor.isActive('codeBlock')) return 'none';
+
+  if (editor.isActive('table')) {
+    const sel = editor.state?.selection;
+    const isCellSelection = Boolean(
+      (sel as any)?.isCellSelection ||
+        sel?.constructor?.name === 'CellSelection' ||
+        ((sel as any)?.ranges && (sel as any).ranges.length > 1)
+    );
+    if (!sel?.empty && !isCellSelection) {
+      return 'text';
+    }
+    return 'table';
+  }
+
   if (!editor.state.selection.empty) return 'text';
   return 'none';
 }
@@ -145,6 +159,100 @@ export function createBubbleMenuExtension() {
                     <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="3 6 5 6 21 6"></polyline>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                `;
+              } else if (context === 'table') {
+                menuEl.innerHTML = `
+                  <!-- Row Operations -->
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="addRowBefore" title="Add Row Above">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 12h16"/>
+                      <path d="M4 18h16"/>
+                      <path d="M12 3v5"/>
+                      <path d="M9.5 5.5h5"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="addRowAfter" title="Add Row Below">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 6h16"/>
+                      <path d="M4 12h16"/>
+                      <path d="M12 16v5"/>
+                      <path d="M9.5 18.5h5"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="deleteRow" title="Delete Row">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="8" width="18" height="8" rx="1.5"/>
+                      <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                  </button>
+
+                  <span class="w-px h-4 bg-border/60 mx-0.5 self-center shrink-0"></span>
+
+                  <!-- Column Operations -->
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="addColumnBefore" title="Add Column Left">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 4v16"/>
+                      <path d="M18 4v16"/>
+                      <path d="M3 12h5"/>
+                      <path d="M5.5 9.5v5"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="addColumnAfter" title="Add Column Right">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 4v16"/>
+                      <path d="M12 4v16"/>
+                      <path d="M16 12h5"/>
+                      <path d="M18.5 9.5v5"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="deleteColumn" title="Delete Column">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="8" y="3" width="8" height="18" rx="1.5"/>
+                      <line x1="12" y1="8" x2="12" y2="16"/>
+                    </svg>
+                  </button>
+
+                  <span class="w-px h-4 bg-border/60 mx-0.5 self-center shrink-0"></span>
+
+                  <!-- Header Toggles -->
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="toggleHeaderRow" title="Toggle Header Row">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <line x1="3" y1="9" x2="21" y2="9" stroke-width="2.5"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="toggleHeaderColumn" title="Toggle Header Column">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <line x1="9" y1="3" x2="9" y2="21" stroke-width="2.5"/>
+                    </svg>
+                  </button>
+
+                  <span class="w-px h-4 bg-border/60 mx-0.5 self-center shrink-0"></span>
+
+                  <!-- Merge & Split -->
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="mergeCells" title="Merge Cells">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <path d="M8 12h8m-2-2 2 2-2 2m-4-4-2 2 2 2"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs" data-table-cmd="splitCell" title="Split Cell">
+                    <svg width="14" height="14" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <line x1="12" y1="3" x2="12" y2="21"/>
+                    </svg>
+                  </button>
+
+                  <span class="w-px h-4 bg-border/60 mx-0.5 self-center shrink-0"></span>
+
+                  <!-- Delete Entire Table -->
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon h-7 w-7 text-xs text-danger hover:bg-danger/10" data-table-cmd="deleteTable" title="Delete Entire Table">
+                    <svg width="14" height="14" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                     </svg>
                   </button>
                 `;
@@ -442,6 +550,20 @@ export function createBubbleMenuExtension() {
                   }
                   return;
                 }
+
+                // 4. Table commands
+                const tableBtn =
+                  target.closest<HTMLButtonElement>('[data-table-cmd]');
+                if (tableBtn) {
+                  if (tableBtn.disabled) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const cmd = tableBtn.getAttribute('data-table-cmd');
+                  if (cmd && (editor.commands as any)[cmd]) {
+                    (editor.chain().focus() as any)[cmd]().run();
+                  }
+                  return;
+                }
               });
             };
 
@@ -612,6 +734,55 @@ export function createBubbleMenuExtension() {
                         btn.classList.add('btn-active');
                       else btn.classList.remove('btn-active');
                     });
+                } else if (context === 'table') {
+                  const mergeBtn = menuEl?.querySelector<HTMLButtonElement>(
+                    '[data-table-cmd="mergeCells"]'
+                  );
+                  if (mergeBtn) {
+                    const canMerge = editor.can().mergeCells();
+                    mergeBtn.disabled = !canMerge;
+                    if (!canMerge) {
+                      mergeBtn.classList.add(
+                        'opacity-40',
+                        'cursor-not-allowed'
+                      );
+                    } else {
+                      mergeBtn.classList.remove(
+                        'opacity-40',
+                        'cursor-not-allowed'
+                      );
+                    }
+                  }
+
+                  const splitBtn = menuEl?.querySelector<HTMLButtonElement>(
+                    '[data-table-cmd="splitCell"]'
+                  );
+                  if (splitBtn) {
+                    const canSplit = editor.can().splitCell();
+                    splitBtn.disabled = !canSplit;
+                    if (!canSplit) {
+                      splitBtn.classList.add(
+                        'opacity-40',
+                        'cursor-not-allowed'
+                      );
+                    } else {
+                      splitBtn.classList.remove(
+                        'opacity-40',
+                        'cursor-not-allowed'
+                      );
+                    }
+                  }
+
+                  const headerRowBtn = menuEl?.querySelector<HTMLButtonElement>(
+                    '[data-table-cmd="toggleHeaderRow"]'
+                  );
+                  if (headerRowBtn) {
+                    if (editor.isActive('tableHeader')) {
+                      headerRowBtn.classList.add('btn-active');
+                    } else {
+                      headerRowBtn.classList.remove('btn-active');
+                    }
+                  }
                 }
 
                 menuEl.style.display = 'flex';
@@ -644,6 +815,48 @@ export function createBubbleMenuExtension() {
                             coords.top,
                             Math.max(coords.right - coords.left, 40),
                             Math.max(coords.bottom - coords.top, 40)
+                          ),
+                      };
+                    }
+                  } else if (context === 'table') {
+                    let activeCellDOM: HTMLElement | null = null;
+                    try {
+                      const domAtPos = view.domAtPos(curSel.from);
+                      const node = domAtPos?.node;
+                      const parentEl =
+                        node instanceof HTMLElement
+                          ? node
+                          : node?.parentElement;
+                      activeCellDOM = parentEl?.closest(
+                        'td, th'
+                      ) as HTMLElement | null;
+                    } catch {
+                      // fallback
+                    }
+
+                    if (!activeCellDOM) {
+                      activeCellDOM = view.dom.querySelector(
+                        'td:focus-within, th:focus-within, .selectedCell'
+                      ) as HTMLElement | null;
+                    }
+
+                    if (
+                      activeCellDOM &&
+                      typeof activeCellDOM.getBoundingClientRect === 'function'
+                    ) {
+                      virtualRef = {
+                        getBoundingClientRect: () =>
+                          activeCellDOM!.getBoundingClientRect(),
+                      };
+                    } else {
+                      const coords = view.coordsAtPos(curSel.from);
+                      virtualRef = {
+                        getBoundingClientRect: () =>
+                          new DOMRect(
+                            coords.left,
+                            coords.top,
+                            Math.max(coords.right - coords.left, 40),
+                            Math.max(coords.bottom - coords.top, 24)
                           ),
                       };
                     }

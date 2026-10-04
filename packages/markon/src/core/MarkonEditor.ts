@@ -287,15 +287,6 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
           </svg>
         </button>
 
-        <!-- Table Operations Group (Hidden when not in table) -->
-        <span class="editor-table-tools hidden items-center gap-0.5 px-1 py-0.5 rounded-lg bg-subtle border border-default" style="display: none;">
-          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="addRowAfter" title="Add Row Below">+Row</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="deleteRow" title="Delete Row">-Row</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="addColumnAfter" title="Add Column Right">+Col</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium" data-command="deleteColumn" title="Delete Column">-Col</button>
-          <button type="button" class="editor-btn btn btn-ghost btn-xs px-2 py-0.5 text-xs font-medium text-danger hover:bg-danger/10" data-command="deleteTable" title="Delete Entire Table">Del Table</button>
-        </span>
-
         <input type="file" class="editor-image-file-input hidden" accept="image/*" hidden style="display: none;" />
         <input type="file" class="editor-generic-file-input hidden" hidden style="display: none;" />
       </div>
@@ -560,22 +551,6 @@ export class MarkonEditor {
 
     // Sync Custom Typography Selector
     this.typographyMenu?.updateTriggerState();
-
-    // Toggle Table Tools
-    const tableTools = toolbar.querySelector<HTMLElement>(
-      '.editor-table-tools'
-    );
-    if (tableTools) {
-      if (this.tiptap.isActive('table')) {
-        tableTools.style.display = 'inline-flex';
-        tableTools.classList.remove('hidden');
-        tableTools.classList.add('flex');
-      } else {
-        tableTools.style.display = 'none';
-        tableTools.classList.add('hidden');
-        tableTools.classList.remove('flex');
-      }
-    }
   }
 
   private updateFooter(text: string): void {
@@ -713,17 +688,35 @@ export class MarkonEditor {
           chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
         }
         break;
+      case 'addRowBefore':
+        chain.addRowBefore().run();
+        break;
       case 'addRowAfter':
         chain.addRowAfter().run();
         break;
       case 'deleteRow':
         chain.deleteRow().run();
         break;
+      case 'addColumnBefore':
+        chain.addColumnBefore().run();
+        break;
       case 'addColumnAfter':
         chain.addColumnAfter().run();
         break;
       case 'deleteColumn':
         chain.deleteColumn().run();
+        break;
+      case 'toggleHeaderRow':
+        chain.toggleHeaderRow().run();
+        break;
+      case 'toggleHeaderColumn':
+        chain.toggleHeaderColumn().run();
+        break;
+      case 'mergeCells':
+        chain.mergeCells().run();
+        break;
+      case 'splitCell':
+        chain.splitCell().run();
         break;
       case 'deleteTable':
         chain.deleteTable().run();

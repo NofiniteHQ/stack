@@ -156,9 +156,95 @@ describe('@nofinite/markon', () => {
       expect(editor.tiptap.isActive('table')).toBe(true);
       expect(editor.getHTML()).toContain('<table');
 
-      // Table tools should now be visible
-      const tableTools = container.querySelector('.editor-table-tools');
-      expect(tableTools?.classList.contains('hidden')).toBe(false);
+      // Static toolbar no longer contains cluttered table tools text buttons
+      expect(container.querySelector('.editor-table-tools')).toBeNull();
+
+      // Test table row and column commands via execCommand
+      editor.execCommand('addRowAfter');
+      editor.execCommand('addColumnAfter');
+      expect(editor.tiptap.isActive('table')).toBe(true);
+      expect(editor.getHTML()).toContain('<table');
+
+      // Test delete table
+      editor.execCommand('deleteTable');
+      expect(editor.tiptap.isActive('table')).toBe(false);
+      expect(editor.getHTML()).not.toContain('<table');
+
+      editor.destroy();
+    });
+
+    it('renders contextual table bubble menu with all row, column, header, and cell operations', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue:
+          '<table><tbody><tr><td><p>Cell 1</p></td><td><p>Cell 2</p></td></tr></tbody></table>',
+      });
+
+      // Focus editor inside table cell
+      editor.tiptap.commands.focus();
+      editor.tiptap.commands.setTextSelection(3);
+
+      // In JSDOM, mock hasFocus
+      vi.spyOn(editor.tiptap.view, 'hasFocus').mockReturnValue(true);
+
+      // Dispatch view update
+      editor.tiptap.view.dispatch(editor.tiptap.state.tr);
+
+      const bubbleMenu = document.querySelector('.markon-bubble-menu');
+      expect(bubbleMenu).toBeTruthy();
+
+      // Check all 11 operations exist
+      const rowAbove = bubbleMenu?.querySelector(
+        '[data-table-cmd="addRowBefore"]'
+      );
+      const rowBelow = bubbleMenu?.querySelector(
+        '[data-table-cmd="addRowAfter"]'
+      );
+      const delRow = bubbleMenu?.querySelector('[data-table-cmd="deleteRow"]');
+      const colLeft = bubbleMenu?.querySelector(
+        '[data-table-cmd="addColumnBefore"]'
+      );
+      const colRight = bubbleMenu?.querySelector(
+        '[data-table-cmd="addColumnAfter"]'
+      );
+      const delCol = bubbleMenu?.querySelector(
+        '[data-table-cmd="deleteColumn"]'
+      );
+      const toggleHeaderRow = bubbleMenu?.querySelector(
+        '[data-table-cmd="toggleHeaderRow"]'
+      );
+      const toggleHeaderCol = bubbleMenu?.querySelector(
+        '[data-table-cmd="toggleHeaderColumn"]'
+      );
+      const merge = bubbleMenu?.querySelector('[data-table-cmd="mergeCells"]');
+      const split = bubbleMenu?.querySelector('[data-table-cmd="splitCell"]');
+      const delTable = bubbleMenu?.querySelector(
+        '[data-table-cmd="deleteTable"]'
+      );
+
+      expect(rowAbove).toBeTruthy();
+      expect(rowBelow).toBeTruthy();
+      expect(delRow).toBeTruthy();
+      expect(colLeft).toBeTruthy();
+      expect(colRight).toBeTruthy();
+      expect(delCol).toBeTruthy();
+      expect(toggleHeaderRow).toBeTruthy();
+      expect(toggleHeaderCol).toBeTruthy();
+      expect(merge).toBeTruthy();
+      expect(split).toBeTruthy();
+      expect(delTable).toBeTruthy();
+
+      // Single cell without multi-selection cannot merge
+      expect(merge?.hasAttribute('disabled')).toBe(true);
+
+      // Click add row below via mousedown
+      rowBelow?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(editor.getHTML()).toContain('<tr>');
+
+      // Click delete table
+      delTable?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(editor.tiptap.isActive('table')).toBe(false);
+      expect(editor.getHTML()).not.toContain('<table');
 
       editor.destroy();
     });

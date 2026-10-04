@@ -197,6 +197,7 @@ export const MARKON_CORE_CSS = `
 
 .markon-editor .ProseMirror th,
 .markon-editor .ProseMirror td {
+  position: relative;
   border: 1px solid var(--border-default);
   padding: 0.625rem 0.875rem;
   text-align: left;
@@ -208,6 +209,15 @@ export const MARKON_CORE_CSS = `
   font-weight: var(--weight-semibold, 600);
   font-size: var(--text-sm, 0.875rem);
   color: var(--fg-default);
+}
+
+.markon-editor .ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  pointer-events: none;
 }
 
 /* Floating Bubble Menu (Glassmorphic Pill) */
