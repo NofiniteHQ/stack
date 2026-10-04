@@ -107,7 +107,7 @@ _Execution Rule: Work is strictly executed one phase at a time. After completing
 - [x] Rewrote `packages/media/README.md` with complete style import guide (`import '@nofinite/media/styles'`), props tables, and imperative instance method reference.
 - [x] Added safe promise error handling to `enterFullscreen` / `enterPictureInPicture` in `player.ts`.
 - [x] Verified with `publint` and `npm pack --dry-run` (exactly 30 clean distribution files, 0 missing files).
-- **Commit:** `pending`
+- **Commit:** `2b7fb86`
 
 ---
 
