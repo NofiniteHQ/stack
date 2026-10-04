@@ -15,6 +15,12 @@ export function htmlToMarkdown(html: string): string {
       .replace(/<p>(.*?)<\/p>/gi, '$1\n\n')
       .replace(/<strong>(.*?)<\/strong>/gi, '**$1**')
       .replace(/<em>(.*?)<\/em>/gi, '*$1*')
+      .replace(/<u>(.*?)<\/u>/gi, '<u>$1</u>')
+      .replace(/<s(?:trike)?>(.*?)<\/s(?:trike)?>/gi, '~~$1~~')
+      .replace(/<del>(.*?)<\/del>/gi, '~~$1~~')
+      .replace(/<mark[^>]*>(.*?)<\/mark>/gi, '==$1==')
+      .replace(/<sub>(.*?)<\/sub>/gi, '~$1~')
+      .replace(/<sup>(.*?)<\/sup>/gi, '^$1^')
       .replace(/<code>(.*?)<\/code>/gi, '`$1`')
       .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
       .replace(/<[^>]+>/g, '')
@@ -86,6 +92,7 @@ export function htmlToMarkdown(html: string): string {
       });
       return `\n\n> [!${alertTag}]\n> ${bodyText
         .trim()
+        .replace(/\n{3,}/g, '\n\n')
         .replace(/\n/g, '\n> ')}\n\n`;
     }
 
@@ -138,6 +145,12 @@ export function htmlToMarkdown(html: string): string {
       case 'del':
       case 'strike':
         return `~~${childrenText}~~`;
+      case 'mark':
+        return `==${childrenText}==`;
+      case 'sub':
+        return `~${childrenText}~`;
+      case 'sup':
+        return `^${childrenText}^`;
       case 'code':
         if (el.parentElement?.tagName.toLowerCase() === 'pre') {
           return childrenText;
@@ -191,9 +204,16 @@ export function htmlToMarkdown(html: string): string {
         let tableMd = '\n\n';
         rows.forEach((row, rowIndex) => {
           const cells = Array.from(row.querySelectorAll('th, td'));
-          const cellTexts = cells.map((c) =>
-            (c.textContent || '').trim().replace(/\|/g, '\\|')
-          );
+          const cellTexts = cells.map((c) => {
+            let cellContent = '';
+            c.childNodes.forEach((child) => {
+              cellContent += processNode(child);
+            });
+            return cellContent
+              .trim()
+              .replace(/\n+/g, ' ')
+              .replace(/\|/g, '\\|');
+          });
           tableMd += `| ${cellTexts.join(' | ')} |\n`;
 
           if (rowIndex === 0) {
@@ -285,6 +305,12 @@ export function markdownToHtml(md: string): string {
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         // Strikethrough
         .replace(/~~(.*?)~~/g, '<s>$1</s>')
+        // Subscript: single tildes not preceded or followed by ~
+        .replace(/(?<!~)~([^~\s][^~]*?)~(?!~)/g, '<sub>$1</sub>')
+        // Superscript: ^text^
+        .replace(/\^([^^]+)\^/g, '<sup>$1</sup>')
+        // Highlight: ==text==
+        .replace(/==([^=]+)==/g, '<mark>$1</mark>')
         // Underline <u>
         .replace(/<u>(.*?)<\/u>/g, '<u>$1</u>')
         // Inline code
@@ -351,7 +377,18 @@ export function markdownToHtml(md: string): string {
       continue;
     }
 
-    // Math block ($$ ... $$)
+    // Single-line Math block ($$ ... $$)
+    const singleLineMath = line.trim().match(/^\$\$(.+)\$\$$/);
+    if (singleLineMath) {
+      flushList();
+      const eq = singleLineMath[1].trim();
+      htmlParts.push(
+        `<div data-math-block="" data-equation="${eq}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${eq}</div>`
+      );
+      continue;
+    }
+
+    // Multi-line Math block ($$ ... $$)
     if (line.trim() === '$$') {
       flushList();
       let eqBuffer = '';
@@ -374,7 +411,27 @@ export function markdownToHtml(md: string): string {
         i++;
         detailsBuffer += lines[i] + '\n';
       }
-      htmlParts.push(detailsBuffer.trim());
+      const rawDetails = detailsBuffer.trim();
+      if (
+        !rawDetails.includes('data-details-content') &&
+        !rawDetails.includes('markon-details-content')
+      ) {
+        const summaryMatch = rawDetails.match(
+          /<summary>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/i
+        );
+        if (summaryMatch) {
+          const summaryHtml = summaryMatch[1].trim();
+          const bodyHtml = summaryMatch[2].trim();
+          const wrapped = `<details><summary class="markon-summary font-semibold text-sm cursor-pointer select-none text-default hover:text-primary list-none flex items-center gap-2 py-1">${summaryHtml}</summary><div data-details-content="" class="markon-details-content pt-2 pl-4 border-l-2 border-primary/40 mt-1 space-y-2">${
+            bodyHtml.startsWith('<')
+              ? bodyHtml
+              : `<p>${inlineFormatting(bodyHtml)}</p>`
+          }</div></details>`;
+          htmlParts.push(wrapped);
+          continue;
+        }
+      }
+      htmlParts.push(rawDetails);
       continue;
     }
 
@@ -422,9 +479,15 @@ export function markdownToHtml(md: string): string {
       i--; // rewind one since loop will increment
 
       const innerContent = alertLines.join('\n').trim();
-      const innerHtml = innerContent
-        ? `<p>${inlineFormatting(innerContent)}</p>`
-        : '<p></p>';
+      let innerHtml = '';
+      if (innerContent) {
+        const paragraphs = innerContent.split(/\n\s*\n/);
+        innerHtml = paragraphs
+          .map((p) => `<p>${inlineFormatting(p.trim())}</p>`)
+          .join('');
+      } else {
+        innerHtml = '<p></p>';
+      }
 
       htmlParts.push(
         `<div data-callout="" data-callout-type="${alertType}" class="markon-callout alert alert-${alertType} my-3 relative rounded-xl border"><div class="alert-content flex-1 min-w-0">${innerHtml}</div></div>`

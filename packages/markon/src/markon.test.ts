@@ -422,6 +422,78 @@ describe('@nofinite/markon', () => {
       expect(convertedMd).toContain('```typescript');
     });
 
+    it('handles highlight, subscript, and superscript round-trip lossless conversion', () => {
+      const md =
+        'This has ==highlighted text==, chemical H~2~O, mathematical E=mc^2^, and ~~deleted text~~.';
+      const html = markdownToHtml(md);
+      expect(html).toContain('<mark>highlighted text</mark>');
+      expect(html).toContain('<sub>2</sub>');
+      expect(html).toContain('<sup>2</sup>');
+      expect(html).toContain('<s>deleted text</s>');
+
+      const backToMd = htmlToMarkdown(html);
+      expect(backToMd).toContain('==highlighted text==');
+      expect(backToMd).toContain('~2~');
+      expect(backToMd).toContain('^2^');
+      expect(backToMd).toContain('~~deleted text~~');
+    });
+
+    it('preserves rich inline formatting inside markdown table cells', () => {
+      const html = `
+        <table>
+          <thead>
+            <tr><th>**Bold Header**</th><th>*Italic Header*</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>==Highlighted Cell==</td><td>Cell with ~sub~ and ^sup^</td></tr>
+          </tbody>
+        </table>
+      `;
+      const md = htmlToMarkdown(html);
+      expect(md).toContain('| **Bold Header** | *Italic Header* |');
+      expect(md).toContain('==Highlighted Cell==');
+      expect(md).toContain('~sub~');
+      expect(md).toContain('^sup^');
+
+      const convertedHtml = markdownToHtml(md);
+      expect(convertedHtml).toContain('<mark>Highlighted Cell</mark>');
+      expect(convertedHtml).toContain('<sub>sub</sub>');
+      expect(convertedHtml).toContain('<sup>sup</sup>');
+    });
+
+    it('converts multi-paragraph GitHub callouts to semantic HTML and back to markdown', () => {
+      const md = '> [!NOTE]\n> First alert line.\n>\n> Second paragraph line.';
+      const html = markdownToHtml(md);
+      expect(html).toContain('data-callout=""');
+      expect(html).toContain('data-callout-type="info"');
+      expect(html).toContain('<p>First alert line.</p>');
+      expect(html).toContain('<p>Second paragraph line.</p>');
+
+      const backToMd = htmlToMarkdown(html);
+      expect(backToMd).toContain('> [!NOTE]');
+      expect(backToMd).toContain('First alert line.');
+      expect(backToMd).toContain('Second paragraph line.');
+    });
+
+    it('handles single-line and multi-line LaTeX math blocks cleanly', () => {
+      // Single-line math
+      const singleLine = '$$a^2 + b^2 = c^2$$';
+      const singleHtml = markdownToHtml(singleLine);
+      expect(singleHtml).toContain('data-math-block=""');
+      expect(singleHtml).toContain('data-equation="a^2 + b^2 = c^2"');
+
+      // Multi-line math
+      const multiLine = '$$\n\\int_{0}^{\\infty} e^{-x^2} dx\n$$';
+      const multiHtml = markdownToHtml(multiLine);
+      expect(multiHtml).toContain('data-math-block=""');
+      expect(multiHtml).toContain(
+        'data-equation="\\int_{0}^{\\infty} e^{-x^2} dx"'
+      );
+
+      const backToMd = htmlToMarkdown(multiHtml);
+      expect(backToMd).toContain('$$\n\\int_{0}^{\\infty} e^{-x^2} dx\n$$');
+    });
+
     it('sets and retrieves content in Markdown format', () => {
       const editor = new MarkonEditor({
         element: container,

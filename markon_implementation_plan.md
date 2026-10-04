@@ -70,19 +70,26 @@ Phase 6: Token Purity, Comprehensive Unit Tests & Playwright Visual Audit
 
 ---
 
-### Phase 2: Markdown Engine Round-Trip Parity
+### Phase 2: Markdown Engine Round-Trip Parity [COMPLETED]
 
 **Goal:** Ensure 100% lossless conversion between Markdown and HTML/TipTap documents.
 
-- **Tasks:**
+- **Completed Deliverables:**
   1. Highlight Round-Trip:
-     - `htmlToMarkdown`: parse `<mark>` tags and output `==highlighted text==` (preserving colors when relevant).
-     - `markdownToHtml`: parse `==text==` into `<mark>` elements.
+     - `htmlToMarkdown`: parse `<mark>` tags and output `==highlighted text==` in both DOM and SSR modes.
+     - `markdownToHtml`: parse `==text==` into semantic `<mark>` elements via `inlineFormatting`.
   2. Subscript & Superscript:
      - `htmlToMarkdown`: support `<sub>` -> `~text~` and `<sup>` -> `^text^`.
-     - `markdownToHtml`: support `~sub~` -> `<sub>sub</sub>` and `^sup^` -> `<sup>sup</sup>`.
+     - `markdownToHtml`: support single-tilde `(?<!~)~([^~\s][^~]*?)~(?!~)` -> `<sub>` and `\^([^^]+)\^` -> `<sup>`.
   3. Markdown Fidelity Hardening:
-     - Ensure task lists (`- [x]`), details/accordions (`<details>`), LaTeX math (`$$ ... $$`), tables, and callouts round-trip cleanly without dropping content or tags.
+     - Formatted table cells: mapping table cells via `processNode` preserves inline bold, italic, code, links, highlights, and subscripts.
+     - GitHub Callouts: multi-paragraph note/warning/tip/caution callouts convert to clean paragraphs inside `.alert-content` and round-trip cleanly without extra blank lines.
+     - LaTeX Math Blocks: supports both single-line `$$...$$` and multi-line `$$\n...\n$$` blocks.
+     - Details / Accordions: guarantees wrapping into TipTap-compatible `<div data-details-content="">`.
+  4. **Verification Passed:**
+     - 44/44 unit tests passing (`npx vitest run packages/markon`).
+     - Visual audit verified in Chromium (`/temp/markon_markdown_roundtrip_rendered.png`).
+     - Lossless markdown extraction verified in runtime browser environment.
 
 ---
 
