@@ -1,3 +1,5 @@
+'use client';
+
 export * from './VideoPlayer';
 export * from './AudioPlayer';
 export type { MediaTrack, MediaTheme } from '../core';

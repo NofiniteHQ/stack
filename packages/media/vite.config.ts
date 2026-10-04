@@ -49,6 +49,15 @@ export default defineConfig({
           format: 'es',
           entryFileNames: '[name].js',
           chunkFileNames: 'chunks/[name]-[hash].js',
+          banner: (chunk) => {
+            if (
+              chunk.name === 'react/index' ||
+              chunk.fileName?.startsWith('react/')
+            ) {
+              return "'use client';";
+            }
+            return '';
+          },
           assetFileNames: (assetInfo) => {
             if (assetInfo.name && assetInfo.name.endsWith('.css')) {
               return 'styles.css';
@@ -61,6 +70,15 @@ export default defineConfig({
           entryFileNames: '[name].cjs',
           chunkFileNames: 'chunks/[name]-[hash].cjs',
           exports: 'named',
+          banner: (chunk) => {
+            if (
+              chunk.name === 'react/index' ||
+              chunk.fileName?.startsWith('react/')
+            ) {
+              return "'use client';";
+            }
+            return '';
+          },
           assetFileNames: (assetInfo) => {
             if (assetInfo.name && assetInfo.name.endsWith('.css')) {
               return 'styles.css';

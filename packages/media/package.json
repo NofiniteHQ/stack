@@ -23,6 +23,12 @@
       "require": "./dist/react/index.cjs",
       "default": "./dist/react/index.js"
     },
+    "./styles": {
+      "types": "./dist/types/styles.d.ts",
+      "import": "./dist/styles.js",
+      "require": "./dist/styles.cjs",
+      "default": "./dist/styles.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },
