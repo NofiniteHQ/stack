@@ -687,3 +687,81 @@ export function calculateMultiBarLayout(
 function zeroY_or_diff(y0: number, y1: number): number {
   return Math.abs(y0 - y1);
 }
+
+export interface MultiScatterPoint {
+  x: number;
+  y: number;
+  seriesName: string;
+  color: string;
+  data: NormalizedDataPoint;
+}
+
+export interface MultiScatterResult {
+  xScale: any;
+  yScale: any;
+  points: MultiScatterPoint[];
+  allActivePoints: NormalizedDataPoint[];
+}
+
+export function calculateMultiScatterLayout(
+  series: ChartSeries[],
+  dimensions: ChartDimensions,
+  options?: DataAccessorOptions
+): MultiScatterResult {
+  const margin = dimensions.margin || defaultMargin;
+  const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
+  const innerHeight = Math.max(
+    0,
+    dimensions.height - margin.top - margin.bottom
+  );
+
+  const activeSeries = series.filter((s) => !s.hidden);
+  const normalizedSeries = activeSeries.map((s, idx) => ({
+    name: s.name,
+    color: s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+    data: normalizeData(s.data, options),
+  }));
+
+  const allActivePoints = normalizedSeries.flatMap((s) => s.data);
+
+  if (allActivePoints.length === 0) {
+    const dummyX = scaleLinear().domain([0, 10]).range([0, innerWidth]);
+    const dummyY = scaleLinear().domain([0, 10]).range([innerHeight, 0]);
+    return { xScale: dummyX, yScale: dummyY, points: [], allActivePoints: [] };
+  }
+
+  const xs = allActivePoints.map((d) => (typeof d.x === 'number' ? d.x : 0));
+  const ys = allActivePoints.map((d) => d.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+
+  const [domainMinX, domainMaxX] = calculateLinearDomain(minX, maxX);
+  const [domainMinY, domainMaxY] = calculateLinearDomain(minY, maxY);
+
+  const xScale = scaleLinear()
+    .domain([domainMinX, domainMaxX])
+    .range([0, innerWidth]);
+
+  const yScale = scaleLinear()
+    .domain([domainMinY, domainMaxY])
+    .range([innerHeight, 0]);
+
+  const points: MultiScatterPoint[] = [];
+  for (const s of normalizedSeries) {
+    for (const d of s.data) {
+      const cx = xScale(typeof d.x === 'number' ? d.x : 0);
+      const cy = yScale(d.y);
+      points.push({
+        x: cx,
+        y: cy,
+        seriesName: s.name,
+        color: d.color || s.color,
+        data: d,
+      });
+    }
+  }
+
+  return { xScale, yScale, points, allActivePoints };
+}

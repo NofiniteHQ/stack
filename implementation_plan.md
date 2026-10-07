@@ -1,149 +1,147 @@
-# Implementation Plan: Enterprise-Grade Charts Deep Audit & UI Bug Resolution
+# Implementation Plan: Scatter Chart Enterprise Upgrades & Hover Label Polish
 
 ## 1. Objective
 
-Perform a forensic, enterprise-grade deep audit of `@nofinite/charts` and its upstream token foundation in `@nofinite/nuicss`. Eliminate UI bugs including duplicate data rendering, categorical axis mislabeling, inverted negative domain scales, tooltip title/label redundancies, and missing keyboard accessibility, while strictly maintaining 100% style dependency on `@nofinite/nuicss`.
+Upgrade `@nofinite/charts` Scatter Chart (across both React `<ScatterChart />` and vanilla `Chart.ts` / `renderChart.ts`) to enterprise-grade standards:
+
+1. **Smart Coordinate Tooltip**: When points lack an explicit label (e.g. `{ x: 10, y: 20 }`), eliminate the redundant header ("10") and display clean coordinate title `(10, 20)` with single point/series swatch.
+2. **Custom Dimension Names (`xLabel`, `yLabel`)**: Allow props `xLabel="Revenue"` and `yLabel="Conversion"` for semantic metrics.
+3. **2D Euclidean Canvas Proximity Scrubbing**: Eliminate pixel-hunting on small dots by enabling canvas-wide pointer scrub that snaps to the nearest point within interactive reach.
+4. **Dual Crosshairs (X and Y Projections)**: Project dashed crosshairs to both the X and Y axes, instantly showing the exact value intercept on both scales.
+5. **Multi-Series Scatter Cluster Support (`series?: ChartSeries<T>[]`)**: Support multiple color-coded scatter clusters with interactive toggling via `<ChartLegend />`.
+6. **Strict `@nofinite/nuicss` Compliance**: Maintain 100% dependency on `@nofinite/nuicss` design tokens and utility classes with zero local CSS files.
 
 ---
 
 ## 2. Current Behavior & Identified Problems
 
-### Bug A: Tooltip Duplicate Data Display ("Same Data Showing Multiple Times")
+### Problem 1: Misleading Fallback Header ("10" above "X: 10")
 
-- **Bar Chart**: Hovering over a bar renders the category name as the header AND as the item label (e.g., Title: "Apples", Item: "● Apples 50"). In multi-series bar charts, the series name (e.g. "2025") was ignored.
-- **Pie / Donut Chart**: Hovering over a segment renders the segment label twice (e.g., Title: "Compute", Item: "● Compute 45"). Total percentage was not computed.
-- **Scatter Chart**: Hovering over a point displayed the X numeric coordinate as the title (e.g. "10") and the label/index as the item label (e.g. "10: 25"), displaying "10" twice without distinct X and Y coordinates.
-- **Line / Area Chart (Single Series)**: Scrubbing displayed the category as title AND as item label (e.g., Title: "Jan", Item: "● Jan 100").
-- **`defaultTooltipPayload` & `renderTooltipHtml`**: Redundant title-and-label pairing was hardcoded. When `title === item.label`, both lines rendered identical text.
+- In `normalizeData` ([`packages/charts/src/core/normalize.ts`](file:///d:/stack/packages/charts/src/core/normalize.ts#L152)), points without `label` fallback to `label = String(xRaw)`.
+- When users supply standard coordinate data `[{ x: 10, y: 20 }]`, `d.label` becomes `"10"`.
+- `ScatterChart.tsx` evaluates `d.label || ...`, rendering `"10"` as the header and `● X: 10` below it.
+- **Expected**: Unlabeled points must render `Title: (10, 20)`. Explicitly labeled points (e.g. `{ label: "Cluster A", x: 10, y: 20 }`) render `Title: Cluster A`.
 
-### Bug B: Categorical X-Axis Mislabeling in Continuous Charts (Area & Line)
+### Problem 2: Confusing Dual Color Swatches
 
-- When users supply categorical string data (e.g., `['Jan', 'Feb', 'Mar']`), `normalizeData` maps strings to indices `[0, 1, 2]`.
-- `calculateAreaPath` and `calculateMultiSeriesAreaPath` treat the scale as linear numeric and call `xScale.ticks(5)`.
-- The X-axis renders numeric indices (`0, 0.5, 1, 1.5, 2`) rather than the actual category labels (`Jan, Feb, Mar`), while the tooltip scrub shows the category label.
+- Both `X` and `Y` render colored dots (`● X: 10`, `● Y: 20`).
+- Swatches indicate distinct data series. In a single point, two identical swatches falsely suggest two competing series.
+- **Expected**: A single swatch associated with the point/series, with clean coordinate metrics below.
 
-### Bug C: Scale Inversion for Negative Datasets
+### Problem 3: Pixel-Hunting on Small Hit Targets
 
-- In `math.ts`, scales calculate `domain([yMin, yMax === 0 ? 10 : yMax * 1.1])`.
-- If all values are negative (e.g. `-50`), `yMax * 1.1` becomes `-55`, creating domain `[-50, -55]` where `min > max`, inverting and breaking SVG vector rendering.
+- Hovering requires directly intercepting a stationary 14px circle. Moving 1px off hides the tooltip immediately.
+- Users cannot scrub across the canvas smoothly.
+- **Expected**: Canvas-wide pointer tracking using 2D Euclidean distance ($\sqrt{(x - x_0)^2 + (y - y_0)^2}$) to snap to the closest point within interactive distance ($r \le 35\text{px}$).
 
-### Bug D: Horizontal Bar Chart Missing Value Gridlines
+### Problem 4: Missing Dual Crosshairs
 
-- Horizontal bar charts have `showGrid && !isHorizontal`, causing horizontal bar layouts to have zero value gridlines across the height.
+- Scatter charts mathematically exist in 2D space. A single vertical line does not indicate the Y-axis position.
+- **Expected**: Dual dashed crosshairs (horizontal line to Y-axis, vertical line to X-axis) when a point is focused.
 
-### Bug E: Mobile Touch & Keyboard Accessibility (WCAG 2.1 AA)
+### Problem 5: Missing Multi-Series Cluster Support
 
-- Mobile users tapping charts trigger `pointerdown`, but only `pointermove` was bound on the scrub overlay.
-- Chart bars, scatter dots, and pie segments lack `tabIndex={0}`, `role="button"`, and keyboard focus handlers (`onFocus`/`onBlur`).
-
-### Bug F: Legend Superclass Synchronization
-
-- `ChartLegend.tsx` used `chart-legend-swatch`, while NUICSS shortcut defines `chart-legend-dot`.
+- `ScatterChart` only accepts single-series `data?: T[]`. Users cannot plot "Group A" vs "Group B" with a legend.
+- **Expected**: Full support for `series?: ChartSeries<T>[]` alongside `data?: T[]`, with interactive `<ChartLegend />`.
 
 ---
 
 ## 3. Proposed Solutions
 
-### 1. Tooltip Deduplication & Enterprise Data Contracts (`tooltip.ts`, `useChartTooltip.ts`, React components, `Chart.ts`)
+### 1. Smart Title & Dimension Labeling (`ScatterChart.tsx`, `renderChart.ts`, `Chart.ts`)
 
-- **`renderTooltipHtml` Safeguard**: If `item.label` matches `payload.title` or is empty, suppress the redundant label and render only the color swatch and value.
-- **Bar Chart Tooltip**:
-  - Single series: Title: `Category` ("Apples"), Item: `● 50`.
-  - Multi-series: Title: `Category` ("Apples"), Item: `● [Series Name] 50`.
-- **Pie / Donut Chart Tooltip**:
-  - Title: `Slice Label` ("Compute"), Item: `● [Value] ([Percentage]%)`.
-- **Scatter Chart Tooltip**:
-  - If labeled: Title: `Label` ("Point C"), Items: `X: 45`, `Y: 40`.
-  - If unlabeled: Title: `(45, 40)`, Items: `X: 45`, `Y: 40`.
-- **Line / Area Chart Tooltip**:
-  - Single series: Title: `Category` ("Jan"), Item: `● [Series Name or Value] [y]`.
-  - Multi-series: Title: `Category` ("Jan"), Items: `● [Series 1] [y1]`, `● [Series 2] [y2]`.
+- Detect whether the point has an explicit label:
+  ```ts
+  const hasExplicitLabel = Boolean(
+    d.raw && (d.raw.label || d.raw.name || d.raw.title)
+  );
+  const title = hasExplicitLabel
+    ? d.label
+    : `(${formatMetricNumber(d.x)}, ${formatMetricNumber(d.y)})`;
+  ```
+- Support props `xLabel?: string` (default `'X'`) and `yLabel?: string` (default `'Y'`).
+- In tooltip items, render a single swatch for the point/series, and display coordinates as clean metric entries without redundant swatches:
+  ```ts
+  items: [
+    {
+      color: seriesColor,
+      label: xLabel || 'X',
+      value: formatMetricNumber(d.x),
+    },
+    {
+      color: 'transparent',
+      label: yLabel || 'Y',
+      value: formatMetricNumber(d.y),
+    },
+  ];
+  ```
 
-### 2. Categorical X-Axis Engine (`math.ts`, `axis.ts`, `AreaChart.tsx`, `LineChart.tsx`, `renderChart.ts`)
+### 2. Multi-Series Scatter Layout Engine (`math.ts`)
 
-- Detect categorical strings in `calculateAreaPath` and `calculateMultiSeriesAreaPath`.
-- Expose `categories` array and `isCategorical` flag.
-- When categorical, place X-axis ticks directly at category data point coordinates with down-sampling for dense screens, rendering `'Jan'`, `'Feb'`, `'Mar'` instead of indices `0, 1, 2`.
+- Add `calculateMultiScatterLayout`:
+  - Accepts `series: ChartSeries<T>[]` (or single series from `data`).
+  - Aggregates all active points to compute non-inverted domains for both X and Y using `calculateLinearDomain`.
+  - Maps points with series color, series name, and normalized coordinates.
 
-### 3. Safe Domain Scaling for Negative & Zero Values (`math.ts`)
+### 3. Canvas Proximity Scrubbing & Dual Crosshairs (`ScatterChart.tsx`, `Chart.ts`)
 
-- Calculate proper mathematical extents:
-  - If `yMax < 0`: domain `[yMin * 1.15, 0]`.
-  - If `yMin > 0`: domain `[0, yMax * 1.1]`.
-  - If mixed: domain `[yMin * 1.1, yMax * 1.1]`.
-  - Guarantee `domain[0] <= domain[1]`.
+- Add canvas overlay with `onPointerMove`, `onPointerDown`, `onPointerLeave`.
+- On cursor movement `(localX, localY)`:
+  - Find point with minimum Euclidean distance $\sqrt{(p.x - localX)^2 + (p.y - localY)^2}$.
+  - If distance $\le 35\text{px}$, activate point, position tooltip, and render:
+    - Vertical crosshair from $(p.x, 0)$ to $(p.x, \text{innerHeight})$.
+    - Horizontal crosshair from $(0, p.y)$ to $(\text{innerWidth}, p.y)$.
+    - Active dot radius expansion ($r = 6\text{px}$) with pulse effect.
+  - If distance $> 35\text{px}$, deactivate point and hide tooltip.
 
-### 4. Horizontal Bar Gridlines (`BarChart.tsx`, `renderChart.ts`)
+### 4. Interactive Legend Integration
 
-- When `isHorizontal === true`, generate vertical value gridlines using `xScale.ticks(5)` spanning `y1={0}` to `y2={innerHeight}`.
-
-### 5. Touch & Keyboard Accessibility
-
-- Add `onPointerDown={handlePointerMove}` to scrub overlays for instant mobile tap responsiveness.
-- Add `tabIndex={0}`, `role="img"` or `role="button"`, and `onFocus`/`onBlur` to interactive points and bars.
-
-### 6. Strict NUICSS Stylesheet Verification
-
-- Ensure all chart elements continue to consume `@nofinite/nuicss` superclasses and tokens with zero external style files.
+- Render `<ChartLegend />` below the scatter chart when `showLegend` is enabled.
+- Allow clicking legend items to show/hide individual clusters.
 
 ---
 
 ## 4. Affected Files & Modules
 
-- `packages/charts/src/core/tooltip.ts`: Deduplicate title and item labels, support percentage and (X, Y) pairs.
-- `packages/charts/src/core/math.ts`: Fix negative domain calculation; support categorical axis detection and category extraction in `calculateAreaPath` and `calculateMultiSeriesAreaPath`.
-- `packages/charts/src/core/axis.ts`: Deduplicate adjacent axis ticks.
-- `packages/charts/src/react/BarChart.tsx`: Pass series names to tooltip, fix single-series duplicate labels, add horizontal gridlines.
-- `packages/charts/src/react/PieChart.tsx`: Compute percentage in tooltip, eliminate duplicate label.
-- `packages/charts/src/react/ScatterChart.tsx`: Format scatter tooltip with coordinates (X, Y), eliminate duplicate X label.
-- `packages/charts/src/react/LineChart.tsx`: Render categorical labels on X-axis; deduplicate tooltip in single series; add `onPointerDown`.
-- `packages/charts/src/react/AreaChart.tsx`: Render categorical labels on X-axis; deduplicate tooltip in single series; add `onPointerDown`.
-- `packages/charts/src/react/ChartLegend.tsx`: Add `chart-legend-dot` superclass.
-- `packages/charts/src/core/renderChart.ts` & `Chart.ts`: Mirror all deduplication, categorical X-axis, and gridline fixes in vanilla engine.
+- `packages/charts/src/core/math.ts`: Add multi-series scatter domain calculation & layout helper.
+- `packages/charts/src/react/ScatterChart.tsx`: Implement multi-series, proximity scrubbing, dual crosshairs, smart labels, and legend.
+- `packages/charts/src/core/renderChart.ts`: Mirror multi-series scatter, dual crosshairs, and proximity overlay in SVG engine.
+- `packages/charts/src/core/Chart.ts`: Mirror dual crosshairs and proximity scrubbing in vanilla DOM engine.
+- `temp/charts-centralized-audit-unique.mjs`: Expand visual verification test to audit unlabeled scatter coordinates, dual crosshairs, and proximity hover.
 
 ---
 
 ## 5. Dependencies & Tools
 
-- Monorepo build: `pnpm nx build nuicss`, `pnpm nx build charts`.
-- Visual verification: Playwright via Chromium in `/temp/charts-enterprise-audit-unique.mjs`.
-- Tarball verification: `npm pack --dry-run` in `packages/charts`.
+- No new external packages. Uses existing `d3-scale`, `d3-array`, and `@floating-ui/dom`.
+- Zero local CSS. 100% styled via `@nofinite/nuicss`.
 
 ---
 
 ## 6. Alternatives Considered
 
-- **Hiding Tooltip Header entirely**: Discarded because multi-series charts benefit from a shared category header ("Jan") above individual series entries ("Revenue", "Cost").
-- **External D3 formatting packages**: Discarded to maintain lean bundle size (<30kB) and keep `@nofinite/charts` lightweight.
+- **`d3-delaunay` (Voronoi Diagrams)**: Would add ~15kB bundle weight for functionality easily accomplished by a $<0.1\text{ms}$ Euclidean loop over $<1,000$ points.
+- **Tooltips without coordinates**: Discarded; coordinates are essential for scatter data exploration.
 
 ---
 
 ## 7. Risks & Mitigations
 
-- **Breaking custom formatters**: `tooltipFormatter` prop signature remains unchanged (`(point: NormalizedDataPoint) => TooltipPayload | string`). Custom formatters continue to take precedence.
-- **Non-breaking layout**: Default margins, SVG viewports, and responsive `useChartDimensions` remain intact.
+- **Backward Compatibility**: Existing code passing `data={clusterData}` continues to work identically without prop changes.
+- **Mobile Touch**: `onPointerDown` ensures mobile users dragging across the canvas smoothly snap between scatter points.
 
 ---
 
 ## 8. Verification Strategy
 
-1. **Automated Unit & Build Verification**:
-   - `pnpm nx build nuicss`: Passed.
-   - `pnpm nx build charts`: Passed.
-   - `npm pack --dry-run`: Passed (65 files, types, cjs/esm chunks).
-2. **Playwright Visual & DOM Verification (`temp/charts-centralized-audit-unique.mjs`)**:
-   - Tooltips for Bar, Pie, Scatter, Line, Area have ZERO duplicate text: Verified.
-   - X-axis on Area/Line charts with categorical data shows string labels (`Jan, Feb, Mar`), not indices (`0, 1, 2`): Verified.
-   - Negative values chart renders valid SVG without inverted scales: Verified.
-   - Horizontal bar chart renders vertical gridlines: Verified.
-   - Multi-viewport screenshots saved to `temp/`: Verified.
-3. **Pre-commit Linter & Git Savepoint**:
-   - Local commit with header $\le 100$ characters.
-
----
-
-## 9. Verification Results: ALL CHECKS PASSED
-
-- Playwright Chromium visual verification passed with zero regressions.
-- Redundant item labels eliminated across single-series and multi-series variants.
-- 100% styled via `@nofinite/nuicss` design tokens and utility shortcuts. Zero chart-specific standalone CSS files.
+1. **Build & Package Verification**:
+   - `pnpm nx build nuicss`
+   - `pnpm nx build charts`
+   - `npm pack --dry-run` in `packages/charts`
+2. **Playwright Visual Verification**:
+   - Hover over `{ x: 10, y: 20 }` -> Verify title is `(10, 20)` and coordinates are distinct without repeating `"10"`.
+   - Hover over multi-series cluster point -> Verify series name and color swatch.
+   - Canvas proximity hover -> Verify dual crosshairs (horizontal and vertical lines) render.
+   - Mobile touch scrub -> Verify touch drag responsiveness.
+3. **Local Git Commit**:
+   - Commit with header $\le 100$ characters.

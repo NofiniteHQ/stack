@@ -5,16 +5,14 @@ import {
   calculatePieSegments,
   calculateMultiSeriesAreaPath,
   calculateMultiBarLayout,
+  calculateMultiScatterLayout,
   type ChartSeries,
   type BarLayoutMode,
   type ReferenceLine,
-  normalizeData,
-  calculateLinearDomain,
 } from './math';
 import { generateAxisSvg } from './axis';
 import { renderLegendHtml } from './legend';
 import { generateA11yTableHtml } from './a11y';
-import { scaleLinear } from 'd3-scale';
 import type { TooltipFormatter } from './tooltip';
 
 export type ChartVariant =
@@ -41,6 +39,8 @@ export interface ChartOptions {
   showAxes?: boolean;
   showTooltip?: boolean;
   showCrosshair?: boolean;
+  xLabel?: string;
+  yLabel?: string;
   xAccessor?: (d: unknown) => number | Date | string;
   yAccessor?: (d: unknown) => number;
   xTickFormat?: (val: unknown) => string;
@@ -347,26 +347,14 @@ export function renderChart(options: ChartOptions): string {
       </g>
     `;
   } else if (variant === 'scatter') {
-    const normalized = normalizeData(seriesList[0].data, {
-      xAccessor: options.xAccessor,
-      yAccessor: options.yAccessor,
-    });
-    const xs = normalized.map((d) => (typeof d.x === 'number' ? d.x : 0));
-    const ys = normalized.map((d) => d.y);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-
-    const [domainMinX, domainMaxX] = calculateLinearDomain(minX, maxX);
-    const [domainMinY, domainMaxY] = calculateLinearDomain(minY, maxY);
-
-    const xScale = scaleLinear()
-      .domain([domainMinX, domainMaxX])
-      .range([0, innerWidth]);
-    const yScale = scaleLinear()
-      .domain([domainMinY, domainMaxY])
-      .range([innerHeight, 0]);
+    const { xScale, yScale, points } = calculateMultiScatterLayout(
+      seriesList,
+      { width, height, margin },
+      {
+        xAccessor: options.xAccessor,
+        yAccessor: options.yAccessor,
+      }
+    );
 
     const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
       width,
@@ -392,28 +380,29 @@ export function renderChart(options: ChartOptions): string {
         ${yAxisSvg}
         ${xAxisSvg}
         ${refLinesSvg}
-        ${normalized
+        ${
+          showCrosshair
+            ? `
+          <g class="chart-crosshair-group pointer-events-none" style="opacity: 0; transition: opacity 0.1s ease;">
+            <line class="chart-crosshair-x" x1="0" y1="0" x2="0" y2="${innerHeight}" stroke="var(--border-strong, var(--border-default))" stroke-width="1" stroke-dasharray="3,3" />
+            <line class="chart-crosshair-y" x1="0" y1="0" x2="${innerWidth}" y2="0" stroke="var(--border-strong, var(--border-default))" stroke-width="1" stroke-dasharray="3,3" />
+          </g>
+        `
+            : ''
+        }
+        <circle class="chart-active-dot" cx="0" cy="0" r="6.5" fill="${color}" stroke="var(--bg-surface)" stroke-width="2" opacity="0" pointer-events="none" style="transition: opacity 0.1s ease;" />
+        ${points
           .map(
-            (d) => `
-          <g class="chart-scatter-point-group">
-            <circle cx="${xScale(
-              typeof d.x === 'number' ? d.x : 0
-            )}" cy="${yScale(d.y)}" r="4"
-                    fill="${
-                      d.color || color
-                    }" stroke="var(--bg-surface)" stroke-width="2"
+            (pt) => `
+          <g class="chart-scatter-point-group" data-series="${pt.seriesName}">
+            <circle cx="${pt.x}" cy="${pt.y}" r="4"
+                    fill="${pt.color}" stroke="var(--bg-surface)" stroke-width="2"
                     class="chart-point pointer-events-none transition-all duration-150" />
-            <circle cx="${xScale(
-              typeof d.x === 'number' ? d.x : 0
-            )}" cy="${yScale(d.y)}" r="14"
-                    fill="transparent"
-                    style="pointer-events: all; cursor: pointer;"
-                    class="chart-scatter-hit-target"
-                    data-label="${d.label}" data-value="${d.y}" />
           </g>
         `
           )
           .join('')}
+        <rect class="chart-scrub-overlay chart-scatter-overlay" x="0" y="0" width="${innerWidth}" height="${innerHeight}" fill="transparent" pointer-events="all" style="cursor: crosshair; touch-action: none;" />
       </g>
     `;
   }

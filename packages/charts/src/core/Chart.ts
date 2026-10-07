@@ -4,9 +4,10 @@ import {
   calculatePieSegments,
   calculateMultiSeriesAreaPath,
   calculateMultiBarLayout,
+  calculateMultiScatterLayout,
+  type MultiScatterPoint,
   type ChartSeries,
   type DataPoint,
-  normalizeData,
   defaultMargin,
 } from './math';
 import { formatMetricNumber } from './axis';
@@ -443,66 +444,135 @@ export class Chart {
         );
       });
     } else if (variant === 'scatter') {
-      const hitTargetEls = container.querySelectorAll<SVGCircleElement>(
-        '.chart-scatter-hit-target'
+      const overlay = container.querySelector<SVGRectElement>(
+        '.chart-scatter-overlay'
       );
-      const normalized = normalizeData(seriesList[0].data, {
-        xAccessor: this.options.xAccessor,
-        yAccessor: this.options.yAccessor,
-      });
+      const crosshairGroup = container.querySelector<SVGGElement>(
+        '.chart-crosshair-group'
+      );
+      const crosshairX =
+        container.querySelector<SVGLineElement>('.chart-crosshair-x');
+      const crosshairY =
+        container.querySelector<SVGLineElement>('.chart-crosshair-y');
+      const activeDot =
+        container.querySelector<SVGCircleElement>('.chart-active-dot');
 
-      hitTargetEls.forEach((hitEl, i) => {
-        const d = normalized[i];
-        if (!d) return;
-        const visualDot =
-          hitEl.parentElement?.querySelector<SVGCircleElement>('.chart-point');
+      const { points } = calculateMultiScatterLayout(
+        seriesList,
+        { width, height, margin },
+        {
+          xAccessor: this.options.xAccessor,
+          yAccessor: this.options.yAccessor,
+        }
+      );
 
-        hitEl.addEventListener(
-          'pointerenter',
-          () => {
-            if (visualDot) visualDot.setAttribute('r', '6');
+      if (overlay) {
+        const onPointerMove = (e: PointerEvent) => {
+          if (!points || points.length === 0) return;
+          const rect = overlay.getBoundingClientRect();
+          const localX = (e.clientX - rect.left) * (innerWidth / rect.width);
+          const localY = (e.clientY - rect.top) * (innerHeight / rect.height);
+
+          let closest: MultiScatterPoint | null = null;
+          let minDistance = Infinity;
+
+          for (const pt of points) {
+            const dx = pt.x - localX;
+            const dy = pt.y - localY;
+            const dist = Math.hypot(dx, dy);
+            if (dist < minDistance) {
+              minDistance = dist;
+              closest = pt;
+            }
+          }
+
+          if (closest && minDistance <= 45) {
+            if (crosshairGroup && this.options.showCrosshair !== false) {
+              crosshairGroup.style.opacity = '1';
+            }
+            if (crosshairX && this.options.showCrosshair !== false) {
+              crosshairX.setAttribute('x1', String(closest.x));
+              crosshairX.setAttribute('x2', String(closest.x));
+            }
+            if (crosshairY && this.options.showCrosshair !== false) {
+              crosshairY.setAttribute('y1', String(closest.y));
+              crosshairY.setAttribute('y2', String(closest.y));
+            }
+            if (activeDot) {
+              activeDot.setAttribute('cx', String(closest.x));
+              activeDot.setAttribute('cy', String(closest.y));
+              activeDot.setAttribute('fill', closest.color);
+              activeDot.style.opacity = '1';
+            }
             if (tooltipEl && this.options.showTooltip !== false) {
-              const pointTitle =
-                d.label ||
-                `(${formatMetricNumber(
-                  typeof d.x === 'number' ? d.x : 0
-                )}, ${formatMetricNumber(d.y)})`;
+              const d = closest.data;
+              const hasExplicitLabel = Boolean(
+                (d.raw && (d.raw.label || d.raw.name || d.raw.title)) ||
+                  (d.label &&
+                    d.label !== String(d.x) &&
+                    d.label !==
+                      formatMetricNumber(typeof d.x === 'number' ? d.x : 0))
+              );
+              const baseTitle = hasExplicitLabel
+                ? d.label
+                : `(${formatMetricNumber(
+                    typeof d.x === 'number' ? d.x : 0
+                  )}, ${formatMetricNumber(d.y)})`;
+              const isMulti = seriesList.length > 1;
+              const title =
+                isMulti && closest.seriesName !== 'Series 1'
+                  ? `${closest.seriesName}: ${baseTitle}`
+                  : baseTitle;
+
               const payload = this.options.tooltipFormatter
                 ? this.options.tooltipFormatter(d)
                 : {
-                    title: pointTitle,
+                    title,
                     items: [
                       {
-                        color: d.color || color,
-                        label: 'X',
+                        color: closest.color,
+                        label: this.options.xLabel || 'X',
                         value: formatMetricNumber(
                           typeof d.x === 'number' ? d.x : 0
                         ),
                       },
                       {
-                        color: d.color || color,
-                        label: 'Y',
+                        color: 'transparent',
+                        label: this.options.yLabel || 'Y',
                         value: formatMetricNumber(d.y),
                       },
                     ],
                   };
               tooltipEl.innerHTML = renderTooltipHtml(payload);
-              positionTooltip(hitEl, tooltipEl);
+
+              const virtualRef = {
+                getBoundingClientRect: () => {
+                  const cRect = container.getBoundingClientRect();
+                  const scaleX = cRect.width / width;
+                  const scaleY = cRect.height / height;
+                  const px = cRect.left + (margin.left + closest.x) * scaleX;
+                  const py = cRect.top + (margin.top + closest.y) * scaleY;
+                  return new DOMRect(px, py, 0, 0);
+                },
+              };
+              positionTooltip(virtualRef, tooltipEl);
               tooltipEl.style.opacity = '1';
             }
-          },
-          { signal }
-        );
+          } else {
+            onPointerLeave();
+          }
+        };
 
-        hitEl.addEventListener(
-          'pointerleave',
-          () => {
-            if (visualDot) visualDot.setAttribute('r', '4');
-            if (tooltipEl) tooltipEl.style.opacity = '0';
-          },
-          { signal }
-        );
-      });
+        const onPointerLeave = () => {
+          if (crosshairGroup) crosshairGroup.style.opacity = '0';
+          if (activeDot) activeDot.style.opacity = '0';
+          if (tooltipEl) tooltipEl.style.opacity = '0';
+        };
+
+        overlay.addEventListener('pointermove', onPointerMove, { signal });
+        overlay.addEventListener('pointerdown', onPointerMove, { signal });
+        overlay.addEventListener('pointerleave', onPointerLeave, { signal });
+      }
     }
   }
 

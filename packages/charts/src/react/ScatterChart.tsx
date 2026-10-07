@@ -1,18 +1,20 @@
-import { useMemo } from 'react';
-import { scaleLinear } from 'd3-scale';
+import { useMemo, useState } from 'react';
 import {
   defaultMargin,
-  normalizeData,
-  calculateLinearDomain,
+  calculateMultiScatterLayout,
+  type ChartSeries,
+  type MultiScatterPoint,
 } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
 import { useChartTooltip } from './useChartTooltip';
 import { useChartDimensions } from './useChartDimensions';
+import { ChartLegend } from './ChartLegend';
 import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
 export interface ScatterChartProps<T = any> {
-  data: T[];
+  data?: T[];
+  series?: ChartSeries<T>[];
   xAccessor?: (d: T) => number | Date | string;
   yAccessor?: (d: T) => number;
   width?: number;
@@ -23,13 +25,19 @@ export interface ScatterChartProps<T = any> {
   showGrid?: boolean;
   showAxes?: boolean;
   showTooltip?: boolean;
+  showCrosshair?: boolean;
+  showLegend?: boolean;
+  xLabel?: string;
+  yLabel?: string;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
   tooltipFormatter?: TooltipFormatter;
+  onToggleSeries?: (seriesName: string) => void;
 }
 
 export function ScatterChart<T = any>({
   data,
+  series: propSeries,
   xAccessor,
   yAccessor,
   width: propWidth,
@@ -40,10 +48,43 @@ export function ScatterChart<T = any>({
   showGrid = true,
   showAxes = true,
   showTooltip = true,
+  showCrosshair = true,
+  showLegend = false,
+  xLabel,
+  yLabel,
   xTickFormat,
   yTickFormat,
   tooltipFormatter,
+  onToggleSeries,
 }: ScatterChartProps<T>) {
+  const [internalHidden, setInternalHidden] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [focusedPoint, setFocusedPoint] = useState<MultiScatterPoint | null>(
+    null
+  );
+
+  const seriesList: ChartSeries<T>[] = useMemo(() => {
+    if (propSeries && propSeries.length > 0) {
+      return propSeries.map((s) => ({
+        ...s,
+        hidden:
+          internalHidden[s.name] !== undefined
+            ? internalHidden[s.name]
+            : s.hidden,
+      }));
+    }
+    return [
+      {
+        name: 'Series 1',
+        data: data || [],
+        color,
+      },
+    ];
+  }, [propSeries, data, color, internalHidden]);
+
+  const isMulti = seriesList.length > 1;
+
   const {
     isOpen,
     activePoint,
@@ -68,30 +109,104 @@ export function ScatterChart<T = any>({
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
 
-  const { normalized, xScale, yScale } = useMemo(() => {
-    const items = normalizeData(data, {
-      xAccessor: xAccessor as any,
-      yAccessor: yAccessor as any,
-    });
-    const xs = items.map((d) => (typeof d.x === 'number' ? d.x : 0));
-    const ys = items.map((d) => d.y);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
+  const { xScale, yScale, points } = useMemo(() => {
+    return calculateMultiScatterLayout(
+      seriesList as any,
+      { width, height, margin },
+      { xAccessor: xAccessor as any, yAccessor: yAccessor as any }
+    );
+  }, [seriesList, width, height, margin, xAccessor, yAccessor]);
 
-    const [domainMinX, domainMaxX] = calculateLinearDomain(minX, maxX);
-    const [domainMinY, domainMaxY] = calculateLinearDomain(minY, maxY);
+  const handlePointerMove = (e: React.PointerEvent<SVGRectElement>) => {
+    if (points.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const localX = (e.clientX - rect.left) * (innerWidth / rect.width);
+    const localY = (e.clientY - rect.top) * (innerHeight / rect.height);
 
-    const xScale = scaleLinear()
-      .domain([domainMinX, domainMaxX])
-      .range([0, innerWidth]);
-    const yScale = scaleLinear()
-      .domain([domainMinY, domainMaxY])
-      .range([innerHeight, 0]);
+    let closest: MultiScatterPoint | null = null;
+    let minDistance = Infinity;
 
-    return { normalized: items, xScale, yScale };
-  }, [data, innerWidth, innerHeight, xAccessor, yAccessor]);
+    for (const pt of points) {
+      const dx = pt.x - localX;
+      const dy = pt.y - localY;
+      const dist = Math.hypot(dx, dy);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closest = pt;
+      }
+    }
+
+    // 2D Proximity Snap threshold (45px radius)
+    if (closest && minDistance <= 45) {
+      setFocusedPoint(closest);
+      const d = closest.data;
+      const hasExplicitLabel = Boolean(
+        (d.raw && (d.raw.label || d.raw.name || d.raw.title)) ||
+          (d.label &&
+            d.label !== String(d.x) &&
+            d.label !== formatMetricNumber(typeof d.x === 'number' ? d.x : 0))
+      );
+      const baseTitle = hasExplicitLabel
+        ? d.label
+        : `(${formatMetricNumber(
+            typeof d.x === 'number' ? d.x : 0
+          )}, ${formatMetricNumber(d.y)})`;
+      const title =
+        isMulti && closest.seriesName !== 'Series 1'
+          ? `${closest.seriesName}: ${baseTitle}`
+          : baseTitle;
+
+      const virtualRef = {
+        getBoundingClientRect: () => {
+          const cRect = containerRef.current?.getBoundingClientRect() || rect;
+          const scaleX = cRect.width / width;
+          const scaleY = cRect.height / height;
+          const px = cRect.left + (margin.left + closest.x) * scaleX;
+          const py = cRect.top + (margin.top + closest.y) * scaleY;
+          return new DOMRect(px, py, 0, 0);
+        },
+      };
+
+      if (tooltipFormatter) {
+        show(d, virtualRef);
+      } else {
+        show(d, virtualRef, {
+          title,
+          items: [
+            {
+              color: closest.color,
+              label: xLabel || 'X',
+              value: formatMetricNumber(typeof d.x === 'number' ? d.x : 0),
+            },
+            {
+              color: 'transparent',
+              label: yLabel || 'Y',
+              value: formatMetricNumber(d.y),
+            },
+          ],
+        });
+      }
+    } else {
+      setFocusedPoint(null);
+      hide();
+    }
+  };
+
+  const handlePointerLeave = () => {
+    setFocusedPoint(null);
+    hide();
+  };
+
+  const handleToggle = (seriesName: string) => {
+    if (onToggleSeries) {
+      onToggleSeries(seriesName);
+    } else {
+      setInternalHidden((prev) => ({
+        ...prev,
+        [seriesName]: !prev[seriesName],
+      }));
+    }
+  };
 
   return (
     <div
@@ -168,63 +283,79 @@ export function ScatterChart<T = any>({
                 );
               })}
 
-          {normalized.map((d, i) => {
-            const cx = xScale(typeof d.x === 'number' ? d.x : 0);
-            const cy = yScale(d.y);
-            const isActive = activePoint === d;
+          {showCrosshair && focusedPoint && (
+            <g className="chart-crosshair-group pointer-events-none">
+              <line
+                x1={focusedPoint.x}
+                y1={0}
+                x2={focusedPoint.x}
+                y2={innerHeight}
+                className="chart-crosshair chart-crosshair-x"
+                stroke="var(--border-strong, var(--border-default))"
+                strokeWidth={1}
+                strokeDasharray="3,3"
+                opacity={0.65}
+              />
+              <line
+                x1={0}
+                y1={focusedPoint.y}
+                x2={innerWidth}
+                y2={focusedPoint.y}
+                className="chart-crosshair chart-crosshair-y"
+                stroke="var(--border-strong, var(--border-default))"
+                strokeWidth={1}
+                strokeDasharray="3,3"
+                opacity={0.65}
+              />
+            </g>
+          )}
+
+          {points.map((pt, i) => {
+            const isPointActive =
+              focusedPoint === pt || activePoint === pt.data;
             return (
               <g key={i} className="chart-scatter-point-group">
                 <circle
-                  cx={cx}
-                  cy={cy}
-                  r={isActive ? 6 : 4}
-                  fill={d.color || color}
+                  cx={pt.x}
+                  cy={pt.y}
+                  r={isPointActive ? 6.5 : 4}
+                  fill={pt.color}
                   stroke="var(--bg-surface)"
                   strokeWidth={2}
                   className="chart-point pointer-events-none transition-all duration-150"
-                />
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={14}
-                  fill="transparent"
-                  className="cursor-pointer"
-                  style={{ pointerEvents: 'all' }}
-                  onPointerEnter={(e) => {
-                    if (tooltipFormatter) {
-                      show(d, e.currentTarget);
-                    } else {
-                      const pointTitle =
-                        d.label ||
-                        `(${formatMetricNumber(
-                          typeof d.x === 'number' ? d.x : 0
-                        )}, ${formatMetricNumber(d.y)})`;
-                      show(d, e.currentTarget, {
-                        title: pointTitle,
-                        items: [
-                          {
-                            color: d.color || color,
-                            label: 'X',
-                            value: formatMetricNumber(
-                              typeof d.x === 'number' ? d.x : 0
-                            ),
-                          },
-                          {
-                            color: d.color || color,
-                            label: 'Y',
-                            value: formatMetricNumber(d.y),
-                          },
-                        ],
-                      });
-                    }
-                  }}
-                  onPointerLeave={hide}
+                  opacity={focusedPoint && !isPointActive ? 0.45 : 1}
                 />
               </g>
             );
           })}
+
+          <rect
+            className="chart-scrub-overlay chart-scatter-overlay"
+            x={0}
+            y={0}
+            width={innerWidth}
+            height={innerHeight}
+            fill="transparent"
+            style={{ cursor: 'crosshair', touchAction: 'none' }}
+            pointerEvents="all"
+            onPointerMove={handlePointerMove}
+            onPointerDown={handlePointerMove}
+            onPointerLeave={handlePointerLeave}
+          />
         </g>
       </svg>
+
+      {showLegend && isMulti && (
+        <ChartLegend
+          series={seriesList.map((s, idx) => ({
+            name: s.name,
+            color:
+              s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+            hidden: s.hidden,
+          }))}
+          onToggle={handleToggle}
+        />
+      )}
 
       {showTooltip && (
         <div
