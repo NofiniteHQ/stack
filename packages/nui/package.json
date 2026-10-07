@@ -61,7 +61,7 @@
     "access": "public"
   },
   "scripts": {
-    "test-storybook": "test-storybook",
+    "test-storybook": "test-storybook -c ../../.storybook",
     "generate": "node scripts/generate.js"
   },
   "dependencies": {

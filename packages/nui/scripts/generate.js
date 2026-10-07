@@ -1,15 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+import fs from 'node:fs';
+import path from 'node:path';
+import readline from 'node:readline';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 const getTemplates = (componentName) => {
-  const kebabName = componentName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-  
+  const kebabName = componentName
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+
   const componentTemplate = `import React from 'react';
 import { cn, Slot } from '../../utils';
 
@@ -90,45 +96,67 @@ export const InteractiveTest: Story = {
   return { componentTemplate, testTemplate, storyTemplate };
 };
 
-rl.question('What is the name of your new component? (e.g. Button, DatePicker): ', (name) => {
-  const componentName = name.trim();
-  if (!componentName) {
-    console.error('Component name is required!');
-    process.exit(1);
+rl.question(
+  'What is the name of your new component? (e.g. Button, DatePicker): ',
+  (name) => {
+    const componentName = name.trim();
+    if (!componentName) {
+      console.error('Component name is required!');
+      process.exit(1);
+    }
+
+    // Ensure PascalCase
+    if (componentName[0] !== componentName[0].toUpperCase()) {
+      console.error('Component name must be PascalCase (e.g. MyComponent)');
+      process.exit(1);
+    }
+
+    const folderName = componentName.toLowerCase();
+    const targetDir = path.join(
+      __dirname,
+      '..',
+      'src',
+      'components',
+      folderName
+    );
+
+    if (fs.existsSync(targetDir)) {
+      console.error(`Component ${componentName} already exists!`);
+      process.exit(1);
+    }
+
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    const { componentTemplate, testTemplate, storyTemplate } =
+      getTemplates(componentName);
+
+    fs.writeFileSync(
+      path.join(targetDir, `${componentName}.tsx`),
+      componentTemplate
+    );
+    fs.writeFileSync(
+      path.join(targetDir, `${componentName}.test.tsx`),
+      testTemplate
+    );
+    fs.writeFileSync(
+      path.join(targetDir, `${componentName}.stories.tsx`),
+      storyTemplate
+    );
+    fs.writeFileSync(
+      path.join(targetDir, 'index.ts'),
+      `export * from './${componentName}';\n`
+    );
+
+    // Update root exports (src/index.ts)
+    const indexFile = path.join(__dirname, '..', 'src', 'index.ts');
+    if (fs.existsSync(indexFile)) {
+      let indexContent = fs.readFileSync(indexFile, 'utf8');
+      indexContent += `export * from './components/${folderName}';\n`;
+      fs.writeFileSync(indexFile, indexContent);
+    }
+
+    console.log(`✅ Successfully generated ${componentName}!`);
+    console.log(`📂 Location: src/components/${folderName}`);
+    process.exit(0);
   }
-
-  // Ensure PascalCase
-  if (componentName[0] !== componentName[0].toUpperCase()) {
-    console.error('Component name must be PascalCase (e.g. MyComponent)');
-    process.exit(1);
-  }
-
-  const folderName = componentName.toLowerCase();
-  const targetDir = path.join(__dirname, '..', 'src', 'components', folderName);
-
-  if (fs.existsSync(targetDir)) {
-    console.error(\`Component \${componentName} already exists!\`);
-    process.exit(1);
-  }
-
-  fs.mkdirSync(targetDir, { recursive: true });
-
-  const { componentTemplate, testTemplate, storyTemplate } = getTemplates(componentName);
-
-  fs.writeFileSync(path.join(targetDir, \`\${componentName}.tsx\`), componentTemplate);
-  fs.writeFileSync(path.join(targetDir, \`\${componentName}.test.tsx\`), testTemplate);
-  fs.writeFileSync(path.join(targetDir, \`\${componentName}.stories.tsx\`), storyTemplate);
-  fs.writeFileSync(path.join(targetDir, \`index.ts\`), \`export * from './\${componentName}';\\n\`);
-
-  // Update root exports
-  const indexFile = path.join(__dirname, '..', 'src', 'components', 'index.ts');
-  if (fs.existsSync(indexFile)) {
-    let indexContent = fs.readFileSync(indexFile, 'utf8');
-    indexContent += \`export * from './\${folderName}';\\n\`;
-    fs.writeFileSync(indexFile, indexContent);
-  }
-
-  console.log(\`✅ Successfully generated \${componentName}!\`);
-  console.log(\`📂 Location: src/components/\${folderName}\`);
-  process.exit(0);
-});
+);

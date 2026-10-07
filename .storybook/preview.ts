@@ -1,8 +1,9 @@
 /* eslint-disable @nx/enforce-module-boundaries */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import 'uno.css';
-import '../../nuicss/dist/index.css';
-import { NUIProvider } from '../src/components/nuiprovider/NUIProvider';
+import '../packages/nuicss/dist/index.css';
+import { NUIProvider } from '../packages/nui/src/components/nuiprovider/NUIProvider';
 
 const preview = {
   parameters: {

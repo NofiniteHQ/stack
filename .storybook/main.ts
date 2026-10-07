@@ -1,9 +1,10 @@
 /* eslint-disable @nx/enforce-module-boundaries */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 import type { StorybookConfig } from '@storybook/react-vite';
-import { nuicssVitePlugin } from '../../nuicss/dist/index.mjs';
+import { nuicssVitePlugin } from '../packages/nuicss/dist/index.mjs';
 import { mergeConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
@@ -13,27 +14,27 @@ const __dirname = dirname(__filename);
 const config: StorybookConfig = {
   stories: [
     {
-      directory: '../src',
+      directory: '../packages/nui/src',
       titlePrefix: 'NUI',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
-      directory: '../../charts/src',
+      directory: '../packages/charts/src',
       titlePrefix: 'Charts',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
-      directory: '../../markon/src',
+      directory: '../packages/markon/src',
       titlePrefix: 'Markon',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
-      directory: '../../media/src',
+      directory: '../packages/media/src',
       titlePrefix: 'Media',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
     {
-      directory: '../../kanban/src',
+      directory: '../packages/kanban/src',
       titlePrefix: 'Kanban',
       files: '**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     },
@@ -54,9 +55,6 @@ function getAbsolutePath(value: string): any {
 
 export default config;
 
-// To customize your Vite configuration you can use the viteFinal field.
-// Check https://storybook.js.org/docs/react/builders/vite#configuration
-// and https://nx.dev/recipes/storybook/custom-builder-configs
 config.viteFinal = async (viteConfig) => {
   return mergeConfig(viteConfig, {
     css: {
@@ -64,10 +62,10 @@ config.viteFinal = async (viteConfig) => {
     },
     plugins: [
       tsconfigPaths({
-        root: resolve(__dirname, '../../..'),
+        root: resolve(__dirname, '..'),
       }),
       nuicssVitePlugin({
-        configFile: resolve(__dirname, '../nuicss.config.ts'),
+        configFile: resolve(__dirname, '../packages/nui/nuicss.config.ts'),
       }),
     ],
   });
