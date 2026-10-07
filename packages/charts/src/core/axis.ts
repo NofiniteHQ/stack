@@ -11,11 +11,12 @@ export interface AxisOptions {
   yScale: any;
   showAxes?: boolean;
   showGrid?: boolean;
+  isHorizontal?: boolean;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
   numXTicks?: number;
   numYTicks?: number;
-  categories?: { label: string; x: number; width: number }[];
+  categories?: { label: string; x?: number; width?: number }[];
 }
 
 export function formatMetricNumber(val: number): string {
@@ -48,6 +49,22 @@ export function formatTemporalTick(val: any): string {
   return String(val);
 }
 
+export function deduplicateTicks<T>(
+  ticks: T[],
+  format: (val: T) => string
+): { value: T; formatted: string }[] {
+  const seen = new Set<string>();
+  const result: { value: T; formatted: string }[] = [];
+  for (const t of ticks) {
+    const formatted = format(t);
+    if (!seen.has(formatted)) {
+      seen.add(formatted);
+      result.push({ value: t, formatted });
+    }
+  }
+  return result;
+}
+
 export function generateAxisSvg(options: AxisOptions): {
   gridSvg: string;
   yAxisSvg: string;
@@ -59,6 +76,7 @@ export function generateAxisSvg(options: AxisOptions): {
     yScale,
     showAxes = true,
     showGrid = true,
+    isHorizontal = false,
     xTickFormat = formatTemporalTick,
     yTickFormat = formatMetricNumber,
     numXTicks = 5,
@@ -69,20 +87,20 @@ export function generateAxisSvg(options: AxisOptions): {
   const innerWidth = Math.max(0, options.width - margin.left - margin.right);
   const innerHeight = Math.max(0, options.height - margin.top - margin.bottom);
 
-  // 1. Grid & Y Axis
   let gridSvg = '';
   let yAxisSvg = '';
+  let xAxisSvg = '';
 
-  if (yScale && typeof yScale.ticks === 'function') {
-    const ticks: number[] = yScale.ticks(numYTicks);
-
-    if (showGrid) {
+  if (isHorizontal) {
+    // 1. Grid: vertical value lines
+    if (showGrid && xScale && typeof xScale.ticks === 'function') {
+      const ticks: number[] = xScale.ticks(numXTicks);
       gridSvg = ticks
         .map((t) => {
-          const y = yScale(t);
+          const x = xScale(t);
           const isZero = t === 0;
           return `
-            <line x1="0" y1="${y}" x2="${innerWidth}" y2="${y}"
+            <line x1="${x}" y1="0" x2="${x}" y2="${innerHeight}"
                   stroke="var(--border-default)"
                   stroke-opacity="${isZero ? '0.6' : '0.35'}"
                   stroke-dasharray="${isZero ? 'none' : '3,3'}"
@@ -92,62 +110,135 @@ export function generateAxisSvg(options: AxisOptions): {
         .join('');
     }
 
-    if (showAxes) {
-      yAxisSvg = ticks
-        .map((t) => {
-          const y = yScale(t);
+    // 2. Y Axis: Category labels
+    if (showAxes && categories && categories.length > 0 && yScale) {
+      yAxisSvg = categories
+        .map((cat) => {
+          const catY = yScale(cat.label) ?? 0;
+          const cy =
+            catY +
+            (typeof yScale.bandwidth === 'function'
+              ? yScale.bandwidth() / 2
+              : 0);
           return `
-            <text x="-10" y="${y}" text-anchor="end" dominant-baseline="central"
+            <text x="-10" y="${cy}" text-anchor="end" dominant-baseline="central"
                   class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                   fill="var(--fg-muted, currentColor)" opacity="0.75">
-              ${yTickFormat(t)}
+              ${cat.label}
             </text>
           `;
         })
         .join('');
     }
-  }
 
-  // 2. X Axis
-  let xAxisSvg = '';
-
-  if (showAxes) {
-    if (categories && categories.length > 0) {
-      // Categorical / Band Layout (e.g. Bar Charts)
-      xAxisSvg = categories
-        .map((cat) => {
-          const cx = cat.x + cat.width / 2;
-          const displayLabel =
-            cat.width < 55 && cat.label.length > 8
-              ? `${cat.label.slice(0, 6)}…`
-              : cat.label;
-          return `
-            <text x="${cx}" y="${innerHeight + 18}" text-anchor="middle"
-                  class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                  fill="var(--fg-muted, currentColor)" opacity="0.75">
-              ${displayLabel}
-            </text>
-          `;
-        })
-        .join('');
-    } else if (xScale && typeof xScale.ticks === 'function') {
-      // Continuous / Time Series (Area, Line, Scatter)
-      const xTicks = xScale.ticks(
+    // 3. X Axis: Metric value labels
+    if (showAxes && xScale && typeof xScale.ticks === 'function') {
+      const xTicks: number[] = xScale.ticks(
         Math.min(numXTicks, innerWidth > 450 ? 6 : 3)
       );
-      xAxisSvg = xTicks
-        .map((t: any) => {
+      const dedupedXTicks = deduplicateTicks(
+        xTicks,
+        yTickFormat || formatMetricNumber
+      );
+      xAxisSvg = dedupedXTicks
+        .map(({ value: t, formatted }) => {
           const x = xScale(t);
           if (x < -5 || x > innerWidth + 5) return '';
           return `
             <text x="${x}" y="${innerHeight + 18}" text-anchor="middle"
                   class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                   fill="var(--fg-muted, currentColor)" opacity="0.75">
-              ${xTickFormat(t)}
+              ${formatted}
             </text>
           `;
         })
         .join('');
+    }
+  } else {
+    // Standard Vertical Layout
+    // 1. Grid & Y Axis
+    if (yScale && typeof yScale.ticks === 'function') {
+      const ticks: number[] = yScale.ticks(numYTicks);
+
+      if (showGrid) {
+        gridSvg = ticks
+          .map((t) => {
+            const y = yScale(t);
+            const isZero = t === 0;
+            return `
+              <line x1="0" y1="${y}" x2="${innerWidth}" y2="${y}"
+                    stroke="var(--border-default)"
+                    stroke-opacity="${isZero ? '0.6' : '0.35'}"
+                    stroke-dasharray="${isZero ? 'none' : '3,3'}"
+                    class="chart-grid" />
+            `;
+          })
+          .join('');
+      }
+
+      if (showAxes) {
+        const dedupedYTicks = deduplicateTicks(ticks, yTickFormat);
+        yAxisSvg = dedupedYTicks
+          .map(({ value: t, formatted }) => {
+            const y = yScale(t);
+            return `
+              <text x="-10" y="${y}" text-anchor="end" dominant-baseline="central"
+                    class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                    fill="var(--fg-muted, currentColor)" opacity="0.75">
+                ${formatted}
+              </text>
+            `;
+          })
+          .join('');
+      }
+    }
+
+    // 2. X Axis
+    if (showAxes) {
+      if (categories && categories.length > 0) {
+        // Categorical Layout (Bar Charts, Categorical Line/Area Charts)
+        xAxisSvg = categories
+          .map((cat) => {
+            const cx =
+              cat.width !== undefined
+                ? (cat.x ?? 0) + cat.width / 2
+                : cat.x ?? 0;
+            const displayLabel =
+              cat.width && cat.width < 55 && cat.label.length > 8
+                ? `${cat.label.slice(0, 6)}…`
+                : xTickFormat
+                ? xTickFormat(cat.label)
+                : cat.label;
+
+            return `
+              <text x="${cx}" y="${innerHeight + 18}" text-anchor="middle"
+                    class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                    fill="var(--fg-muted, currentColor)" opacity="0.75">
+                ${displayLabel}
+              </text>
+            `;
+          })
+          .join('');
+      } else if (xScale && typeof xScale.ticks === 'function') {
+        // Continuous / Time Series
+        const xTicks = xScale.ticks(
+          Math.min(numXTicks, innerWidth > 450 ? 6 : 3)
+        );
+        const dedupedXTicks = deduplicateTicks(xTicks, xTickFormat);
+        xAxisSvg = dedupedXTicks
+          .map(({ value: t, formatted }) => {
+            const x = xScale(t);
+            if (x < -5 || x > innerWidth + 5) return '';
+            return `
+              <text x="${x}" y="${innerHeight + 18}" text-anchor="middle"
+                    class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                    fill="var(--fg-muted, currentColor)" opacity="0.75">
+                ${formatted}
+              </text>
+            `;
+          })
+          .join('');
+      }
     }
   }
 

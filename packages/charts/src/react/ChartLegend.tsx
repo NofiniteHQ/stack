@@ -33,7 +33,7 @@ export function ChartLegend({ series, onToggle, className }: ChartLegendProps) {
           )}
         >
           <span
-            className="chart-legend-swatch w-2.5 h-2.5 rounded-full flex-shrink-0"
+            className="chart-legend-swatch chart-legend-dot w-2.5 h-2.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: s.color }}
           />
           <span className="chart-legend-label font-medium text-default">

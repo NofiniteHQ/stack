@@ -32,24 +32,40 @@ export function defaultTooltipPayload(
   point: NormalizedDataPoint,
   defaultColor = 'var(--chart-1, var(--color-primary))'
 ): TooltipPayload {
-  const title =
-    point.xOriginal !== undefined
-      ? String(point.xOriginal)
-      : point.label ||
-        (point.x instanceof Date
-          ? point.x.toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })
-          : String(point.x));
+  const isTime = point.x instanceof Date;
+  let title = '';
+  if (isTime) {
+    title = (point.x as Date).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } else if (point.label) {
+    title = point.label;
+  } else if (
+    point.xOriginal !== undefined &&
+    typeof point.xOriginal === 'string'
+  ) {
+    title = point.xOriginal;
+  } else if (typeof point.x === 'number') {
+    title = formatMetricNumber(point.x);
+  } else {
+    title = String(point.x);
+  }
+
+  // To prevent showing the same data twice:
+  // If item label would be identical to title, leave label empty so only the swatch + value is rendered.
+  let itemLabel = '';
+  if (point.label && point.label !== title) {
+    itemLabel = point.label;
+  }
 
   return {
     title,
     items: [
       {
         color: point.color || defaultColor,
-        label: point.label || 'Value',
+        label: itemLabel,
         value:
           typeof point.y === 'number'
             ? formatMetricNumber(point.y)
@@ -69,17 +85,28 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
     : '';
 
   const itemsHtml = payload.items
-    .map(
-      (item) => `
+    .map((item) => {
+      // Deduplication safeguard: if single item and item.label is identical to payload.title, don't repeat it!
+      const shouldRenderLabel =
+        Boolean(item.label) &&
+        (payload.items.length > 1 || item.label !== payload.title);
+
+      return `
     <div class="chart-tooltip-item">
       <div class="chart-tooltip-label-group">
-        <span class="chart-tooltip-swatch" style="background-color: ${item.color};"></span>
-        <span class="chart-tooltip-label">${item.label}</span>
+        <span class="chart-tooltip-swatch" style="background-color: ${
+          item.color
+        };"></span>
+        ${
+          shouldRenderLabel
+            ? `<span class="chart-tooltip-label">${item.label}</span>`
+            : ''
+        }
       </div>
       <span class="chart-tooltip-value">${item.value}</span>
     </div>
-  `
-    )
+  `;
+    })
     .join('');
 
   return `

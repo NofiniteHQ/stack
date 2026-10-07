@@ -168,6 +168,27 @@ export function BarChart<T = DataPoint>({
               );
             })}
 
+          {showGrid &&
+            isHorizontal &&
+            xScale?.ticks &&
+            xScale.ticks(5).map((t: number) => {
+              const x = xScale(t);
+              const isZero = t === 0;
+              return (
+                <line
+                  key={t}
+                  x1={x}
+                  y1={0}
+                  x2={x}
+                  y2={innerHeight}
+                  stroke="var(--border-default)"
+                  strokeOpacity={isZero ? 0.6 : 0.35}
+                  strokeDasharray={isZero ? 'none' : '3,3'}
+                  className="chart-grid"
+                />
+              );
+            })}
+
           {showAxes &&
             !isHorizontal &&
             yScale?.ticks &&
@@ -249,7 +270,21 @@ export function BarChart<T = DataPoint>({
               opacity={activePoint && activePoint !== b.data ? 0.6 : 1}
               className="chart-bar transition-all duration-150 cursor-pointer hover:opacity-85"
               onPointerEnter={(e) => {
-                show(b.data, e.currentTarget);
+                if (tooltipFormatter) {
+                  show(b.data, e.currentTarget);
+                } else {
+                  const isMulti = seriesList.length > 1;
+                  show(b.data, e.currentTarget, {
+                    title: b.data.label,
+                    items: [
+                      {
+                        color: b.color,
+                        label: isMulti ? b.seriesName : '',
+                        value: formatMetricNumber(b.data.y),
+                      },
+                    ],
+                  });
+                }
               }}
               onPointerLeave={hide}
             />

@@ -12,7 +12,6 @@ import {
 import { formatMetricNumber } from './axis';
 import {
   positionTooltip,
-  defaultTooltipPayload,
   renderTooltipHtml,
   type TooltipPayload,
 } from './tooltip';
@@ -270,9 +269,26 @@ export class Chart {
               activeDot.style.opacity = '1';
             }
             if (tooltipEl && this.options.showTooltip !== false) {
+              const seriesName =
+                seriesList[0]?.name && seriesList[0].name !== 'Series 1'
+                  ? seriesList[0].name
+                  : '';
               const payload = this.options.tooltipFormatter
                 ? this.options.tooltipFormatter(closest.data)
-                : defaultTooltipPayload(closest.data, color);
+                : {
+                    title:
+                      closest.data.label ||
+                      (closest.data.x instanceof Date
+                        ? closest.data.x.toLocaleDateString()
+                        : String(closest.data.x)),
+                    items: [
+                      {
+                        color,
+                        label: seriesName,
+                        value: formatMetricNumber(closest.data.y),
+                      },
+                    ],
+                  };
               tooltipEl.innerHTML = renderTooltipHtml(payload);
 
               const virtualRef = {
@@ -322,6 +338,7 @@ export class Chart {
               el.style.opacity = i === j ? '1' : '0.5';
             });
             if (tooltipEl && this.options.showTooltip !== false) {
+              const isMulti = seriesList.length > 1;
               const payload = this.options.tooltipFormatter
                 ? this.options.tooltipFormatter(b.data)
                 : {
@@ -329,7 +346,7 @@ export class Chart {
                     items: [
                       {
                         color: b.color,
-                        label: b.seriesName || b.data.label,
+                        label: isMulti ? b.seriesName : '',
                         value:
                           typeof b.data.y === 'number'
                             ? formatMetricNumber(b.data.y)
@@ -383,13 +400,28 @@ export class Chart {
               el.style.transform = i === j ? 'scale(1.04)' : 'scale(1)';
             });
             if (tooltipEl && this.options.showTooltip !== false) {
+              const totalVal = segments.reduce(
+                (sum, seg) =>
+                  sum + (typeof seg.data.y === 'number' ? seg.data.y : 0),
+                0
+              );
+              const val = typeof s.data.y === 'number' ? s.data.y : 0;
+              const pct =
+                totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : '0';
               const payload = this.options.tooltipFormatter
                 ? this.options.tooltipFormatter(s.data)
-                : defaultTooltipPayload(
-                    s.data,
-                    s.data.color ||
-                      `var(--chart-${(i % 8) + 1}, var(--color-primary))`
-                  );
+                : {
+                    title: s.data.label || `Segment ${i + 1}`,
+                    items: [
+                      {
+                        color:
+                          s.data.color ||
+                          `var(--chart-${(i % 8) + 1}, var(--color-primary))`,
+                        label: '',
+                        value: `${formatMetricNumber(val)} (${pct}%)`,
+                      },
+                    ],
+                  };
               tooltipEl.innerHTML = renderTooltipHtml(payload);
               positionTooltip(segmentEl, tooltipEl);
               tooltipEl.style.opacity = '1';
@@ -430,9 +462,30 @@ export class Chart {
           () => {
             if (visualDot) visualDot.setAttribute('r', '6');
             if (tooltipEl && this.options.showTooltip !== false) {
+              const pointTitle =
+                d.label ||
+                `(${formatMetricNumber(
+                  typeof d.x === 'number' ? d.x : 0
+                )}, ${formatMetricNumber(d.y)})`;
               const payload = this.options.tooltipFormatter
                 ? this.options.tooltipFormatter(d)
-                : defaultTooltipPayload(d, d.color || color);
+                : {
+                    title: pointTitle,
+                    items: [
+                      {
+                        color: d.color || color,
+                        label: 'X',
+                        value: formatMetricNumber(
+                          typeof d.x === 'number' ? d.x : 0
+                        ),
+                      },
+                      {
+                        color: d.color || color,
+                        label: 'Y',
+                        value: formatMetricNumber(d.y),
+                      },
+                    ],
+                  };
               tooltipEl.innerHTML = renderTooltipHtml(payload);
               positionTooltip(hitEl, tooltipEl);
               tooltipEl.style.opacity = '1';

@@ -1,118 +1,149 @@
-# Implementation Plan: Fix Broken Storybook Migration and Runtime Rendering
+# Implementation Plan: Enterprise-Grade Charts Deep Audit & UI Bug Resolution
 
-## Objective
+## 1. Objective
 
-Restore full functionality, runtime stability, proper styling, and clean navigation hierarchy for the centralized Storybook across all packages in the monorepo (`@nofinite/nui`, `@nofinite/charts`, `@nofinite/markon`, `@nofinite/media`, `@nofinite/kanban`), strictly adhering to `@nofinite/nuicss` as the sole source of truth for all styles and design tokens.
-
----
-
-## Current Behavior & Problem Diagnosis
-
-Following the recent Storybook centralization from `packages/nui/.storybook` to the root `.storybook`, several systemic and visual regressions occurred:
-
-1. **Systemic Runtime Crash (`ReferenceError: React is not defined`):**
-   - **Root Cause:** In the previous setup, Storybook ran from `packages/nui/`, where Vite automatically loaded `packages/nui/vite.config.ts` containing `react()` (`@vitejs/plugin-react`). In the root `.storybook/main.ts`, Vite had no `@vitejs/plugin-react` plugin. Without the React plugin, Vite defaulted to raw esbuild compilation without the automatic JSX runtime (`react/jsx-runtime`), producing `React.createElement(...)` calls in bundled story files. Because modern React 18/19 components and CSF stories do not explicitly include `import React from 'react'`, this caused a fatal `ReferenceError: React is not defined` runtime exception on every single story and autodocs page that uses JSX.
-2. **Missing NUICSS Utility Classes in Decoupled Packages (`packages/nui/nuicss.config.ts` Path Mismatch):**
-   - **Root Cause:** In `packages/nui/nuicss.config.ts`, lines 10–14 configured UnoCSS `content.filesystem` with:
-     ```ts
-     '../../markon/src/**/*.{js,ts,jsx,tsx}',
-     '../../media/src/**/*.{js,ts,jsx,tsx}',
-     '../../charts/src/**/*.{js,ts,jsx,tsx}',
-     '../../kanban/src/**/*.{js,ts,jsx,tsx}',
-     ```
-     Because `nuicss.config.ts` resides in `packages/nui/`, resolving `../../markon` points to `d:\stack\..\markon` (outside the monorepo). As a result, UnoCSS silently failed to scan any source code from `markon`, `media`, `charts`, or `kanban`. The NUICSS classes and design tokens consumed by those components were never generated in `uno.css`, leaving the components unstyled or broken in Storybook.
-     Additionally, line 3 imported `../../nuicss/src/plugin/preset`, which also resolves outside the workspace.
-3. **Redundant & Clashing Storybook Navigation Hierarchy:**
-   - **Root Cause:** `.storybook/main.ts` sets `titlePrefix` for each package (`NUI`, `Charts`, `Markon`, `Media`, `Kanban`). However, individual story files had titles that repeated or collided with the prefix:
-     - `MarkonEditor.stories.tsx`: `title: 'Markon/MarkonEditor'` -> rendered as `Markon > Markon > MarkonEditor`
-     - `MediaPlayer.stories.tsx`: `title: 'Media/Player'` -> rendered as `Media > Media > Player`
-     - `Kanban.stories.tsx`: `title: 'Kanban'` -> rendered as `Kanban > Kanban`
-     - `Chart.stories.tsx`: `title: 'Data Visualization/Chart'` -> rendered as `Charts > Data Visualization > Chart`
+Perform a forensic, enterprise-grade deep audit of `@nofinite/charts` and its upstream token foundation in `@nofinite/nuicss`. Eliminate UI bugs including duplicate data rendering, categorical axis mislabeling, inverted negative domain scales, tooltip title/label redundancies, and missing keyboard accessibility, while strictly maintaining 100% style dependency on `@nofinite/nuicss`.
 
 ---
 
-## Proposed Solution
+## 2. Current Behavior & Identified Problems
 
-### 1. Enable React JSX Transform in `.storybook/main.ts`
+### Bug A: Tooltip Duplicate Data Display ("Same Data Showing Multiple Times")
 
-- Import `@vitejs/plugin-react` and include `react()` in `viteConfig.plugins` inside `viteFinal`.
-- Set `esbuild: { jsx: 'automatic' }` as defensive redundancy so all JSX transpiles to `react/jsx-runtime`.
+- **Bar Chart**: Hovering over a bar renders the category name as the header AND as the item label (e.g., Title: "Apples", Item: "● Apples 50"). In multi-series bar charts, the series name (e.g. "2025") was ignored.
+- **Pie / Donut Chart**: Hovering over a segment renders the segment label twice (e.g., Title: "Compute", Item: "● Compute 45"). Total percentage was not computed.
+- **Scatter Chart**: Hovering over a point displayed the X numeric coordinate as the title (e.g. "10") and the label/index as the item label (e.g. "10: 25"), displaying "10" twice without distinct X and Y coordinates.
+- **Line / Area Chart (Single Series)**: Scrubbing displayed the category as title AND as item label (e.g., Title: "Jan", Item: "● Jan 100").
+- **`defaultTooltipPayload` & `renderTooltipHtml`**: Redundant title-and-label pairing was hardcoded. When `title === item.label`, both lines rendered identical text.
 
-### 2. Fix UnoCSS Content Scanning in `packages/nui/nuicss.config.ts`
+### Bug B: Categorical X-Axis Mislabeling in Continuous Charts (Area & Line)
 
-- Change `../../nuicss/src/plugin/preset` to `../nuicss/dist/index.mjs` (or `../nuicss/src/plugin/preset`).
-- Correct the relative globs for all sibling packages:
-  - `'../markon/src/**/*.{js,ts,jsx,tsx}'`
-  - `'../media/src/**/*.{js,ts,jsx,tsx}'`
-  - `'../charts/src/**/*.{js,ts,jsx,tsx}'`
-  - `'../kanban/src/**/*.{js,ts,jsx,tsx}'`
-- Ensure UnoCSS scans every package and generates all NUICSS superclasses and utility tokens into `uno.css`.
+- When users supply categorical string data (e.g., `['Jan', 'Feb', 'Mar']`), `normalizeData` maps strings to indices `[0, 1, 2]`.
+- `calculateAreaPath` and `calculateMultiSeriesAreaPath` treat the scale as linear numeric and call `xScale.ticks(5)`.
+- The X-axis renders numeric indices (`0, 0.5, 1, 1.5, 2`) rather than the actual category labels (`Jan, Feb, Mar`), while the tooltip scrub shows the category label.
 
-### 3. Ensure Design Token & Base CSS Parity in `.storybook/preview.ts`
+### Bug C: Scale Inversion for Negative Datasets
 
-- Retain `@nofinite/nuicss` as the single source of truth for styles.
-- In `.storybook/preview.ts`, ensure `uno.css` and `../packages/nuicss/dist/index.css` (or `../packages/nuicss/dist/styles.css`) are loaded so all design tokens and precompiled styles are available to every story.
+- In `math.ts`, scales calculate `domain([yMin, yMax === 0 ? 10 : yMax * 1.1])`.
+- If all values are negative (e.g. `-50`), `yMax * 1.1` becomes `-55`, creating domain `[-50, -55]` where `min > max`, inverting and breaking SVG vector rendering.
 
-### 4. Normalize Story Titles Across Decoupled Packages
+### Bug D: Horizontal Bar Chart Missing Value Gridlines
 
-- Update story metadata titles to work harmoniously with `titlePrefix`:
-  - `packages/charts/src/react/Chart.stories.tsx`: `title: 'Chart'` (renders cleanly as `Charts/Chart`)
-  - `packages/markon/src/react/MarkonEditor.stories.tsx`: `title: 'Editor'` (renders cleanly as `Markon/Editor`)
-  - `packages/media/src/react/MediaPlayer.stories.tsx`: `title: 'Player'` (renders cleanly as `Media/Player`)
-  - `packages/kanban/src/react/Kanban.stories.tsx`: `title: 'Board'` (renders cleanly as `Kanban/Board`)
+- Horizontal bar charts have `showGrid && !isHorizontal`, causing horizontal bar layouts to have zero value gridlines across the height.
 
----
+### Bug E: Mobile Touch & Keyboard Accessibility (WCAG 2.1 AA)
 
-## Affected Files & Modules
+- Mobile users tapping charts trigger `pointerdown`, but only `pointermove` was bound on the scrub overlay.
+- Chart bars, scatter dots, and pie segments lack `tabIndex={0}`, `role="button"`, and keyboard focus handlers (`onFocus`/`onBlur`).
 
-- `.storybook/main.ts` (Vite plugins: `@vitejs/plugin-react`, esbuild JSX options)
-- `packages/nui/nuicss.config.ts` (Path fixes for filesystem globs and nuicss preset)
-- `.storybook/preview.ts` (Clean token/styles loading)
-- `packages/charts/src/react/Chart.stories.tsx` (Title normalization)
-- `packages/markon/src/react/MarkonEditor.stories.tsx` (Title normalization)
-- `packages/media/src/react/MediaPlayer.stories.tsx` (Title normalization)
-- `packages/kanban/src/react/Kanban.stories.tsx` (Title normalization)
+### Bug F: Legend Superclass Synchronization
+
+- `ChartLegend.tsx` used `chart-legend-swatch`, while NUICSS shortcut defines `chart-legend-dot`.
 
 ---
 
-## Dependencies & Tools
+## 3. Proposed Solutions
 
-- `@vitejs/plugin-react` (already present in repository `node_modules`)
-- `@nofinite/nuicss` (sole styling and token engine)
-- `@playwright/test` / Playwright runner in `temp/` for automated visual and runtime error verification
-- `storybook build` / `storybook dev`
+### 1. Tooltip Deduplication & Enterprise Data Contracts (`tooltip.ts`, `useChartTooltip.ts`, React components, `Chart.ts`)
+
+- **`renderTooltipHtml` Safeguard**: If `item.label` matches `payload.title` or is empty, suppress the redundant label and render only the color swatch and value.
+- **Bar Chart Tooltip**:
+  - Single series: Title: `Category` ("Apples"), Item: `● 50`.
+  - Multi-series: Title: `Category` ("Apples"), Item: `● [Series Name] 50`.
+- **Pie / Donut Chart Tooltip**:
+  - Title: `Slice Label` ("Compute"), Item: `● [Value] ([Percentage]%)`.
+- **Scatter Chart Tooltip**:
+  - If labeled: Title: `Label` ("Point C"), Items: `X: 45`, `Y: 40`.
+  - If unlabeled: Title: `(45, 40)`, Items: `X: 45`, `Y: 40`.
+- **Line / Area Chart Tooltip**:
+  - Single series: Title: `Category` ("Jan"), Item: `● [Series Name or Value] [y]`.
+  - Multi-series: Title: `Category` ("Jan"), Items: `● [Series 1] [y1]`, `● [Series 2] [y2]`.
+
+### 2. Categorical X-Axis Engine (`math.ts`, `axis.ts`, `AreaChart.tsx`, `LineChart.tsx`, `renderChart.ts`)
+
+- Detect categorical strings in `calculateAreaPath` and `calculateMultiSeriesAreaPath`.
+- Expose `categories` array and `isCategorical` flag.
+- When categorical, place X-axis ticks directly at category data point coordinates with down-sampling for dense screens, rendering `'Jan'`, `'Feb'`, `'Mar'` instead of indices `0, 1, 2`.
+
+### 3. Safe Domain Scaling for Negative & Zero Values (`math.ts`)
+
+- Calculate proper mathematical extents:
+  - If `yMax < 0`: domain `[yMin * 1.15, 0]`.
+  - If `yMin > 0`: domain `[0, yMax * 1.1]`.
+  - If mixed: domain `[yMin * 1.1, yMax * 1.1]`.
+  - Guarantee `domain[0] <= domain[1]`.
+
+### 4. Horizontal Bar Gridlines (`BarChart.tsx`, `renderChart.ts`)
+
+- When `isHorizontal === true`, generate vertical value gridlines using `xScale.ticks(5)` spanning `y1={0}` to `y2={innerHeight}`.
+
+### 5. Touch & Keyboard Accessibility
+
+- Add `onPointerDown={handlePointerMove}` to scrub overlays for instant mobile tap responsiveness.
+- Add `tabIndex={0}`, `role="img"` or `role="button"`, and `onFocus`/`onBlur` to interactive points and bars.
+
+### 6. Strict NUICSS Stylesheet Verification
+
+- Ensure all chart elements continue to consume `@nofinite/nuicss` superclasses and tokens with zero external style files.
 
 ---
 
-## Alternatives Considered
+## 4. Affected Files & Modules
 
-- **Keep `titlePrefix` off and manually namespace stories:** Having `titlePrefix` in `.storybook/main.ts` is cleaner because each package directory maintains its own namespace automatically without hardcoding monorepo top-level folders inside individual packages.
-
----
-
-## Risks & Mitigations
-
-- **Build Performance:** `@vitejs/plugin-react` adds standard React Fast Refresh and Babel JSX transform, which has minimal overhead during Vite builds.
-- **Token Availability:** Using `@nofinite/nuicss` ensures 100% token consistency across all components without any ad-hoc CSS overrides.
-
----
-
-## Security Considerations
-
-None. These changes affect development build configurations and story files only.
+- `packages/charts/src/core/tooltip.ts`: Deduplicate title and item labels, support percentage and (X, Y) pairs.
+- `packages/charts/src/core/math.ts`: Fix negative domain calculation; support categorical axis detection and category extraction in `calculateAreaPath` and `calculateMultiSeriesAreaPath`.
+- `packages/charts/src/core/axis.ts`: Deduplicate adjacent axis ticks.
+- `packages/charts/src/react/BarChart.tsx`: Pass series names to tooltip, fix single-series duplicate labels, add horizontal gridlines.
+- `packages/charts/src/react/PieChart.tsx`: Compute percentage in tooltip, eliminate duplicate label.
+- `packages/charts/src/react/ScatterChart.tsx`: Format scatter tooltip with coordinates (X, Y), eliminate duplicate X label.
+- `packages/charts/src/react/LineChart.tsx`: Render categorical labels on X-axis; deduplicate tooltip in single series; add `onPointerDown`.
+- `packages/charts/src/react/AreaChart.tsx`: Render categorical labels on X-axis; deduplicate tooltip in single series; add `onPointerDown`.
+- `packages/charts/src/react/ChartLegend.tsx`: Add `chart-legend-dot` superclass.
+- `packages/charts/src/core/renderChart.ts` & `Chart.ts`: Mirror all deduplication, categorical X-axis, and gridline fixes in vanilla engine.
 
 ---
 
-## Verification Strategy
+## 5. Dependencies & Tools
 
-1. **Build Validation:** Run `pnpm run build:storybook` to ensure zero compilation or asset errors.
-2. **Automated Runtime Verification:** Run `node temp/audit_storybook.js` via Playwright to verify that:
-   - Zero console errors or `ReferenceError: React is not defined` occur across all 450+ stories and docs.
-   - All story pages render `#storybook-root` and docs blocks without error boundaries.
-3. **Visual Verification:** Check rendered output of Markon, Media, Charts, Kanban, and NUI Button/Modal in Playwright to verify full NUICSS styling and layout harmony.
+- Monorepo build: `pnpm nx build nuicss`, `pnpm nx build charts`.
+- Visual verification: Playwright via Chromium in `/temp/charts-enterprise-audit-unique.mjs`.
+- Tarball verification: `npm pack --dry-run` in `packages/charts`.
 
 ---
 
-## Rollback Considerations
+## 6. Alternatives Considered
 
-If issues occur, changes are isolated to `.storybook/`, `nuicss.config.ts`, and story metadata titles, which can be cleanly reverted via Git.
+- **Hiding Tooltip Header entirely**: Discarded because multi-series charts benefit from a shared category header ("Jan") above individual series entries ("Revenue", "Cost").
+- **External D3 formatting packages**: Discarded to maintain lean bundle size (<30kB) and keep `@nofinite/charts` lightweight.
+
+---
+
+## 7. Risks & Mitigations
+
+- **Breaking custom formatters**: `tooltipFormatter` prop signature remains unchanged (`(point: NormalizedDataPoint) => TooltipPayload | string`). Custom formatters continue to take precedence.
+- **Non-breaking layout**: Default margins, SVG viewports, and responsive `useChartDimensions` remain intact.
+
+---
+
+## 8. Verification Strategy
+
+1. **Automated Unit & Build Verification**:
+   - `pnpm nx build nuicss`: Passed.
+   - `pnpm nx build charts`: Passed.
+   - `npm pack --dry-run`: Passed (65 files, types, cjs/esm chunks).
+2. **Playwright Visual & DOM Verification (`temp/charts-centralized-audit-unique.mjs`)**:
+   - Tooltips for Bar, Pie, Scatter, Line, Area have ZERO duplicate text: Verified.
+   - X-axis on Area/Line charts with categorical data shows string labels (`Jan, Feb, Mar`), not indices (`0, 1, 2`): Verified.
+   - Negative values chart renders valid SVG without inverted scales: Verified.
+   - Horizontal bar chart renders vertical gridlines: Verified.
+   - Multi-viewport screenshots saved to `temp/`: Verified.
+3. **Pre-commit Linter & Git Savepoint**:
+   - Local commit with header $\le 100$ characters.
+
+---
+
+## 9. Verification Results: ALL CHECKS PASSED
+
+- Playwright Chromium visual verification passed with zero regressions.
+- Redundant item labels eliminated across single-series and multi-series variants.
+- 100% styled via `@nofinite/nuicss` design tokens and utility shortcuts. Zero chart-specific standalone CSS files.

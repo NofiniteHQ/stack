@@ -9,6 +9,7 @@ import {
   type BarLayoutMode,
   type ReferenceLine,
   normalizeData,
+  calculateLinearDomain,
 } from './math';
 import { generateAxisSvg } from './axis';
 import { renderLegendHtml } from './legend';
@@ -115,12 +116,13 @@ export function renderChart(options: ChartOptions): string {
   if (variant === 'area' || variant === 'line') {
     if (seriesList.length > 1) {
       // Multi-Series
-      const { xScale, yScale, series } = calculateMultiSeriesAreaPath(
-        seriesList,
-        { width, height, margin },
-        options.xAccessor,
-        options.yAccessor
-      );
+      const { xScale, yScale, series, isCategorical, categories } =
+        calculateMultiSeriesAreaPath(
+          seriesList,
+          { width, height, margin },
+          options.xAccessor,
+          options.yAccessor
+        );
 
       const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
         width,
@@ -132,6 +134,7 @@ export function renderChart(options: ChartOptions): string {
         showGrid,
         xTickFormat: options.xTickFormat,
         yTickFormat: options.yTickFormat,
+        categories: isCategorical ? categories : undefined,
       });
 
       const refLinesSvg = renderReferenceLinesSvg(
@@ -194,7 +197,15 @@ export function renderChart(options: ChartOptions): string {
       `;
     } else {
       // Single series
-      const { areaPath, linePath, xScale, yScale, points } = calculateAreaPath(
+      const {
+        areaPath,
+        linePath,
+        xScale,
+        yScale,
+        points,
+        isCategorical,
+        categories,
+      } = calculateAreaPath(
         seriesList[0].data,
         { width, height, margin },
         options.xAccessor,
@@ -211,6 +222,7 @@ export function renderChart(options: ChartOptions): string {
         showGrid,
         xTickFormat: options.xTickFormat,
         yTickFormat: options.yTickFormat,
+        categories: isCategorical ? categories : undefined,
       });
 
       const refLinesSvg = renderReferenceLinesSvg(
@@ -278,9 +290,10 @@ export function renderChart(options: ChartOptions): string {
       yScale,
       showAxes,
       showGrid,
+      isHorizontal,
       xTickFormat: options.xTickFormat,
       yTickFormat: options.yTickFormat,
-      categories: isHorizontal ? undefined : categories,
+      categories,
     });
 
     const refLinesSvg = renderReferenceLinesSvg(
@@ -340,16 +353,19 @@ export function renderChart(options: ChartOptions): string {
     });
     const xs = normalized.map((d) => (typeof d.x === 'number' ? d.x : 0));
     const ys = normalized.map((d) => d.y);
-    const minX = Math.min(0, ...xs);
-    const maxX = Math.max(10, ...xs) || 100;
-    const minY = Math.min(0, ...ys);
-    const maxY = Math.max(10, ...ys) || 100;
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    const [domainMinX, domainMaxX] = calculateLinearDomain(minX, maxX);
+    const [domainMinY, domainMaxY] = calculateLinearDomain(minY, maxY);
 
     const xScale = scaleLinear()
-      .domain([minX, maxX * 1.05])
+      .domain([domainMinX, domainMaxX])
       .range([0, innerWidth]);
     const yScale = scaleLinear()
-      .domain([minY, maxY * 1.05])
+      .domain([domainMinY, domainMaxY])
       .range([innerHeight, 0]);
 
     const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({

@@ -225,7 +225,28 @@ export function AreaChart<T = DataPoint>({
             return new DOMRect(px, py, 0, 0);
           },
         };
-        show(closest.data, virtualRef);
+        if (tooltipFormatter) {
+          show(closest.data, virtualRef);
+        } else {
+          const seriesName =
+            seriesList[0]?.name && seriesList[0].name !== 'Series 1'
+              ? seriesList[0].name
+              : '';
+          show(closest.data, virtualRef, {
+            title:
+              closest.data.label ||
+              (closest.data.x instanceof Date
+                ? closest.data.x.toLocaleDateString()
+                : String(closest.data.x)),
+            items: [
+              {
+                color,
+                label: seriesName,
+                value: formatMetricNumber(closest.data.y),
+              },
+            ],
+          });
+        }
       }
     }
   };
@@ -324,6 +345,9 @@ export function AreaChart<T = DataPoint>({
           {showAxes &&
             xScale &&
             typeof xScale.ticks === 'function' &&
+            !(isMulti
+              ? multiResult?.isCategorical
+              : singleResult?.isCategorical) &&
             xScale
               .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
               .map((t: any, i: number) => {
@@ -343,6 +367,26 @@ export function AreaChart<T = DataPoint>({
                   </text>
                 );
               })}
+
+          {showAxes &&
+            (isMulti
+              ? multiResult?.isCategorical
+              : singleResult?.isCategorical) &&
+            (isMulti ? multiResult?.categories : singleResult?.categories)?.map(
+              (cat, i) => (
+                <text
+                  key={i}
+                  x={cat.x}
+                  y={innerHeight + 18}
+                  textAnchor="middle"
+                  className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                  fill="var(--fg-muted, currentColor)"
+                  opacity={0.75}
+                >
+                  {xTickFormat ? xTickFormat(cat.label) : cat.label}
+                </text>
+              )
+            )}
 
           {referenceLines &&
             referenceLines.map((ref, idx) => {
@@ -470,6 +514,7 @@ export function AreaChart<T = DataPoint>({
             style={{ cursor: 'crosshair', touchAction: 'none' }}
             pointerEvents="all"
             onPointerMove={handlePointerMove}
+            onPointerDown={handlePointerMove}
             onPointerLeave={handlePointerLeave}
           />
         </g>

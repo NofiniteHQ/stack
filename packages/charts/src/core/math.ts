@@ -14,6 +14,7 @@ import { scaleLinear, scaleTime, scaleBand } from 'd3-scale';
 import { max, bisector } from 'd3-array';
 import {
   normalizeData,
+  parseDateSafe,
   type NormalizedDataPoint,
   type DataAccessorOptions,
 } from './normalize';
@@ -30,19 +31,40 @@ export interface ChartDimensions {
 
 export const defaultMargin = { top: 24, right: 24, bottom: 36, left: 40 };
 
-export function calculateAreaPath(
-  data: any[],
-  dimensions: ChartDimensions,
-  xAccessor?: (d: any) => number | Date | string,
-  yAccessor?: (d: any) => number
-): {
+export function calculateLinearDomain(
+  yMin: number,
+  yMax: number
+): [number, number] {
+  if (yMin === 0 && yMax === 0) {
+    return [0, 10];
+  }
+  if (yMax <= 0) {
+    const low = yMin < 0 ? yMin * 1.15 : -10;
+    return [low, 0];
+  }
+  if (yMin >= 0) {
+    return [0, yMax * 1.1];
+  }
+  return [yMin * 1.1, yMax * 1.1];
+}
+
+export interface AreaPathResult {
   areaPath: string;
   linePath: string;
   xScale: any;
   yScale: any;
   points: { x: number; y: number; data: NormalizedDataPoint }[];
   normalizedData: NormalizedDataPoint[];
-} {
+  isCategorical?: boolean;
+  categories?: { label: string; x: number }[];
+}
+
+export function calculateAreaPath(
+  data: any[],
+  dimensions: ChartDimensions,
+  xAccessor?: (d: any) => number | Date | string,
+  yAccessor?: (d: any) => number
+): AreaPathResult {
   const margin = dimensions.margin || defaultMargin;
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
   const innerHeight = Math.max(
@@ -65,6 +87,15 @@ export function calculateAreaPath(
   }
 
   const isTime = normalized[0].x instanceof Date;
+  const isCategorical =
+    !isTime &&
+    normalized.some(
+      (d) =>
+        typeof d.xOriginal === 'string' &&
+        isNaN(Number(d.xOriginal)) &&
+        !(parseDateSafe(d.xOriginal) instanceof Date)
+    );
+
   let xScale: any;
 
   if (isTime) {
@@ -78,6 +109,9 @@ export function calculateAreaPath(
       maxDate = new Date(maxDate.getTime() + 86400000);
     }
     xScale = scaleTime().domain([minDate, maxDate]).range([0, innerWidth]);
+  } else if (isCategorical) {
+    const maxIdx = Math.max(0, normalized.length - 1);
+    xScale = scaleLinear().domain([0, maxIdx]).range([0, innerWidth]);
   } else {
     const nums = normalized.map((d) => d.x as number);
     let minNum = Math.min(...nums);
@@ -91,9 +125,10 @@ export function calculateAreaPath(
   }
 
   const yMax = max(normalized, (d) => d.y) ?? 100;
-  const yMin = Math.min(0, ...normalized.map((d) => d.y));
+  const yMin = Math.min(...normalized.map((d) => d.y));
+  const [domainMin, domainMax] = calculateLinearDomain(yMin, yMax);
   const yScale = scaleLinear()
-    .domain([yMin, yMax === 0 ? 10 : yMax * 1.1])
+    .domain([domainMin, domainMax])
     .range([innerHeight, 0]);
 
   const lineGenerator = d3Line<NormalizedDataPoint>()
@@ -117,6 +152,13 @@ export function calculateAreaPath(
     data: d,
   }));
 
+  const categories = isCategorical
+    ? normalized.map((d) => ({
+        label: d.label,
+        x: xScale(d.x)!,
+      }))
+    : undefined;
+
   return {
     areaPath,
     linePath,
@@ -124,6 +166,8 @@ export function calculateAreaPath(
     yScale,
     points,
     normalizedData: normalized,
+    isCategorical,
+    categories,
   };
 }
 
@@ -253,6 +297,8 @@ export interface MultiSeriesPathResult {
     linePath: string;
     points: Array<{ x: number; y: number; data: NormalizedDataPoint }>;
   }>;
+  isCategorical?: boolean;
+  categories?: { label: string; x: number }[];
 }
 
 export function calculateMultiSeriesAreaPath(
@@ -294,6 +340,36 @@ export function calculateMultiSeriesAreaPath(
   }
 
   const isTime = allActivePoints[0]?.x instanceof Date;
+  const isCategorical =
+    !isTime &&
+    allActivePoints.some(
+      (d) =>
+        typeof d.xOriginal === 'string' &&
+        isNaN(Number(d.xOriginal)) &&
+        !(parseDateSafe(d.xOriginal) instanceof Date)
+    );
+
+  const categoryLabels: string[] = [];
+  if (isCategorical) {
+    for (const s of normalizedSeries) {
+      for (const d of s.data) {
+        if (d.label && !categoryLabels.includes(d.label)) {
+          categoryLabels.push(d.label);
+        }
+      }
+    }
+
+    // Harmonize points to category indices so multi-series points align identically on X
+    for (const s of normalizedSeries) {
+      for (const d of s.data) {
+        const catIdx = categoryLabels.indexOf(d.label);
+        if (catIdx !== -1) {
+          d.x = catIdx;
+        }
+      }
+    }
+  }
+
   let xScale: any;
 
   if (isTime) {
@@ -307,6 +383,9 @@ export function calculateMultiSeriesAreaPath(
       maxDate = new Date(maxDate.getTime() + 86400000);
     }
     xScale = scaleTime().domain([minDate, maxDate]).range([0, innerWidth]);
+  } else if (isCategorical) {
+    const maxIdx = Math.max(0, categoryLabels.length - 1);
+    xScale = scaleLinear().domain([0, maxIdx]).range([0, innerWidth]);
   } else {
     const allNums = allActivePoints.map((d) =>
       typeof d.x === 'number' ? d.x : 0
@@ -321,9 +400,10 @@ export function calculateMultiSeriesAreaPath(
   }
 
   const yMax = max(allActivePoints, (d) => d.y) ?? 100;
-  const yMin = Math.min(0, ...allActivePoints.map((d) => d.y));
+  const yMin = Math.min(...allActivePoints.map((d) => d.y));
+  const [domainMin, domainMax] = calculateLinearDomain(yMin, yMax);
   const yScale = scaleLinear()
-    .domain([yMin, yMax === 0 ? 10 : yMax * 1.1])
+    .domain([domainMin, domainMax])
     .range([innerHeight, 0]);
 
   const lineGenerator = d3Line<NormalizedDataPoint>()
@@ -369,7 +449,14 @@ export function calculateMultiSeriesAreaPath(
     };
   });
 
-  return { xScale, yScale, series: seriesResults };
+  const categories = isCategorical
+    ? categoryLabels.map((label, idx) => ({
+        label,
+        x: xScale(idx) ?? 0,
+      }))
+    : undefined;
+
+  return { xScale, yScale, series: seriesResults, isCategorical, categories };
 }
 
 export type BarLayoutMode = 'grouped' | 'stacked' | 'horizontal';

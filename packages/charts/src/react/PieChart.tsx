@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { calculatePieSegments, type DataPoint } from '../core/math';
+import { formatMetricNumber } from '../core/axis';
 import { useChartTooltip } from './useChartTooltip';
 import { useChartDimensions } from './useChartDimensions';
 import type { TooltipFormatter } from '../core/tooltip';
@@ -58,6 +59,13 @@ export function PieChart<T = DataPoint>({
     });
   }, [data, radius, donutCutout, labelAccessor, valueAccessor]);
 
+  const totalSum = useMemo(() => {
+    return segments.reduce(
+      (sum, s) => sum + (typeof s.data.y === 'number' ? s.data.y : 0),
+      0
+    );
+  }, [segments]);
+
   const centerX = size / 2;
   const centerY = size / 2;
 
@@ -89,7 +97,26 @@ export function PieChart<T = DataPoint>({
               opacity={activePoint && activePoint !== s.data ? 0.6 : 1}
               className="chart-segment transition-all duration-150 cursor-pointer hover:scale-105"
               onPointerEnter={(e) => {
-                show(s.data, e.currentTarget);
+                if (tooltipFormatter) {
+                  show(s.data, e.currentTarget);
+                } else {
+                  const val = typeof s.data.y === 'number' ? s.data.y : 0;
+                  const pct =
+                    totalSum > 0 ? ((val / totalSum) * 100).toFixed(1) : '0';
+                  const sliceColor =
+                    s.data.color ||
+                    `var(--chart-${(i % 8) + 1}, var(--color-primary))`;
+                  show(s.data, e.currentTarget, {
+                    title: s.data.label || `Segment ${i + 1}`,
+                    items: [
+                      {
+                        color: sliceColor,
+                        label: '',
+                        value: `${formatMetricNumber(val)} (${pct}%)`,
+                      },
+                    ],
+                  });
+                }
               }}
               onPointerLeave={hide}
             />

@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 import { scaleLinear } from 'd3-scale';
-import { defaultMargin, normalizeData } from '../core/math';
+import {
+  defaultMargin,
+  normalizeData,
+  calculateLinearDomain,
+} from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
 import { useChartTooltip } from './useChartTooltip';
 import { useChartDimensions } from './useChartDimensions';
@@ -71,16 +75,19 @@ export function ScatterChart<T = any>({
     });
     const xs = items.map((d) => (typeof d.x === 'number' ? d.x : 0));
     const ys = items.map((d) => d.y);
-    const minX = Math.min(0, ...xs);
-    const maxX = Math.max(10, ...xs) || 100;
-    const minY = Math.min(0, ...ys);
-    const maxY = Math.max(10, ...ys) || 100;
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    const [domainMinX, domainMaxX] = calculateLinearDomain(minX, maxX);
+    const [domainMinY, domainMaxY] = calculateLinearDomain(minY, maxY);
 
     const xScale = scaleLinear()
-      .domain([minX, maxX * 1.05])
+      .domain([domainMinX, domainMaxX])
       .range([0, innerWidth]);
     const yScale = scaleLinear()
-      .domain([minY, maxY * 1.05])
+      .domain([domainMinY, domainMaxY])
       .range([innerHeight, 0]);
 
     return { normalized: items, xScale, yScale };
@@ -184,7 +191,32 @@ export function ScatterChart<T = any>({
                   className="cursor-pointer"
                   style={{ pointerEvents: 'all' }}
                   onPointerEnter={(e) => {
-                    show(d, e.currentTarget);
+                    if (tooltipFormatter) {
+                      show(d, e.currentTarget);
+                    } else {
+                      const pointTitle =
+                        d.label ||
+                        `(${formatMetricNumber(
+                          typeof d.x === 'number' ? d.x : 0
+                        )}, ${formatMetricNumber(d.y)})`;
+                      show(d, e.currentTarget, {
+                        title: pointTitle,
+                        items: [
+                          {
+                            color: d.color || color,
+                            label: 'X',
+                            value: formatMetricNumber(
+                              typeof d.x === 'number' ? d.x : 0
+                            ),
+                          },
+                          {
+                            color: d.color || color,
+                            label: 'Y',
+                            value: formatMetricNumber(d.y),
+                          },
+                        ],
+                      });
+                    }
                   }}
                   onPointerLeave={hide}
                 />
