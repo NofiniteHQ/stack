@@ -267,7 +267,7 @@ const sampleMetadata = {
 };
 
 const meta: Meta = {
-  title: 'Markon/MarkonEditor',
+  title: 'Editor',
   parameters: {
     layout: 'padded',
   },

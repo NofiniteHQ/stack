@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 import type { StorybookConfig } from '@storybook/react-vite';
+import react from '@vitejs/plugin-react';
 import { nuicssVitePlugin } from '../packages/nuicss/dist/index.mjs';
 import { mergeConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -57,10 +58,14 @@ export default config;
 
 config.viteFinal = async (viteConfig) => {
   return mergeConfig(viteConfig, {
+    esbuild: {
+      jsx: 'automatic',
+    },
     css: {
       transformer: 'postcss',
     },
     plugins: [
+      react(),
       tsconfigPaths({
         root: resolve(__dirname, '..'),
       }),

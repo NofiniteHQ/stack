@@ -1,135 +1,118 @@
-# Implementation Plan: Centralize Storybook, Resolve Nx Collision, Clean Git Artifacts & Fix Generator
+# Implementation Plan: Fix Broken Storybook Migration and Runtime Rendering
 
-## 1. Objective
+## Objective
 
-1. **Centralize Storybook Architecture**: Hoist the monorepo Storybook configuration from `packages/nui/.storybook` to the workspace root (`.storybook`), eliminating Nx module boundary violations (`@nx/enforce-module-boundaries`), decoupling leaf package dependencies, and updating workspace scripts.
-2. **Resolve Nx Project Graph Collision**: Add an explicit `project.json` for `packages/nuicss-cli` with project name `"nuicss-cli"`, restoring full functionality to Nx commands (`nx test`, `nx build`, `nx run nui:test`).
-3. **Clean Up Git Artifacts & Stray Files**: Remove tracked temporary files (`debug-storybook.log`, `tsc-errors.txt`, `tsconfig.tsbuildinfo`, `docs/components/video.md`) and untracked tarballs (`nofinite-nui-3.0.6.tgz`) from `packages/nui`, and ensure `.gitignore` prevents future regressions.
-4. **Fix Syntax & Module Errors in `generate.js`**: Convert `packages/nui/scripts/generate.js` to clean ES Module syntax, remove invalid escaped backticks, and align output exports with `src/index.ts`.
+Restore full functionality, runtime stability, proper styling, and clean navigation hierarchy for the centralized Storybook across all packages in the monorepo (`@nofinite/nui`, `@nofinite/charts`, `@nofinite/markon`, `@nofinite/media`, `@nofinite/kanban`), strictly adhering to `@nofinite/nuicss` as the sole source of truth for all styles and design tokens.
 
 ---
 
-## 2. Current Behavior & Identified Problems
+## Current Behavior & Problem Diagnosis
 
-| Area                     | Current Behavior                                                                                                                                                                                                              | Problem                                                                                                                                                                                        |
-| :----------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Storybook Config**     | Storybook configuration resides in `packages/nui/.storybook` and reaches out to `../../charts`, `../../markon`, `../../media`, `../../kanban`.                                                                                | Inverts monorepo architecture; creates Nx module boundary lint errors; tightly couples independent packages to `nui`; confuses developers on where Storybook lives.                            |
-| **Nx Project Collision** | `packages/nuicss/project.json` is named `"nuicss"`. `packages/nuicss-cli` lacks a `project.json`, so Nx infers name `"nuicss"` from `package.json`.                                                                           | **Fatal blocker**: Any Nx command (`pnpm nx run nui:test`, `pnpm nx test`) crashes with `Failed to process project graph. The following projects are defined in multiple locations: - nuicss`. |
-| **Git Artifacts**        | `debug-storybook.log`, `tsc-errors.txt`, and `tsconfig.tsbuildinfo` are tracked in git inside `packages/nui`. `nofinite-nui-3.0.6.tgz` (650KB) sits untracked. `docs/components/video.md` references decoupled `VideoPlayer`. | Pollutes git history; pollutes npm packages; confuses AI models and developers with stale documentation and error logs.                                                                        |
-| **Component Generator**  | `packages/nui/scripts/generate.js` uses CommonJS `require()` in an ES module package and has escaped backticks (`console.error(\`Component...\`)`).                                                                           | Executing `pnpm run generate` crashes immediately with `SyntaxError: Invalid or unexpected token`.                                                                                             |
+Following the recent Storybook centralization from `packages/nui/.storybook` to the root `.storybook`, several systemic and visual regressions occurred:
 
----
-
-## 3. Proposed Solution
-
-### Step 1: Centralize Storybook Configuration to Root (`.storybook`)
-
-1. Create `.storybook/` at `d:\stack\.storybook/`:
-   - `.storybook/main.ts`:
-     - Update stories glob paths to point to `../packages/{nui,charts,markon,media,kanban}/src/**/*.stories.*`.
-     - Update Vite plugin imports and aliases relative to root (`nuicssVitePlugin`, `tsconfigPaths`).
-     - Point UnoCSS config to `resolve(__dirname, '../packages/nui/nuicss.config.ts')`.
-   - `.storybook/preview.ts`:
-     - Import `../packages/nuicss/dist/index.css`.
-     - Import `NUIProvider` from `../packages/nui/src/components/nuiprovider/NUIProvider`.
-     - Preserve theme detection decorator and story sort order (`['NUI', 'Charts', 'Markon', 'Media', 'Kanban']`).
-   - `.storybook/test-runner.ts`:
-     - Move from `packages/nui/.storybook/test-runner.ts`.
-2. Remove `packages/nui/.storybook/`.
-3. Update `d:\stack\package.json`:
-   - Change `"storybook"` script to: `"storybook dev -p 6006 -c .storybook"`.
-   - Change `"build:storybook"` script to: `"storybook build -c .storybook -o dist/storybook"`.
-4. Update `packages/nui/package.json`:
-   - Update `"test-storybook"` script to reference root config if needed: `"test-storybook -c ../../.storybook"`.
-
-### Step 2: Fix Nx Project Collision (`packages/nuicss-cli`)
-
-1. Create `packages/nuicss-cli/project.json`:
-   ```json
-   {
-     "name": "nuicss-cli",
-     "$schema": "../../node_modules/nx/schemas/project-schema.json",
-     "sourceRoot": "packages/nuicss-cli",
-     "projectType": "library",
-     "targets": {
-       "build": {
-         "executor": "nx:run-commands",
-         "options": {
-           "command": "powershell -ExecutionPolicy Bypass -File ./build.ps1",
-           "cwd": "packages/nuicss-cli"
-         }
-       },
-       "typecheck": {
-         "executor": "nx:run-commands",
-         "options": {
-           "command": "tsc --noEmit",
-           "cwd": "packages/nuicss-cli"
-         }
-       }
-     }
-   }
-   ```
-2. Verify Nx resolves the project graph without errors: `pnpm nx show projects`.
-
-### Step 3: Clean Up Git Artifacts & Stale Docs
-
-1. Remove tracked artifacts from git index and disk:
-   - `git rm packages/nui/debug-storybook.log`
-   - `git rm packages/nui/tsc-errors.txt`
-   - `git rm --cached packages/nui/tsconfig.tsbuildinfo` (remove file from disk)
-   - `git rm packages/nui/docs/components/video.md`
-2. Remove untracked tarball:
-   - Delete `packages/nui/nofinite-nui-3.0.6.tgz`.
-3. Update root `.gitignore`:
-   - Ensure `debug-*.log`, `tsc-errors.txt`, and `*.log` patterns are ignored.
-
-### Step 4: Fix Syntax & Module Architecture in `packages/nui/scripts/generate.js`
-
-1. Rewrite `packages/nui/scripts/generate.js` as an ES Module:
-   - Use `import fs from 'node:fs'`, `import path from 'node:path'`, `import readline from 'node:readline'`, `import { fileURLToPath } from 'node:url'`.
-   - Define `__dirname = path.dirname(fileURLToPath(import.meta.url))`.
-2. Fix all syntax errors:
-   - Replace escaped backticks ` \`` with valid template literals ``  ` ``.
-   - Replace escaped interpolations `\${` with `${`.
-3. Fix export targeting:
-   - Target `src/index.ts` (instead of non-existent `src/components/index.ts`) so newly generated components are correctly exported.
-4. Verify by running the script with test input or verifying syntax via Node.js compiler check.
+1. **Systemic Runtime Crash (`ReferenceError: React is not defined`):**
+   - **Root Cause:** In the previous setup, Storybook ran from `packages/nui/`, where Vite automatically loaded `packages/nui/vite.config.ts` containing `react()` (`@vitejs/plugin-react`). In the root `.storybook/main.ts`, Vite had no `@vitejs/plugin-react` plugin. Without the React plugin, Vite defaulted to raw esbuild compilation without the automatic JSX runtime (`react/jsx-runtime`), producing `React.createElement(...)` calls in bundled story files. Because modern React 18/19 components and CSF stories do not explicitly include `import React from 'react'`, this caused a fatal `ReferenceError: React is not defined` runtime exception on every single story and autodocs page that uses JSX.
+2. **Missing NUICSS Utility Classes in Decoupled Packages (`packages/nui/nuicss.config.ts` Path Mismatch):**
+   - **Root Cause:** In `packages/nui/nuicss.config.ts`, lines 10–14 configured UnoCSS `content.filesystem` with:
+     ```ts
+     '../../markon/src/**/*.{js,ts,jsx,tsx}',
+     '../../media/src/**/*.{js,ts,jsx,tsx}',
+     '../../charts/src/**/*.{js,ts,jsx,tsx}',
+     '../../kanban/src/**/*.{js,ts,jsx,tsx}',
+     ```
+     Because `nuicss.config.ts` resides in `packages/nui/`, resolving `../../markon` points to `d:\stack\..\markon` (outside the monorepo). As a result, UnoCSS silently failed to scan any source code from `markon`, `media`, `charts`, or `kanban`. The NUICSS classes and design tokens consumed by those components were never generated in `uno.css`, leaving the components unstyled or broken in Storybook.
+     Additionally, line 3 imported `../../nuicss/src/plugin/preset`, which also resolves outside the workspace.
+3. **Redundant & Clashing Storybook Navigation Hierarchy:**
+   - **Root Cause:** `.storybook/main.ts` sets `titlePrefix` for each package (`NUI`, `Charts`, `Markon`, `Media`, `Kanban`). However, individual story files had titles that repeated or collided with the prefix:
+     - `MarkonEditor.stories.tsx`: `title: 'Markon/MarkonEditor'` -> rendered as `Markon > Markon > MarkonEditor`
+     - `MediaPlayer.stories.tsx`: `title: 'Media/Player'` -> rendered as `Media > Media > Player`
+     - `Kanban.stories.tsx`: `title: 'Kanban'` -> rendered as `Kanban > Kanban`
+     - `Chart.stories.tsx`: `title: 'Data Visualization/Chart'` -> rendered as `Charts > Data Visualization > Chart`
 
 ---
 
-## 4. Affected Files & Modules
+## Proposed Solution
 
-| File / Directory                        | Change Description                                                                      |
-| :-------------------------------------- | :-------------------------------------------------------------------------------------- |
-| `packages/nuicss-cli/project.json`      | **CREATE**: Define explicit unique Nx project name `"nuicss-cli"`.                      |
-| `.storybook/main.ts`                    | **CREATE**: Centralized Storybook configuration pointing to all package sources.        |
-| `.storybook/preview.ts`                 | **CREATE**: Centralized Storybook preview decorator and styling setup.                  |
-| `.storybook/test-runner.ts`             | **CREATE**: Centralized Storybook test runner hooks.                                    |
-| `packages/nui/.storybook/`              | **DELETE**: Remove old package-scoped configuration directory.                          |
-| `package.json` (root)                   | **UPDATE**: Point `storybook` and `build:storybook` scripts to `-c .storybook`.         |
-| `packages/nui/package.json`             | **UPDATE**: Point `test-storybook` to root `.storybook`.                                |
-| `packages/nui/scripts/generate.js`      | **UPDATE**: Convert to ESM, fix syntax errors and backtick escaping, fix export target. |
-| `packages/nui/debug-storybook.log`      | **DELETE (git rm)**: Remove tracked debug log.                                          |
-| `packages/nui/tsc-errors.txt`           | **DELETE (git rm)**: Remove tracked error dump.                                         |
-| `packages/nui/tsconfig.tsbuildinfo`     | **DELETE (git rm)**: Remove tracked tsbuildinfo cache.                                  |
-| `packages/nui/nofinite-nui-3.0.6.tgz`   | **DELETE**: Remove untracked npm tarball.                                               |
-| `packages/nui/docs/components/video.md` | **DELETE (git rm)**: Remove stale video documentation.                                  |
-| `.gitignore`                            | **UPDATE**: Add explicit rules for debug logs and error text dumps.                     |
+### 1. Enable React JSX Transform in `.storybook/main.ts`
+
+- Import `@vitejs/plugin-react` and include `react()` in `viteConfig.plugins` inside `viteFinal`.
+- Set `esbuild: { jsx: 'automatic' }` as defensive redundancy so all JSX transpiles to `react/jsx-runtime`.
+
+### 2. Fix UnoCSS Content Scanning in `packages/nui/nuicss.config.ts`
+
+- Change `../../nuicss/src/plugin/preset` to `../nuicss/dist/index.mjs` (or `../nuicss/src/plugin/preset`).
+- Correct the relative globs for all sibling packages:
+  - `'../markon/src/**/*.{js,ts,jsx,tsx}'`
+  - `'../media/src/**/*.{js,ts,jsx,tsx}'`
+  - `'../charts/src/**/*.{js,ts,jsx,tsx}'`
+  - `'../kanban/src/**/*.{js,ts,jsx,tsx}'`
+- Ensure UnoCSS scans every package and generates all NUICSS superclasses and utility tokens into `uno.css`.
+
+### 3. Ensure Design Token & Base CSS Parity in `.storybook/preview.ts`
+
+- Retain `@nofinite/nuicss` as the single source of truth for styles.
+- In `.storybook/preview.ts`, ensure `uno.css` and `../packages/nuicss/dist/index.css` (or `../packages/nuicss/dist/styles.css`) are loaded so all design tokens and precompiled styles are available to every story.
+
+### 4. Normalize Story Titles Across Decoupled Packages
+
+- Update story metadata titles to work harmoniously with `titlePrefix`:
+  - `packages/charts/src/react/Chart.stories.tsx`: `title: 'Chart'` (renders cleanly as `Charts/Chart`)
+  - `packages/markon/src/react/MarkonEditor.stories.tsx`: `title: 'Editor'` (renders cleanly as `Markon/Editor`)
+  - `packages/media/src/react/MediaPlayer.stories.tsx`: `title: 'Player'` (renders cleanly as `Media/Player`)
+  - `packages/kanban/src/react/Kanban.stories.tsx`: `title: 'Board'` (renders cleanly as `Kanban/Board`)
 
 ---
 
-## 5. Verification Strategy
+## Affected Files & Modules
 
-1. **Nx Project Graph Check**: Run `pnpm nx show projects` and ensure all 8 packages (`charts`, `kanban`, `locale`, `markon`, `media`, `nui`, `nuicss`, `nuicss-cli`) are recognized without collisions.
-2. **Nx Test Execution**: Run `pnpm nx run nui:test` to confirm the target executor runs successfully.
-3. **Storybook Validation**: Test Storybook configuration parsing (`pnpm exec storybook --version` or dry run build check).
-4. **Generator Script Test**: Run `node packages/nui/scripts/generate.js` to ensure zero syntax or ESM loading errors.
-5. **Git Status & Artifact Check**: Confirm `git status` shows clean tracking, artifacts removed, and no untracked garbage.
+- `.storybook/main.ts` (Vite plugins: `@vitejs/plugin-react`, esbuild JSX options)
+- `packages/nui/nuicss.config.ts` (Path fixes for filesystem globs and nuicss preset)
+- `.storybook/preview.ts` (Clean token/styles loading)
+- `packages/charts/src/react/Chart.stories.tsx` (Title normalization)
+- `packages/markon/src/react/MarkonEditor.stories.tsx` (Title normalization)
+- `packages/media/src/react/MediaPlayer.stories.tsx` (Title normalization)
+- `packages/kanban/src/react/Kanban.stories.tsx` (Title normalization)
 
 ---
 
-## 6. Risks & Rollback
+## Dependencies & Tools
 
-- **Risk**: Storybook resolution of `@nofinite/nuicss` styles if `dist` is not compiled.  
-  _Mitigation_: Point preview imports directly or ensure build order is preserved.
-- **Rollback**: Local git commit will be created immediately upon completion, allowing instant revert if needed.
+- `@vitejs/plugin-react` (already present in repository `node_modules`)
+- `@nofinite/nuicss` (sole styling and token engine)
+- `@playwright/test` / Playwright runner in `temp/` for automated visual and runtime error verification
+- `storybook build` / `storybook dev`
+
+---
+
+## Alternatives Considered
+
+- **Keep `titlePrefix` off and manually namespace stories:** Having `titlePrefix` in `.storybook/main.ts` is cleaner because each package directory maintains its own namespace automatically without hardcoding monorepo top-level folders inside individual packages.
+
+---
+
+## Risks & Mitigations
+
+- **Build Performance:** `@vitejs/plugin-react` adds standard React Fast Refresh and Babel JSX transform, which has minimal overhead during Vite builds.
+- **Token Availability:** Using `@nofinite/nuicss` ensures 100% token consistency across all components without any ad-hoc CSS overrides.
+
+---
+
+## Security Considerations
+
+None. These changes affect development build configurations and story files only.
+
+---
+
+## Verification Strategy
+
+1. **Build Validation:** Run `pnpm run build:storybook` to ensure zero compilation or asset errors.
+2. **Automated Runtime Verification:** Run `node temp/audit_storybook.js` via Playwright to verify that:
+   - Zero console errors or `ReferenceError: React is not defined` occur across all 450+ stories and docs.
+   - All story pages render `#storybook-root` and docs blocks without error boundaries.
+3. **Visual Verification:** Check rendered output of Markon, Media, Charts, Kanban, and NUI Button/Modal in Playwright to verify full NUICSS styling and layout harmony.
+
+---
+
+## Rollback Considerations
+
+If issues occur, changes are isolated to `.storybook/`, `nuicss.config.ts`, and story metadata titles, which can be cleanly reverted via Git.

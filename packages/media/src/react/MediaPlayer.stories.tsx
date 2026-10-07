@@ -5,7 +5,7 @@ import { VideoPlayer, AudioPlayer } from './index';
 import { createMediaPlayer } from '../core';
 
 const meta: Meta = {
-  title: 'Media/Player',
+  title: 'Player',
   parameters: {
     layout: 'centered',
   },
