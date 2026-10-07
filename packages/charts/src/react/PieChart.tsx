@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { calculatePieSegments, type DataPoint } from '../core/math';
 import { formatMetricNumber } from '../core/axis';
+import { generateA11yTableHtml } from '../core/a11y';
 import { useChartTooltip } from './useChartTooltip';
 import { useChartDimensions } from './useChartDimensions';
 import type { TooltipFormatter } from '../core/tooltip';
@@ -12,6 +13,7 @@ export interface PieChartProps<T = DataPoint> {
   height?: number;
   donutCutout?: number;
   className?: string;
+  ariaLabel?: string;
   showTooltip?: boolean;
   tooltipFormatter?: TooltipFormatter;
   labelAccessor?: (d: T) => string;
@@ -24,6 +26,7 @@ export function PieChart<T = DataPoint>({
   height: propHeight = 300,
   donutCutout = 0,
   className,
+  ariaLabel,
   showTooltip = true,
   tooltipFormatter,
   labelAccessor,
@@ -50,6 +53,8 @@ export function PieChart<T = DataPoint>({
   });
 
   const size = Math.min(width, height);
+  const centerX = size / 2;
+  const centerY = size / 2;
   const radius = Math.max(10, size / 2 - 16);
 
   const segments = useMemo(() => {
@@ -66,14 +71,78 @@ export function PieChart<T = DataPoint>({
     );
   }, [segments]);
 
-  const centerX = size / 2;
-  const centerY = size / 2;
+  const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
+
+  const activateSegmentByIndex = (index: number) => {
+    if (!segments || segments.length === 0) return;
+    const s = segments[index];
+    if (!s) return;
+
+    const val = typeof s.data.y === 'number' ? s.data.y : 0;
+    const pct = totalSum > 0 ? ((val / totalSum) * 100).toFixed(1) : '0';
+    const sliceColor =
+      s.data.color || `var(--chart-${(index % 8) + 1}, var(--color-primary))`;
+
+    const virtualRef = {
+      getBoundingClientRect: () => {
+        const cRect = containerRef.current?.getBoundingClientRect();
+        if (!cRect) return new DOMRect(0, 0, 0, 0);
+        const scale = Math.min(cRect.width, cRect.height) / size;
+        const px = cRect.left + (centerX + s.centroid[0]) * scale;
+        const py = cRect.top + (centerY + s.centroid[1]) * scale;
+        return new DOMRect(px, py, 0, 0);
+      },
+    };
+
+    if (tooltipFormatter) {
+      show(s.data, virtualRef);
+    } else {
+      show(s.data, virtualRef, {
+        title: s.data.label || `Segment ${index + 1}`,
+        items: [
+          {
+            color: sliceColor,
+            label: '',
+            value: `${formatMetricNumber(val)} (${pct}%)`,
+          },
+        ],
+      });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (segments.length === 0) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIdx =
+        keyboardIndex === null
+          ? 0
+          : Math.min(segments.length - 1, keyboardIndex + 1);
+      setKeyboardIndex(nextIdx);
+      activateSegmentByIndex(nextIdx);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIdx =
+        keyboardIndex === null
+          ? segments.length - 1
+          : Math.max(0, keyboardIndex - 1);
+      setKeyboardIndex(prevIdx);
+      activateSegmentByIndex(prevIdx);
+    } else if (e.key === 'Escape') {
+      setKeyboardIndex(null);
+      hide();
+    }
+  };
 
   return (
     <div
       ref={containerRef}
+      role="region"
+      aria-label={ariaLabel || (donutCutout > 0 ? 'Donut chart' : 'Pie chart')}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       className={clsx(
-        'chart-container chart-container-circular nui-chart-container relative flex items-center justify-center select-none font-sans',
+        'chart-container chart-container-circular nui-chart-container relative flex items-center justify-center select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
         className
       )}
       style={{ width: '100%', height }}
@@ -97,6 +166,7 @@ export function PieChart<T = DataPoint>({
               opacity={activePoint && activePoint !== s.data ? 0.6 : 1}
               className="chart-segment transition-all duration-150 cursor-pointer hover:scale-105"
               onPointerEnter={(e) => {
+                setKeyboardIndex(i);
                 if (tooltipFormatter) {
                   show(s.data, e.currentTarget);
                 } else {
@@ -118,11 +188,30 @@ export function PieChart<T = DataPoint>({
                   });
                 }
               }}
-              onPointerLeave={hide}
+              onPointerLeave={() => {
+                setKeyboardIndex(null);
+                hide();
+              }}
             />
           ))}
         </g>
       </svg>
+
+      <div
+        className="sr-only chart-a11y-container"
+        dangerouslySetInnerHTML={{
+          __html: generateA11yTableHtml(
+            [{ name: 'Distribution', data: data as any }],
+            {
+              title:
+                ariaLabel ||
+                (donutCutout > 0
+                  ? 'Donut chart data table'
+                  : 'Pie chart data table'),
+            }
+          ),
+        }}
+      />
 
       {showTooltip && (
         <div

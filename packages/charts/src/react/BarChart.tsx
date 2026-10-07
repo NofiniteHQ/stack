@@ -8,6 +8,7 @@ import {
   type ReferenceLine,
 } from '../core/math';
 import { formatMetricNumber } from '../core/axis';
+import { generateA11yTableHtml } from '../core/a11y';
 import { useChartTooltip } from './useChartTooltip';
 import { useChartDimensions } from './useChartDimensions';
 import { ChartLegend } from './ChartLegend';
@@ -27,6 +28,7 @@ export interface BarChartProps<T = DataPoint> {
   margin?: { top: number; right: number; bottom: number; left: number };
   color?: string;
   className?: string;
+  ariaLabel?: string;
   showGrid?: boolean;
   showAxes?: boolean;
   showTooltip?: boolean;
@@ -49,6 +51,7 @@ export function BarChart<T = DataPoint>({
   margin: propMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
+  ariaLabel,
   showGrid = true,
   showAxes = true,
   showTooltip = true,
@@ -60,6 +63,7 @@ export function BarChart<T = DataPoint>({
   const [internalHidden, setInternalHidden] = useState<Record<string, boolean>>(
     {}
   );
+  const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
 
   const seriesList: ChartSeries<T>[] = useMemo(() => {
     if (propSeries && propSeries.length > 0) {
@@ -121,6 +125,75 @@ export function BarChart<T = DataPoint>({
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
   const isHorizontal = barLayout === 'horizontal';
 
+  const effectiveYTickFormat =
+    yTickFormat ||
+    (!isHorizontal && barLayout === 'percent'
+      ? (val: number) => `${val}%`
+      : undefined);
+
+  const effectiveXTickFormat = xTickFormat;
+
+  const activateBarByIndex = (index: number) => {
+    if (!bars || bars.length === 0) return;
+    const b = bars[index];
+    if (!b) return;
+
+    const isMulti = seriesList.length > 1;
+    const virtualRef = {
+      getBoundingClientRect: () => {
+        const cRect = containerRef.current?.getBoundingClientRect();
+        if (!cRect) return new DOMRect(0, 0, 0, 0);
+        const scaleX = cRect.width / width;
+        const scaleY = cRect.height / height;
+        const px = cRect.left + (margin.left + b.x + b.width / 2) * scaleX;
+        const py = cRect.top + (margin.top + b.y + b.height / 2) * scaleY;
+        return new DOMRect(px, py, 0, 0);
+      },
+    };
+
+    if (tooltipFormatter) {
+      show(b.data, virtualRef);
+    } else {
+      show(b.data, virtualRef, {
+        title: b.data.label,
+        items: [
+          {
+            color: b.color,
+            label: isMulti ? b.seriesName : '',
+            value:
+              barLayout === 'percent'
+                ? `${formatMetricNumber(b.data.y)}%`
+                : formatMetricNumber(b.data.y),
+          },
+        ],
+      });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (bars.length === 0) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIdx =
+        keyboardIndex === null
+          ? 0
+          : Math.min(bars.length - 1, keyboardIndex + 1);
+      setKeyboardIndex(nextIdx);
+      activateBarByIndex(nextIdx);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIdx =
+        keyboardIndex === null
+          ? bars.length - 1
+          : Math.max(0, keyboardIndex - 1);
+      setKeyboardIndex(prevIdx);
+      activateBarByIndex(prevIdx);
+    } else if (e.key === 'Escape') {
+      setKeyboardIndex(null);
+      hide();
+    }
+  };
+
   const handleToggle = (seriesName: string) => {
     if (onToggleSeries) {
       onToggleSeries(seriesName);
@@ -135,8 +208,12 @@ export function BarChart<T = DataPoint>({
   return (
     <div
       ref={containerRef}
+      role="region"
+      aria-label={ariaLabel || 'Bar chart data visualization'}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       className={clsx(
-        'chart-container nui-chart-container relative w-full select-none font-sans',
+        'chart-container nui-chart-container relative w-full select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
         className
       )}
       style={{ height }}
@@ -203,7 +280,9 @@ export function BarChart<T = DataPoint>({
                 fill="var(--fg-muted, currentColor)"
                 opacity={0.75}
               >
-                {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
+                {effectiveYTickFormat
+                  ? effectiveYTickFormat(t)
+                  : formatMetricNumber(t)}
               </text>
             ))}
 
@@ -220,7 +299,9 @@ export function BarChart<T = DataPoint>({
                 fill="var(--fg-muted, currentColor)"
                 opacity={0.75}
               >
-                {xTickFormat ? xTickFormat(t) : formatMetricNumber(t)}
+                {effectiveXTickFormat
+                  ? effectiveXTickFormat(t)
+                  : formatMetricNumber(t)}
               </text>
             ))}
 
@@ -344,6 +425,15 @@ export function BarChart<T = DataPoint>({
           onToggle={handleToggle}
         />
       )}
+
+      <div
+        className="sr-only chart-a11y-container"
+        dangerouslySetInnerHTML={{
+          __html: generateA11yTableHtml(seriesList as any, {
+            title: ariaLabel || 'Bar chart data table',
+          }),
+        }}
+      />
 
       {showTooltip && (
         <div

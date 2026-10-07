@@ -143,7 +143,8 @@ export class Chart {
           seriesList,
           { width, height, margin },
           this.options.xAccessor,
-          this.options.yAccessor
+          this.options.yAccessor,
+          this.options.areaMode || 'overlapping'
         );
 
         const activeSeries = series.filter((s) => !s.hidden);

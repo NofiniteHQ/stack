@@ -6,6 +6,7 @@ import {
   type MultiScatterPoint,
 } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
+import { generateA11yTableHtml } from '../core/a11y';
 import { useChartTooltip } from './useChartTooltip';
 import { useChartDimensions } from './useChartDimensions';
 import { ChartLegend } from './ChartLegend';
@@ -22,6 +23,7 @@ export interface ScatterChartProps<T = any> {
   margin?: { top: number; right: number; bottom: number; left: number };
   color?: string;
   className?: string;
+  ariaLabel?: string;
   showGrid?: boolean;
   showAxes?: boolean;
   showTooltip?: boolean;
@@ -45,6 +47,7 @@ export function ScatterChart<T = any>({
   margin = defaultMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
+  ariaLabel,
   showGrid = true,
   showAxes = true,
   showTooltip = true,
@@ -63,6 +66,7 @@ export function ScatterChart<T = any>({
   const [focusedPoint, setFocusedPoint] = useState<MultiScatterPoint | null>(
     null
   );
+  const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
 
   const seriesList: ChartSeries<T>[] = useMemo(() => {
     if (propSeries && propSeries.length > 0) {
@@ -117,6 +121,58 @@ export function ScatterChart<T = any>({
     );
   }, [seriesList, width, height, margin, xAccessor, yAccessor]);
 
+  const activatePoint = (pt: MultiScatterPoint) => {
+    setFocusedPoint(pt);
+    const d = pt.data;
+    const hasExplicitLabel = Boolean(
+      (d.raw && (d.raw.label || d.raw.name || d.raw.title)) ||
+        (d.label &&
+          d.label !== String(d.x) &&
+          d.label !== formatMetricNumber(typeof d.x === 'number' ? d.x : 0))
+    );
+    const baseTitle = hasExplicitLabel
+      ? d.label
+      : `(${formatMetricNumber(
+          typeof d.x === 'number' ? d.x : 0
+        )}, ${formatMetricNumber(d.y)})`;
+    const title =
+      isMulti && pt.seriesName !== 'Series 1'
+        ? `${pt.seriesName}: ${baseTitle}`
+        : baseTitle;
+
+    const virtualRef = {
+      getBoundingClientRect: () => {
+        const cRect = containerRef.current?.getBoundingClientRect();
+        if (!cRect) return new DOMRect(0, 0, 0, 0);
+        const scaleX = cRect.width / width;
+        const scaleY = cRect.height / height;
+        const px = cRect.left + (margin.left + pt.x) * scaleX;
+        const py = cRect.top + (margin.top + pt.y) * scaleY;
+        return new DOMRect(px, py, 0, 0);
+      },
+    };
+
+    if (tooltipFormatter) {
+      show(d, virtualRef);
+    } else {
+      show(d, virtualRef, {
+        title,
+        items: [
+          {
+            color: pt.color,
+            label: xLabel || 'X',
+            value: formatMetricNumber(typeof d.x === 'number' ? d.x : 0),
+          },
+          {
+            color: 'transparent',
+            label: yLabel || 'Y',
+            value: formatMetricNumber(d.y),
+          },
+        ],
+      });
+    }
+  };
+
   const handlePointerMove = (e: React.PointerEvent<SVGRectElement>) => {
     if (points.length === 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -138,56 +194,36 @@ export function ScatterChart<T = any>({
 
     // 2D Proximity Snap threshold (45px radius)
     if (closest && minDistance <= 45) {
-      setFocusedPoint(closest);
-      const d = closest.data;
-      const hasExplicitLabel = Boolean(
-        (d.raw && (d.raw.label || d.raw.name || d.raw.title)) ||
-          (d.label &&
-            d.label !== String(d.x) &&
-            d.label !== formatMetricNumber(typeof d.x === 'number' ? d.x : 0))
-      );
-      const baseTitle = hasExplicitLabel
-        ? d.label
-        : `(${formatMetricNumber(
-            typeof d.x === 'number' ? d.x : 0
-          )}, ${formatMetricNumber(d.y)})`;
-      const title =
-        isMulti && closest.seriesName !== 'Series 1'
-          ? `${closest.seriesName}: ${baseTitle}`
-          : baseTitle;
-
-      const virtualRef = {
-        getBoundingClientRect: () => {
-          const cRect = containerRef.current?.getBoundingClientRect() || rect;
-          const scaleX = cRect.width / width;
-          const scaleY = cRect.height / height;
-          const px = cRect.left + (margin.left + closest.x) * scaleX;
-          const py = cRect.top + (margin.top + closest.y) * scaleY;
-          return new DOMRect(px, py, 0, 0);
-        },
-      };
-
-      if (tooltipFormatter) {
-        show(d, virtualRef);
-      } else {
-        show(d, virtualRef, {
-          title,
-          items: [
-            {
-              color: closest.color,
-              label: xLabel || 'X',
-              value: formatMetricNumber(typeof d.x === 'number' ? d.x : 0),
-            },
-            {
-              color: 'transparent',
-              label: yLabel || 'Y',
-              value: formatMetricNumber(d.y),
-            },
-          ],
-        });
-      }
+      const idx = points.indexOf(closest);
+      if (idx !== -1) setKeyboardIndex(idx);
+      activatePoint(closest);
     } else {
       setFocusedPoint(null);
+      hide();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (points.length === 0) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIdx =
+        keyboardIndex === null
+          ? 0
+          : Math.min(points.length - 1, keyboardIndex + 1);
+      setKeyboardIndex(nextIdx);
+      activatePoint(points[nextIdx]);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIdx =
+        keyboardIndex === null
+          ? points.length - 1
+          : Math.max(0, keyboardIndex - 1);
+      setKeyboardIndex(prevIdx);
+      activatePoint(points[prevIdx]);
+    } else if (e.key === 'Escape') {
+      setFocusedPoint(null);
+      setKeyboardIndex(null);
       hide();
     }
   };
@@ -211,8 +247,12 @@ export function ScatterChart<T = any>({
   return (
     <div
       ref={containerRef}
+      role="region"
+      aria-label={ariaLabel || 'Scatter plot data visualization'}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       className={clsx(
-        'chart-container nui-chart-container relative w-full select-none font-sans',
+        'chart-container nui-chart-container relative w-full select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
         className
       )}
       style={{ height }}
@@ -356,6 +396,15 @@ export function ScatterChart<T = any>({
           onToggle={handleToggle}
         />
       )}
+
+      <div
+        className="sr-only chart-a11y-container"
+        dangerouslySetInnerHTML={{
+          __html: generateA11yTableHtml(seriesList as any, {
+            title: ariaLabel || 'Scatter plot data table',
+          }),
+        }}
+      />
 
       {showTooltip && (
         <div

@@ -9,6 +9,7 @@ import {
   type ChartSeries,
   type BarLayoutMode,
   type ReferenceLine,
+  type AreaMode,
 } from './math';
 import { generateAxisSvg } from './axis';
 import { renderLegendHtml } from './legend';
@@ -28,6 +29,7 @@ export interface ChartOptions {
   data?: DataPoint[];
   series?: ChartSeries[];
   barLayout?: BarLayoutMode;
+  areaMode?: AreaMode;
   referenceLines?: ReferenceLine[];
   showLegend?: boolean;
   width?: number;
@@ -121,8 +123,15 @@ export function renderChart(options: ChartOptions): string {
           seriesList,
           { width, height, margin },
           options.xAccessor,
-          options.yAccessor
+          options.yAccessor,
+          options.areaMode || 'overlapping'
         );
+
+      const effectiveYTickFormat =
+        options.yTickFormat ||
+        (options.areaMode === 'percent'
+          ? (val: number) => `${val}%`
+          : undefined);
 
       const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
         width,
@@ -133,7 +142,7 @@ export function renderChart(options: ChartOptions): string {
         showAxes,
         showGrid,
         xTickFormat: options.xTickFormat,
-        yTickFormat: options.yTickFormat,
+        yTickFormat: effectiveYTickFormat,
         categories: isCategorical ? categories : undefined,
       });
 
@@ -282,6 +291,10 @@ export function renderChart(options: ChartOptions): string {
     const activeMargin = layoutMargin || margin;
     const isHorizontal = layout === 'horizontal';
 
+    const effectiveBarYTickFormat =
+      options.yTickFormat ||
+      (layout === 'percent' ? (val: number) => `${val}%` : undefined);
+
     const { gridSvg, yAxisSvg, xAxisSvg } = generateAxisSvg({
       width,
       height,
@@ -292,7 +305,7 @@ export function renderChart(options: ChartOptions): string {
       showGrid,
       isHorizontal,
       xTickFormat: options.xTickFormat,
-      yTickFormat: options.yTickFormat,
+      yTickFormat: effectiveBarYTickFormat,
       categories,
     });
 

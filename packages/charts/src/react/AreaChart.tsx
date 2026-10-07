@@ -6,8 +6,10 @@ import {
   defaultMargin,
   type ChartSeries,
   type ReferenceLine,
+  type AreaMode,
 } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
+import { generateA11yTableHtml } from '../core/a11y';
 import { useChartTooltip } from './useChartTooltip';
 import { useChartDimensions } from './useChartDimensions';
 import { ChartLegend } from './ChartLegend';
@@ -17,6 +19,7 @@ import clsx from 'clsx';
 export interface AreaChartProps<T = DataPoint> {
   data?: T[];
   series?: ChartSeries<T>[];
+  areaMode?: AreaMode;
   referenceLines?: ReferenceLine[];
   showLegend?: boolean;
   xAccessor?: (d: T) => number | Date | string;
@@ -26,6 +29,7 @@ export interface AreaChartProps<T = DataPoint> {
   margin?: { top: number; right: number; bottom: number; left: number };
   color?: string;
   className?: string;
+  ariaLabel?: string;
   showGrid?: boolean;
   showAxes?: boolean;
   showTooltip?: boolean;
@@ -39,6 +43,7 @@ export interface AreaChartProps<T = DataPoint> {
 export function AreaChart<T = DataPoint>({
   data,
   series: propSeries,
+  areaMode = 'overlapping',
   referenceLines,
   showLegend,
   xAccessor,
@@ -48,6 +53,7 @@ export function AreaChart<T = DataPoint>({
   margin = defaultMargin,
   color = 'var(--chart-1, var(--color-primary))',
   className,
+  ariaLabel,
   showGrid = true,
   showAxes = true,
   showTooltip = true,
@@ -110,9 +116,19 @@ export function AreaChart<T = DataPoint>({
       seriesList,
       { width, height, margin },
       xAccessor as any,
-      yAccessor as any
+      yAccessor as any,
+      areaMode
     );
-  }, [isMulti, seriesList, width, height, margin, xAccessor, yAccessor]);
+  }, [
+    isMulti,
+    seriesList,
+    width,
+    height,
+    margin,
+    xAccessor,
+    yAccessor,
+    areaMode,
+  ]);
 
   const singleResult = useMemo(() => {
     if (isMulti) return null;
@@ -130,124 +146,134 @@ export function AreaChart<T = DataPoint>({
   const innerWidth = Math.max(0, width - margin.left - margin.right);
   const innerHeight = Math.max(0, height - margin.top - margin.bottom);
 
+  const effectiveYTickFormat =
+    yTickFormat ||
+    (areaMode === 'percent' ? (val: number) => `${val}%` : undefined);
+
   const [activeXPos, setActiveXPos] = useState<number | null>(null);
+  const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
+
+  const activePointsList = useMemo(() => {
+    if (isMulti && multiResult) {
+      const activeSeries = multiResult.series.filter((s) => !s.hidden);
+      return activeSeries[0]?.points || [];
+    }
+    return singleResult?.points || [];
+  }, [isMulti, multiResult, singleResult]);
+
+  const activatePointByIndex = (index: number) => {
+    if (!activePointsList || activePointsList.length === 0) return;
+    const pt = activePointsList[index];
+    if (!pt) return;
+
+    setActiveXPos(pt.x);
+    const virtualRef = {
+      getBoundingClientRect: () => {
+        const cRect = containerRef.current?.getBoundingClientRect();
+        if (!cRect) return new DOMRect(0, 0, 0, 0);
+        const scaleX = cRect.width / width;
+        const scaleY = cRect.height / height;
+        const px = cRect.left + (margin.left + pt.x) * scaleX;
+        const py = cRect.top + (margin.top + pt.y) * scaleY;
+        return new DOMRect(px, py, 0, 0);
+      },
+    };
+
+    if (tooltipFormatter) {
+      show(pt.data, virtualRef);
+    } else if (isMulti && multiResult) {
+      const activeSeries = multiResult.series.filter((s) => !s.hidden);
+      const multiPayload: TooltipPayload = {
+        title:
+          pt.data.label ||
+          (pt.data.x instanceof Date
+            ? pt.data.x.toLocaleDateString()
+            : String(pt.data.x)),
+        items: activeSeries.map((s) => {
+          let sClosest = s.points[0];
+          let sMin = Infinity;
+          for (const sp of s.points) {
+            const d = Math.abs(sp.x - pt.x);
+            if (d < sMin) {
+              sMin = d;
+              sClosest = sp;
+            }
+          }
+          return {
+            color: s.color,
+            label: s.name,
+            value:
+              typeof sClosest.data.y === 'number'
+                ? formatMetricNumber(sClosest.data.y)
+                : String(sClosest.data.y),
+          };
+        }),
+      };
+      show(pt.data, virtualRef, multiPayload);
+    } else {
+      const seriesName =
+        seriesList[0]?.name && seriesList[0].name !== 'Series 1'
+          ? seriesList[0].name
+          : '';
+      show(pt.data, virtualRef, {
+        title:
+          pt.data.label ||
+          (pt.data.x instanceof Date
+            ? pt.data.x.toLocaleDateString()
+            : String(pt.data.x)),
+        items: [
+          {
+            color,
+            label: seriesName,
+            value: formatMetricNumber(pt.data.y),
+          },
+        ],
+      });
+    }
+  };
 
   const handlePointerMove = (e: React.PointerEvent<SVGRectElement>) => {
     if (!showTooltip && !showCrosshair) return;
+    if (activePointsList.length === 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const localX = (e.clientX - rect.left) * (innerWidth / rect.width);
 
-    if (isMulti && multiResult) {
-      const activeSeries = multiResult.series.filter((s) => !s.hidden);
-      if (activeSeries.length === 0) return;
-
-      const primary = activeSeries[0].points;
-      if (primary.length === 0) return;
-
-      let closest = primary[0];
-      let minDistance = Infinity;
-      for (const p of primary) {
-        const dist = Math.abs(p.x - localX);
-        if (dist < minDistance) {
-          minDistance = dist;
-          closest = p;
-        }
+    let closestIdx = 0;
+    let minDistance = Infinity;
+    for (let i = 0; i < activePointsList.length; i++) {
+      const dist = Math.abs(activePointsList[i].x - localX);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestIdx = i;
       }
+    }
 
-      if (closest) {
-        setActiveXPos(closest.x);
-        const virtualRef = {
-          getBoundingClientRect: () => {
-            const cRect = containerRef.current?.getBoundingClientRect() || rect;
-            const scaleX = cRect.width / width;
-            const scaleY = cRect.height / height;
-            const px = cRect.left + (margin.left + closest.x) * scaleX;
-            const py = cRect.top + (margin.top + closest.y) * scaleY;
-            return new DOMRect(px, py, 0, 0);
-          },
-        };
+    setKeyboardIndex(closestIdx);
+    activatePointByIndex(closestIdx);
+  };
 
-        if (tooltipFormatter) {
-          show(closest.data, virtualRef);
-        } else {
-          const multiPayload: TooltipPayload = {
-            title:
-              closest.data.label ||
-              (closest.data.x instanceof Date
-                ? closest.data.x.toLocaleDateString()
-                : String(closest.data.x)),
-            items: activeSeries.map((s) => {
-              let sClosest = s.points[0];
-              let sMin = Infinity;
-              for (const pt of s.points) {
-                const d = Math.abs(pt.x - localX);
-                if (d < sMin) {
-                  sMin = d;
-                  sClosest = pt;
-                }
-              }
-              return {
-                color: s.color,
-                label: s.name,
-                value:
-                  typeof sClosest.data.y === 'number'
-                    ? formatMetricNumber(sClosest.data.y)
-                    : String(sClosest.data.y),
-              };
-            }),
-          };
-          show(closest.data, virtualRef, multiPayload);
-        }
-      }
-    } else if (singleResult) {
-      const { points } = singleResult;
-      if (!points || points.length === 0) return;
-
-      let closest = points[0];
-      let minDistance = Infinity;
-      for (const p of points) {
-        const dist = Math.abs(p.x - localX);
-        if (dist < minDistance) {
-          minDistance = dist;
-          closest = p;
-        }
-      }
-
-      if (closest) {
-        setActiveXPos(closest.x);
-        const virtualRef = {
-          getBoundingClientRect: () => {
-            const cRect = containerRef.current?.getBoundingClientRect() || rect;
-            const scaleX = cRect.width / width;
-            const scaleY = cRect.height / height;
-            const px = cRect.left + (margin.left + closest.x) * scaleX;
-            const py = cRect.top + (margin.top + closest.y) * scaleY;
-            return new DOMRect(px, py, 0, 0);
-          },
-        };
-        if (tooltipFormatter) {
-          show(closest.data, virtualRef);
-        } else {
-          const seriesName =
-            seriesList[0]?.name && seriesList[0].name !== 'Series 1'
-              ? seriesList[0].name
-              : '';
-          show(closest.data, virtualRef, {
-            title:
-              closest.data.label ||
-              (closest.data.x instanceof Date
-                ? closest.data.x.toLocaleDateString()
-                : String(closest.data.x)),
-            items: [
-              {
-                color,
-                label: seriesName,
-                value: formatMetricNumber(closest.data.y),
-              },
-            ],
-          });
-        }
-      }
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (activePointsList.length === 0) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIdx =
+        keyboardIndex === null
+          ? 0
+          : Math.min(activePointsList.length - 1, keyboardIndex + 1);
+      setKeyboardIndex(nextIdx);
+      activatePointByIndex(nextIdx);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIdx =
+        keyboardIndex === null
+          ? activePointsList.length - 1
+          : Math.max(0, keyboardIndex - 1);
+      setKeyboardIndex(prevIdx);
+      activatePointByIndex(prevIdx);
+    } else if (e.key === 'Escape') {
+      setActiveXPos(null);
+      setKeyboardIndex(null);
+      hide();
     }
   };
 
@@ -270,8 +296,12 @@ export function AreaChart<T = DataPoint>({
   return (
     <div
       ref={containerRef}
+      role="region"
+      aria-label={ariaLabel || 'Area chart data visualization'}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       className={clsx(
-        'chart-container nui-chart-container relative w-full select-none font-sans',
+        'chart-container nui-chart-container relative w-full select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
         className
       )}
       style={{ height }}
@@ -338,7 +368,9 @@ export function AreaChart<T = DataPoint>({
                 fill="var(--fg-muted, currentColor)"
                 opacity={0.75}
               >
-                {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
+                {effectiveYTickFormat
+                  ? effectiveYTickFormat(t)
+                  : formatMetricNumber(t)}
               </text>
             ))}
 
@@ -431,6 +463,7 @@ export function AreaChart<T = DataPoint>({
                       <path
                         d={s.areaPath}
                         fill={`url(#${baseGradientId}-${idx})`}
+                        className="chart-area transition-all duration-300"
                       />
                     )}
                     {s.linePath && (
@@ -441,6 +474,7 @@ export function AreaChart<T = DataPoint>({
                         strokeWidth={2.5}
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        className="chart-line transition-all duration-300"
                       />
                     )}
                     {s.points.map((p, i) => (
@@ -464,6 +498,7 @@ export function AreaChart<T = DataPoint>({
                     <path
                       d={singleResult.areaPath}
                       fill={`url(#${baseGradientId})`}
+                      className="chart-area transition-all duration-300"
                     />
                   )}
                   {singleResult.linePath && (
@@ -474,6 +509,7 @@ export function AreaChart<T = DataPoint>({
                       strokeWidth={2.5}
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      className="chart-line transition-all duration-300"
                     />
                   )}
                   {singleResult.points.map((p, i) => (
@@ -531,6 +567,15 @@ export function AreaChart<T = DataPoint>({
           onToggle={handleToggle}
         />
       )}
+
+      <div
+        className="sr-only chart-a11y-container"
+        dangerouslySetInnerHTML={{
+          __html: generateA11yTableHtml(seriesList as any, {
+            title: ariaLabel || 'Area chart data table',
+          }),
+        }}
+      />
 
       {showTooltip && (
         <div

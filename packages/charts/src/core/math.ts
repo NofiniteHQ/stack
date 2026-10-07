@@ -285,6 +285,8 @@ export interface ReferenceLine {
   strokeDasharray?: string;
 }
 
+export type AreaMode = 'overlapping' | 'stacked' | 'percent';
+
 export interface MultiSeriesPathResult {
   xScale: any;
   yScale: any;
@@ -299,13 +301,15 @@ export interface MultiSeriesPathResult {
   }>;
   isCategorical?: boolean;
   categories?: { label: string; x: number }[];
+  areaMode?: AreaMode;
 }
 
 export function calculateMultiSeriesAreaPath(
   seriesList: ChartSeries[],
   dimensions: ChartDimensions,
   xAccessor?: (d: any) => number | Date | string,
-  yAccessor?: (d: any) => number
+  yAccessor?: (d: any) => number,
+  areaMode: AreaMode = 'overlapping'
 ): MultiSeriesPathResult {
   const margin = dimensions.margin || defaultMargin;
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
@@ -399,55 +403,193 @@ export function calculateMultiSeriesAreaPath(
     xScale = scaleLinear().domain([minNum, maxNum]).range([0, innerWidth]);
   }
 
-  const yMax = max(allActivePoints, (d) => d.y) ?? 100;
-  const yMin = Math.min(...allActivePoints.map((d) => d.y));
-  const [domainMin, domainMax] = calculateLinearDomain(yMin, yMax);
-  const yScale = scaleLinear()
-    .domain([domainMin, domainMax])
-    .range([innerHeight, 0]);
+  // 1. Identify distinct X coordinates
+  let uniqueXKeys: Array<{ x: any; key: string | number }> = [];
+  if (isCategorical) {
+    uniqueXKeys = categoryLabels.map((cat, idx) => ({ x: idx, key: cat }));
+  } else {
+    const seen = new Set<string | number>();
+    for (const d of allActivePoints) {
+      const k = d.x instanceof Date ? d.x.getTime() : d.x;
+      if (!seen.has(k)) {
+        seen.add(k);
+        uniqueXKeys.push({ x: d.x, key: k });
+      }
+    }
+    uniqueXKeys.sort((a, b) => {
+      const vA = a.x instanceof Date ? a.x.getTime() : Number(a.x);
+      const vB = b.x instanceof Date ? b.x.getTime() : Number(b.x);
+      return vA - vB;
+    });
+  }
 
-  const lineGenerator = d3Line<NormalizedDataPoint>()
-    .x((d) => xScale(d.x)!)
-    .y((d) => yScale(d.y)!)
-    .curve(curveMonotoneX);
+  // 2. Compute sums per X position for stacked/percent
+  const xTotals = uniqueXKeys.map(({ key }) => {
+    return activeSeries.reduce((acc, s) => {
+      const item = s.data.find((d) =>
+        isCategorical
+          ? d.label === key
+          : (d.x instanceof Date ? d.x.getTime() : d.x) === key
+      );
+      return acc + (item ? Math.max(0, item.y) : 0);
+    }, 0);
+  });
 
-  const areaGenerator = d3Area<NormalizedDataPoint>()
-    .x((d) => xScale(d.x)!)
-    .y0(innerHeight)
-    .y1((d) => yScale(d.y)!)
-    .curve(curveMonotoneX);
+  // 3. Compute yScale
+  let yScale: any;
+  if (areaMode === 'percent') {
+    yScale = scaleLinear().domain([0, 100]).range([innerHeight, 0]);
+  } else if (areaMode === 'stacked') {
+    const yMax = Math.max(10, ...xTotals);
+    yScale = scaleLinear()
+      .domain([0, yMax * 1.1])
+      .range([innerHeight, 0]);
+  } else {
+    const yMax = max(allActivePoints, (d) => d.y) ?? 100;
+    const yMin = Math.min(...allActivePoints.map((d) => d.y));
+    const [domainMin, domainMax] = calculateLinearDomain(yMin, yMax);
+    yScale = scaleLinear()
+      .domain([domainMin, domainMax])
+      .range([innerHeight, 0]);
+  }
 
-  const seriesResults = normalizedSeries.map((s) => {
-    if (s.hidden) {
+  // 4. Generate series paths
+  let seriesResults: MultiSeriesPathResult['series'];
+
+  if (areaMode === 'stacked' || areaMode === 'percent') {
+    const baselineY = new Array(uniqueXKeys.length).fill(0);
+
+    seriesResults = normalizedSeries.map((s) => {
+      if (s.hidden) {
+        return {
+          id: s.id,
+          name: s.name,
+          color: s.color,
+          hidden: true,
+          areaPath: '',
+          linePath: '',
+          points: [],
+        };
+      }
+
+      type StackedPoint = {
+        x: any;
+        y0: number;
+        y1: number;
+        data: NormalizedDataPoint;
+      };
+
+      const stackedPoints: StackedPoint[] = [];
+
+      for (let j = 0; j < uniqueXKeys.length; j++) {
+        const { x, key } = uniqueXKeys[j];
+        const item = s.data.find((d) =>
+          isCategorical
+            ? d.label === key
+            : (d.x instanceof Date ? d.x.getTime() : d.x) === key
+        );
+        const rawY = item ? Math.max(0, item.y) : 0;
+        const total = xTotals[j];
+        const val =
+          areaMode === 'percent'
+            ? total > 0
+              ? (rawY / total) * 100
+              : 0
+            : rawY;
+
+        const y0 = baselineY[j];
+        const y1 = y0 + val;
+        baselineY[j] = y1;
+
+        stackedPoints.push({
+          x: item ? item.x : x,
+          y0,
+          y1,
+          data: item || {
+            id: `stack-${s.id}-${j}`,
+            x,
+            y: rawY,
+            label: isCategorical ? String(key) : '',
+            xOriginal: x,
+            raw: { x, y: rawY },
+          },
+        });
+      }
+
+      const areaGen = d3Area<StackedPoint>()
+        .x((d) => xScale(d.x)!)
+        .y0((d) => yScale(d.y0)!)
+        .y1((d) => yScale(d.y1)!)
+        .curve(curveMonotoneX);
+
+      const lineGen = d3Line<StackedPoint>()
+        .x((d) => xScale(d.x)!)
+        .y((d) => yScale(d.y1)!)
+        .curve(curveMonotoneX);
+
+      const areaPath = areaGen(stackedPoints) || '';
+      const linePath = lineGen(stackedPoints) || '';
+      const points = stackedPoints.map((d) => ({
+        x: xScale(d.x)!,
+        y: yScale(d.y1)!,
+        data: d.data,
+      }));
+
       return {
         id: s.id,
         name: s.name,
         color: s.color,
-        hidden: true,
-        areaPath: '',
-        linePath: '',
-        points: [],
+        hidden: false,
+        areaPath,
+        linePath,
+        points,
       };
-    }
+    });
+  } else {
+    // Overlapping (default)
+    const lineGenerator = d3Line<NormalizedDataPoint>()
+      .x((d) => xScale(d.x)!)
+      .y((d) => yScale(d.y)!)
+      .curve(curveMonotoneX);
 
-    const linePath = lineGenerator(s.data) || '';
-    const areaPath = areaGenerator(s.data) || '';
-    const points = s.data.map((d) => ({
-      x: xScale(d.x)!,
-      y: yScale(d.y)!,
-      data: d,
-    }));
+    const areaGenerator = d3Area<NormalizedDataPoint>()
+      .x((d) => xScale(d.x)!)
+      .y0(innerHeight)
+      .y1((d) => yScale(d.y)!)
+      .curve(curveMonotoneX);
 
-    return {
-      id: s.id,
-      name: s.name,
-      color: s.color,
-      hidden: false,
-      areaPath,
-      linePath,
-      points,
-    };
-  });
+    seriesResults = normalizedSeries.map((s) => {
+      if (s.hidden) {
+        return {
+          id: s.id,
+          name: s.name,
+          color: s.color,
+          hidden: true,
+          areaPath: '',
+          linePath: '',
+          points: [],
+        };
+      }
+
+      const linePath = lineGenerator(s.data) || '';
+      const areaPath = areaGenerator(s.data) || '';
+      const points = s.data.map((d) => ({
+        x: xScale(d.x)!,
+        y: yScale(d.y)!,
+        data: d,
+      }));
+
+      return {
+        id: s.id,
+        name: s.name,
+        color: s.color,
+        hidden: false,
+        areaPath,
+        linePath,
+        points,
+      };
+    });
+  }
 
   const categories = isCategorical
     ? categoryLabels.map((label, idx) => ({
@@ -456,10 +598,17 @@ export function calculateMultiSeriesAreaPath(
       }))
     : undefined;
 
-  return { xScale, yScale, series: seriesResults, isCategorical, categories };
+  return {
+    xScale,
+    yScale,
+    series: seriesResults,
+    isCategorical,
+    categories,
+    areaMode,
+  };
 }
 
-export type BarLayoutMode = 'grouped' | 'stacked' | 'horizontal';
+export type BarLayoutMode = 'grouped' | 'stacked' | 'horizontal' | 'percent';
 
 export interface MultiBarResult {
   xScale: any;
@@ -623,6 +772,44 @@ export function calculateMultiBarLayout(
           cumulativeY += item.y;
           const y1 = yScale(cumulativeY);
           const barHeight = Math.max(2, Math.abs(zeroY_or_diff(y0, y1)));
+
+          bars.push({
+            x: catX,
+            y: y1,
+            width: barWidth,
+            height: barHeight,
+            color: item.color || s.color,
+            seriesName: s.name,
+            data: item,
+          });
+        }
+      }
+    }
+
+    return { xScale, yScale, bars, categories };
+  }
+
+  if (layout === 'percent') {
+    const yScale = scaleLinear().domain([0, 100]).range([innerHeight, 0]);
+
+    const bars: MultiBarResult['bars'] = [];
+    for (const cat of categoryLabels) {
+      const catX = xScale(cat) ?? 0;
+      const barWidth = xScale.bandwidth();
+      const catTotal = activeSeries.reduce((acc, s) => {
+        const item = s.data.find((d) => d.label === cat);
+        return acc + (item ? Math.max(0, item.y) : 0);
+      }, 0);
+
+      let cumulativePct = 0;
+      for (const s of activeSeries) {
+        const item = s.data.find((d) => d.label === cat);
+        if (item && item.y > 0 && catTotal > 0) {
+          const pct = (item.y / catTotal) * 100;
+          const y0 = yScale(cumulativePct);
+          cumulativePct += pct;
+          const y1 = yScale(cumulativePct);
+          const barHeight = Math.max(1, Math.abs(y0 - y1));
 
           bars.push({
             x: catX,
