@@ -1025,6 +1025,64 @@ input[type='number'] {
   transform-origin: center;
 }
 
+@keyframes chartLineDraw {
+  from {
+    stroke-dashoffset: 2000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes chartBarGrowY {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes chartBarGrowX {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.chart-animate-line {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 0;
+  animation: chartLineDraw 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.chart-animate-fade {
+  animation: chartFadeIn 0.5s ease-out forwards;
+}
+
+.chart-animate-bar-y {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: chartBarGrowY 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.chart-animate-bar-x {
+  transform-box: fill-box;
+  transform-origin: left;
+  animation: chartBarGrowX 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* ------------------------------------------------------------
 16. WCAG AAA REDUCED MOTION & ACCESSIBILITY
 ------------------------------------------------------------ */

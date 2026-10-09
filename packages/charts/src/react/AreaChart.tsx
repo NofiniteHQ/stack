@@ -34,6 +34,7 @@ export interface AreaChartProps<T = DataPoint> {
   showAxes?: boolean;
   showTooltip?: boolean;
   showCrosshair?: boolean;
+  animate?: boolean;
   downsampleThreshold?: number;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
@@ -59,6 +60,7 @@ export function AreaChart<T = DataPoint>({
   showAxes = true,
   showTooltip = true,
   showCrosshair = true,
+  animate = true,
   downsampleThreshold,
   xTickFormat,
   yTickFormat,
@@ -477,7 +479,10 @@ export function AreaChart<T = DataPoint>({
                       <path
                         d={s.areaPath}
                         fill={`url(#${baseGradientId}-${idx})`}
-                        className="chart-area transition-all duration-300"
+                        className={clsx(
+                          'chart-area transition-all duration-300',
+                          animate && 'chart-animate-fade'
+                        )}
                       />
                     )}
                     {s.linePath && (
@@ -488,7 +493,10 @@ export function AreaChart<T = DataPoint>({
                         strokeWidth={2.5}
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="chart-line transition-all duration-300"
+                        className={clsx(
+                          'chart-line transition-all duration-300',
+                          animate && 'chart-animate-line'
+                        )}
                       />
                     )}
                     {s.points.map((p, i) => (
@@ -500,7 +508,10 @@ export function AreaChart<T = DataPoint>({
                         fill={s.color}
                         stroke="var(--bg-surface)"
                         strokeWidth={2}
-                        className="chart-point transition-all duration-150 cursor-pointer"
+                        className={clsx(
+                          'chart-point transition-all duration-150 cursor-pointer',
+                          animate && 'chart-animate-fade'
+                        )}
                       />
                     ))}
                   </g>
@@ -512,7 +523,10 @@ export function AreaChart<T = DataPoint>({
                     <path
                       d={singleResult.areaPath}
                       fill={`url(#${baseGradientId})`}
-                      className="chart-area transition-all duration-300"
+                      className={clsx(
+                        'chart-area transition-all duration-300',
+                        animate && 'chart-animate-fade'
+                      )}
                     />
                   )}
                   {singleResult.linePath && (
@@ -523,7 +537,10 @@ export function AreaChart<T = DataPoint>({
                       strokeWidth={2.5}
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="chart-line transition-all duration-300"
+                      className={clsx(
+                        'chart-line transition-all duration-300',
+                        animate && 'chart-animate-line'
+                      )}
                     />
                   )}
                   {singleResult.points.map((p, i) => (
@@ -535,7 +552,10 @@ export function AreaChart<T = DataPoint>({
                       fill={color}
                       stroke="var(--bg-surface)"
                       strokeWidth={2}
-                      className="chart-point transition-all duration-150 cursor-pointer"
+                      className={clsx(
+                        'chart-point transition-all duration-150 cursor-pointer',
+                        animate && 'chart-animate-fade'
+                      )}
                     />
                   ))}
                 </>

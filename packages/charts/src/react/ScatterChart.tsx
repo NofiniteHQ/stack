@@ -29,6 +29,7 @@ export interface ScatterChartProps<T = any> {
   showTooltip?: boolean;
   showCrosshair?: boolean;
   showLegend?: boolean;
+  animate?: boolean;
   xLabel?: string;
   yLabel?: string;
   downsampleThreshold?: number;
@@ -54,6 +55,7 @@ export function ScatterChart<T = any>({
   showTooltip = true,
   showCrosshair = true,
   showLegend = false,
+  animate = true,
   xLabel,
   yLabel,
   downsampleThreshold,
@@ -373,7 +375,10 @@ export function ScatterChart<T = any>({
                   fill={pt.color}
                   stroke="var(--bg-surface)"
                   strokeWidth={2}
-                  className="chart-point pointer-events-none transition-all duration-150"
+                  className={clsx(
+                    'chart-point pointer-events-none transition-all duration-150',
+                    animate && 'chart-animate-fade'
+                  )}
                   opacity={focusedPoint && !isPointActive ? 0.45 : 1}
                 />
               </g>

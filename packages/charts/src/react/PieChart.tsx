@@ -15,6 +15,7 @@ export interface PieChartProps<T = DataPoint> {
   className?: string;
   ariaLabel?: string;
   showTooltip?: boolean;
+  animate?: boolean;
   tooltipFormatter?: TooltipFormatter;
   labelAccessor?: (d: T) => string;
   valueAccessor?: (d: T) => number;
@@ -28,6 +29,7 @@ export function PieChart<T = DataPoint>({
   className,
   ariaLabel,
   showTooltip = true,
+  animate = true,
   tooltipFormatter,
   labelAccessor,
   valueAccessor,
@@ -164,7 +166,10 @@ export function PieChart<T = DataPoint>({
               stroke="var(--bg-surface)"
               strokeWidth={2}
               opacity={activePoint && activePoint !== s.data ? 0.6 : 1}
-              className="chart-segment transition-all duration-150 cursor-pointer hover:scale-105"
+              className={clsx(
+                'chart-segment transition-all duration-150 cursor-pointer hover:scale-105',
+                animate && 'chart-animate-fade'
+              )}
               onPointerEnter={(e) => {
                 setKeyboardIndex(i);
                 if (tooltipFormatter) {

@@ -241,6 +241,8 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['chart-grid', 'stroke-default opacity-50'],
   ['chart-axes', 'fill-muted text-xs select-none'],
   ['chart-point', 'transition-all duration-150'],
+  ['chart-line', 'transition-all duration-300'],
+  ['chart-area', 'transition-all duration-300'],
   [
     'chart-bar',
     'transition-opacity duration-150 cursor-pointer hover:opacity-85',

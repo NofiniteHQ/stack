@@ -21,6 +21,7 @@ export interface BarChartProps<T = DataPoint> {
   barLayout?: BarLayoutMode;
   referenceLines?: ReferenceLine[];
   showLegend?: boolean;
+  animate?: boolean;
   xAccessor?: (d: T) => number | Date | string;
   yAccessor?: (d: T) => number;
   width?: number;
@@ -44,6 +45,7 @@ export function BarChart<T = DataPoint>({
   barLayout = 'grouped',
   referenceLines,
   showLegend,
+  animate = true,
   xAccessor,
   yAccessor,
   width: propWidth,
@@ -349,7 +351,11 @@ export function BarChart<T = DataPoint>({
               rx={3}
               fill={b.color}
               opacity={activePoint && activePoint !== b.data ? 0.6 : 1}
-              className="chart-bar transition-all duration-150 cursor-pointer hover:opacity-85"
+              className={clsx(
+                'chart-bar transition-all duration-150 cursor-pointer hover:opacity-85',
+                animate &&
+                  (isHorizontal ? 'chart-animate-bar-x' : 'chart-animate-bar-y')
+              )}
               onPointerEnter={(e) => {
                 if (tooltipFormatter) {
                   show(b.data, e.currentTarget);
