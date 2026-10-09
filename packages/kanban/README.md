@@ -1,8 +1,38 @@
-# @nofinite/kanban
+<div align="center">
 
-Universal, framework-agnostic task board and Kanban suite powered by Pragmatic Drag and Drop and styled strictly with `@nofinite/nuicss` tokens and superclasses.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/kanban/logos/kanban-horizontal-white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/kanban/logos/kanban-horizontal.svg">
+  <img alt="Kanban" src="https://cdn.nofinite.com/brand/oss/kanban/logos/kanban-horizontal.svg" width="300">
+</picture>
 
-## Features
+<br/>
+<br/>
+
+**High-performance, accessible virtualized task board with WIP limits, search, and keyboard navigation.**
+
+<p align="center">
+  <a href="https://www.typescriptlang.org/">
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  </a>
+  <a href="https://opensource.nofinite.com/docs/kanban">
+    <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
+  </a>
+  <a href="./LICENSE">
+    <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-%23000133?style=for-the-badge&labelColor=slategray">
+  </a>
+  <a href="https://www.npmjs.com/package/@nofinite/kanban">
+    <img alt="NPM Version" src="https://img.shields.io/npm/v/%40nofinite%2Fkanban?style=for-the-badge&logo=npm&logoColor=white&labelColor=slategray&color=%23000133">
+  </a>
+</p>
+
+</div>
+
+---
+
+## Overview
+
+Nofinite Kanban is a universal, framework-agnostic task board and workflow suite engineered on Atlassian's Pragmatic Drag and Drop. It combines high-performance DOM reconciliation with strict `@nofinite/nuicss` design tokens and glassmorphic surfaces.
 
 - **Universal Architecture:** Pure TypeScript core (`createKanbanBoard`, `renderKanbanHTML`) with first-class React bindings (`<Kanban />`). Works seamlessly in vanilla HTML/JS, Next.js, React, Vue, or Svelte.
 - **Self-Contained NUICSS Stylesheet:** Ships standalone CSS (`@nofinite/kanban/styles.css`) referencing `@nofinite/nuicss` tokens (`var(--bg-surface)`, `var(--color-primary)`, `var(--border-default)`) and modern glassmorphic surfaces (`backdrop-blur-sm`).
@@ -18,7 +48,14 @@ Universal, framework-agnostic task board and Kanban suite powered by Pragmatic D
 ## Installation
 
 ```bash
+# pnpm
 pnpm add @nofinite/kanban @nofinite/nuicss @atlaskit/pragmatic-drag-and-drop
+
+# npm
+npm install @nofinite/kanban @nofinite/nuicss @atlaskit/pragmatic-drag-and-drop
+
+# yarn
+yarn add @nofinite/kanban @nofinite/nuicss @atlaskit/pragmatic-drag-and-drop
 ```
 
 Import the stylesheet in your application:
@@ -158,7 +195,7 @@ board.addCard('col-todo', { id: 'task-2', title: 'Write tests' });
 
 ## Keyboard Accessibility
 
-`@nofinite/kanban` adheres to W3C ARIA accessibility best practices:
+`@nofinite/kanban` adheres strictly to W3C ARIA accessibility best practices:
 
 | Shortcut           | Action                               |
 | :----------------- | :----------------------------------- |
@@ -192,6 +229,14 @@ When active, column counter badges automatically reflect matching item ratios (e
 
 ---
 
+## Documentation
+
+For full setup guides, component examples, and API references, [read documentation](https://opensource.nofinite.com/docs/kanban).
+
+---
+
 ## License
 
-MIT © [Nofinite](https://nofinite.com)
+This project is licensed under the [Apache License, Version 2.0](./LICENSE).
+
+Feel free to use, modify, and share this project in your applications, products, and services. Attribution is welcome and appreciated, but never required.

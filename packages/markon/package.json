@@ -2,6 +2,7 @@
   "name": "@nofinite/markon",
   "version": "2.0.0",
   "description": "Universal, framework-agnostic rich text and content authoring engine powered by TipTap and ProseMirror.",
+  "license": "Apache-2.0",
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",

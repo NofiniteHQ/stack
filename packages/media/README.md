@@ -1,10 +1,32 @@
-# @nofinite/media
+<div align="center">
 
-Universal, enterprise-grade audio and video streaming media player suite powered by Vidstack and styled with `@nofinite/nuicss` design tokens.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/media/logos/media-horizontal-white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/media/logos/media-horizontal.svg">
+  <img alt="Media" src="https://cdn.nofinite.com/brand/oss/media/logos/media-horizontal.svg" width="300">
+</picture>
 
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![NPM Version](https://img.shields.io/npm/v/@nofinite/media.svg)](https://www.npmjs.com/package/@nofinite/media)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+<br/>
+<br/>
+
+**Universal, enterprise-grade audio and video streaming media player suite powered by Vidstack and styled with NUICSS design tokens.**
+
+<p align="center">
+  <a href="https://www.typescriptlang.org/">
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  </a>
+  <a href="https://opensource.nofinite.com/docs/media">
+    <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
+  </a>
+  <a href="./LICENSE">
+    <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-%23000133?style=for-the-badge&labelColor=slategray">
+  </a>
+  <a href="https://www.npmjs.com/package/@nofinite/media">
+    <img alt="NPM Version" src="https://img.shields.io/npm/v/%40nofinite%2Fmedia?style=for-the-badge&logo=npm&logoColor=white&labelColor=slategray&color=%23000133">
+  </a>
+</p>
+
+</div>
 
 ---
 
@@ -236,8 +258,14 @@ import {
 } from '@nofinite/media/react';
 ```
 
+## Documentation
+
+For full setup guides, component examples, and API references, [read documentation](https://opensource.nofinite.com/docs/media).
+
 ---
 
 ## License
 
-Apache-2.0 © [Nofinite HQ](https://nofinite.design)
+This project is licensed under the [Apache License, Version 2.0](./LICENSE).
+
+Feel free to use, modify, and share this project in your applications, products, and services. Attribution is welcome and appreciated, but never required.

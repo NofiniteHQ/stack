@@ -1,7 +1,8 @@
 {
   "name": "@nofinite/charts",
   "version": "1.0.0",
-  "description": "Universal, framework-agnostic data visualization suite powered by modular D3 and styled with @nofinite/nuicss design tokens.",
+  "description": "Universal, framework-agnostic vector data visualization suite powered by modular D3 and styled with @nofinite/nuicss design tokens.",
+  "license": "Apache-2.0",
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",

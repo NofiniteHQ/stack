@@ -1,6 +1,8 @@
 {
   "name": "@nofinite/nui",
   "version": "3.1.0",
+  "description": "A robust, accessible, and lightweight React component library designed for modern web applications.",
+  "license": "Apache-2.0",
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",

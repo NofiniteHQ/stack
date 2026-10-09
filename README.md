@@ -8,34 +8,42 @@ The central repository for Nofinite's core infrastructure. This monorepo manages
 
 Each package is strictly decoupled and can be published or consumed independently.
 
-| Package | Purpose |
-| :--- | :--- |
-| **NUI ([`@nofinite/nui`](./packages/nui))** | Headless React component library. |
-| **NUI CSS ([`@nofinite/nuicss`](./packages/nuicss))** | A zero-config, semantic utility CSS framework. |
-| **Utils ([`@nofinite/utils`](./packages/utils))** | High-performance logic & security helpers. |
-| **Locale ([`@nofinite/locale`](./packages/locale))** | Lightweight library for country metadata, flags, and international dialing codes. |
+| Package                                               | Purpose                                                            |
+| :---------------------------------------------------- | :----------------------------------------------------------------- |
+| **NUI ([`@nofinite/nui`](./packages/nui))**           | Headless React component library.                                  |
+| **NUI CSS ([`@nofinite/nuicss`](./packages/nuicss))** | A zero-config, semantic utility CSS framework.                     |
+| **Charts ([`@nofinite/charts`](./packages/charts))**  | Vector data visualization suite powered by modular D3 and NUICSS.  |
+| **Kanban ([`@nofinite/kanban`](./packages/kanban))**  | High-performance task board powered by Pragmatic Drag and Drop.    |
+| **Markon ([`@nofinite/markon`](./packages/markon))**  | Rich text authoring engine powered by TipTap and ProseMirror.      |
+| **Media ([`@nofinite/media`](./packages/media))**     | Streaming audio and video media player suite powered by Vidstack.  |
+| **Utils ([`@nofinite/utils`](./packages/utils))**     | High-performance logic & security helpers.                         |
+| **Locale ([`@nofinite/locale`](./packages/locale))**  | Standardized country data, flags, and international dialing codes. |
 
 ---
 
 ## Engine
 
-* **Orchestration:** [Nx](https://nx.dev) handles task pipelines and caching.
-* **Package Manager:** [pnpm](https://pnpm.io) for strict workspace management.
-* **Build System:** [Vite](https://vitejs.dev) for JS and CSS bundling.
-* **Verification:** [Vitest](https://vitest.dev) for unit and integration testing.
+- **Orchestration:** [Nx](https://nx.dev) handles task pipelines and caching.
+- **Package Manager:** [pnpm](https://pnpm.io) for strict workspace management.
+- **Build System:** [Vite](https://vitejs.dev) for JS and CSS bundling.
+- **Verification:** [Vitest](https://vitest.dev) for unit and integration testing.
 
 ---
 
 ## Commands
 
 ### Setup
+
 Install all workspace dependencies:
+
 ```bash
 pnpm install
 ```
 
 ### Build
+
 Nx optimizes builds by only processing packages that have changed since the last successful run.
+
 ```bash
 # Build the entire stack
 pnpm nx run-many -t build
@@ -45,7 +53,9 @@ pnpm nx build @nofinite/nui
 ```
 
 ### Testing
+
 Maintain code integrity across the workspace.
+
 ```bash
 # Run all unit tests
 pnpm nx run-many -t test

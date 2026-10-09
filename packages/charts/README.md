@@ -1,30 +1,63 @@
-# @nofinite/charts
+<div align="center">
 
-> Universal, framework-agnostic vector data visualization suite powered by modular D3 and styled with @nofinite/nuicss design tokens.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/charts/logos/charts-horizontal-white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/charts/logos/charts-horizontal.svg">
+  <img alt="Charts" src="https://cdn.nofinite.com/brand/oss/charts/logos/charts-horizontal.svg" width="300">
+</picture>
 
-[![npm](https://img.shields.io/npm/v/@nofinite/charts?style=flat-square)](https://www.npmjs.com/package/@nofinite/charts)
+<br/>
+<br/>
+
+**Universal, framework-agnostic vector data visualization suite powered by modular D3 and styled with NUICSS tokens.**
+
+<p align="center">
+  <a href="https://www.typescriptlang.org/">
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  </a>
+  <a href="https://opensource.nofinite.com/docs/charts">
+    <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
+  </a>
+  <a href="./LICENSE">
+    <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-%23000133?style=for-the-badge&labelColor=slategray">
+  </a>
+  <a href="https://www.npmjs.com/package/@nofinite/charts">
+    <img alt="NPM Version" src="https://img.shields.io/npm/v/%40nofinite%2Fcharts?style=for-the-badge&logo=npm&logoColor=white&labelColor=slategray&color=%23000133">
+  </a>
+</p>
+
+</div>
 
 ---
 
-## Features
+## Overview
 
-- **Universal Core**: Pure SVG vector rendering with smooth monotone cubic hermite splines (`curveMonotoneX`), multi-stop gradient falloffs, and responsive `viewBox`.
-- **Zero Framework Lock-in**: Works in plain HTML, HTMX, Vue, Svelte, and React.
-- **Idiomatic React Export**: Dedicated `@nofinite/charts/react` with `<AreaChart />`, `<BarChart />`, `<LineChart />`, `<PieChart />`, `<DonutChart />`, `<ScatterChart />`, and `<Sparkline />`.
-- **Token-Driven Design**: Styled natively with `@nofinite/nuicss` CSS variables (`var(--chart-1)`, `var(--color-primary)`, `var(--bg-surface)`). Dark mode switches instantly with 0ms delay.
-- **Featherweight**: Modular D3 mathematics under 25 kB gzipped.
+Nofinite Charts provides an ultra-lightweight, modular charting engine designed for modern web applications. Engineered on pure SVG vector rendering and mathematically grounded D3 layout primitives, it pairs seamlessly with the `@nofinite/nuicss` design token ecosystem.
+
+- **Universal Core:** Pure SVG vector rendering with smooth monotone cubic hermite splines (`curveMonotoneX`), multi-stop gradient falloffs, and responsive `viewBox`.
+- **Zero Framework Lock-in:** Works across plain HTML, HTMX, Vue, Svelte, and React.
+- **Idiomatic React Export:** Dedicated `@nofinite/charts/react` with `<AreaChart />`, `<BarChart />`, `<LineChart />`, `<PieChart />`, `<DonutChart />`, `<ScatterChart />`, and `<Sparkline />`.
+- **Token-Driven Theming:** Styled natively with `@nofinite/nuicss` CSS variables (`var(--chart-1)`, `var(--color-primary)`, `var(--bg-surface)`). Dark mode switches instantly with 0ms delay.
+- **Featherweight Bundle:** Modular D3 mathematics under 25 kB gzipped.
 
 ---
 
 ## Installation
 
 ```bash
+# pnpm
+pnpm add @nofinite/charts @nofinite/nuicss
+
+# npm
 npm install @nofinite/charts @nofinite/nuicss
+
+# yarn
+yarn add @nofinite/charts @nofinite/nuicss
 ```
 
 ---
 
-## Usage
+## Quick Start
 
 ### In React
 
@@ -75,6 +108,28 @@ export function RevenueChart() {
 
 ---
 
+## Chart Catalog
+
+| Component                         | Export Subpath           | Description                                              |
+| :-------------------------------- | :----------------------- | :------------------------------------------------------- |
+| `<AreaChart />`                   | `@nofinite/charts/react` | Gradient-filled smooth spline and stepped area charts    |
+| `<BarChart />`                    | `@nofinite/charts/react` | Grouped, stacked, horizontal, and 100% normalized bars   |
+| `<LineChart />`                   | `@nofinite/charts/react` | Single and multi-series trendlines with markers          |
+| `<PieChart />` / `<DonutChart />` | `@nofinite/charts/react` | Proportional radial slices with customizable inner radii |
+| `<ScatterChart />`                | `@nofinite/charts/react` | Multi-dimensional correlation and point distributions    |
+| `<Sparkline />`                   | `@nofinite/charts/react` | Minimalist inline trend indicators                       |
+| `renderChart()`                   | `@nofinite/charts`       | Framework-agnostic vanilla HTML / DOM generator          |
+
+---
+
+## Documentation
+
+For full setup guides, component examples, and API references, [read documentation](https://opensource.nofinite.com/docs/charts).
+
+---
+
 ## License
 
-Apache-2.0 © Nofinite
+This project is licensed under the [Apache License, Version 2.0](./LICENSE).
+
+Feel free to use, modify, and share this project in your applications, products, and services. Attribution is welcome and appreciated, but never required.

@@ -1,6 +1,13 @@
 <div align="center">
 
-# NUI
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/nui/logos/nui-horizontal-white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/nui/logos/nui-horizontal.svg">
+  <img alt="NUI" src="https://cdn.nofinite.com/brand/oss/nui/logos/nui-horizontal.svg" width="300">
+</picture>
+
+<br/>
+<br/>
 
 **A robust, accessible, and lightweight React component library designed for modern web applications.**
 
@@ -8,15 +15,12 @@
   <a href="https://www.typescriptlang.org/">
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
   </a>
-
   <a href="https://opensource.nofinite.com/docs/nui">
     <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
-
   <a href="./LICENSE">
     <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
-
   <a href="https://www.npmjs.com/package/@nofinite/nui">
     <img alt="NPM Version" src="https://img.shields.io/npm/v/%40nofinite%2Fnui?style=for-the-badge&logo=npm&logoColor=white&labelColor=slategray&color=%23000133">
   </a>
@@ -30,9 +34,9 @@
 
 NUI provides a set of accessible, production-ready components to help you build modern web applications faster. It handles the complex details—like focus management and accessibility—so you can focus on building your product.
 
-* **Accessible:** WAI-ARIA compliant out of the box.
-* **Type-Safe:** Built with TypeScript for a great developer experience.
-* **Lightweight:** Modular design with zero heavy dependencies.
+- **Accessible:** WAI-ARIA compliant out of the box.
+- **Type-Safe:** Built with TypeScript for a great developer experience.
+- **Lightweight:** Modular design with zero heavy dependencies.
 
 ---
 
@@ -59,6 +63,7 @@ yarn add @nofinite/nui
 ## Quick Start
 
 ### 1. Import Styles
+
 Import the pre-compiled stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
 
 ```tsx
@@ -66,21 +71,19 @@ import '@nofinite/nui/styles.css';
 ```
 
 ### 2. Add the Provider
+
 Wrap your application in the `<NUIProvider>` to automatically manage dark mode, theme toggling, and layout state.
 
 ```tsx
 import { NUIProvider } from '@nofinite/nui';
 
 function App({ children }) {
-  return (
-    <NUIProvider defaultTheme="system">
-      {children}
-    </NUIProvider>
-  );
+  return <NUIProvider defaultTheme="system">{children}</NUIProvider>;
 }
 ```
 
 ### 3. Use Components
+
 ```tsx
 import { Button } from '@nofinite/nui';
 
