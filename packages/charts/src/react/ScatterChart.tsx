@@ -31,6 +31,7 @@ export interface ScatterChartProps<T = any> {
   showLegend?: boolean;
   xLabel?: string;
   yLabel?: string;
+  downsampleThreshold?: number;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
   tooltipFormatter?: TooltipFormatter;
@@ -55,6 +56,7 @@ export function ScatterChart<T = any>({
   showLegend = false,
   xLabel,
   yLabel,
+  downsampleThreshold,
   xTickFormat,
   yTickFormat,
   tooltipFormatter,
@@ -117,9 +119,18 @@ export function ScatterChart<T = any>({
     return calculateMultiScatterLayout(
       seriesList as any,
       { width, height, margin },
-      { xAccessor: xAccessor as any, yAccessor: yAccessor as any }
+      { xAccessor: xAccessor as any, yAccessor: yAccessor as any },
+      downsampleThreshold
     );
-  }, [seriesList, width, height, margin, xAccessor, yAccessor]);
+  }, [
+    seriesList,
+    width,
+    height,
+    margin,
+    xAccessor,
+    yAccessor,
+    downsampleThreshold,
+  ]);
 
   const activatePoint = (pt: MultiScatterPoint) => {
     setFocusedPoint(pt);
@@ -426,58 +437,4 @@ export function ScatterChart<T = any>({
   );
 }
 
-export interface SparklineProps {
-  data: number[];
-  width?: number;
-  height?: number;
-  color?: string;
-  className?: string;
-}
-
-export function Sparkline({
-  data,
-  width = 120,
-  height = 36,
-  color = 'var(--color-primary)',
-  className,
-}: SparklineProps) {
-  if (!data || data.length === 0) {
-    return null;
-  }
-
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-
-  const points = data
-    .map((val, i) => {
-      const x = (i / Math.max(1, data.length - 1)) * width;
-      const y = height - ((val - min) / range) * (height - 6) - 3;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
-
-  return (
-    <div
-      className={clsx(
-        'sparkline inline-flex items-center select-none',
-        className
-      )}
-      style={{ width, height }}
-    >
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-full overflow-visible"
-      >
-        <polyline
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          points={points}
-        />
-      </svg>
-    </div>
-  );
-}
+export { Sparkline, type SparklineProps } from './Sparkline';

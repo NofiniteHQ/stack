@@ -34,6 +34,7 @@ export interface AreaChartProps<T = DataPoint> {
   showAxes?: boolean;
   showTooltip?: boolean;
   showCrosshair?: boolean;
+  downsampleThreshold?: number;
   xTickFormat?: (val: any) => string;
   yTickFormat?: (val: number) => string;
   tooltipFormatter?: TooltipFormatter;
@@ -58,6 +59,7 @@ export function AreaChart<T = DataPoint>({
   showAxes = true,
   showTooltip = true,
   showCrosshair = true,
+  downsampleThreshold,
   xTickFormat,
   yTickFormat,
   tooltipFormatter,
@@ -117,7 +119,8 @@ export function AreaChart<T = DataPoint>({
       { width, height, margin },
       xAccessor as any,
       yAccessor as any,
-      areaMode
+      areaMode,
+      downsampleThreshold
     );
   }, [
     isMulti,
@@ -128,6 +131,7 @@ export function AreaChart<T = DataPoint>({
     xAccessor,
     yAccessor,
     areaMode,
+    downsampleThreshold,
   ]);
 
   const singleResult = useMemo(() => {
@@ -136,9 +140,19 @@ export function AreaChart<T = DataPoint>({
       seriesList[0]?.data || [],
       { width, height, margin },
       xAccessor as any,
-      yAccessor as any
+      yAccessor as any,
+      downsampleThreshold
     );
-  }, [isMulti, seriesList, width, height, margin, xAccessor, yAccessor]);
+  }, [
+    isMulti,
+    seriesList,
+    width,
+    height,
+    margin,
+    xAccessor,
+    yAccessor,
+    downsampleThreshold,
+  ]);
 
   const xScale = isMulti ? multiResult?.xScale : singleResult?.xScale;
   const yScale = isMulti ? multiResult?.yScale : singleResult?.yScale;

@@ -48,6 +48,108 @@ export function calculateLinearDomain(
   return [yMin * 1.1, yMax * 1.1];
 }
 
+/**
+ * Downsamples time-series or numerical points using the Largest Triangle Three Buckets (LTTB) algorithm.
+ * Preserves visual peaks, troughs, and curve morphology with O(N) linear time complexity.
+ *
+ * @param data Array of items with { x: number | Date, y: number }
+ * @param threshold Number of points to downsample down to (minimum 3)
+ */
+export function downsampleLTTB<T extends { x: number | Date; y: number }>(
+  data: T[],
+  threshold: number
+): T[] {
+  if (!data || data.length <= threshold || threshold <= 2) {
+    return data;
+  }
+
+  const sampled: T[] = [];
+  const dataLength = data.length;
+  const bucketSize = (dataLength - 2) / (threshold - 2);
+
+  const getX = (item: T): number => {
+    return item.x instanceof Date ? item.x.getTime() : Number(item.x);
+  };
+
+  const firstPoint = data[0];
+  if (!firstPoint) return data;
+  sampled.push(firstPoint);
+  let aIdx = 0;
+
+  for (let i = 0; i < threshold - 2; i++) {
+    const bucketStart = Math.floor((i + 0) * bucketSize) + 1;
+    const bucketEnd = Math.min(
+      Math.floor((i + 1) * bucketSize) + 1,
+      dataLength
+    );
+
+    const nextBucketStart = Math.floor((i + 1) * bucketSize) + 1;
+    const nextBucketEnd = Math.min(
+      Math.floor((i + 2) * bucketSize) + 1,
+      dataLength
+    );
+
+    let avgX = 0;
+    let avgY = 0;
+    let nextBucketCount = 0;
+
+    for (let j = nextBucketStart; j < nextBucketEnd; j++) {
+      const nextItem = data[j];
+      if (nextItem) {
+        avgX += getX(nextItem);
+        avgY += Number(nextItem.y);
+        nextBucketCount++;
+      }
+    }
+
+    if (nextBucketCount > 0) {
+      avgX /= nextBucketCount;
+      avgY /= nextBucketCount;
+    } else {
+      const last = data[dataLength - 1];
+      if (last) {
+        avgX = getX(last);
+        avgY = Number(last.y);
+      }
+    }
+
+    const aPoint = data[aIdx] ?? firstPoint;
+    const aX = getX(aPoint);
+    const aY = Number(aPoint.y);
+
+    let maxArea = -1;
+    let maxIdx = bucketStart;
+
+    for (let j = bucketStart; j < bucketEnd; j++) {
+      const p = data[j];
+      if (!p) continue;
+      const pX = getX(p);
+      const pY = Number(p.y);
+
+      // Area of triangle = 0.5 * |(Ax - Cx)(Py - Ay) - (Ax - Px)(Cy - Ay)|
+      const area = Math.abs((aX - avgX) * (pY - aY) - (aX - pX) * (avgY - aY));
+
+      if (area > maxArea) {
+        maxArea = area;
+        maxIdx = j;
+      }
+    }
+
+    const selected = data[maxIdx];
+    if (selected) {
+      sampled.push(selected);
+      aIdx = maxIdx;
+    }
+  }
+
+  const lastPoint = data[dataLength - 1];
+  if (lastPoint) {
+    sampled.push(lastPoint);
+  }
+
+  return sampled;
+}
+
 export interface AreaPathResult {
   areaPath: string;
   linePath: string;
@@ -63,7 +165,8 @@ export function calculateAreaPath(
   data: any[],
   dimensions: ChartDimensions,
   xAccessor?: (d: any) => number | Date | string,
-  yAccessor?: (d: any) => number
+  yAccessor?: (d: any) => number,
+  downsampleThreshold?: number
 ): AreaPathResult {
   const margin = dimensions.margin || defaultMargin;
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
@@ -72,7 +175,7 @@ export function calculateAreaPath(
     dimensions.height - margin.top - margin.bottom
   );
 
-  const normalized = normalizeData(data, { xAccessor, yAccessor });
+  let normalized = normalizeData(data, { xAccessor, yAccessor });
 
   if (normalized.length === 0) {
     const dummyScale = scaleLinear().range([0, innerWidth]);
@@ -86,7 +189,7 @@ export function calculateAreaPath(
     };
   }
 
-  const isTime = normalized[0].x instanceof Date;
+  const isTime = normalized[0]?.x instanceof Date;
   const isCategorical =
     !isTime &&
     normalized.some(
@@ -95,6 +198,15 @@ export function calculateAreaPath(
         isNaN(Number(d.xOriginal)) &&
         !(parseDateSafe(d.xOriginal) instanceof Date)
     );
+
+  if (
+    downsampleThreshold &&
+    downsampleThreshold >= 3 &&
+    !isCategorical &&
+    normalized.length > downsampleThreshold
+  ) {
+    normalized = downsampleLTTB(normalized, downsampleThreshold);
+  }
 
   let xScale: any;
 
@@ -309,7 +421,8 @@ export function calculateMultiSeriesAreaPath(
   dimensions: ChartDimensions,
   xAccessor?: (d: any) => number | Date | string,
   yAccessor?: (d: any) => number,
-  areaMode: AreaMode = 'overlapping'
+  areaMode: AreaMode = 'overlapping',
+  downsampleThreshold?: number
 ): MultiSeriesPathResult {
   const margin = dimensions.margin || defaultMargin;
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
@@ -327,7 +440,7 @@ export function calculateMultiSeriesAreaPath(
   }));
 
   const activeSeries = normalizedSeries.filter((s) => !s.hidden);
-  const allActivePoints = activeSeries.flatMap((s) => s.data);
+  let allActivePoints = activeSeries.flatMap((s) => s.data);
 
   if (allActivePoints.length === 0) {
     const dummyScale = scaleLinear().range([0, innerWidth]);
@@ -352,6 +465,15 @@ export function calculateMultiSeriesAreaPath(
         isNaN(Number(d.xOriginal)) &&
         !(parseDateSafe(d.xOriginal) instanceof Date)
     );
+
+  if (downsampleThreshold && downsampleThreshold >= 3 && !isCategorical) {
+    for (const s of normalizedSeries) {
+      if (s.data.length > downsampleThreshold) {
+        s.data = downsampleLTTB(s.data, downsampleThreshold);
+      }
+    }
+    allActivePoints = activeSeries.flatMap((s) => s.data);
+  }
 
   const categoryLabels: string[] = [];
   if (isCategorical) {
@@ -893,7 +1015,8 @@ export interface MultiScatterResult {
 export function calculateMultiScatterLayout(
   series: ChartSeries[],
   dimensions: ChartDimensions,
-  options?: DataAccessorOptions
+  options?: DataAccessorOptions,
+  downsampleThreshold?: number
 ): MultiScatterResult {
   const margin = dimensions.margin || defaultMargin;
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right);
@@ -903,11 +1026,21 @@ export function calculateMultiScatterLayout(
   );
 
   const activeSeries = series.filter((s) => !s.hidden);
-  const normalizedSeries = activeSeries.map((s, idx) => ({
-    name: s.name,
-    color: s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
-    data: normalizeData(s.data, options),
-  }));
+  const normalizedSeries = activeSeries.map((s, idx) => {
+    let pts = normalizeData(s.data, options);
+    if (
+      downsampleThreshold &&
+      downsampleThreshold >= 3 &&
+      pts.length > downsampleThreshold
+    ) {
+      pts = downsampleLTTB(pts, downsampleThreshold);
+    }
+    return {
+      name: s.name,
+      color: s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+      data: pts,
+    };
+  });
 
   const allActivePoints = normalizedSeries.flatMap((s) => s.data);
 

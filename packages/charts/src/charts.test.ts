@@ -4,6 +4,7 @@ import {
   calculateAreaPath,
   calculateBarLayout,
   calculatePieSegments,
+  downsampleLTTB,
   renderChart,
   Chart,
   defaultMargin,
@@ -145,5 +146,69 @@ describe('@nofinite/charts DOM class', () => {
 
     chart.destroy();
     expect(chart.element?.innerHTML).toBe('');
+  });
+});
+
+describe('@nofinite/charts LTTB downsampling algorithm', () => {
+  it('downsamples high-density data to exact threshold while preserving endpoints and extreme peaks', () => {
+    // Generate 1000 points with a massive peak at index 500
+    const points: { x: number; y: number }[] = [];
+    for (let i = 0; i < 1000; i++) {
+      const y = i === 500 ? 9999 : Math.sin(i / 10) * 10;
+      points.push({ x: i, y });
+    }
+
+    const downsampled = downsampleLTTB(points, 50);
+
+    expect(downsampled.length).toBe(50);
+    expect(downsampled[0].x).toBe(0);
+    expect(downsampled[downsampled.length - 1].x).toBe(999);
+
+    // The extreme peak (y=9999) must be preserved!
+    const hasPeak = downsampled.some((p) => p.y === 9999);
+    expect(hasPeak).toBe(true);
+  });
+
+  it('returns original data if threshold is greater than or equal to data length', () => {
+    const points = [
+      { x: 1, y: 10 },
+      { x: 2, y: 20 },
+      { x: 3, y: 15 },
+    ];
+    const result = downsampleLTTB(points, 10);
+    expect(result).toBe(points);
+  });
+
+  it('downsamples temporal Date-based data correctly', () => {
+    const dates: { x: Date; y: number }[] = [];
+    const base = new Date('2026-01-01').getTime();
+    for (let i = 0; i < 500; i++) {
+      dates.push({
+        x: new Date(base + i * 86400000),
+        y: Math.cos(i / 5) * 50,
+      });
+    }
+
+    const result = downsampleLTTB(dates, 30);
+    expect(result.length).toBe(30);
+    expect(result[0].x.getTime()).toBe(base);
+    expect(result[result.length - 1].x.getTime()).toBe(base + 499 * 86400000);
+  });
+
+  it('integrates downsampleThreshold into calculateAreaPath', () => {
+    const denseData = [];
+    for (let i = 0; i < 200; i++) {
+      denseData.push({ x: i, y: i * 2 });
+    }
+
+    const result = calculateAreaPath(
+      denseData,
+      { width: 500, height: 300, margin: defaultMargin },
+      undefined,
+      undefined,
+      25
+    );
+
+    expect(result.points.length).toBe(25);
   });
 });
