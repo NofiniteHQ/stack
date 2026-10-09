@@ -34,7 +34,7 @@ export interface LineChartProps<T = DataPoint> {
   showCrosshair?: boolean;
   animate?: boolean;
   downsampleThreshold?: number;
-  xTickFormat?: (val: any) => string;
+  xTickFormat?: (val: number | Date | string) => string;
   yTickFormat?: (val: number) => string;
   tooltipFormatter?: TooltipFormatter;
   onToggleSeries?: (seriesName: string) => void;
@@ -116,8 +116,8 @@ export function LineChart<T = DataPoint>({
     return calculateMultiSeriesAreaPath(
       seriesList,
       { width, height, margin },
-      xAccessor as any,
-      yAccessor as any,
+      xAccessor,
+      yAccessor,
       'overlapping',
       downsampleThreshold
     );
@@ -137,8 +137,8 @@ export function LineChart<T = DataPoint>({
     return calculateAreaPath(
       seriesList[0]?.data || [],
       { width, height, margin },
-      xAccessor as any,
-      yAccessor as any,
+      xAccessor,
+      yAccessor,
       downsampleThreshold
     );
   }, [
@@ -364,9 +364,10 @@ export function LineChart<T = DataPoint>({
               : singleResult?.isCategorical) &&
             xScale
               .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
-              .map((t: any, i: number) => {
+              .map((t: number | Date, i: number) => {
                 const x = xScale(t);
-                if (x < -5 || x > innerWidth + 5) return null;
+                if (x === undefined || x < -5 || x > innerWidth + 5)
+                  return null;
                 return (
                   <text
                     key={i}
@@ -407,7 +408,7 @@ export function LineChart<T = DataPoint>({
               if (ref.y === undefined || typeof yScale !== 'function')
                 return null;
               const yPos = yScale(ref.y);
-              if (isNaN(yPos)) return null;
+              if (yPos === undefined || isNaN(yPos)) return null;
               const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
               return (
                 <g key={`ref-${idx}`} className="chart-reference-group">
@@ -551,7 +552,7 @@ export function LineChart<T = DataPoint>({
       <div
         className="sr-only chart-a11y-container"
         dangerouslySetInnerHTML={{
-          __html: generateA11yTableHtml(seriesList as any, {
+          __html: generateA11yTableHtml(seriesList, {
             title: ariaLabel || 'Line chart data table',
           }),
         }}

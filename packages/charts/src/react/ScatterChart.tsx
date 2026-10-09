@@ -4,6 +4,7 @@ import {
   calculateMultiScatterLayout,
   type ChartSeries,
   type MultiScatterPoint,
+  type DataPoint,
 } from '../core/math';
 import { formatMetricNumber, formatTemporalTick } from '../core/axis';
 import { generateA11yTableHtml } from '../core/a11y';
@@ -13,7 +14,7 @@ import { ChartLegend } from './ChartLegend';
 import type { TooltipFormatter } from '../core/tooltip';
 import clsx from 'clsx';
 
-export interface ScatterChartProps<T = any> {
+export interface ScatterChartProps<T = DataPoint> {
   data?: T[];
   series?: ChartSeries<T>[];
   xAccessor?: (d: T) => number | Date | string;
@@ -33,13 +34,13 @@ export interface ScatterChartProps<T = any> {
   xLabel?: string;
   yLabel?: string;
   downsampleThreshold?: number;
-  xTickFormat?: (val: any) => string;
+  xTickFormat?: (val: number | Date | string) => string;
   yTickFormat?: (val: number) => string;
   tooltipFormatter?: TooltipFormatter;
   onToggleSeries?: (seriesName: string) => void;
 }
 
-export function ScatterChart<T = any>({
+export function ScatterChart<T = DataPoint>({
   data,
   series: propSeries,
   xAccessor,
@@ -119,9 +120,9 @@ export function ScatterChart<T = any>({
 
   const { xScale, yScale, points } = useMemo(() => {
     return calculateMultiScatterLayout(
-      seriesList as any,
+      seriesList,
       { width, height, margin },
-      { xAccessor: xAccessor as any, yAccessor: yAccessor as any },
+      { xAccessor, yAccessor },
       downsampleThreshold
     );
   }, [
@@ -137,8 +138,12 @@ export function ScatterChart<T = any>({
   const activatePoint = (pt: MultiScatterPoint) => {
     setFocusedPoint(pt);
     const d = pt.data;
+    const rawObj =
+      d.raw && typeof d.raw === 'object'
+        ? (d.raw as Record<string, unknown>)
+        : null;
     const hasExplicitLabel = Boolean(
-      (d.raw && (d.raw.label || d.raw.name || d.raw.title)) ||
+      (rawObj && (rawObj.label || rawObj.name || rawObj.title)) ||
         (d.label &&
           d.label !== String(d.x) &&
           d.label !== formatMetricNumber(typeof d.x === 'number' ? d.x : 0))
@@ -318,9 +323,10 @@ export function ScatterChart<T = any>({
             typeof xScale.ticks === 'function' &&
             xScale
               .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
-              .map((t: any, i: number) => {
+              .map((t: number | Date, i: number) => {
                 const x = xScale(t);
-                if (x < -5 || x > innerWidth + 5) return null;
+                if (x === undefined || x < -5 || x > innerWidth + 5)
+                  return null;
                 return (
                   <text
                     key={i}
@@ -416,7 +422,7 @@ export function ScatterChart<T = any>({
       <div
         className="sr-only chart-a11y-container"
         dangerouslySetInnerHTML={{
-          __html: generateA11yTableHtml(seriesList as any, {
+          __html: generateA11yTableHtml(seriesList, {
             title: ariaLabel || 'Scatter plot data table',
           }),
         }}

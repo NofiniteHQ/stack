@@ -8,20 +8,20 @@ export interface NormalizedDataPoint {
   id: string | number;
   label: string;
   x: number | Date;
-  xOriginal: any;
+  xOriginal: unknown;
   y: number;
   color?: string;
-  raw: any;
+  raw: unknown;
 }
 
-export interface DataAccessorOptions {
-  xAccessor?: (d: any) => number | Date | string;
-  yAccessor?: (d: any) => number;
-  labelAccessor?: (d: any) => string;
-  valueAccessor?: (d: any) => number;
+export interface DataAccessorOptions<T = Record<string, unknown>> {
+  xAccessor?: (d: T) => number | Date | string;
+  yAccessor?: (d: T) => number;
+  labelAccessor?: (d: T) => string;
+  valueAccessor?: (d: T) => number;
 }
 
-export function parseDateSafe(val: any): Date | null {
+export function parseDateSafe(val: unknown): Date | null {
   if (val instanceof Date && !isNaN(val.getTime())) {
     return val;
   }
@@ -45,9 +45,9 @@ export function parseDateSafe(val: any): Date | null {
   return null;
 }
 
-export function normalizeData(
-  rawData: any[],
-  options: DataAccessorOptions = {}
+export function normalizeData<T = Record<string, unknown>>(
+  rawData: T[],
+  options: DataAccessorOptions<T> = {}
 ): NormalizedDataPoint[] {
   if (!Array.isArray(rawData) || rawData.length === 0) {
     return [];
@@ -79,43 +79,45 @@ export function normalizeData(
       };
     }
 
+    const obj = item as Record<string, unknown>;
+
     // 2. Resolve Y / Value
     let y = 0;
     if (yAccessor) {
       y = yAccessor(item);
     } else if (valueAccessor) {
       y = valueAccessor(item);
-    } else if (item.y !== undefined) {
-      y = Number(item.y);
-    } else if (item.value !== undefined) {
-      y = Number(item.value);
-    } else if (item.val !== undefined) {
-      y = Number(item.val);
-    } else if (item.count !== undefined) {
-      y = Number(item.count);
-    } else if (item.secondaryValue !== undefined) {
-      y = Number(item.secondaryValue);
+    } else if (obj.y !== undefined) {
+      y = Number(obj.y);
+    } else if (obj.value !== undefined) {
+      y = Number(obj.value);
+    } else if (obj.val !== undefined) {
+      y = Number(obj.val);
+    } else if (obj.count !== undefined) {
+      y = Number(obj.count);
+    } else if (obj.secondaryValue !== undefined) {
+      y = Number(obj.secondaryValue);
     }
     if (typeof y !== 'number' || isNaN(y)) {
       y = 0;
     }
 
     // 3. Resolve X / Date / Time
-    let xRaw: any;
+    let xRaw: unknown;
     if (xAccessor) {
       xRaw = xAccessor(item);
-    } else if (item.date !== undefined) {
-      xRaw = item.date;
-    } else if (item.timestamp !== undefined) {
-      xRaw = item.timestamp;
-    } else if (item.time !== undefined) {
-      xRaw = item.time;
-    } else if (item.x !== undefined) {
-      xRaw = item.x;
-    } else if (item.label !== undefined) {
-      xRaw = item.label;
-    } else if (item.name !== undefined) {
-      xRaw = item.name;
+    } else if (obj.date !== undefined) {
+      xRaw = obj.date;
+    } else if (obj.timestamp !== undefined) {
+      xRaw = obj.timestamp;
+    } else if (obj.time !== undefined) {
+      xRaw = obj.time;
+    } else if (obj.x !== undefined) {
+      xRaw = obj.x;
+    } else if (obj.label !== undefined) {
+      xRaw = obj.label;
+    } else if (obj.name !== undefined) {
+      xRaw = obj.name;
     } else {
       xRaw = index;
     }
@@ -135,12 +137,12 @@ export function normalizeData(
     let label = '';
     if (labelAccessor) {
       label = String(labelAccessor(item));
-    } else if (item.label !== undefined) {
-      label = String(item.label);
-    } else if (item.name !== undefined) {
-      label = String(item.name);
-    } else if (item.x !== undefined && typeof item.x === 'string') {
-      label = item.x;
+    } else if (obj.label !== undefined) {
+      label = String(obj.label);
+    } else if (obj.name !== undefined) {
+      label = String(obj.name);
+    } else if (obj.x !== undefined && typeof obj.x === 'string') {
+      label = obj.x;
     } else if (parsedDate) {
       label = parsedDate.toLocaleDateString(undefined, {
         month: 'short',
@@ -153,12 +155,12 @@ export function normalizeData(
     }
 
     return {
-      id: item.id ?? index,
+      id: (obj.id as string | number) ?? index,
       label,
       x,
       xOriginal: xRaw,
       y,
-      color: item.color,
+      color: typeof obj.color === 'string' ? obj.color : undefined,
       raw: item,
     };
   });

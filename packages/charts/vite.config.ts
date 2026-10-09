@@ -4,7 +4,7 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import path from 'node:path';
 
-const assetFileNamePattern = (assetInfo: any) => {
+const assetFileNamePattern = (assetInfo: { name?: string }) => {
   if (assetInfo.name && assetInfo.name.endsWith('.css')) {
     return 'styles.css';
   }

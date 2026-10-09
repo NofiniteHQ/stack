@@ -12,8 +12,8 @@ export interface A11yOptions {
   description?: string;
 }
 
-export function generateA11yTableHtml(
-  seriesList: ChartSeries[],
+export function generateA11yTableHtml<T = unknown>(
+  seriesList: ChartSeries<T>[],
   options?: A11yOptions
 ): string {
   if (!seriesList || seriesList.length === 0) return '';

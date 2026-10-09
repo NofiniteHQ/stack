@@ -507,8 +507,12 @@ export class Chart {
             }
             if (tooltipEl && this.options.showTooltip !== false) {
               const d = closest.data;
+              const rawObj =
+                d.raw && typeof d.raw === 'object'
+                  ? (d.raw as Record<string, unknown>)
+                  : null;
               const hasExplicitLabel = Boolean(
-                (d.raw && (d.raw.label || d.raw.name || d.raw.title)) ||
+                (rawObj && (rawObj.label || rawObj.name || rawObj.title)) ||
                   (d.label &&
                     d.label !== String(d.x) &&
                     d.label !==

@@ -9,6 +9,7 @@ import {
   curveMonotoneX,
   pie as d3Pie,
   arc as d3Arc,
+  type PieArcDatum,
 } from 'd3-shape';
 import { scaleLinear, scaleTime, scaleBand } from 'd3-scale';
 import { max, bisector } from 'd3-array';
@@ -18,10 +19,16 @@ import {
   type NormalizedDataPoint,
   type DataAccessorOptions,
 } from './normalize';
+import { type ChartScale } from './axis';
 
-export { normalizeData, type NormalizedDataPoint, type DataAccessorOptions };
+export {
+  normalizeData,
+  type NormalizedDataPoint,
+  type DataAccessorOptions,
+  type ChartScale,
+};
 
-export type DataPoint = NormalizedDataPoint | Record<string, any>;
+export type DataPoint = NormalizedDataPoint | Record<string, unknown>;
 
 export interface ChartDimensions {
   width: number;
@@ -153,19 +160,19 @@ export function downsampleLTTB<T extends { x: number | Date; y: number }>(
 export interface AreaPathResult {
   areaPath: string;
   linePath: string;
-  xScale: any;
-  yScale: any;
+  xScale: ChartScale<number | Date>;
+  yScale: ChartScale<number>;
   points: { x: number; y: number; data: NormalizedDataPoint }[];
   normalizedData: NormalizedDataPoint[];
   isCategorical?: boolean;
   categories?: { label: string; x: number }[];
 }
 
-export function calculateAreaPath(
-  data: any[],
+export function calculateAreaPath<T = DataPoint>(
+  data: T[],
   dimensions: ChartDimensions,
-  xAccessor?: (d: any) => number | Date | string,
-  yAccessor?: (d: any) => number,
+  xAccessor?: (d: T) => number | Date | string,
+  yAccessor?: (d: T) => number,
   downsampleThreshold?: number
 ): AreaPathResult {
   const margin = dimensions.margin || defaultMargin;
@@ -208,7 +215,7 @@ export function calculateAreaPath(
     normalized = downsampleLTTB(normalized, downsampleThreshold);
   }
 
-  let xScale: any;
+  let xScale: ChartScale<number | Date>;
 
   if (isTime) {
     const dates = normalized.map((d) => d.x as Date);
@@ -244,14 +251,14 @@ export function calculateAreaPath(
     .range([innerHeight, 0]);
 
   const lineGenerator = d3Line<NormalizedDataPoint>()
-    .x((d) => xScale(d.x)!)
-    .y((d) => yScale(d.y)!)
+    .x((d) => xScale(d.x) ?? 0)
+    .y((d) => yScale(d.y) ?? 0)
     .curve(curveMonotoneX);
 
   const areaGenerator = d3Area<NormalizedDataPoint>()
-    .x((d) => xScale(d.x)!)
+    .x((d) => xScale(d.x) ?? 0)
     .y0(innerHeight)
-    .y1((d) => yScale(d.y)!)
+    .y1((d) => yScale(d.y) ?? 0)
     .curve(curveMonotoneX);
 
   const linePath = lineGenerator(normalized) || '';
@@ -259,15 +266,15 @@ export function calculateAreaPath(
 
   // Perfectly synchronized points aligned with the exact xScale and yScale
   const points = normalized.map((d) => ({
-    x: xScale(d.x)!,
-    y: yScale(d.y)!,
+    x: xScale(d.x) ?? 0,
+    y: yScale(d.y) ?? 0,
     data: d,
   }));
 
   const categories = isCategorical
     ? normalized.map((d) => ({
         label: d.label,
-        x: xScale(d.x)!,
+        x: xScale(d.x) ?? 0,
       }))
     : undefined;
 
@@ -283,10 +290,10 @@ export function calculateAreaPath(
   };
 }
 
-export function calculateBarLayout(
-  data: any[],
+export function calculateBarLayout<T = DataPoint>(
+  data: T[],
   dimensions: ChartDimensions,
-  options?: DataAccessorOptions
+  options?: DataAccessorOptions<T>
 ): {
   bars: {
     x: number;
@@ -295,8 +302,8 @@ export function calculateBarLayout(
     height: number;
     data: NormalizedDataPoint;
   }[];
-  xScale: any;
-  yScale: any;
+  xScale: ChartScale;
+  yScale: ChartScale;
   normalizedData: NormalizedDataPoint[];
 } {
   const margin = dimensions.margin || defaultMargin;
@@ -346,11 +353,11 @@ export function calculateBarLayout(
   return { bars, xScale, yScale, normalizedData: normalized };
 }
 
-export function calculatePieSegments(
-  data: any[],
+export function calculatePieSegments<T = DataPoint>(
+  data: T[],
   radius: number,
   donutCutout = 0,
-  options?: DataAccessorOptions
+  options?: DataAccessorOptions<T>
 ): { path: string; data: NormalizedDataPoint; centroid: [number, number] }[] {
   const normalized = normalizeData(data, options);
   if (normalized.length === 0) {
@@ -362,7 +369,7 @@ export function calculatePieSegments(
     .sort(null);
 
   const innerRadius = radius * donutCutout;
-  const arcGenerator = d3Arc<any>()
+  const arcGenerator = d3Arc<PieArcDatum<NormalizedDataPoint>>()
     .innerRadius(innerRadius)
     .outerRadius(radius)
     .cornerRadius(4)
@@ -378,10 +385,10 @@ export function calculatePieSegments(
 }
 
 export const bisectDate = bisector<NormalizedDataPoint, Date>((d) =>
-  d.x instanceof Date ? d.x : new Date(d.xOriginal || d.label)
+  d.x instanceof Date ? d.x : new Date(String(d.xOriginal ?? d.label))
 ).left;
 
-export interface ChartSeries<T = any> {
+export interface ChartSeries<T = DataPoint> {
   id?: string;
   name: string;
   data: T[];
@@ -391,7 +398,7 @@ export interface ChartSeries<T = any> {
 
 export interface ReferenceLine {
   y?: number;
-  x?: any;
+  x?: number | Date | string;
   label?: string;
   color?: string;
   strokeDasharray?: string;
@@ -400,8 +407,8 @@ export interface ReferenceLine {
 export type AreaMode = 'overlapping' | 'stacked' | 'percent';
 
 export interface MultiSeriesPathResult {
-  xScale: any;
-  yScale: any;
+  xScale: ChartScale<number | Date>;
+  yScale: ChartScale<number>;
   series: Array<{
     id: string;
     name: string;
@@ -416,11 +423,11 @@ export interface MultiSeriesPathResult {
   areaMode?: AreaMode;
 }
 
-export function calculateMultiSeriesAreaPath(
-  seriesList: ChartSeries[],
+export function calculateMultiSeriesAreaPath<T = DataPoint>(
+  seriesList: ChartSeries<T>[],
   dimensions: ChartDimensions,
-  xAccessor?: (d: any) => number | Date | string,
-  yAccessor?: (d: any) => number,
+  xAccessor?: (d: T) => number | Date | string,
+  yAccessor?: (d: T) => number,
   areaMode: AreaMode = 'overlapping',
   downsampleThreshold?: number
 ): MultiSeriesPathResult {
@@ -496,7 +503,7 @@ export function calculateMultiSeriesAreaPath(
     }
   }
 
-  let xScale: any;
+  let xScale: ChartScale<number | Date>;
 
   if (isTime) {
     const allDates = allActivePoints.map((d) =>
@@ -526,7 +533,7 @@ export function calculateMultiSeriesAreaPath(
   }
 
   // 1. Identify distinct X coordinates
-  let uniqueXKeys: Array<{ x: any; key: string | number }> = [];
+  let uniqueXKeys: Array<{ x: number | Date; key: string | number }> = [];
   if (isCategorical) {
     uniqueXKeys = categoryLabels.map((cat, idx) => ({ x: idx, key: cat }));
   } else {
@@ -558,7 +565,7 @@ export function calculateMultiSeriesAreaPath(
   });
 
   // 3. Compute yScale
-  let yScale: any;
+  let yScale: ChartScale<number>;
   if (areaMode === 'percent') {
     yScale = scaleLinear().domain([0, 100]).range([innerHeight, 0]);
   } else if (areaMode === 'stacked') {
@@ -595,7 +602,7 @@ export function calculateMultiSeriesAreaPath(
       }
 
       type StackedPoint = {
-        x: any;
+        x: number | Date;
         y0: number;
         y1: number;
         data: NormalizedDataPoint;
@@ -639,21 +646,21 @@ export function calculateMultiSeriesAreaPath(
       }
 
       const areaGen = d3Area<StackedPoint>()
-        .x((d) => xScale(d.x)!)
-        .y0((d) => yScale(d.y0)!)
-        .y1((d) => yScale(d.y1)!)
+        .x((d) => xScale(d.x) ?? 0)
+        .y0((d) => yScale(d.y0) ?? 0)
+        .y1((d) => yScale(d.y1) ?? 0)
         .curve(curveMonotoneX);
 
       const lineGen = d3Line<StackedPoint>()
-        .x((d) => xScale(d.x)!)
-        .y((d) => yScale(d.y1)!)
+        .x((d) => xScale(d.x) ?? 0)
+        .y((d) => yScale(d.y1) ?? 0)
         .curve(curveMonotoneX);
 
       const areaPath = areaGen(stackedPoints) || '';
       const linePath = lineGen(stackedPoints) || '';
       const points = stackedPoints.map((d) => ({
-        x: xScale(d.x)!,
-        y: yScale(d.y1)!,
+        x: xScale(d.x) ?? 0,
+        y: yScale(d.y1) ?? 0,
         data: d.data,
       }));
 
@@ -670,14 +677,14 @@ export function calculateMultiSeriesAreaPath(
   } else {
     // Overlapping (default)
     const lineGenerator = d3Line<NormalizedDataPoint>()
-      .x((d) => xScale(d.x)!)
-      .y((d) => yScale(d.y)!)
+      .x((d) => xScale(d.x) ?? 0)
+      .y((d) => yScale(d.y) ?? 0)
       .curve(curveMonotoneX);
 
     const areaGenerator = d3Area<NormalizedDataPoint>()
-      .x((d) => xScale(d.x)!)
+      .x((d) => xScale(d.x) ?? 0)
       .y0(innerHeight)
-      .y1((d) => yScale(d.y)!)
+      .y1((d) => yScale(d.y) ?? 0)
       .curve(curveMonotoneX);
 
     seriesResults = normalizedSeries.map((s) => {
@@ -696,8 +703,8 @@ export function calculateMultiSeriesAreaPath(
       const linePath = lineGenerator(s.data) || '';
       const areaPath = areaGenerator(s.data) || '';
       const points = s.data.map((d) => ({
-        x: xScale(d.x)!,
-        y: yScale(d.y)!,
+        x: xScale(d.x) ?? 0,
+        y: yScale(d.y) ?? 0,
         data: d,
       }));
 
@@ -733,8 +740,8 @@ export function calculateMultiSeriesAreaPath(
 export type BarLayoutMode = 'grouped' | 'stacked' | 'horizontal' | 'percent';
 
 export interface MultiBarResult {
-  xScale: any;
-  yScale: any;
+  xScale: ChartScale<number>;
+  yScale: ChartScale<number>;
   margin?: { top: number; right: number; bottom: number; left: number };
   bars: Array<{
     x: number;
@@ -748,11 +755,11 @@ export interface MultiBarResult {
   categories: Array<{ label: string; x: number; width: number }>;
 }
 
-export function calculateMultiBarLayout(
-  seriesList: ChartSeries[],
+export function calculateMultiBarLayout<T = DataPoint>(
+  seriesList: ChartSeries<T>[],
   dimensions: ChartDimensions,
   layout: BarLayoutMode = 'grouped',
-  options?: DataAccessorOptions
+  options?: DataAccessorOptions<T>
 ): MultiBarResult {
   const rawMargin = dimensions.margin || defaultMargin;
   const margin = { ...rawMargin };
@@ -1006,16 +1013,16 @@ export interface MultiScatterPoint {
 }
 
 export interface MultiScatterResult {
-  xScale: any;
-  yScale: any;
+  xScale: ChartScale<number | Date>;
+  yScale: ChartScale<number>;
   points: MultiScatterPoint[];
   allActivePoints: NormalizedDataPoint[];
 }
 
-export function calculateMultiScatterLayout(
-  series: ChartSeries[],
+export function calculateMultiScatterLayout<T = DataPoint>(
+  series: ChartSeries<T>[],
   dimensions: ChartDimensions,
-  options?: DataAccessorOptions,
+  options?: DataAccessorOptions<T>,
   downsampleThreshold?: number
 ): MultiScatterResult {
   const margin = dimensions.margin || defaultMargin;

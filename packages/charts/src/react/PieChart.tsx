@@ -61,8 +61,8 @@ export function PieChart<T = DataPoint>({
 
   const segments = useMemo(() => {
     return calculatePieSegments(data, radius, donutCutout, {
-      labelAccessor: labelAccessor as any,
-      valueAccessor: valueAccessor as any,
+      labelAccessor,
+      valueAccessor,
     });
   }, [data, radius, donutCutout, labelAccessor, valueAccessor]);
 
@@ -205,16 +205,13 @@ export function PieChart<T = DataPoint>({
       <div
         className="sr-only chart-a11y-container"
         dangerouslySetInnerHTML={{
-          __html: generateA11yTableHtml(
-            [{ name: 'Distribution', data: data as any }],
-            {
-              title:
-                ariaLabel ||
-                (donutCutout > 0
-                  ? 'Donut chart data table'
-                  : 'Pie chart data table'),
-            }
-          ),
+          __html: generateA11yTableHtml([{ name: 'Distribution', data }], {
+            title:
+              ariaLabel ||
+              (donutCutout > 0
+                ? 'Donut chart data table'
+                : 'Pie chart data table'),
+          }),
         }}
       />
 

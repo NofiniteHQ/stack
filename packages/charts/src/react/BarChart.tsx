@@ -33,7 +33,7 @@ export interface BarChartProps<T = DataPoint> {
   showGrid?: boolean;
   showAxes?: boolean;
   showTooltip?: boolean;
-  xTickFormat?: (val: any) => string;
+  xTickFormat?: (val: number | Date | string) => string;
   yTickFormat?: (val: number) => string;
   tooltipFormatter?: TooltipFormatter;
   onToggleSeries?: (seriesName: string) => void;
@@ -118,7 +118,7 @@ export function BarChart<T = DataPoint>({
       seriesList,
       { width, height, margin: propMargin },
       barLayout,
-      { xAccessor: xAccessor as any, yAccessor: yAccessor as any }
+      { xAccessor, yAccessor }
     );
   }, [seriesList, width, height, propMargin, barLayout, xAccessor, yAccessor]);
 
@@ -312,7 +312,7 @@ export function BarChart<T = DataPoint>({
               if (ref.y === undefined || typeof yScale !== 'function')
                 return null;
               const yPos = yScale(ref.y);
-              if (isNaN(yPos)) return null;
+              if (yPos === undefined || isNaN(yPos)) return null;
               const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
               return (
                 <g key={`ref-${idx}`} className="chart-reference-group">
@@ -401,7 +401,11 @@ export function BarChart<T = DataPoint>({
             isHorizontal &&
             categories.map((cat, i) => {
               const catY = yScale(cat.label) ?? 0;
-              const cy = catY + yScale.bandwidth() / 2;
+              const cy =
+                catY +
+                (typeof yScale.bandwidth === 'function'
+                  ? yScale.bandwidth() / 2
+                  : 0);
               return (
                 <text
                   key={`cat-h-${i}`}
@@ -435,7 +439,7 @@ export function BarChart<T = DataPoint>({
       <div
         className="sr-only chart-a11y-container"
         dangerouslySetInnerHTML={{
-          __html: generateA11yTableHtml(seriesList as any, {
+          __html: generateA11yTableHtml(seriesList, {
             title: ariaLabel || 'Bar chart data table',
           }),
         }}

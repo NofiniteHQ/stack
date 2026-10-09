@@ -10,6 +10,7 @@ import {
   type BarLayoutMode,
   type ReferenceLine,
   type AreaMode,
+  type ChartScale,
 } from './math';
 import { generateAxisSvg } from './axis';
 import { renderLegendHtml } from './legend';
@@ -54,7 +55,10 @@ let gradientCounter = 0;
 
 function renderReferenceLinesSvg(
   referenceLines: ReferenceLine[] | undefined,
-  yScale: ((val: number) => number) | undefined,
+  yScale:
+    | ChartScale<number>
+    | ((val: number) => number | undefined)
+    | undefined,
   innerWidth: number
 ): string {
   if (!referenceLines || referenceLines.length === 0 || !yScale) return '';
@@ -63,7 +67,7 @@ function renderReferenceLinesSvg(
     .map((ref) => {
       if (ref.y === undefined || typeof yScale !== 'function') return '';
       const yPos = yScale(ref.y);
-      if (isNaN(yPos)) return '';
+      if (yPos === undefined || isNaN(yPos)) return '';
 
       const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
       const dash = ref.strokeDasharray || '4,4';

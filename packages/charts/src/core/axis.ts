@@ -3,16 +3,24 @@
  * Renders high-legibility X/Y axes conforming to @nofinite/nuicss typography.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ChartScale<TTick = number | Date> = ((
+  val: any
+) => number | undefined) & {
+  ticks?: (count?: number) => TTick[];
+  bandwidth?: () => number;
+};
+
 export interface AxisOptions {
   width: number;
   height: number;
   margin: { top: number; right: number; bottom: number; left: number };
-  xScale: any;
-  yScale: any;
+  xScale: ChartScale<number | Date>;
+  yScale: ChartScale<number>;
   showAxes?: boolean;
   showGrid?: boolean;
   isHorizontal?: boolean;
-  xTickFormat?: (val: any) => string;
+  xTickFormat?: (val: unknown) => string;
   yTickFormat?: (val: number) => string;
   numXTicks?: number;
   numYTicks?: number;
@@ -36,7 +44,7 @@ export function formatMetricNumber(val: number): string {
   return val.toFixed(1).replace(/\.0$/, '');
 }
 
-export function formatTemporalTick(val: any): string {
+export function formatTemporalTick(val: unknown): string {
   if (val instanceof Date) {
     return val.toLocaleDateString(undefined, {
       month: 'short',
@@ -46,7 +54,10 @@ export function formatTemporalTick(val: any): string {
   if (typeof val === 'number') {
     return formatMetricNumber(val);
   }
-  return String(val);
+  if (typeof val === 'string') {
+    return val;
+  }
+  return val != null ? String(val) : '';
 }
 
 export function deduplicateTicks<T>(
@@ -94,7 +105,7 @@ export function generateAxisSvg(options: AxisOptions): {
   if (isHorizontal) {
     // 1. Grid: vertical value lines
     if (showGrid && xScale && typeof xScale.ticks === 'function') {
-      const ticks: number[] = xScale.ticks(numXTicks);
+      const ticks = (xScale.ticks(numXTicks) as number[]) ?? [];
       gridSvg = ticks
         .map((t) => {
           const x = xScale(t);
@@ -133,9 +144,10 @@ export function generateAxisSvg(options: AxisOptions): {
 
     // 3. X Axis: Metric value labels
     if (showAxes && xScale && typeof xScale.ticks === 'function') {
-      const xTicks: number[] = xScale.ticks(
-        Math.min(numXTicks, innerWidth > 450 ? 6 : 3)
-      );
+      const xTicks =
+        (xScale.ticks(
+          Math.min(numXTicks, innerWidth > 450 ? 6 : 3)
+        ) as number[]) ?? [];
       const dedupedXTicks = deduplicateTicks(
         xTicks,
         yTickFormat || formatMetricNumber
@@ -143,7 +155,7 @@ export function generateAxisSvg(options: AxisOptions): {
       xAxisSvg = dedupedXTicks
         .map(({ value: t, formatted }) => {
           const x = xScale(t);
-          if (x < -5 || x > innerWidth + 5) return '';
+          if (x === undefined || x < -5 || x > innerWidth + 5) return '';
           return `
             <text x="${x}" y="${innerHeight + 18}" text-anchor="middle"
                   class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
@@ -158,7 +170,7 @@ export function generateAxisSvg(options: AxisOptions): {
     // Standard Vertical Layout
     // 1. Grid & Y Axis
     if (yScale && typeof yScale.ticks === 'function') {
-      const ticks: number[] = yScale.ticks(numYTicks);
+      const ticks = (yScale.ticks(numYTicks) as number[]) ?? [];
 
       if (showGrid) {
         gridSvg = ticks
@@ -221,14 +233,16 @@ export function generateAxisSvg(options: AxisOptions): {
           .join('');
       } else if (xScale && typeof xScale.ticks === 'function') {
         // Continuous / Time Series
-        const xTicks = xScale.ticks(
-          Math.min(numXTicks, innerWidth > 450 ? 6 : 3)
-        );
+        const xTicks =
+          (xScale.ticks(Math.min(numXTicks, innerWidth > 450 ? 6 : 3)) as (
+            | number
+            | Date
+          )[]) ?? [];
         const dedupedXTicks = deduplicateTicks(xTicks, xTickFormat);
         xAxisSvg = dedupedXTicks
           .map(({ value: t, formatted }) => {
             const x = xScale(t);
-            if (x < -5 || x > innerWidth + 5) return '';
+            if (x === undefined || x < -5 || x > innerWidth + 5) return '';
             return `
               <text x="${x}" y="${innerHeight + 18}" text-anchor="middle"
                     class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
