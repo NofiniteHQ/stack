@@ -15,7 +15,7 @@
   <a href="https://www.typescriptlang.org/">
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
   </a>
-  <a href="https://opensource.nofinite.com/docs/markon">
+  <a href="https://opensource.nofinite.com/markon">
     <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
   <a href="./LICENSE">
@@ -111,7 +111,7 @@ export function EditorExample() {
 
 ## Documentation
 
-For full setup guides, component examples, and API references, [read documentation](https://opensource.nofinite.com/docs/markon).
+For full setup guides, component examples, and API references, [read documentation](https://opensource.nofinite.com/markon).
 
 ---
 

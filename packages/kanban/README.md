@@ -15,7 +15,7 @@
   <a href="https://www.typescriptlang.org/">
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
   </a>
-  <a href="https://opensource.nofinite.com/docs/kanban">
+  <a href="https://opensource.nofinite.com/kanban">
     <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
   <a href="./LICENSE">
@@ -49,13 +49,13 @@ Nofinite Kanban is a universal, framework-agnostic task board and workflow suite
 
 ```bash
 # pnpm
-pnpm add @nofinite/kanban @nofinite/nuicss @atlaskit/pragmatic-drag-and-drop
+pnpm add @nofinite/kanban @nofinite/nuicss
 
 # npm
-npm install @nofinite/kanban @nofinite/nuicss @atlaskit/pragmatic-drag-and-drop
+npm install @nofinite/kanban @nofinite/nuicss
 
 # yarn
-yarn add @nofinite/kanban @nofinite/nuicss @atlaskit/pragmatic-drag-and-drop
+yarn add @nofinite/kanban @nofinite/nuicss
 ```
 
 Import the stylesheet in your application:
@@ -231,7 +231,7 @@ When active, column counter badges automatically reflect matching item ratios (e
 
 ## Documentation
 
-For full setup guides, component examples, and API references, [read documentation](https://opensource.nofinite.com/docs/kanban).
+For full setup guides, component examples, and API references, [read documentation](https://opensource.nofinite.com/kanban).
 
 ---
 

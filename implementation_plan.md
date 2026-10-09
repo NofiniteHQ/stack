@@ -96,7 +96,7 @@ For all branded packages (`nui`, `nuicss`, `charts`, `kanban`, `markon`, `media`
         src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white"
       />
     </a>
-    <a href="https://opensource.nofinite.com/docs/{slug}">
+    <a href="https://opensource.nofinite.com/{slug}">
       <img
         alt="Documentation"
         src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray"
