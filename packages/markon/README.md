@@ -57,11 +57,24 @@ yarn add @nofinite/markon @nofinite/nuicss
 
 ---
 
+## Styles Setup
+
+Markon's editor typography, bubble menus, and toolbar controls are styled natively via NUICSS. Import the stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+
+```tsx
+import '@nofinite/nuicss/styles.css';
+```
+
+> **Note:** Alternatively, Markon also exports a standalone stylesheet (`@nofinite/markon/styles.css`) if consumed in projects without the full NUICSS utility suite.
+
+---
+
 ## Quick Start
 
 ### In React
 
 ```tsx
+import '@nofinite/nuicss/styles.css';
 import { useState } from 'react';
 import { MarkonEditor } from '@nofinite/markon/react';
 
@@ -92,6 +105,37 @@ export function EditorExample() {
     onChange: (html) => console.log('Content updated:', html),
   });
 </script>
+```
+
+### Zero-Build CDN (ESM)
+
+For rapid prototyping without a build step or bundler:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- NUICSS Design Tokens & Editor Stylesheet -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss/dist/styles.css"
+    />
+  </head>
+  <body class="bg-surface p-6">
+    <div id="editor-container"></div>
+
+    <script type="module">
+      import { MarkonEditor } from 'https://esm.sh/@nofinite/markon';
+
+      const editor = new MarkonEditor({
+        element: document.getElementById('editor-container'),
+        initialValue: '<p>Hello from zero-build CDN!</p>',
+        onChange: (html) => console.log('Content updated:', html),
+      });
+    </script>
+  </body>
+</html>
 ```
 
 ---

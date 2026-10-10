@@ -45,29 +45,31 @@
 
 ```bash
 # pnpm
-pnpm add @nofinite/media
+pnpm add @nofinite/media @nofinite/nuicss
 
 # npm
-npm install @nofinite/media
+npm install @nofinite/media @nofinite/nuicss
 
 # yarn
-yarn add @nofinite/media
+yarn add @nofinite/media @nofinite/nuicss
 ```
 
 ---
 
 ## Styles Setup
 
-Import the unified player stylesheet in your application's entrypoint or root layout:
+Media combines modern glassmorphic OKLCH design tokens from NUICSS with player layout chrome from `@nofinite/media/styles`. Import both stylesheets at your application root:
 
 ```ts
 // In your root layout (Next.js layout.tsx, Vite main.tsx, or index.ts)
+import '@nofinite/nuicss/styles.css';
 import '@nofinite/media/styles';
 ```
 
-Alternatively, you can import the raw CSS file directly:
+Alternatively, you can import the raw CSS files directly:
 
 ```css
+@import '@nofinite/nuicss/styles.css';
 @import '@nofinite/media/styles.css';
 ```
 
@@ -78,6 +80,8 @@ Alternatively, you can import the raw CSS file directly:
 ### 1. React Video Player
 
 ```tsx
+import '@nofinite/nuicss/styles.css';
+import '@nofinite/media/styles';
 import { VideoPlayer } from '@nofinite/media/react';
 
 export function MoviePlayer() {
@@ -174,6 +178,43 @@ player.setPlaybackRate(1.25);
 
 // Cleanup on unmount (SPA safe, detaches all listeners)
 // player.destroy();
+```
+
+### 4. Zero-Build CDN (ESM)
+
+For rapid prototyping or server-rendered HTML/HTMX environments without a build step:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- NUICSS Design Tokens & Media Player Styles -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss/dist/styles.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@nofinite/media/dist/styles.css"
+    />
+  </head>
+  <body class="bg-surface p-6">
+    <div id="player-container"></div>
+
+    <script type="module">
+      import { createMediaPlayer } from 'https://esm.sh/@nofinite/media';
+
+      const player = createMediaPlayer({
+        src: 'https://files.vidstack.io/sprite-fight/720p.mp4',
+        poster: 'https://files.vidstack.io/sprite-fight/poster.webp',
+        title: 'Sprite Fight',
+      });
+
+      document.getElementById('player-container').appendChild(player.element);
+    </script>
+  </body>
+</html>
 ```
 
 ---

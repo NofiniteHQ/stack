@@ -57,11 +57,22 @@ yarn add @nofinite/charts @nofinite/nuicss
 
 ---
 
+## Styles Setup
+
+Charts is styled natively via NUICSS design tokens (`var(--chart-1)`, `var(--color-primary)`, `var(--bg-surface)`). Import the stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+
+```tsx
+import '@nofinite/nuicss/styles.css';
+```
+
+---
+
 ## Quick Start
 
 ### In React
 
 ```tsx
+import '@nofinite/nuicss/styles.css';
 import { AreaChart } from '@nofinite/charts/react';
 
 const data = [
@@ -104,6 +115,44 @@ export function RevenueChart() {
 
   document.getElementById('chart-container').innerHTML = html;
 </script>
+```
+
+### Zero-Build CDN (ESM)
+
+For rapid prototyping or server-rendered environments without a build step:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- NUICSS Design Tokens & Stylesheet -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss/dist/styles.css"
+    />
+  </head>
+  <body class="bg-surface p-6">
+    <div id="chart-container"></div>
+
+    <script type="module">
+      import { renderChart } from 'https://esm.sh/@nofinite/charts';
+
+      const html = renderChart({
+        variant: 'area',
+        data: [
+          { label: 'Jan', value: 120 },
+          { label: 'Feb', value: 240 },
+          { label: 'Mar', value: 190 },
+          { label: 'Apr', value: 380 },
+        ],
+        height: 300,
+      });
+
+      document.getElementById('chart-container').innerHTML = html;
+    </script>
+  </body>
+</html>
 ```
 
 ---

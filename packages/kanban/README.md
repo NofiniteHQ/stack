@@ -58,10 +58,20 @@ npm install @nofinite/kanban @nofinite/nuicss
 yarn add @nofinite/kanban @nofinite/nuicss
 ```
 
-Import the stylesheet in your application:
+## Styles Setup
+
+Kanban combines design tokens and glassmorphic surfaces from NUICSS with dedicated board layout geometry from `@nofinite/kanban/styles.css`. Import both stylesheets at your application root (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+
+```tsx
+import '@nofinite/nuicss/styles.css';
+import '@nofinite/kanban/styles.css';
+```
+
+Or via CSS `@import`:
 
 ```css
-/* In your global styles */
+/* In your global stylesheet */
+@import '@nofinite/nuicss/styles.css';
 @import '@nofinite/kanban/styles.css';
 ```
 
@@ -69,9 +79,11 @@ Import the stylesheet in your application:
 
 ## Quick Start
 
-### React Component
+### In React
 
 ```tsx
+import '@nofinite/nuicss/styles.css';
+import '@nofinite/kanban/styles.css';
 import { useState, useRef } from 'react';
 import {
   Kanban,
@@ -191,11 +203,69 @@ board.addCard('col-todo', { id: 'task-2', title: 'Write tests' });
 // board.destroy();
 ```
 
+### Zero-Build CDN (ESM)
+
+For rapid prototyping or server-rendered environments without a build step:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- NUICSS Design Tokens & Kanban Geometry Styles -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss/dist/styles.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@nofinite/kanban/dist/styles.css"
+    />
+  </head>
+  <body class="bg-surface p-6">
+    <div id="board-container"></div>
+
+    <script type="module">
+      import { createKanbanBoard } from 'https://esm.sh/@nofinite/kanban';
+
+      const board = createKanbanBoard({
+        container: document.getElementById('board-container'),
+        columns: [
+          {
+            id: 'todo',
+            title: 'To Do',
+            items: [
+              {
+                id: 'task-1',
+                title: 'Audit Hardware Key Isolation',
+                badge: { label: 'Security' },
+              },
+            ],
+          },
+          {
+            id: 'done',
+            title: 'Done',
+            items: [],
+          },
+        ],
+        allowAddColumn: true,
+        enforceWipLimit: true,
+        onCardMove: ({ itemId, targetColumnId, newIndex }) => {
+          console.log(
+            `Moved card ${itemId} to ${targetColumnId} at position ${newIndex}`
+          );
+        },
+      });
+    </script>
+  </body>
+</html>
+```
+
 ---
 
 ## Keyboard Accessibility
 
-`@nofinite/kanban` adheres strictly to W3C ARIA accessibility best practices:
+Kanban adheres strictly to W3C ARIA accessibility best practices:
 
 | Shortcut           | Action                               |
 | :----------------- | :----------------------------------- |
