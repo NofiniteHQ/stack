@@ -35,7 +35,7 @@
 - **Framework-Agnostic Core:** Native W3C Custom Element engine (`createMediaPlayer`) with zero React dependencies or bundle penalty.
 - **Next.js App Router & RSC Ready:** React entrypoint preserves byte-0 `'use client';` directives across both ESM and CJS bundles.
 - **Adaptive Streaming Built-In:** Native support for HLS (`.m3u8`), DASH (`.mpd`), MP4, WebM, MP3, WAV, AAC, and YouTube with lazy-loaded streaming decoders.
-- **Glassmorphic OKLCH Theming:** Fully harmonized with `@nofinite/nuicss` design tokens (`--color-primary`, `--bg-surface`, `--bg-subtle`, `--fg-default`) supporting seamless light and dark mode cascading.
+- **Glassmorphic OKLCH Theming:** Fully harmonized with NUICSS design tokens (`--color-primary`, `--bg-surface`, `--bg-subtle`, `--fg-default`) supporting seamless light and dark mode cascading.
 - **CDN CORS Resilience:** Default `crossOrigin="anonymous"` handling prevents browser CORS rejections on external WebVTT subtitles, storyboard thumbnails, and audio streams.
 - **Zero Memory Leaks:** Automatic listener registry detachment and element teardown on `player.destroy()`, engineered for single-page applications.
 

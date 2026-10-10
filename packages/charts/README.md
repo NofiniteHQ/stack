@@ -32,12 +32,12 @@
 
 ## Overview
 
-Nofinite Charts provides an ultra-lightweight, modular charting engine designed for modern web applications. Engineered on pure SVG vector rendering and mathematically grounded D3 layout primitives, it pairs seamlessly with the `@nofinite/nuicss` design token ecosystem.
+Charts provides an ultra-lightweight, modular charting engine designed for modern web applications. Engineered on pure SVG vector rendering and mathematically grounded D3 layout primitives, it pairs seamlessly with the NUICSS design token ecosystem.
 
 - **Universal Core:** Pure SVG vector rendering with smooth monotone cubic hermite splines (`curveMonotoneX`), multi-stop gradient falloffs, and responsive `viewBox`.
 - **Zero Framework Lock-in:** Works across plain HTML, HTMX, Vue, Svelte, and React.
 - **Idiomatic React Export:** Dedicated `@nofinite/charts/react` with `<AreaChart />`, `<BarChart />`, `<LineChart />`, `<PieChart />`, `<DonutChart />`, `<ScatterChart />`, and `<Sparkline />`.
-- **Token-Driven Theming:** Styled natively with `@nofinite/nuicss` CSS variables (`var(--chart-1)`, `var(--color-primary)`, `var(--bg-surface)`). Dark mode switches instantly with 0ms delay.
+- **Token-Driven Theming:** Styled natively with NUICSS design tokens (`var(--chart-1)`, `var(--color-primary)`, `var(--bg-surface)`). Dark mode switches instantly with 0ms delay.
 - **Featherweight Bundle:** Modular D3 mathematics under 25 kB gzipped.
 
 ---

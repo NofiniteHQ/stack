@@ -32,10 +32,10 @@
 
 ## Overview
 
-Nofinite Kanban is a universal, framework-agnostic task board and workflow suite engineered on Atlassian's Pragmatic Drag and Drop. It combines high-performance DOM reconciliation with strict `@nofinite/nuicss` design tokens and glassmorphic surfaces.
+Kanban is a universal, framework-agnostic task board and workflow suite engineered on Atlassian's Pragmatic Drag and Drop. It combines high-performance DOM reconciliation with strict NUICSS design tokens and glassmorphic surfaces.
 
 - **Universal Architecture:** Pure TypeScript core (`createKanbanBoard`, `renderKanbanHTML`) with first-class React bindings (`<Kanban />`). Works seamlessly in vanilla HTML/JS, Next.js, React, Vue, or Svelte.
-- **Self-Contained NUICSS Stylesheet:** Ships standalone CSS (`@nofinite/kanban/styles.css`) referencing `@nofinite/nuicss` tokens (`var(--bg-surface)`, `var(--color-primary)`, `var(--border-default)`) and modern glassmorphic surfaces (`backdrop-blur-sm`).
+- **Self-Contained NUICSS Stylesheet:** Ships standalone CSS (`@nofinite/kanban/styles.css`) referencing NUICSS tokens (`var(--bg-surface)`, `var(--color-primary)`, `var(--border-default)`) and modern glassmorphic surfaces (`backdrop-blur-sm`).
 - **Complete Keyboard Accessibility:** Full W3C ARIA grid compliance. Navigate cards with `ArrowUp`/`ArrowDown`, reorder across columns with `Alt+ArrowLeft`/`Alt+ArrowRight`, jump with `Home`/`End`, and announce all movements via dynamic `aria-live="polite"` live regions.
 - **Targeted DOM Reconciliation:** Preserves user scroll position, column focus, and active drag adapters across live data updates without blunt `innerHTML` re-renders.
 - **Enforceable WIP Limits & Validation Hooks:** Define column `wipLimit`, enforce strict drag blocking via `enforceWipLimit`, and implement custom business rules with `canMoveCard`.

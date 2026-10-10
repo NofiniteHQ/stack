@@ -32,11 +32,11 @@
 
 ## Overview
 
-Nofinite Markon is a modern document authoring and WYSIWYG rich text engine engineered for speed, modularity, and framework versatility. Built upon the robust foundation of TipTap and ProseMirror, Markon features declarative React wrappers, a zero-dependency vanilla JS class, and comprehensive styling driven by `@nofinite/nuicss` design tokens.
+Markon is a modern document authoring and WYSIWYG rich text engine engineered for speed, modularity, and framework versatility. Built upon the robust foundation of TipTap and ProseMirror, Markon features declarative React wrappers, a zero-dependency vanilla JS class, and comprehensive styling driven by NUICSS design tokens.
 
 - **Universal Core:** Framework-agnostic Vanilla DOM class (`MarkonEditor`). Works out of the box with plain HTML, HTMX, Vue, Svelte, and React.
 - **Idiomatic React Adapter:** Dedicated `@nofinite/markon/react` export with declarative `<MarkonEditor />` component and `useMarkon` hook.
-- **Design Tokens & OKLCH Theming:** 100% styled with `@nofinite/nuicss` semantic component superclasses (`card`, `btn`, `input`) and OKLCH color palettes.
+- **Design Tokens & OKLCH Theming:** 100% styled with NUICSS semantic component superclasses (`card`, `btn`, `input`) and OKLCH color palettes.
 - **Rich Content Suite:** Comprehensive formatting extensions including headings, blockquotes, ordered/bullet lists, markdown tables, code blocks, hyperlinks, text highlights, and inline formatting marks.
 - **Accessible & Responsive:** W3C keyboard navigation shortcuts, bubble menu toolbars, and responsive editing viewports.
 

@@ -1,7 +1,7 @@
 {
   "name": "@nofinite/kanban",
   "version": "1.0.0",
-  "description": "Universal, framework-agnostic task board and Kanban suite powered by Pragmatic Drag and Drop and styled with @nofinite/nuicss design tokens.",
+  "description": "Universal, framework-agnostic task board and Kanban suite powered by Pragmatic Drag and Drop and styled with NUICSS design tokens.",
   "license": "Apache-2.0",
   "private": false,
   "type": "module",
