@@ -3,13 +3,14 @@
  * Renders high-legibility X/Y axes conforming to @nofinite/nuicss typography.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ChartScale<TTick = number | Date> = ((
   val: any
 ) => number | undefined) & {
   ticks?: (count?: number) => TTick[];
   bandwidth?: () => number;
 };
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export interface AxisOptions {
   width: number;
