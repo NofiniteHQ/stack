@@ -48,6 +48,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
+    pool: 'threads',
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 });

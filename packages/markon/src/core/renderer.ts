@@ -137,6 +137,68 @@ export const MARKON_RENDERER_CSS = `
   color: var(--fg-default);
   font-size: 1rem;
 }
+.markon-content ul:not(.task-list) {
+  list-style-type: disc;
+  margin: 1rem 0;
+  padding-left: 1.625rem;
+}
+.markon-content ol {
+  list-style-type: decimal;
+  margin: 1rem 0;
+  padding-left: 1.625rem;
+}
+.markon-content li {
+  margin: 0.35rem 0;
+  line-height: 1.7;
+}
+.markon-content ul ul {
+  list-style-type: circle;
+  margin: 0.25rem 0;
+}
+.markon-content ol ol {
+  list-style-type: lower-alpha;
+  margin: 0.25rem 0;
+}
+.markon-content ul.task-list {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 1rem 0;
+}
+.markon-content li.task-item {
+  list-style: none !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0.35rem 0;
+}
+.markon-content li.task-item input[type="checkbox"] {
+  margin-top: 0.35rem;
+  accent-color: var(--color-primary);
+  cursor: default;
+}
+.markon-content blockquote {
+  border-left: 4px solid var(--color-primary, oklch(0.65 0.22 260));
+  background-color: var(--bg-subtle, oklch(0.96 0.01 260));
+  color: var(--fg-muted, oklch(0.45 0.02 260));
+  font-style: italic;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.markon-content hr {
+  border: none;
+  border-top: 1px solid var(--border-default, oklch(0.88 0.01 260));
+  margin: 2rem 0;
+}
+.markon-content code:not(pre code) {
+  background-color: var(--bg-subtle, oklch(0.95 0.01 260));
+  color: var(--color-primary, oklch(0.6 0.22 260));
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+  border: 1px solid var(--border-default, oklch(0.9 0.01 260));
+}
 .markon-heading {
   font-weight: 700;
   line-height: 1.3;
@@ -353,6 +415,108 @@ h6.markon-heading { font-size: 0.875rem; text-transform: uppercase; letter-spaci
   line-height: 1.6;
   color: var(--fg-default);
 }
+/* Code syntax highlighting via Lowlight (OKLCH token harmony) */
+.markon-code-block .hljs-keyword,
+.markon-code-block .hljs-selector-tag,
+.markon-code-block .hljs-built_in {
+  color: oklch(0.55 0.22 300);
+  font-weight: 600;
+}
+.markon-code-block .hljs-string,
+.markon-code-block .hljs-attribute,
+.markon-code-block .hljs-symbol {
+  color: oklch(0.58 0.18 150);
+}
+.markon-code-block .hljs-title,
+.markon-code-block .hljs-section,
+.markon-code-block .hljs-function {
+  color: oklch(0.55 0.18 240);
+  font-weight: 600;
+}
+.markon-code-block .hljs-comment,
+.markon-code-block .hljs-quote {
+  color: var(--fg-muted, oklch(0.55 0.02 260));
+  font-style: italic;
+}
+.markon-code-block .hljs-number,
+.markon-code-block .hljs-literal {
+  color: oklch(0.62 0.19 55);
+}
+.markon-code-block .hljs-variable,
+.markon-code-block .hljs-template-variable {
+  color: oklch(0.58 0.15 200);
+}
+.markon-code-block .hljs-type,
+.markon-code-block .hljs-class .hljs-title {
+  color: oklch(0.65 0.18 85);
+  font-weight: 600;
+}
+.markon-code-block .hljs-tag,
+.markon-code-block .hljs-name {
+  color: oklch(0.55 0.22 25);
+}
+.markon-code-block .hljs-attr {
+  color: oklch(0.58 0.16 230);
+}
+
+/* Dark mode syntax tokens */
+[data-theme="dark"] .markon-code-block .hljs-keyword,
+[data-theme="dark"] .markon-code-block .hljs-selector-tag,
+[data-theme="dark"] .markon-code-block .hljs-built_in,
+.dark .markon-code-block .hljs-keyword,
+.dark .markon-code-block .hljs-selector-tag,
+.dark .markon-code-block .hljs-built_in {
+  color: oklch(0.78 0.2 300);
+}
+[data-theme="dark"] .markon-code-block .hljs-string,
+[data-theme="dark"] .markon-code-block .hljs-attribute,
+[data-theme="dark"] .markon-code-block .hljs-symbol,
+.dark .markon-code-block .hljs-string,
+.dark .markon-code-block .hljs-attribute,
+.dark .markon-code-block .hljs-symbol {
+  color: oklch(0.78 0.17 150);
+}
+[data-theme="dark"] .markon-code-block .hljs-title,
+[data-theme="dark"] .markon-code-block .hljs-section,
+[data-theme="dark"] .markon-code-block .hljs-function,
+.dark .markon-code-block .hljs-title,
+.dark .markon-code-block .hljs-section,
+.dark .markon-code-block .hljs-function {
+  color: oklch(0.78 0.16 235);
+}
+[data-theme="dark"] .markon-code-block .hljs-comment,
+[data-theme="dark"] .markon-code-block .hljs-quote,
+.dark .markon-code-block .hljs-comment,
+.dark .markon-code-block .hljs-quote {
+  color: oklch(0.65 0.02 260);
+}
+[data-theme="dark"] .markon-code-block .hljs-number,
+[data-theme="dark"] .markon-code-block .hljs-literal,
+.dark .markon-code-block .hljs-number,
+.dark .markon-code-block .hljs-literal {
+  color: oklch(0.8 0.18 60);
+}
+[data-theme="dark"] .markon-code-block .hljs-variable,
+[data-theme="dark"] .markon-code-block .hljs-template-variable,
+.dark .markon-code-block .hljs-variable,
+.dark .markon-code-block .hljs-template-variable {
+  color: oklch(0.78 0.15 200);
+}
+[data-theme="dark"] .markon-code-block .hljs-type,
+.dark .markon-code-block .hljs-type {
+  color: oklch(0.82 0.16 85);
+}
+[data-theme="dark"] .markon-code-block .hljs-tag,
+[data-theme="dark"] .markon-code-block .hljs-name,
+.dark .markon-code-block .hljs-tag,
+.dark .markon-code-block .hljs-name {
+  color: oklch(0.76 0.2 25);
+}
+[data-theme="dark"] .markon-code-block .hljs-attr,
+.dark .markon-code-block .hljs-attr {
+  color: oklch(0.78 0.16 230);
+}
+
 .markon-math-block {
   padding: 1.25rem;
   border-radius: 0.75rem;
@@ -362,6 +526,35 @@ h6.markon-heading { font-size: 0.875rem; text-transform: uppercase; letter-spaci
   margin: 1.5rem 0;
   overflow-x: auto;
 }
+.markon-math-block .katex-display {
+  display: block;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+.markon-render .katex {
+  font-size: 1.15em;
+  text-rendering: auto;
+  font-family: KaTeX_Main, "Times New Roman", serif;
+  line-height: 1.2;
+}
+.markon-render .katex .katex-html {
+  display: inline-block;
+}
+.markon-render .katex .base {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  width: min-content;
+}
+.markon-render .katex .frac-line {
+  display: inline-block;
+  width: 100%;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+}
+
 .markon-callout {
   margin: 1.5rem 0;
   border-radius: 0.75rem;
@@ -370,6 +563,68 @@ h6.markon-heading { font-size: 0.875rem; text-transform: uppercase; letter-spaci
   align-items: flex-start;
   gap: 0.875rem;
   border: 1px solid var(--border-default);
+}
+/* Standalone Callout variant fallbacks */
+.markon-callout.alert-info {
+  background-color: var(--color-info-subtle, oklch(0.96 0.03 235));
+  border-color: var(--color-info-muted, oklch(0.86 0.08 235));
+}
+.markon-callout.alert-info .alert-icon {
+  color: var(--color-info, oklch(0.55 0.18 235));
+}
+.markon-callout.alert-success {
+  background-color: var(--color-success-subtle, oklch(0.96 0.04 150));
+  border-color: var(--color-success-muted, oklch(0.86 0.08 150));
+}
+.markon-callout.alert-success .alert-icon {
+  color: var(--color-success, oklch(0.55 0.18 150));
+}
+.markon-callout.alert-warning {
+  background-color: var(--color-warning-subtle, oklch(0.97 0.05 85));
+  border-color: var(--color-warning-muted, oklch(0.88 0.1 85));
+}
+.markon-callout.alert-warning .alert-icon {
+  color: var(--color-warning, oklch(0.6 0.18 85));
+}
+.markon-callout.alert-danger {
+  background-color: var(--color-danger-subtle, oklch(0.96 0.04 25));
+  border-color: var(--color-danger-muted, oklch(0.86 0.1 25));
+}
+.markon-callout.alert-danger .alert-icon {
+  color: var(--color-danger, oklch(0.55 0.22 25));
+}
+.markon-callout.alert-tip {
+  background-color: var(--color-primary-subtle, oklch(0.96 0.04 260));
+  border-color: var(--color-primary-muted, oklch(0.86 0.1 260));
+}
+.markon-callout.alert-tip .alert-icon {
+  color: var(--color-primary, oklch(0.6 0.22 260));
+}
+
+[data-theme="dark"] .markon-callout.alert-info,
+.dark .markon-callout.alert-info {
+  background-color: oklch(0.22 0.04 235);
+  border-color: oklch(0.35 0.08 235);
+}
+[data-theme="dark"] .markon-callout.alert-success,
+.dark .markon-callout.alert-success {
+  background-color: oklch(0.22 0.04 150);
+  border-color: oklch(0.35 0.08 150);
+}
+[data-theme="dark"] .markon-callout.alert-warning,
+.dark .markon-callout.alert-warning {
+  background-color: oklch(0.23 0.05 85);
+  border-color: oklch(0.38 0.09 85);
+}
+[data-theme="dark"] .markon-callout.alert-danger,
+.dark .markon-callout.alert-danger {
+  background-color: oklch(0.22 0.05 25);
+  border-color: oklch(0.36 0.09 25);
+}
+[data-theme="dark"] .markon-callout.alert-tip,
+.dark .markon-callout.alert-tip {
+  background-color: oklch(0.22 0.04 260);
+  border-color: oklch(0.35 0.08 260);
 }
 .markon-details {
   border-radius: 0.75rem;

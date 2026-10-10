@@ -3,6 +3,11 @@
   "version": "2.0.0",
   "description": "Universal, framework-agnostic rich text and content authoring engine powered by TipTap and ProseMirror.",
   "license": "Apache-2.0",
+  "author": "Nofinite HQ",
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
+  },
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
@@ -11,6 +16,10 @@
   "sideEffects": [
     "*.css"
   ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
+  },
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
@@ -19,6 +28,8 @@
       "default": "./dist/index.js"
     },
     "./styles.css": "./dist/markon.css",
+    "./dist/markon.css": "./dist/markon.css",
+    "./dist/*": "./dist/*",
     "./react": {
       "types": "./dist/types/react/index.d.ts",
       "import": "./dist/react/index.js",
@@ -29,6 +40,7 @@
   },
   "files": [
     "dist",
+    "!dist/package.json",
     "README.md",
     "LICENSE"
   ],
@@ -66,7 +78,8 @@
     "htmx"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@floating-ui/dom": "^1.6.13",
