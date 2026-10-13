@@ -1,192 +1,160 @@
-# Implementation Plan: Developer Architecture, Central Docs & AI Governance Rules
+# Implementation Plan: Full Documentation Synchronization (Reflecting `oss-docs` into `stack/docs`)
 
 ## Executive Summary
 
-This implementation plan establishes a mature, enterprise-grade engineering and documentation architecture across the Nofinite ecosystem. It accomplishes four major goals:
-
-1. **Developer Guidelines & Governance:** Introduces `ARCHITECTURE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and Architectural Decision Records (ADRs) in `d:\stack`.
-2. **Central Monorepo Documentation Hub (`d:\stack\docs/`):** Establishes a clean, centralized markdown documentation tree at the root of `d:\stack` that directly mirrors `d:\oss-docs` routes, eliminating per-package clutter while preserving canonical API specifications.
-3. **AI Engineering Rules & Constitution Modernization:** Updates `AGENTS.md` and `.agents/rules/` across `d:\stack`, `d:\nuix`, and `d:\oss-docs` to enforce the **Zero Downstream CSS Invariant**, the **Official Brand Taxonomy**, the **Two-Tier Commit vs. Release Protocol**, and the **Cross-Repo Docs Sync Contract**.
-4. **Release & Changelog System Integrity:** Initializes `CHANGELOG.md` across all missing domain packages (`Nofinite Charts`, `Nofinite Kanban`, `Nofinite Locale`, `Nofinite Markon`, `Nofinite Media`) and creates a comprehensive consolidation Changeset for the accumulated unreleased features.
+This plan replaces the placeholder single `README.md` files in `d:\stack\docs/` with the **complete, comprehensive documentation tree** reflecting the entire documentation suite from `d:\oss-docs`.
 
 ---
 
-## 1. Problem Statement & Root Cause Analysis
+## 1. Problem Statement
 
-### Current State
+Previously, `d:\stack\docs/` only contained high-level starter `README.md` files for each package. However, `d:\oss-docs` contains over 120 detailed markdown guides, API references, and component pages across:
 
-1. **Style Fragmentation & Past AI Errors:** Previous AI agents created isolated `.css` bundles in downstream packages because `AGENTS.md` did not have an explicit "Zero Downstream CSS Invariant".
-2. **Release & Versioning Void:** Despite over 110 commits on `dev`, package versions remained statically at 1.0.0/2.0.0, `.changeset/` remained untouched since September 22, and 5 out of 8 packages had no `CHANGELOG.md`.
-3. **Documentation Drift:** Package documentation was scattered and ad-hoc. There was no centralized home in `d:\stack` for canonical Markdown specs, making syncing with `d:\oss-docs` manual and prone to drift.
-4. **Missing Developer Onboarding:** The monorepo lacked root-level `ARCHITECTURE.md`, `CONTRIBUTING.md`, and `CODE_OF_CONDUCT.md` files for human contributors and AI agents.
-5. **Brand Ambiguity:** AI agents frequently referred to packages using raw npm strings (`@nofinite/kanban`) or incorrect brand names ("NUI Kanban" instead of the official "Nofinite Kanban").
+- **NUI:** Full component catalog (Button, Modal, Dialog, Accordion, Table, CodeBlock, etc.) and getting-started guides.
+- **NUICSS:** Architecture, theming, OKLCH tokens, superclasses, and utility references.
+- **Nofinite Kanban:** Board architecture, event flows, WIP limits, search & filter engine, imperative handles, and keyboard navigation.
+- **Nofinite Charts:** Installation, AreaChart, BarChart, LineChart, PieChart, ScatterChart, Legend, and Export guides.
+- **Nofinite Media:** Installation, VideoPlayer, and AudioPlayer streaming guides.
+- **Nofinite Markon:** Installation, editor setup, TipTap syntax, and bubble menu guides.
+- **Nofinite Locale:** Installation, country lookup, and flag primitives.
+- **Nofinite Utils:** Installation, JWT, OTP, password hashing, UUID, env, and Zeptomail utilities.
+
+To satisfy the **Single Source of Truth** contract, `d:\stack\docs/` must contain the complete, authoritative documentation mirroring every route and topic in `d:\oss-docs`.
+
+### Key Constraints & Rules:
+
+1. **The Pure Markdown Invariant (Zero Live Components):**  
+   All documentation in `d:\stack\docs/` must be 100% pure, clean GitHub-flavored Markdown (`.md`). Never include React JSX tags, `<Preview />`, `<ComponentPreview />`, or `<PackageHero />`. Only include markdown headings, explanations, code blocks (` ```tsx ... ``` `), tables, and lists.
+2. **Current Implementation First (Upgrade Over Old Docs):**  
+   Use `oss-docs` as a reference for structure and topics, but **upgrade every document to reflect the current, latest implementation in `packages/*`**:
+   - Single `@nofinite/nuicss/styles.css` stylesheet setup (no obsolete secondary package stylesheets).
+   - 16 standardized codeblock languages with categorized optgroups in Nofinite Markon and NUI.
+   - Symmetrical typography selector in Nofinite Markon.
+   - Pragmatic drag-and-drop architecture in Nofinite Kanban.
+   - Clean D3 vector math and zero redundant stylesheets in Nofinite Charts.
+   - NUICSS OKLCH token bridges in Nofinite Media.
+   - Strict use of official brand names (**NUICSS**, **NUI**, **Nofinite Charts**, **Nofinite Kanban**, **Nofinite Markon**, **Nofinite Media**, **Nofinite Locale**, **Nofinite Utils**).
 
 ---
 
-## 2. Proposed Architecture & System Design
-
-### 2.1 The Two-Tier Commit vs. Release Protocol
-
-We explicitly formalize the distinction between local commits and NPM releases:
-
-- **Tier 1 — Local Safety Commits (Frequent Checkpoints):**
-  Commits are made locally after every working step/refactor. This is a crucial safety savepoint preventing hallucination loss and providing zero-risk `git reset` anchors. A local commit is **not** an NPM release.
-- **Tier 2 — Changeset Intent Tracking:**
-  When a unit of feature or bugfix work is completed on a package, a `.changeset/<name>.md` file is committed. This records SemVer intent (`patch`, `minor`, `major`) and human-readable release notes without bumping `package.json`.
-- **Tier 3 — Batched Release Milestone:**
-  Releases happen in batched cycles (`npx changeset version`). This consumes changesets, bumps `package.json` versions, and compiles `CHANGELOG.md` files in a clean, isolated release commit.
-
-### 2.2 Official Brand Taxonomy
-
-All discussions, documentation, and agent reasoning must enforce:
-
-- **NUICSS** (`@nofinite/nuicss`): Single-source CSS engine, tokens, OKLCH palettes, and semantic superclasses.
-- **NUI** (`@nofinite/nui`): Core headless & polymorphic React component library.
-- **Nofinite Charts** (`@nofinite/charts`): Data visualization primitives.
-- **Nofinite Kanban** (`@nofinite/kanban`): Drag-and-drop kanban boards and workflow cards.
-- **Nofinite Markon** (`@nofinite/markon`): Markdown WYSIWYG editor, floating bubble menus, codeblock highlight.
-- **Nofinite Media** (`@nofinite/media`): Video/audio player primitives and media token bridges.
-- **Nofinite Locale** (`@nofinite/locale`): Internationalization and localization primitives.
-- **Nofinite Utils** (`@nofinite/utils`): Shared TypeScript core utilities.
-
-### 2.3 Central Monorepo Documentation Hub (`d:\stack\docs/`)
-
-Instead of scattering `docs/` inside each individual package, `d:\stack` maintains a central `docs/` directory that directly mirrors `d:\oss-docs/content/docs/`:
+## 2. Proposed Architecture & Directory Structure
 
 ```
-d:\stack/
-├── ARCHITECTURE.md          # Macro blueprint: System topology, NUICSS single-engine rule, package roles
-├── CONTRIBUTING.md          # How to clone, build, run tests, GitFlow rules, local commits, Changeset workflow
-├── CODE_OF_CONDUCT.md      # Ethics & community standards (Contributor Covenant 2.1)
+d:\stack\docs/
+├── architecture/
+│   ├── 001-unified-nuicss-engine.md
+│   └── 002-package-boundaries-and-subpaths.md
 │
-├── docs/                    # Central Markdown Source of Truth (1-to-1 mirror with oss-docs)
-│   ├── architecture/        # Architectural Decision Records (ADRs)
-│   │   ├── 001-unified-nuicss-engine.md
-│   │   └── 002-package-boundaries-and-subpaths.md
-│   ├── nuicss/              # NUICSS styling engine, tokens, OKLCH, CLI
-│   ├── nui/                 # NUI core components
-│   ├── kanban/              # Nofinite Kanban
-│   ├── charts/              # Nofinite Charts
-│   ├── markon/              # Nofinite Markon
-│   ├── media/               # Nofinite Media
-│   ├── locale/              # Nofinite Locale
-│   └── utils/               # Nofinite Utils
+├── kanban/
+│   ├── index.md             <-- Overview, interactive concepts, why Kanban
+│   ├── installation.md      <-- Package installation & NUICSS import
+│   ├── board.md             <-- Column data model, drag events, reordering
+│   └── features.md          <-- WIP limits, search/filter, imperative handle
 │
-└── packages/
-    ├── kanban/
-    │   ├── README.md        # Lightweight npm overview & quickstart (for npmjs.com)
-    │   ├── CHANGELOG.md     # Package changelog tracking releases
-    │   └── src/
-    └── ...
+├── charts/
+│   ├── index.md             <-- Overview & D3 vector engine concepts
+│   ├── installation.md      <-- Installation & theme setup
+│   ├── area-chart.md        <-- Interpolated spline & stepped area
+│   ├── bar-chart.md         <-- Single & stacked bars
+│   ├── line-chart.md        <-- Multi-series line charts
+│   ├── pie-chart.md         <-- Pie & donut charts
+│   ├── scatter-chart.md     <-- Scatter plot coordinate rendering
+│   ├── legend.md            <-- Interactive series legends & toggles
+│   └── export.md            <-- PNG / SVG canvas export
+│
+├── media/
+│   ├── index.md             <-- Overview & W3C Custom Element engine
+│   ├── installation.md      <-- Installation & player setup
+│   ├── video-player.md      <-- HLS/DASH streaming video player
+│   └── audio-player.md      <-- Audio track playback & waveform
+│
+├── markon/
+│   ├── index.md             <-- Overview & TipTap architecture
+│   ├── getting-started/
+│   │   ├── installation.md  <-- npm / pnpm install
+│   │   ├── setup.md         <-- Editor provider setup
+│   │   └── cdn.md           <-- Standalone script setup
+│   └── usage/
+│       └── markon-syntax.md <-- Rich text, codeblocks & tables
+│
+├── locale/
+│   ├── index.md             <-- Overview & native Intl runtime
+│   ├── getting-started/
+│   │   ├── installation.md  <-- Package install
+│   │   └── cdn.md           <-- CDN quickstart
+│   └── usage/
+│       ├── country-lookup.md<-- ISO country code resolver
+│       └── flags.md         <-- Localized emoji & SVG flags
+│
+├── utils/
+│   ├── index.md             <-- Overview & micro-weight utilities
+│   ├── getting-started/
+│   │   └── installation.md
+│   └── components/
+│       ├── env.md           <-- Type-safe env validation
+│       ├── jwt.md           <-- HMAC-SHA256 JWT tokens
+│       ├── otp.md           <-- TOTP / HOTP generator
+│       ├── password.md      <-- Scrypt password hashing
+│       ├── uuid.md          <-- Fast v4 / v7 UUID generation
+│       └── zeptomail.md     <-- Transactional email client
+│
+├── nuicss/
+│   ├── index.md             <-- Styling engine overview
+│   ├── architecture.md      <-- Token layers & zero-runtime compilation
+│   ├── installation.md      <-- CLI & package install
+│   ├── theming.md           <-- OKLCH color palettes & dark mode
+│   ├── superclasses.md      <-- Pre-engineered component superclasses
+│   ├── ide-setup.md         <-- VS Code / Cursor customData autocomplete
+│   └── migration.md         <-- Tailwind-to-NUICSS migration guide
+│
+└── nui/
+    ├── index.md             <-- Core component overview & polymorphic design
+    ├── getting-started/
+    │   ├── installation.md
+    │   ├── setup.md
+    │   ├── themetokens.md
+    │   └── customtheme.md
+    └── components/          <-- Full component library (40+ components)
+        ├── accordion.md, alert.md, avatar.md, badge.md, breadcrumbs.md
+        ├── button.md, card.md, checkbox.md, chip.md, combobox.md
+        ├── commandpalette.md, contextmenu.md, datagrid.md, datepicker.md
+        ├── dialog.md, drawer.md, dropdown.md, fileuploader.md, hovercard.md
+        ├── input.md, modal.md, pagination.md, popover.md, progress.md
+        ├── radiogroup.md, select.md, skeleton.md, slider.md, spinner.md
+        ├── switch.md, table.md, tabs.md, textarea.md, toast.md, tooltip.md
+        └── ...
 ```
 
-### 2.4 The Cross-Repo Docs Sync Contract
+---
 
-- **In `d:\stack`:** Developers and AI agents write pure, standard Markdown in `d:\stack\docs/<pkg>/` and keep `packages/<pkg>/README.md` lean.
-- **In `d:\oss-docs`:** The documentation developers consume that Markdown and enrich it with interactive client components (`<ComponentPreview />`), live sandboxes, and Theme Studio pickers.
+## 3. Phased Execution Steps
+
+### Phase 1: Mirror `kanban`, `charts`, and `media` Documentation
+
+1. Migrate the complete documentation pages from `d:\oss-docs\src\app\kanban/**/*.mdx` into clean, standard Markdown in `d:\stack\docs\kanban/` (`index.md`, `installation.md`, `board.md`, `features.md`).
+2. Migrate all 9 chart documentation pages from `d:\oss-docs\src\app\charts/**/*.mdx` into `d:\stack\docs\charts/` (`index.md`, `installation.md`, `area-chart.md`, `bar-chart.md`, `line-chart.md`, `pie-chart.md`, `scatter-chart.md`, `legend.md`, `export.md`).
+3. Migrate all media player documentation pages from `d:\oss-docs\src\app\media/**/*.mdx` into `d:\stack\docs\media/` (`index.md`, `installation.md`, `video-player.md`, `audio-player.md`).
+
+### Phase 2: Mirror `markon`, `locale`, `utils`, and `nuicss`
+
+1. Replicate full guides and references from `d:\oss-docs\docs/` into `d:\stack\docs/`:
+   - `d:\stack\docs\markon/` (getting-started, usage guides)
+   - `d:\stack\docs\locale/` (country-lookup, flags, usage)
+   - `d:\stack\docs\utils/` (crypto, auth, tokens, env)
+   - `d:\stack\docs\nuicss/` (architecture, theming, superclasses, ide-setup, migration)
+
+### Phase 3: Mirror the Complete `nui` Component Library
+
+1. Replicate the full 40+ component docs and getting-started guides from `d:\oss-docs\docs\nui/` into `d:\stack\docs\nui/`.
+
+### Phase 4: Sync into `d:\oss-docs\docs/`
+
+1. Ensure `d:\oss-docs\docs/` also contains the clean Markdown mirrors of `kanban`, `charts`, and `media` so both repositories share identical ground truth documentation.
 
 ---
 
-## 3. Affected Files and Modules
+## 4. Verification & Review Strategy
 
-| Area                     | File Path                                                           | Action                                                       |
-| :----------------------- | :------------------------------------------------------------------ | :----------------------------------------------------------- |
-| **Developer Governance** | `d:\stack\ARCHITECTURE.md`                                          | Create comprehensive system blueprint                        |
-| **Developer Governance** | `d:\stack\CONTRIBUTING.md`                                          | Create developer contribution & workflow guide               |
-| **Developer Governance** | `d:\stack\CODE_OF_CONDUCT.md`                                       | Create standard Contributor Covenant 2.1                     |
-| **Architecture ADRs**    | `d:\stack\docs\architecture\001-unified-nuicss-engine.md`           | Create ADR documenting single-engine CSS architecture        |
-| **Architecture ADRs**    | `d:\stack\docs\architecture\002-package-boundaries-and-subpaths.md` | Create ADR documenting package modularity & exports          |
-| **Central Docs Hub**     | `d:\stack\docs\nuicss\README.md`                                    | Create central NUICSS markdown documentation                 |
-| **Central Docs Hub**     | `d:\stack\docs\nui\README.md`                                       | Create central NUI markdown documentation                    |
-| **Central Docs Hub**     | `d:\stack\docs\kanban\README.md`                                    | Create central Nofinite Kanban markdown documentation        |
-| **Central Docs Hub**     | `d:\stack\docs\charts\README.md`                                    | Create central Nofinite Charts markdown documentation        |
-| **Central Docs Hub**     | `d:\stack\docs\markon\README.md`                                    | Create central Nofinite Markon markdown documentation        |
-| **Central Docs Hub**     | `d:\stack\docs\media\README.md`                                     | Create central Nofinite Media markdown documentation         |
-| **Central Docs Hub**     | `d:\stack\docs\locale\README.md`                                    | Create central Nofinite Locale markdown documentation        |
-| **Central Docs Hub**     | `d:\stack\docs\utils\README.md`                                     | Create central Nofinite Utils markdown documentation         |
-| **Package Changelogs**   | `packages/charts/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
-| **Package Changelogs**   | `packages/kanban/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
-| **Package Changelogs**   | `packages/locale/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
-| **Package Changelogs**   | `packages/markon/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
-| **Package Changelogs**   | `packages/media/CHANGELOG.md`                                       | Initialize standard Keep-a-Changelog template                |
-| **Changesets**           | `.changeset/consolidate-ecosystem-architecture.md`                  | Create Changeset documenting styling consolidation           |
-| **AI Rules (stack)**     | `d:\stack\AGENTS.md`                                                | Add 9-stage workflow, brand rules, two-tier commit protocol  |
-| **AI Rules (stack)**     | `d:\stack\.agents\rules\architecture.md`                            | Add Zero Downstream CSS Invariant & Brand Taxonomy           |
-| **AI Rules (stack)**     | `d:\stack\.agents\rules\release.md`                                 | Add compulsory package changelog integrity & Changeset rules |
-| **AI Rules (nuix)**      | `d:\nuix\AGENTS.md`                                                 | Sync Zero Downstream CSS, Brand Taxonomy, and Doc Sync rules |
-| **AI Rules (oss-docs)**  | `d:\oss-docs\AGENTS.md`                                             | Sync Brand Taxonomy, Cross-Repo Docs Sync Contract           |
-
----
-
-## 4. Implementation Steps (Phased Execution)
-
-### Phase 1: Developer Governance & Architecture
-
-1. Write `d:\stack\ARCHITECTURE.md` defining the macro ecosystem topology, NUICSS single-engine architecture, and package roles.
-2. Write `d:\stack\CONTRIBUTING.md` detailing local safety commit etiquette, Changesets, branch promotion (`feature` → `dev` → `main`), and verification steps.
-3. Write `d:\stack\CODE_OF_CONDUCT.md` establishing open-source community ethics and professional conduct.
-4. Establish `d:\stack\docs\architecture/` with ADRs:
-   - `001-unified-nuicss-engine.md` (documents eliminating dual-track styles and migrating 450+ lines of Kanban/Markon styles to NUICSS).
-   - `002-package-boundaries-and-subpaths.md` (documents headless package boundaries, modular CSS subpaths, and backward-compatible shims).
-
-### Phase 2: Central Documentation Hub Setup (`d:\stack\docs/`)
-
-1. Create `d:\stack\docs/{nuicss,nui,kanban,charts,markon,media,locale,utils}/`.
-2. Populate clean, canonical Markdown specifications for each package (installation, zero-config quickstart, architecture, key APIs).
-3. Validate that the directory structure seamlessly maps 1-to-1 with `d:\oss-docs/content/docs/`.
-
-### Phase 3: Changelog Initialization & Changeset Creation
-
-1. Create initial `CHANGELOG.md` in `packages/{charts,kanban,locale,markon,media}` following Keep-a-Changelog format.
-2. Create `.changeset/consolidate-ecosystem-architecture.md` documenting:
-   - `@nofinite/nuicss`: minor (incorporated Kanban DND, Markon floating toolbar, modular subpaths).
-   - `@nofinite/kanban`: minor (migrated styles to NUICSS, lightweight shim).
-   - `@nofinite/markon`: minor (migrated editor chrome to NUICSS, lightweight shim).
-   - `@nofinite/charts`: minor (removed duplicate NUICSS bundle, lightweight shim).
-   - `@nofinite/media`: patch (NUICSS OKLCH token bridge integration).
-
-### Phase 4: AI Engineering Rules & Constitutions Modernization
-
-1. Update `d:\stack\AGENTS.md` with:
-   - 9-stage engineering workflow: `UNDERSTAND → PLAN → STOP → APPROVAL → IMPLEMENT → VERIFY → DOCUMENT & VERSION → REVIEW → COMMIT`.
-   - Two-tier commit vs release protocol.
-   - Zero Downstream CSS Invariant.
-   - Official Brand Taxonomy.
-2. Update `d:\stack\.agents\rules\architecture.md` and `d:\stack\.agents\rules\release.md`.
-3. Update `d:\nuix\AGENTS.md` and `d:\oss-docs\AGENTS.md` to guarantee ecosystem alignment.
-
----
-
-## 5. Alternatives Considered
-
-1. **Scattered `docs/` in each package:**
-   - _Rejected:_ Clutters packages, makes cross-package guides difficult, and complicates `oss-docs` syncing.
-2. **Single Git Submodule for `oss-docs`:**
-   - _Rejected:_ Fragile in multi-developer setups, causes detached HEAD and submodule pointer conflicts.
-3. **Automated Version Bumps on Every Local Commit:**
-   - _Rejected:_ Bloats versions, causes version churn, and conflicts with local checkpoint safety commits.
-
----
-
-## 6. Risks & Mitigations
-
-| Risk                                             | Impact | Mitigation Strategy                                                                                                                                        |
-| :----------------------------------------------- | :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Accidental Breaking Change to Existing Rules** | High   | Merge new rules cleanly by extending existing constitution sections without removing existing safeguards (e.g. "Green Test Fallacy", "Upstream Fix Rule"). |
-| **Documentation Inconsistencies**                | Low    | Derive all package documentation directly from verified TypeScript exports and actual source implementations.                                              |
-| **Changeset Tooling Conflicts**                  | Low    | Verify Changeset format against `.changeset/config.json` before committing.                                                                                |
-
----
-
-## 7. Verification Strategy
-
-1. **File System Verification:** Ensure all files exist in their target locations (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `d:\stack\docs/**`, `CHANGELOG.md` in all packages).
-2. **Changeset Validation:** Run `npx changeset status` in `d:\stack` to verify that the changeset is valid and recognized by the Changeset CLI.
-3. **Git Status & Boundary Check:** Ensure no rogue `.css` files were created and all workspaces have clean working trees.
-4. **Mandatory Savepoint Commit:** Create a local git commit checkpoint in `d:\stack` immediately after verification.
-
----
-
-## 8. Rollback Considerations
-
-Since this task creates documentation files, governance guides, and rule updates without altering compiled package runtime logic, rollback can be achieved cleanly via `git reset --hard HEAD~1` in the owning repository if needed.
+1. Verify that `d:\stack\docs/` contains the full directory tree and non-empty documentation files.
+2. Verify that all Markdown files use clean GitHub-flavored Markdown without breaking build errors.
+3. Create a local safety commit in `d:\stack` and `d:\oss-docs`.
