@@ -47,11 +47,12 @@ export function SpeedBenchmark() {
 
 ## Props Reference
 
-| Prop          | Type               | Default                  | Description                                  |
-| :------------ | :----------------- | :----------------------- | :------------------------------------------- |
-| `data`        | `T[]`              | Required                 | Array of coordinate data points.             |
-| `xAccessor`   | `(d: T) => number` | Required                 | Numerical value for the horizontal X-axis.   |
-| `yAccessor`   | `(d: T) => number` | Required                 | Numerical value for the vertical Y-axis.     |
-| `dotColor`    | `string`           | `'var(--color-primary)'` | Fill color for the scatter points.           |
-| `dotRadius`   | `number`           | `4`                      | Radius of individual points in pixels.       |
-| `showTooltip` | `boolean`          | `true`                   | Enables hover tooltip on point intersection. |
+| Prop             | Type                | Default                  | Description                                      |
+| :--------------- | :------------------ | :----------------------- | :----------------------------------------------- |
+| `data`           | `T[]`               | Required                 | Array of coordinate data points.                 |
+| `xAccessor`      | `(d: T) => number`  | Required                 | Numerical value for the horizontal X-axis.       |
+| `yAccessor`      | `(d: T) => number`  | Required                 | Numerical value for the vertical Y-axis.         |
+| `dotColor`       | `string`            | `'var(--color-primary)'` | Fill color for the scatter points.               |
+| `dotRadius`      | `number`            | `4`                      | Radius of individual points in pixels.           |
+| `showTooltip`    | `boolean`           | `true`                   | Enables hover tooltip on point intersection.     |
+| `legendPosition` | `'top' \| 'bottom'` | `'bottom'`               | Zero-overflow placement for multi-series legend. |

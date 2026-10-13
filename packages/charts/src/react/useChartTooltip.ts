@@ -55,7 +55,9 @@ export function useChartTooltip(options: UseChartTooltipOptions = {}) {
 
   useEffect(() => {
     if (isOpen && pendingReferenceRef.current && tooltipRef.current) {
-      positionTooltip(pendingReferenceRef.current, tooltipRef.current);
+      positionTooltip(pendingReferenceRef.current, tooltipRef.current, {
+        boundary: containerRef.current || undefined,
+      });
     }
   }, [isOpen, tooltipHtml]);
 

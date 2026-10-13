@@ -790,7 +790,10 @@ export function calculateMultiBarLayout<T = DataPoint>(
     const maxLen = Math.max(...categoryLabels.map((l) => l.length));
     margin.left = Math.max(
       margin.left,
-      Math.min(160, Math.round(maxLen * 7 + 16))
+      Math.min(
+        Math.max(160, Math.round(dimensions.width * 0.35)),
+        Math.round(maxLen * 7.5 + 24)
+      )
     );
   }
 

@@ -110,6 +110,26 @@ describe('@nofinite/charts React Component Suite', () => {
       expect(legend?.textContent).toContain('Beta');
     });
 
+    it('positions legend at top when legendPosition="top" and adjusts plotHeight', () => {
+      const { container } = render(
+        <LineChart
+          series={sampleMultiSeries}
+          width={400}
+          height={200}
+          showLegend={true}
+          legendPosition="top"
+        />
+      );
+
+      const root = container.querySelector('.nui-chart-container');
+      const firstChild = root?.children[0];
+      expect(firstChild?.classList.contains('chart-legend')).toBe(true);
+
+      const plotWrapper = container.querySelector('.chart-plot-wrapper');
+      expect(plotWrapper).not.toBeNull();
+      expect((plotWrapper as HTMLElement)?.style.height).toBe('162px');
+    });
+
     it('handles empty dataset without throwing', () => {
       const { container } = render(
         <LineChart data={[]} width={400} height={200} />
@@ -198,6 +218,47 @@ describe('@nofinite/charts React Component Suite', () => {
       expect(horizontalBars.length).toBe(sampleTimeData.length);
     });
 
+    it('truncates long category labels with title tooltip in horizontal layout', () => {
+      const longLabelData = [
+        { x: 'Enterprise Customer Success Department North America', y: 120 },
+      ];
+      const { container } = render(
+        <BarChart
+          data={longLabelData}
+          barLayout="horizontal"
+          width={400}
+          height={200}
+        />
+      );
+
+      const titleTag = container.querySelector('text title');
+      expect(titleTag).not.toBeNull();
+      expect(titleTag?.textContent).toBe(
+        'Enterprise Customer Success Department North America'
+      );
+      const labelText = titleTag?.parentElement;
+      expect(labelText?.textContent).toContain('…');
+    });
+
+    it('positions legend at top when legendPosition="top" and adjusts plotHeight', () => {
+      const { container } = render(
+        <BarChart
+          series={sampleMultiSeries}
+          width={400}
+          height={200}
+          showLegend={true}
+          legendPosition="top"
+        />
+      );
+
+      const root = container.querySelector('.nui-chart-container');
+      const firstChild = root?.children[0];
+      expect(firstChild?.classList.contains('chart-legend')).toBe(true);
+
+      const plotWrapper = container.querySelector('.chart-plot-wrapper');
+      expect((plotWrapper as HTMLElement)?.style.height).toBe('162px');
+    });
+
     it('handles empty data gracefully', () => {
       const { container } = render(
         <BarChart data={[]} width={400} height={200} />
@@ -275,6 +336,28 @@ describe('@nofinite/charts React Component Suite', () => {
 
       const overlay = container.querySelector('rect.chart-scatter-overlay');
       expect(overlay).not.toBeNull();
+    });
+
+    it('positions legend at top when legendPosition="top" for multi-series', () => {
+      const { container } = render(
+        <ScatterChart
+          series={[
+            { name: 'Cluster A', data: [{ x: 10, y: 20 }] },
+            { name: 'Cluster B', data: [{ x: 30, y: 40 }] },
+          ]}
+          width={400}
+          height={200}
+          showLegend={true}
+          legendPosition="top"
+        />
+      );
+
+      const root = container.querySelector('.nui-chart-container');
+      const firstChild = root?.children[0];
+      expect(firstChild?.classList.contains('chart-legend')).toBe(true);
+
+      const plotWrapper = container.querySelector('.chart-plot-wrapper');
+      expect((plotWrapper as HTMLElement)?.style.height).toBe('162px');
     });
 
     it('handles empty dataset gracefully', () => {

@@ -30,6 +30,7 @@ export interface ScatterChartProps<T = DataPoint> {
   showTooltip?: boolean;
   showCrosshair?: boolean;
   showLegend?: boolean;
+  legendPosition?: 'top' | 'bottom';
   animate?: boolean;
   xLabel?: string;
   yLabel?: string;
@@ -56,6 +57,7 @@ export function ScatterChart<T = DataPoint>({
   showTooltip = true,
   showCrosshair = true,
   showLegend = false,
+  legendPosition = 'bottom',
   animate = true,
   xLabel,
   yLabel,
@@ -115,20 +117,23 @@ export function ScatterChart<T = DataPoint>({
     defaultHeight: 300,
   });
 
+  const plotHeight =
+    showLegend && isMulti ? Math.max(120, height - 38) : height;
+
   const innerWidth = Math.max(0, width - margin.left - margin.right);
-  const innerHeight = Math.max(0, height - margin.top - margin.bottom);
+  const innerHeight = Math.max(0, plotHeight - margin.top - margin.bottom);
 
   const { xScale, yScale, points } = useMemo(() => {
     return calculateMultiScatterLayout(
       seriesList,
-      { width, height, margin },
+      { width, height: plotHeight, margin },
       { xAccessor, yAccessor },
       downsampleThreshold
     );
   }, [
     seriesList,
     width,
-    height,
+    plotHeight,
     margin,
     xAccessor,
     yAccessor,
@@ -162,10 +167,11 @@ export function ScatterChart<T = DataPoint>({
       getBoundingClientRect: () => {
         const cRect = containerRef.current?.getBoundingClientRect();
         if (!cRect) return new DOMRect(0, 0, 0, 0);
+        const topOffset =
+          showLegend && isMulti && legendPosition === 'top' ? 38 : 0;
         const scaleX = cRect.width / width;
-        const scaleY = cRect.height / height;
         const px = cRect.left + (margin.left + pt.x) * scaleX;
-        const py = cRect.top + (margin.top + pt.y) * scaleY;
+        const py = cRect.top + topOffset + (margin.top + pt.y);
         return new DOMRect(px, py, 0, 0);
       },
     };
@@ -270,145 +276,166 @@ export function ScatterChart<T = DataPoint>({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'chart-container nui-chart-container relative w-full select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
+        'chart-container nui-chart-container relative w-full flex flex-col select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
         className
       )}
       style={{ height }}
     >
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-full overflow-visible"
-        preserveAspectRatio="none"
+      {showLegend && isMulti && legendPosition === 'top' && (
+        <ChartLegend
+          position="top"
+          series={seriesList.map((s, idx) => ({
+            name: s.name,
+            color:
+              s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+            hidden: s.hidden,
+          }))}
+          onToggle={handleToggle}
+        />
+      )}
+
+      <div
+        className="chart-plot-wrapper relative w-full flex-1 min-h-0"
+        style={{ height: plotHeight }}
       >
-        <g transform={`translate(${margin.left}, ${margin.top})`}>
-          {showGrid &&
-            yScale.ticks &&
-            yScale.ticks(5).map((t: number) => {
-              const y = yScale(t);
-              const isZero = t === 0;
-              return (
-                <line
-                  key={t}
-                  x1={0}
-                  y1={y}
-                  x2={innerWidth}
-                  y2={y}
-                  stroke="var(--border-default)"
-                  strokeOpacity={isZero ? 0.6 : 0.35}
-                  strokeDasharray={isZero ? 'none' : '3,3'}
-                  className="chart-grid"
-                />
-              );
-            })}
-
-          {showAxes &&
-            yScale.ticks &&
-            yScale.ticks(5).map((t: number) => (
-              <text
-                key={t}
-                x={-10}
-                y={yScale(t)}
-                textAnchor="end"
-                dominantBaseline="central"
-                className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                fill="var(--fg-muted, currentColor)"
-                opacity={0.75}
-              >
-                {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
-              </text>
-            ))}
-
-          {showAxes &&
-            xScale &&
-            typeof xScale.ticks === 'function' &&
-            xScale
-              .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
-              .map((t: number | Date, i: number) => {
-                const x = xScale(t);
-                if (x === undefined || x < -5 || x > innerWidth + 5)
-                  return null;
+        <svg
+          viewBox={`0 0 ${width} ${plotHeight}`}
+          className="w-full h-full overflow-visible"
+          preserveAspectRatio="none"
+        >
+          <g transform={`translate(${margin.left}, ${margin.top})`}>
+            {showGrid &&
+              yScale.ticks &&
+              yScale.ticks(5).map((t: number) => {
+                const y = yScale(t);
+                const isZero = t === 0;
                 return (
-                  <text
-                    key={i}
-                    x={x}
-                    y={innerHeight + 18}
-                    textAnchor="middle"
-                    className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                    fill="var(--fg-muted, currentColor)"
-                    opacity={0.75}
-                  >
-                    {xTickFormat ? xTickFormat(t) : formatTemporalTick(t)}
-                  </text>
+                  <line
+                    key={t}
+                    x1={0}
+                    y1={y}
+                    x2={innerWidth}
+                    y2={y}
+                    stroke="var(--border-default)"
+                    strokeOpacity={isZero ? 0.6 : 0.35}
+                    strokeDasharray={isZero ? 'none' : '3,3'}
+                    className="chart-grid"
+                  />
                 );
               })}
 
-          {showCrosshair && focusedPoint && (
-            <g className="chart-crosshair-group pointer-events-none">
-              <line
-                x1={focusedPoint.x}
-                y1={0}
-                x2={focusedPoint.x}
-                y2={innerHeight}
-                className="chart-crosshair chart-crosshair-x"
-                stroke="var(--border-strong, var(--border-default))"
-                strokeWidth={1}
-                strokeDasharray="3,3"
-                opacity={0.65}
-              />
-              <line
-                x1={0}
-                y1={focusedPoint.y}
-                x2={innerWidth}
-                y2={focusedPoint.y}
-                className="chart-crosshair chart-crosshair-y"
-                stroke="var(--border-strong, var(--border-default))"
-                strokeWidth={1}
-                strokeDasharray="3,3"
-                opacity={0.65}
-              />
-            </g>
-          )}
+            {showAxes &&
+              yScale.ticks &&
+              yScale.ticks(5).map((t: number) => (
+                <text
+                  key={t}
+                  x={-10}
+                  y={yScale(t)}
+                  textAnchor="end"
+                  dominantBaseline="central"
+                  className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                  fill="var(--fg-muted, currentColor)"
+                  opacity={0.75}
+                >
+                  {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
+                </text>
+              ))}
 
-          {points.map((pt, i) => {
-            const isPointActive =
-              focusedPoint === pt || activePoint === pt.data;
-            return (
-              <g key={i} className="chart-scatter-point-group">
-                <circle
-                  cx={pt.x}
-                  cy={pt.y}
-                  r={isPointActive ? 6.5 : 4}
-                  fill={pt.color}
-                  stroke="var(--bg-surface)"
-                  strokeWidth={2}
-                  className={clsx(
-                    'chart-point pointer-events-none transition-all duration-150',
-                    animate && 'chart-animate-fade'
-                  )}
-                  opacity={focusedPoint && !isPointActive ? 0.45 : 1}
+            {showAxes &&
+              xScale &&
+              typeof xScale.ticks === 'function' &&
+              xScale
+                .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
+                .map((t: number | Date, i: number) => {
+                  const x = xScale(t);
+                  if (x === undefined || x < -5 || x > innerWidth + 5)
+                    return null;
+                  const anchor =
+                    x < 15 ? 'start' : x > innerWidth - 15 ? 'end' : 'middle';
+                  return (
+                    <text
+                      key={i}
+                      x={x}
+                      y={innerHeight + 18}
+                      textAnchor={anchor}
+                      className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                      fill="var(--fg-muted, currentColor)"
+                      opacity={0.75}
+                    >
+                      {xTickFormat ? xTickFormat(t) : formatTemporalTick(t)}
+                    </text>
+                  );
+                })}
+
+            {showCrosshair && focusedPoint && (
+              <g className="chart-crosshair-group pointer-events-none">
+                <line
+                  x1={focusedPoint.x}
+                  y1={0}
+                  x2={focusedPoint.x}
+                  y2={innerHeight}
+                  className="chart-crosshair chart-crosshair-x"
+                  stroke="var(--border-strong, var(--border-default))"
+                  strokeWidth={1}
+                  strokeDasharray="3,3"
+                  opacity={0.65}
+                />
+                <line
+                  x1={0}
+                  y1={focusedPoint.y}
+                  x2={innerWidth}
+                  y2={focusedPoint.y}
+                  className="chart-crosshair chart-crosshair-y"
+                  stroke="var(--border-strong, var(--border-default))"
+                  strokeWidth={1}
+                  strokeDasharray="3,3"
+                  opacity={0.65}
                 />
               </g>
-            );
-          })}
+            )}
 
-          <rect
-            className="chart-scrub-overlay chart-scatter-overlay"
-            x={0}
-            y={0}
-            width={innerWidth}
-            height={innerHeight}
-            fill="transparent"
-            style={{ cursor: 'crosshair', touchAction: 'none' }}
-            pointerEvents="all"
-            onPointerMove={handlePointerMove}
-            onPointerDown={handlePointerMove}
-            onPointerLeave={handlePointerLeave}
-          />
-        </g>
-      </svg>
+            {points.map((pt, i) => {
+              const isPointActive =
+                focusedPoint === pt || activePoint === pt.data;
+              return (
+                <g key={i} className="chart-scatter-point-group">
+                  <circle
+                    cx={pt.x}
+                    cy={pt.y}
+                    r={isPointActive ? 6.5 : 4}
+                    fill={pt.color}
+                    stroke="var(--bg-surface)"
+                    strokeWidth={2}
+                    className={clsx(
+                      'chart-point pointer-events-none transition-all duration-150',
+                      animate && 'chart-animate-fade'
+                    )}
+                    opacity={focusedPoint && !isPointActive ? 0.45 : 1}
+                  />
+                </g>
+              );
+            })}
 
-      {showLegend && isMulti && (
+            <rect
+              className="chart-scrub-overlay chart-scatter-overlay"
+              x={0}
+              y={0}
+              width={innerWidth}
+              height={innerHeight}
+              fill="transparent"
+              style={{ cursor: 'crosshair', touchAction: 'none' }}
+              pointerEvents="all"
+              onPointerMove={handlePointerMove}
+              onPointerDown={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
+            />
+          </g>
+        </svg>
+      </div>
+
+      {showLegend && isMulti && legendPosition === 'bottom' && (
         <ChartLegend
+          position="bottom"
           series={seriesList.map((s, idx) => ({
             name: s.name,
             color:

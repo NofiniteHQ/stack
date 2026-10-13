@@ -96,7 +96,7 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
       <div class="chart-tooltip-label-group">
         <span class="chart-tooltip-swatch" style="background-color: ${
           item.color
-        };"></span>
+        }; box-shadow: 0 0 6px ${item.color}55;"></span>
         ${
           shouldRenderLabel
             ? `<span class="chart-tooltip-label">${item.label}</span>`
@@ -122,6 +122,7 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
 export interface PositionTooltipOptions {
   placement?: 'top' | 'bottom' | 'left' | 'right';
   offset?: number;
+  boundary?: Element;
 }
 
 export async function positionTooltip(
@@ -129,15 +130,32 @@ export async function positionTooltip(
   tooltipEl: HTMLElement,
   options?: PositionTooltipOptions
 ): Promise<void> {
-  const placement = options?.placement ?? 'top';
+  let placement = options?.placement ?? 'top';
   const offsetDistance = options?.offset ?? 10;
+  const boundary = options?.boundary;
+
+  // Smart top-edge avoidance: if reference point is within 65px of container top, prioritize bottom
+  if (boundary && typeof reference.getBoundingClientRect === 'function') {
+    const refRect = reference.getBoundingClientRect();
+    const boundaryRect = boundary.getBoundingClientRect();
+    if (refRect.top - boundaryRect.top < 65) {
+      placement = 'bottom';
+    }
+  }
 
   const { x, y } = await computePosition(reference, tooltipEl, {
     placement,
     middleware: [
       offset(offsetDistance),
-      flip({ fallbackPlacements: ['bottom', 'top', 'right', 'left'] }),
-      shift({ padding: 8, limiter: limitShift() }),
+      flip({
+        boundary,
+        fallbackPlacements: ['bottom', 'top', 'right', 'left'],
+      }),
+      shift({
+        boundary,
+        padding: 10,
+        limiter: limitShift(),
+      }),
     ],
   });
 

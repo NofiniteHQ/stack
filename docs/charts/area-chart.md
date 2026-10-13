@@ -59,5 +59,6 @@ export function LatencyWidget() {
 | `fillColor`        | `string`                            | `'var(--color-primary)'` | Base color for the translucent area gradient.            |
 | `curve`            | `'monotoneX' \| 'linear' \| 'step'` | `'monotoneX'`            | Interpolation curve algorithm.                           |
 | `showTooltip`      | `boolean`                           | `true`                   | Enables interactive cursor crosshairs and hover details. |
+| `legendPosition`   | `'top' \| 'bottom'`                 | `'bottom'`               | Zero-overflow placement for multi-series legend.         |
 | `tooltipFormatter` | `(d: T) => React.ReactNode`         | `undefined`              | Custom renderer for tooltip popup contents.              |
 | `className`        | `string`                            | `undefined`              | Additional class name for the SVG container.             |

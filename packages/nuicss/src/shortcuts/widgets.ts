@@ -254,19 +254,28 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['chart-crosshair', 'stroke-default opacity-60 pointer-events-none'],
   [
     'chart-tooltip',
-    'absolute pointer-events-none bg-surface/90 text-default border border-default rounded-lg shadow-lg px-3 py-2 text-xs backdrop-blur-md z-50 whitespace-nowrap',
+    'absolute pointer-events-none bg-surface/80 text-default border border-default/40 rounded-xl shadow-2xl px-3.5 py-2.5 text-xs backdrop-blur-xl saturate-150 z-50 whitespace-nowrap transition-opacity duration-150',
   ],
-  ['chart-tooltip-container', 'flex flex-col gap-1 min-w-[100px]'],
-  ['chart-tooltip-title', 'text-[11px] font-medium text-muted mb-1 opacity-80'],
-  ['chart-tooltip-items', 'flex flex-col gap-1'],
+  ['chart-tooltip-container', 'flex flex-col gap-1 min-w-[110px]'],
+  [
+    'chart-tooltip-title',
+    'text-[11px] font-semibold text-muted tracking-wider uppercase pb-1.5 mb-1.5 border-b border-default/20 opacity-80',
+  ],
+  ['chart-tooltip-items', 'flex flex-col gap-1.5'],
   [
     'chart-tooltip-item',
     'flex items-center justify-between gap-3 text-xs leading-tight',
   ],
   ['chart-tooltip-label-group', 'flex items-center gap-1.5 min-w-0'],
-  ['chart-tooltip-swatch', 'w-2 h-2 rounded-full shrink-0'],
+  [
+    'chart-tooltip-swatch',
+    'w-2 h-2 rounded-full ring-2 ring-current/20 shrink-0',
+  ],
   ['chart-tooltip-label', 'text-muted truncate opacity-90'],
-  ['chart-tooltip-value', 'font-semibold text-default tabular-nums'],
+  [
+    'chart-tooltip-value',
+    'font-semibold font-mono text-default tabular-nums ml-auto',
+  ],
   [
     'chart-legend',
     'flex flex-wrap items-center justify-center gap-4 mt-3 text-xs',

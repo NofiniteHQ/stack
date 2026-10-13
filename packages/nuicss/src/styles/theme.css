@@ -1492,6 +1492,20 @@ input[type='number'] {
   animation: chartBarGrowX 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.chart-tooltip,
+.nui-chart-tooltip {
+  box-shadow: 0 16px 36px -6px oklch(0 0 0 / 0.35),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.15);
+}
+
+[data-theme='light'] .chart-tooltip,
+[data-theme='light'] .nui-chart-tooltip,
+.light .chart-tooltip,
+.light .nui-chart-tooltip {
+  box-shadow: 0 12px 30px -4px oklch(0 0 0 / 0.12),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
+}
+
 /* ------------------------------------------------------------
 15.c. KANBAN TASK BOARD & DND LAYOUT
 ------------------------------------------------------------ */

@@ -45,13 +45,14 @@ export function RevenueBarWidget() {
 
 ## Props Reference
 
-| Prop           | Type                         | Default            | Description                                           |
-| :------------- | :--------------------------- | :----------------- | :---------------------------------------------------- |
-| `data`         | `T[]`                        | Required           | Array of data points.                                 |
-| `xAccessor`    | `(d: T) => string \| number` | Required           | Function returning the category name.                 |
-| `yAccessor`    | `(d: T) => number`           | Required           | Function returning the bar metric value.              |
-| `barColor`     | `string`                     | `'var(--chart-1)'` | OKLCH color token or CSS variable for bar fill.       |
-| `borderRadius` | `number`                     | `4`                | Corner radius for the top caps of each bar in pixels. |
-| `orientation`  | `'vertical' \| 'horizontal'` | `'vertical'`       | Layout orientation of bars.                           |
-| `showTooltip`  | `boolean`                    | `true`             | Enables hover tooltip displaying exact values.        |
-| `className`    | `string`                     | `undefined`        | Additional class name for container.                  |
+| Prop             | Type                         | Default            | Description                                           |
+| :--------------- | :--------------------------- | :----------------- | :---------------------------------------------------- |
+| `data`           | `T[]`                        | Required           | Array of data points.                                 |
+| `xAccessor`      | `(d: T) => string \| number` | Required           | Function returning the category name.                 |
+| `yAccessor`      | `(d: T) => number`           | Required           | Function returning the bar metric value.              |
+| `barColor`       | `string`                     | `'var(--chart-1)'` | OKLCH color token or CSS variable for bar fill.       |
+| `borderRadius`   | `number`                     | `4`                | Corner radius for the top caps of each bar in pixels. |
+| `orientation`    | `'vertical' \| 'horizontal'` | `'vertical'`       | Layout orientation of bars.                           |
+| `showTooltip`    | `boolean`                    | `true`             | Enables hover tooltip displaying exact values.        |
+| `legendPosition` | `'top' \| 'bottom'`          | `'bottom'`         | Zero-overflow placement for multi-series legend.      |
+| `className`      | `string`                     | `undefined`        | Additional class name for container.                  |

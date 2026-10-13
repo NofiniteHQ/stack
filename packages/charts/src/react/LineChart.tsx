@@ -20,6 +20,7 @@ export interface LineChartProps<T = DataPoint> {
   series?: ChartSeries<T>[];
   referenceLines?: ReferenceLine[];
   showLegend?: boolean;
+  legendPosition?: 'top' | 'bottom';
   xAccessor?: (d: T) => number | Date | string;
   yAccessor?: (d: T) => number;
   width?: number;
@@ -45,6 +46,7 @@ export function LineChart<T = DataPoint>({
   series: propSeries,
   referenceLines,
   showLegend,
+  legendPosition = 'bottom',
   xAccessor,
   yAccessor,
   width: propWidth,
@@ -111,11 +113,13 @@ export function LineChart<T = DataPoint>({
     defaultHeight: 300,
   });
 
+  const plotHeight = showLegend ? Math.max(120, height - 38) : height;
+
   const multiResult = useMemo(() => {
     if (!isMulti) return null;
     return calculateMultiSeriesAreaPath(
       seriesList,
-      { width, height, margin },
+      { width, height: plotHeight, margin },
       xAccessor,
       yAccessor,
       'overlapping',
@@ -125,7 +129,7 @@ export function LineChart<T = DataPoint>({
     isMulti,
     seriesList,
     width,
-    height,
+    plotHeight,
     margin,
     xAccessor,
     yAccessor,
@@ -136,7 +140,7 @@ export function LineChart<T = DataPoint>({
     if (isMulti) return null;
     return calculateAreaPath(
       seriesList[0]?.data || [],
-      { width, height, margin },
+      { width, height: plotHeight, margin },
       xAccessor,
       yAccessor,
       downsampleThreshold
@@ -145,7 +149,7 @@ export function LineChart<T = DataPoint>({
     isMulti,
     seriesList,
     width,
-    height,
+    plotHeight,
     margin,
     xAccessor,
     yAccessor,
@@ -156,7 +160,7 @@ export function LineChart<T = DataPoint>({
   const yScale = isMulti ? multiResult?.yScale : singleResult?.yScale;
 
   const innerWidth = Math.max(0, width - margin.left - margin.right);
-  const innerHeight = Math.max(0, height - margin.top - margin.bottom);
+  const innerHeight = Math.max(0, plotHeight - margin.top - margin.bottom);
 
   const [activeXPos, setActiveXPos] = useState<number | null>(null);
 
@@ -178,10 +182,10 @@ export function LineChart<T = DataPoint>({
       getBoundingClientRect: () => {
         const cRect = containerRef.current?.getBoundingClientRect();
         if (!cRect) return new DOMRect(0, 0, 0, 0);
+        const topOffset = showLegend && legendPosition === 'top' ? 38 : 0;
         const scaleX = cRect.width / width;
-        const scaleY = cRect.height / height;
         const px = cRect.left + (margin.left + pt.x) * scaleX;
-        const py = cRect.top + (margin.top + pt.y) * scaleY;
+        const py = cRect.top + topOffset + (margin.top + pt.y);
         return new DOMRect(px, py, 0, 0);
       },
     };
@@ -308,145 +312,207 @@ export function LineChart<T = DataPoint>({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'chart-container nui-chart-container relative w-full select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
+        'chart-container nui-chart-container relative w-full flex flex-col select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
         className
       )}
       style={{ height }}
     >
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-full overflow-visible"
-        preserveAspectRatio="none"
+      {showLegend && legendPosition === 'top' && (
+        <ChartLegend
+          position="top"
+          series={seriesList.map((s, idx) => ({
+            name: s.name,
+            color:
+              s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+            hidden: s.hidden,
+          }))}
+          onToggle={handleToggle}
+        />
+      )}
+
+      <div
+        className="chart-plot-wrapper relative w-full flex-1 min-h-0"
+        style={{ height: plotHeight }}
       >
-        <g transform={`translate(${margin.left}, ${margin.top})`}>
-          {showGrid &&
-            yScale?.ticks &&
-            yScale.ticks(5).map((t: number) => {
-              const y = yScale(t);
-              const isZero = t === 0;
-              return (
-                <line
-                  key={t}
-                  x1={0}
-                  y1={y}
-                  x2={innerWidth}
-                  y2={y}
-                  stroke="var(--border-default)"
-                  strokeOpacity={isZero ? 0.6 : 0.35}
-                  strokeDasharray={isZero ? 'none' : '3,3'}
-                  className="chart-grid"
-                />
-              );
-            })}
-
-          {showAxes &&
-            yScale?.ticks &&
-            yScale.ticks(5).map((t: number) => (
-              <text
-                key={t}
-                x={-10}
-                y={yScale(t)}
-                textAnchor="end"
-                dominantBaseline="central"
-                className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                fill="var(--fg-muted, currentColor)"
-                opacity={0.75}
-              >
-                {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
-              </text>
-            ))}
-
-          {showAxes &&
-            xScale &&
-            typeof xScale.ticks === 'function' &&
-            !(isMulti
-              ? multiResult?.isCategorical
-              : singleResult?.isCategorical) &&
-            xScale
-              .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
-              .map((t: number | Date, i: number) => {
-                const x = xScale(t);
-                if (x === undefined || x < -5 || x > innerWidth + 5)
-                  return null;
+        <svg
+          viewBox={`0 0 ${width} ${plotHeight}`}
+          className="w-full h-full overflow-visible"
+          preserveAspectRatio="none"
+        >
+          <g transform={`translate(${margin.left}, ${margin.top})`}>
+            {showGrid &&
+              yScale?.ticks &&
+              yScale.ticks(5).map((t: number) => {
+                const y = yScale(t);
+                const isZero = t === 0;
                 return (
-                  <text
-                    key={i}
-                    x={x}
-                    y={innerHeight + 18}
-                    textAnchor="middle"
-                    className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                    fill="var(--fg-muted, currentColor)"
-                    opacity={0.75}
-                  >
-                    {xTickFormat ? xTickFormat(t) : formatTemporalTick(t)}
-                  </text>
+                  <line
+                    key={t}
+                    x1={0}
+                    y1={y}
+                    x2={innerWidth}
+                    y2={y}
+                    stroke="var(--border-default)"
+                    strokeOpacity={isZero ? 0.6 : 0.35}
+                    strokeDasharray={isZero ? 'none' : '3,3'}
+                    className="chart-grid"
+                  />
                 );
               })}
 
-          {showAxes &&
-            (isMulti
-              ? multiResult?.isCategorical
-              : singleResult?.isCategorical) &&
-            (isMulti ? multiResult?.categories : singleResult?.categories)?.map(
-              (cat, i) => (
+            {showAxes &&
+              yScale?.ticks &&
+              yScale.ticks(5).map((t: number) => (
                 <text
-                  key={i}
-                  x={cat.x}
-                  y={innerHeight + 18}
-                  textAnchor="middle"
+                  key={t}
+                  x={-10}
+                  y={yScale(t)}
+                  textAnchor="end"
+                  dominantBaseline="central"
                   className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                   fill="var(--fg-muted, currentColor)"
                   opacity={0.75}
                 >
-                  {xTickFormat ? xTickFormat(cat.label) : cat.label}
+                  {yTickFormat ? yTickFormat(t) : formatMetricNumber(t)}
                 </text>
-              )
-            )}
+              ))}
 
-          {referenceLines &&
-            referenceLines.map((ref, idx) => {
-              if (ref.y === undefined || typeof yScale !== 'function')
-                return null;
-              const yPos = yScale(ref.y);
-              if (yPos === undefined || isNaN(yPos)) return null;
-              const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
-              return (
-                <g key={`ref-${idx}`} className="chart-reference-group">
-                  <line
-                    x1={0}
-                    y1={yPos}
-                    x2={innerWidth}
-                    y2={yPos}
-                    stroke={strokeColor}
-                    strokeWidth={1.5}
-                    strokeDasharray={ref.strokeDasharray || '4,4'}
-                    className="chart-reference-line"
-                  />
-                  {ref.label && (
+            {showAxes &&
+              xScale &&
+              typeof xScale.ticks === 'function' &&
+              !(isMulti
+                ? multiResult?.isCategorical
+                : singleResult?.isCategorical) &&
+              xScale
+                .ticks(Math.min(5, innerWidth > 450 ? 6 : 3))
+                .map((t: number | Date, i: number) => {
+                  const x = xScale(t);
+                  if (x === undefined || x < -5 || x > innerWidth + 5)
+                    return null;
+                  const anchor =
+                    x < 15 ? 'start' : x > innerWidth - 15 ? 'end' : 'middle';
+                  return (
                     <text
-                      x={innerWidth - 6}
-                      y={yPos - 6}
-                      textAnchor="end"
-                      className="chart-reference-label text-[10px] font-medium font-sans select-none pointer-events-none"
-                      fill={strokeColor}
+                      key={i}
+                      x={x}
+                      y={innerHeight + 18}
+                      textAnchor={anchor}
+                      className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                      fill="var(--fg-muted, currentColor)"
+                      opacity={0.75}
                     >
-                      {ref.label}
+                      {xTickFormat ? xTickFormat(t) : formatTemporalTick(t)}
                     </text>
-                  )}
-                </g>
-              );
-            })}
+                  );
+                })}
 
-          {isMulti && multiResult
-            ? multiResult.series.map((s) => {
-                if (s.hidden) return null;
+            {showAxes &&
+              (isMulti
+                ? multiResult?.isCategorical
+                : singleResult?.isCategorical) &&
+              (isMulti
+                ? multiResult?.categories
+                : singleResult?.categories
+              )?.map((cat, i) => {
+                const anchor =
+                  cat.x < 15
+                    ? 'start'
+                    : cat.x > innerWidth - 15
+                    ? 'end'
+                    : 'middle';
                 return (
-                  <g key={s.id} className="chart-series">
-                    {s.linePath && (
+                  <text
+                    key={i}
+                    x={cat.x}
+                    y={innerHeight + 18}
+                    textAnchor={anchor}
+                    className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                    fill="var(--fg-muted, currentColor)"
+                    opacity={0.75}
+                  >
+                    {xTickFormat ? xTickFormat(cat.label) : cat.label}
+                  </text>
+                );
+              })}
+
+            {referenceLines &&
+              referenceLines.map((ref, idx) => {
+                if (ref.y === undefined || typeof yScale !== 'function')
+                  return null;
+                const yPos = yScale(ref.y);
+                if (yPos === undefined || isNaN(yPos)) return null;
+                const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
+                return (
+                  <g key={`ref-${idx}`} className="chart-reference-group">
+                    <line
+                      x1={0}
+                      y1={yPos}
+                      x2={innerWidth}
+                      y2={yPos}
+                      stroke={strokeColor}
+                      strokeWidth={1.5}
+                      strokeDasharray={ref.strokeDasharray || '4,4'}
+                      className="chart-reference-line"
+                    />
+                    {ref.label && (
+                      <text
+                        x={innerWidth - 6}
+                        y={yPos - 6}
+                        textAnchor="end"
+                        className="chart-reference-label text-[10px] font-medium font-sans select-none pointer-events-none"
+                        fill={strokeColor}
+                      >
+                        {ref.label}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+
+            {isMulti && multiResult
+              ? multiResult.series.map((s) => {
+                  if (s.hidden) return null;
+                  return (
+                    <g key={s.id} className="chart-series">
+                      {s.linePath && (
+                        <path
+                          d={s.linePath}
+                          fill="none"
+                          stroke={s.color}
+                          strokeWidth={2.5}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={clsx(
+                            'chart-line transition-all duration-300',
+                            animate && 'chart-animate-line'
+                          )}
+                        />
+                      )}
+                      {s.points.map((p, i) => (
+                        <circle
+                          key={i}
+                          cx={p.x}
+                          cy={p.y}
+                          r={activePoint === p.data ? 5.5 : 3.5}
+                          fill={s.color}
+                          stroke="var(--bg-surface)"
+                          strokeWidth={2}
+                          className={clsx(
+                            'chart-point transition-all duration-150 cursor-pointer',
+                            animate && 'chart-animate-fade'
+                          )}
+                        />
+                      ))}
+                    </g>
+                  );
+                })
+              : singleResult && (
+                  <>
+                    {singleResult.linePath && (
                       <path
-                        d={s.linePath}
+                        d={singleResult.linePath}
                         fill="none"
-                        stroke={s.color}
+                        stroke={color}
                         strokeWidth={2.5}
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -456,13 +522,13 @@ export function LineChart<T = DataPoint>({
                         )}
                       />
                     )}
-                    {s.points.map((p, i) => (
+                    {singleResult.points.map((p, i) => (
                       <circle
                         key={i}
                         cx={p.x}
                         cy={p.y}
                         r={activePoint === p.data ? 5.5 : 3.5}
-                        fill={s.color}
+                        fill={color}
                         stroke="var(--bg-surface)"
                         strokeWidth={2}
                         className={clsx(
@@ -471,74 +537,42 @@ export function LineChart<T = DataPoint>({
                         )}
                       />
                     ))}
-                  </g>
-                );
-              })
-            : singleResult && (
-                <>
-                  {singleResult.linePath && (
-                    <path
-                      d={singleResult.linePath}
-                      fill="none"
-                      stroke={color}
-                      strokeWidth={2.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className={clsx(
-                        'chart-line transition-all duration-300',
-                        animate && 'chart-animate-line'
-                      )}
-                    />
-                  )}
-                  {singleResult.points.map((p, i) => (
-                    <circle
-                      key={i}
-                      cx={p.x}
-                      cy={p.y}
-                      r={activePoint === p.data ? 5.5 : 3.5}
-                      fill={color}
-                      stroke="var(--bg-surface)"
-                      strokeWidth={2}
-                      className={clsx(
-                        'chart-point transition-all duration-150 cursor-pointer',
-                        animate && 'chart-animate-fade'
-                      )}
-                    />
-                  ))}
-                </>
-              )}
+                  </>
+                )}
 
-          {showCrosshair && activeXPos !== null && (
-            <line
-              x1={activeXPos}
-              y1={0}
-              x2={activeXPos}
-              y2={innerHeight}
-              className="chart-crosshair pointer-events-none"
-              stroke="var(--border-strong, var(--border-default))"
-              strokeWidth={1}
-              strokeDasharray="3,3"
-              opacity={0.7}
+            {showCrosshair && activeXPos !== null && (
+              <line
+                x1={activeXPos}
+                y1={0}
+                x2={activeXPos}
+                y2={innerHeight}
+                className="chart-crosshair pointer-events-none"
+                stroke="var(--border-strong, var(--border-default))"
+                strokeWidth={1}
+                strokeDasharray="3,3"
+                opacity={0.7}
+              />
+            )}
+
+            <rect
+              x={0}
+              y={0}
+              width={innerWidth}
+              height={innerHeight}
+              fill="transparent"
+              style={{ cursor: 'crosshair', touchAction: 'none' }}
+              pointerEvents="all"
+              onPointerMove={handlePointerMove}
+              onPointerDown={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
             />
-          )}
+          </g>
+        </svg>
+      </div>
 
-          <rect
-            x={0}
-            y={0}
-            width={innerWidth}
-            height={innerHeight}
-            fill="transparent"
-            style={{ cursor: 'crosshair', touchAction: 'none' }}
-            pointerEvents="all"
-            onPointerMove={handlePointerMove}
-            onPointerDown={handlePointerMove}
-            onPointerLeave={handlePointerLeave}
-          />
-        </g>
-      </svg>
-
-      {showLegend && (
+      {showLegend && legendPosition === 'bottom' && (
         <ChartLegend
+          position="bottom"
           series={seriesList.map((s, idx) => ({
             name: s.name,
             color:

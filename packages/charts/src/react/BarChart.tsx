@@ -21,6 +21,7 @@ export interface BarChartProps<T = DataPoint> {
   barLayout?: BarLayoutMode;
   referenceLines?: ReferenceLine[];
   showLegend?: boolean;
+  legendPosition?: 'top' | 'bottom';
   animate?: boolean;
   xAccessor?: (d: T) => number | Date | string;
   yAccessor?: (d: T) => number;
@@ -45,6 +46,7 @@ export function BarChart<T = DataPoint>({
   barLayout = 'grouped',
   referenceLines,
   showLegend,
+  legendPosition = 'bottom',
   animate = true,
   xAccessor,
   yAccessor,
@@ -107,6 +109,8 @@ export function BarChart<T = DataPoint>({
     defaultHeight: 300,
   });
 
+  const plotHeight = showLegend ? Math.max(120, height - 38) : height;
+
   const {
     bars,
     xScale,
@@ -116,15 +120,23 @@ export function BarChart<T = DataPoint>({
   } = useMemo(() => {
     return calculateMultiBarLayout(
       seriesList,
-      { width, height, margin: propMargin },
+      { width, height: plotHeight, margin: propMargin },
       barLayout,
       { xAccessor, yAccessor }
     );
-  }, [seriesList, width, height, propMargin, barLayout, xAccessor, yAccessor]);
+  }, [
+    seriesList,
+    width,
+    plotHeight,
+    propMargin,
+    barLayout,
+    xAccessor,
+    yAccessor,
+  ]);
 
   const margin = layoutMargin || propMargin || defaultMargin;
   const innerWidth = Math.max(0, width - margin.left - margin.right);
-  const innerHeight = Math.max(0, height - margin.top - margin.bottom);
+  const innerHeight = Math.max(0, plotHeight - margin.top - margin.bottom);
   const isHorizontal = barLayout === 'horizontal';
 
   const effectiveYTickFormat =
@@ -215,217 +227,249 @@ export function BarChart<T = DataPoint>({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'chart-container nui-chart-container relative w-full select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
+        'chart-container nui-chart-container relative w-full flex flex-col select-none font-sans focus:outline-none focus-visible:ring-1 focus-visible:ring-primary',
         className
       )}
       style={{ height }}
     >
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-full overflow-visible"
-        preserveAspectRatio="none"
+      {showLegend && legendPosition === 'top' && (
+        <ChartLegend
+          position="top"
+          series={seriesList.map((s, idx) => ({
+            name: s.name,
+            color:
+              s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+            hidden: s.hidden,
+          }))}
+          onToggle={handleToggle}
+        />
+      )}
+
+      <div
+        className="chart-plot-wrapper relative w-full flex-1 min-h-0"
+        style={{ height: plotHeight }}
       >
-        <g transform={`translate(${margin.left}, ${margin.top})`}>
-          {showGrid &&
-            !isHorizontal &&
-            yScale?.ticks &&
-            yScale.ticks(5).map((t: number) => {
-              const y = yScale(t);
-              const isZero = t === 0;
-              return (
-                <line
-                  key={t}
-                  x1={0}
-                  y1={y}
-                  x2={innerWidth}
-                  y2={y}
-                  stroke="var(--border-default)"
-                  strokeOpacity={isZero ? 0.6 : 0.35}
-                  strokeDasharray={isZero ? 'none' : '3,3'}
-                  className="chart-grid"
-                />
-              );
-            })}
-
-          {showGrid &&
-            isHorizontal &&
-            xScale?.ticks &&
-            xScale.ticks(5).map((t: number) => {
-              const x = xScale(t);
-              const isZero = t === 0;
-              return (
-                <line
-                  key={t}
-                  x1={x}
-                  y1={0}
-                  x2={x}
-                  y2={innerHeight}
-                  stroke="var(--border-default)"
-                  strokeOpacity={isZero ? 0.6 : 0.35}
-                  strokeDasharray={isZero ? 'none' : '3,3'}
-                  className="chart-grid"
-                />
-              );
-            })}
-
-          {showAxes &&
-            !isHorizontal &&
-            yScale?.ticks &&
-            yScale.ticks(5).map((t: number) => (
-              <text
-                key={t}
-                x={-10}
-                y={yScale(t)}
-                textAnchor="end"
-                dominantBaseline="central"
-                className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                fill="var(--fg-muted, currentColor)"
-                opacity={0.75}
-              >
-                {effectiveYTickFormat
-                  ? effectiveYTickFormat(t)
-                  : formatMetricNumber(t)}
-              </text>
-            ))}
-
-          {showAxes &&
-            isHorizontal &&
-            xScale?.ticks &&
-            xScale.ticks(5).map((t: number) => (
-              <text
-                key={t}
-                x={xScale(t)}
-                y={innerHeight + 18}
-                textAnchor="middle"
-                className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                fill="var(--fg-muted, currentColor)"
-                opacity={0.75}
-              >
-                {effectiveXTickFormat
-                  ? effectiveXTickFormat(t)
-                  : formatMetricNumber(t)}
-              </text>
-            ))}
-
-          {referenceLines &&
-            referenceLines.map((ref, idx) => {
-              if (ref.y === undefined || typeof yScale !== 'function')
-                return null;
-              const yPos = yScale(ref.y);
-              if (yPos === undefined || isNaN(yPos)) return null;
-              const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
-              return (
-                <g key={`ref-${idx}`} className="chart-reference-group">
+        <svg
+          viewBox={`0 0 ${width} ${plotHeight}`}
+          className="w-full h-full overflow-visible"
+          preserveAspectRatio="none"
+        >
+          <g transform={`translate(${margin.left}, ${margin.top})`}>
+            {showGrid &&
+              !isHorizontal &&
+              yScale?.ticks &&
+              yScale.ticks(5).map((t: number) => {
+                const y = yScale(t);
+                const isZero = t === 0;
+                return (
                   <line
+                    key={t}
                     x1={0}
-                    y1={yPos}
+                    y1={y}
                     x2={innerWidth}
-                    y2={yPos}
-                    stroke={strokeColor}
-                    strokeWidth={1.5}
-                    strokeDasharray={ref.strokeDasharray || '4,4'}
-                    className="chart-reference-line"
+                    y2={y}
+                    stroke="var(--border-default)"
+                    strokeOpacity={isZero ? 0.6 : 0.35}
+                    strokeDasharray={isZero ? 'none' : '3,3'}
+                    className="chart-grid"
                   />
-                  {ref.label && (
-                    <text
-                      x={innerWidth - 6}
-                      y={yPos - 6}
-                      textAnchor="end"
-                      className="chart-reference-label text-[10px] font-medium font-sans select-none pointer-events-none"
-                      fill={strokeColor}
-                    >
-                      {ref.label}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
+                );
+              })}
 
-          {bars.map((b, i) => (
-            <rect
-              key={i}
-              x={b.x}
-              y={b.y}
-              width={b.width}
-              height={b.height}
-              rx={3}
-              fill={b.color}
-              opacity={activePoint && activePoint !== b.data ? 0.6 : 1}
-              className={clsx(
-                'chart-bar transition-all duration-150 cursor-pointer hover:opacity-85',
-                animate &&
-                  (isHorizontal ? 'chart-animate-bar-x' : 'chart-animate-bar-y')
-              )}
-              onPointerEnter={(e) => {
-                if (tooltipFormatter) {
-                  show(b.data, e.currentTarget);
-                } else {
-                  const isMulti = seriesList.length > 1;
-                  show(b.data, e.currentTarget, {
-                    title: b.data.label,
-                    items: [
-                      {
-                        color: b.color,
-                        label: isMulti ? b.seriesName : '',
-                        value: formatMetricNumber(b.data.y),
-                      },
-                    ],
-                  });
-                }
-              }}
-              onPointerLeave={hide}
-            />
-          ))}
+            {showGrid &&
+              isHorizontal &&
+              xScale?.ticks &&
+              xScale.ticks(5).map((t: number) => {
+                const x = xScale(t);
+                const isZero = t === 0;
+                return (
+                  <line
+                    key={t}
+                    x1={x}
+                    y1={0}
+                    x2={x}
+                    y2={innerHeight}
+                    stroke="var(--border-default)"
+                    strokeOpacity={isZero ? 0.6 : 0.35}
+                    strokeDasharray={isZero ? 'none' : '3,3'}
+                    className="chart-grid"
+                  />
+                );
+              })}
 
-          {showAxes &&
-            !isHorizontal &&
-            categories.map((cat, i) => {
-              const cx = cat.x + cat.width / 2;
-              const label = xTickFormat ? xTickFormat(cat.label) : cat.label;
-              return (
+            {showAxes &&
+              !isHorizontal &&
+              yScale?.ticks &&
+              yScale.ticks(5).map((t: number) => (
                 <text
-                  key={`cat-${i}`}
-                  x={cx}
-                  y={innerHeight + 18}
-                  textAnchor="middle"
-                  className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
-                  fill="var(--fg-muted, currentColor)"
-                  opacity={0.75}
-                >
-                  {label}
-                </text>
-              );
-            })}
-
-          {showAxes &&
-            isHorizontal &&
-            categories.map((cat, i) => {
-              const catY = yScale(cat.label) ?? 0;
-              const cy =
-                catY +
-                (typeof yScale.bandwidth === 'function'
-                  ? yScale.bandwidth() / 2
-                  : 0);
-              return (
-                <text
-                  key={`cat-h-${i}`}
+                  key={t}
                   x={-10}
-                  y={cy}
+                  y={yScale(t)}
                   textAnchor="end"
                   dominantBaseline="central"
                   className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                   fill="var(--fg-muted, currentColor)"
                   opacity={0.75}
                 >
-                  {cat.label}
+                  {effectiveYTickFormat
+                    ? effectiveYTickFormat(t)
+                    : formatMetricNumber(t)}
                 </text>
-              );
-            })}
-        </g>
-      </svg>
+              ))}
 
-      {showLegend && (
+            {showAxes &&
+              isHorizontal &&
+              xScale?.ticks &&
+              xScale.ticks(5).map((t: number) => (
+                <text
+                  key={t}
+                  x={xScale(t)}
+                  y={innerHeight + 18}
+                  textAnchor="middle"
+                  className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                  fill="var(--fg-muted, currentColor)"
+                  opacity={0.75}
+                >
+                  {effectiveXTickFormat
+                    ? effectiveXTickFormat(t)
+                    : formatMetricNumber(t)}
+                </text>
+              ))}
+
+            {referenceLines &&
+              referenceLines.map((ref, idx) => {
+                if (ref.y === undefined || typeof yScale !== 'function')
+                  return null;
+                const yPos = yScale(ref.y);
+                if (yPos === undefined || isNaN(yPos)) return null;
+                const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
+                return (
+                  <g key={`ref-${idx}`} className="chart-reference-group">
+                    <line
+                      x1={0}
+                      y1={yPos}
+                      x2={innerWidth}
+                      y2={yPos}
+                      stroke={strokeColor}
+                      strokeWidth={1.5}
+                      strokeDasharray={ref.strokeDasharray || '4,4'}
+                      className="chart-reference-line"
+                    />
+                    {ref.label && (
+                      <text
+                        x={innerWidth - 6}
+                        y={yPos - 6}
+                        textAnchor="end"
+                        className="chart-reference-label text-[10px] font-medium font-sans select-none pointer-events-none"
+                        fill={strokeColor}
+                      >
+                        {ref.label}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+
+            {bars.map((b, i) => (
+              <rect
+                key={i}
+                x={b.x}
+                y={b.y}
+                width={b.width}
+                height={b.height}
+                rx={3}
+                fill={b.color}
+                opacity={activePoint && activePoint !== b.data ? 0.6 : 1}
+                className={clsx(
+                  'chart-bar transition-all duration-150 cursor-pointer hover:opacity-85',
+                  animate &&
+                    (isHorizontal
+                      ? 'chart-animate-bar-x'
+                      : 'chart-animate-bar-y')
+                )}
+                onPointerEnter={(e) => {
+                  if (tooltipFormatter) {
+                    show(b.data, e.currentTarget);
+                  } else {
+                    const isMulti = seriesList.length > 1;
+                    show(b.data, e.currentTarget, {
+                      title: b.data.label,
+                      items: [
+                        {
+                          color: b.color,
+                          label: isMulti ? b.seriesName : '',
+                          value: formatMetricNumber(b.data.y),
+                        },
+                      ],
+                    });
+                  }
+                }}
+                onPointerLeave={hide}
+              />
+            ))}
+
+            {showAxes &&
+              !isHorizontal &&
+              categories.map((cat, i) => {
+                const cx = cat.x + cat.width / 2;
+                const label = xTickFormat ? xTickFormat(cat.label) : cat.label;
+                const anchor =
+                  cx < 15 ? 'start' : cx > innerWidth - 15 ? 'end' : 'middle';
+                return (
+                  <text
+                    key={`cat-${i}`}
+                    x={cx}
+                    y={innerHeight + 18}
+                    textAnchor={anchor}
+                    className="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
+                    fill="var(--fg-muted, currentColor)"
+                    opacity={0.75}
+                  >
+                    {label}
+                  </text>
+                );
+              })}
+
+            {showAxes &&
+              isHorizontal &&
+              categories.map((cat, i) => {
+                const catY = yScale(cat.label) ?? 0;
+                const cy =
+                  catY +
+                  (typeof yScale.bandwidth === 'function'
+                    ? yScale.bandwidth() / 2
+                    : 0);
+                const maxChars = Math.max(
+                  10,
+                  Math.floor((margin.left - 15) / 6.8)
+                );
+                const displayLabel =
+                  cat.label.length > maxChars
+                    ? `${cat.label.slice(0, maxChars - 1)}…`
+                    : cat.label;
+                return (
+                  <text
+                    key={`cat-h-${i}`}
+                    x={-10}
+                    y={cy}
+                    textAnchor="end"
+                    dominantBaseline="central"
+                    className="chart-axes text-[11px] fill-muted font-sans select-none"
+                    fill="var(--fg-muted, currentColor)"
+                    opacity={0.75}
+                  >
+                    {displayLabel}
+                    {cat.label.length > maxChars && <title>{cat.label}</title>}
+                  </text>
+                );
+              })}
+          </g>
+        </svg>
+      </div>
+
+      {showLegend && legendPosition === 'bottom' && (
         <ChartLegend
+          position="bottom"
           series={seriesList.map((s, idx) => ({
             name: s.name,
             color:

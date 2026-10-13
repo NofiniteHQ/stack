@@ -9,16 +9,23 @@ import type { LegendItem } from '../core/legend';
 export interface ChartLegendProps {
   series: LegendItem[];
   onToggle?: (seriesName: string) => void;
+  position?: 'top' | 'bottom';
   className?: string;
 }
 
-export function ChartLegend({ series, onToggle, className }: ChartLegendProps) {
+export function ChartLegend({
+  series,
+  onToggle,
+  position = 'bottom',
+  className,
+}: ChartLegendProps) {
   if (!series || series.length === 0) return null;
 
   return (
     <div
       className={clsx(
-        'chart-legend nui-chart-legend flex flex-wrap items-center justify-center gap-3 pt-2 text-xs font-sans select-none',
+        'chart-legend nui-chart-legend flex flex-wrap items-center justify-center gap-3 text-xs font-sans select-none',
+        position === 'top' ? 'pb-2.5' : 'pt-2.5',
         className
       )}
     >
