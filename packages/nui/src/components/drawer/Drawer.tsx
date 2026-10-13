@@ -180,6 +180,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
                   'fixed inset-0 bg-overlay z-[9998]',
                   overlayClassName
                 )}
+                style={{ zIndex: 9998 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -200,6 +201,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
                     'bottom-0 left-0 right-0 h-auto min-h-[250px] max-h-[90vh] border-t border-glassBorder rounded-t-xl',
                   className
                 )}
+                style={{ zIndex: 9999, ...props.style }}
                 initial={{
                   x:
                     position === 'left'
