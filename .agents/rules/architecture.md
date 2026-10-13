@@ -106,9 +106,16 @@ Never silently perform architectural redesign during feature implementation.
 - Preserve `@nofinite/nuicss` as an external dependency in the NUI build when required to prevent Rollup from traversing package source unexpectedly.
 - Preserve the established `preserveModules` packaging architecture unless an approved architectural change explicitly changes it.
 
-## Stack Design-System Architecture
+## Stack Design-System Architecture: Zero Downstream CSS Invariant
 
-`@nofinite/nuicss` is the source of truth for Stack design tokens, semantic colors, and semantic CSS superclasses.
+`@nofinite/nuicss` is the sole and absolute source of truth for design tokens, OKLCH palettes, and semantic CSS superclasses across the entire ecosystem.
+
+### The Zero Downstream CSS Invariant:
+
+- Downstream packages (`NUI`, `Nofinite Kanban`, `Nofinite Markon`, `Nofinite Charts`, `Nofinite Media`, `Nofinite Locale`, `Nofinite Utils`) **MUST NEVER** author, compile, or bundle independent `.css` files.
+- All component layouts, geometry, animations, drag-and-drop indicators, and token maps belong exclusively in `packages/nuicss`.
+- Downstream packages are strictly headless or pure React/TypeScript logic that apply NUICSS semantic superclasses (`kanban-board`, `markon-editor`, `chart-container`, `btn`, `card`, `input`).
+- Any downstream package `styles.css` is strictly an architectural violation (or at most an `@import '@nofinite/nuicss/styles.css'` backward-compatibility bridge).
 
 When an appropriate NUICSS token or superclass already exists:
 
@@ -117,7 +124,22 @@ When an appropriate NUICSS token or superclass already exists:
 - Do not recreate existing semantic component classes.
 - Do not replace established semantic classes with unnecessarily large utility-class combinations.
 
-NUI components and other packages should consume the established NUICSS design system rather than recreating visual primitives locally.
+NUI components and domain packages should consume the established NUICSS design system rather than recreating visual primitives locally.
+
+## Official Brand Taxonomy & Identity Standards
+
+In all discussions, implementation plans, release notes, and documentation, engineers and AI agents MUST use official brand names rather than raw package strings:
+
+- **NUICSS** (`@nofinite/nuicss`, CLI: `nuicss`)
+- **NUI** (`@nofinite/nui`)
+- **Nofinite Charts** (`@nofinite/charts`)
+- **Nofinite Kanban** (`@nofinite/kanban`)
+- **Nofinite Markon** (`@nofinite/markon`)
+- **Nofinite Media** (`@nofinite/media`)
+- **Nofinite Locale** (`@nofinite/locale`)
+- **Nofinite Utils** (`@nofinite/utils`)
+
+Raw `@nofinite/*` strings are reserved strictly for code imports and CLI package manager commands.
 
 ## Upstream Library Fixes
 

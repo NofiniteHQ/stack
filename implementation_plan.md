@@ -1,169 +1,192 @@
-# Implementation Plan: Unification of Ecosystem Styles into `@nofinite/nuicss`
+# Implementation Plan: Developer Architecture, Central Docs & AI Governance Rules
 
 ## Executive Summary
 
-This implementation plan resolves the multi-stylesheet fragmentation ("dual-track styling") across `@nofinite/charts`, `@nofinite/kanban`, `@nofinite/markon`, and `@nofinite/media`. It establishes `@nofinite/nuicss` as the single source of truth and single required stylesheet for the entire Nofinite ecosystem, eliminating import fatigue, cascade conflicts, and bundle duplication.
+This implementation plan establishes a mature, enterprise-grade engineering and documentation architecture across the Nofinite ecosystem. It accomplishes four major goals:
+
+1. **Developer Guidelines & Governance:** Introduces `ARCHITECTURE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and Architectural Decision Records (ADRs) in `d:\stack`.
+2. **Central Monorepo Documentation Hub (`d:\stack\docs/`):** Establishes a clean, centralized markdown documentation tree at the root of `d:\stack` that directly mirrors `d:\oss-docs` routes, eliminating per-package clutter while preserving canonical API specifications.
+3. **AI Engineering Rules & Constitution Modernization:** Updates `AGENTS.md` and `.agents/rules/` across `d:\stack`, `d:\nuix`, and `d:\oss-docs` to enforce the **Zero Downstream CSS Invariant**, the **Official Brand Taxonomy**, the **Two-Tier Commit vs. Release Protocol**, and the **Cross-Repo Docs Sync Contract**.
+4. **Release & Changelog System Integrity:** Initializes `CHANGELOG.md` across all missing domain packages (`Nofinite Charts`, `Nofinite Kanban`, `Nofinite Locale`, `Nofinite Markon`, `Nofinite Media`) and creates a comprehensive consolidation Changeset for the accumulated unreleased features.
 
 ---
 
 ## 1. Problem Statement & Root Cause Analysis
 
-### Current Behavior
+### Current State
 
-Currently, developers installing packages across the ecosystem must configure multiple separate stylesheets:
-
-- `@nofinite/nuicss/styles.css` (Base tokens & core superclasses)
-- `@nofinite/kanban/styles.css` (10.4 kB board & drag-and-drop layout)
-- `@nofinite/markon/styles.css` (10.8 kB editor chrome & bubble menu)
-- `@nofinite/media/styles.css` (74.4 kB player layout & Vidstack styles)
-- `@nofinite/charts/styles.css` (196.9 kB duplicate copy of NUICSS)
-
-### Why Each Package Currently Has Its Own File
-
-1. **Charts:** Contains **0 lines** of custom CSS in `src/`. Its `src/styles.ts` literally imports `@nofinite/nuicss/styles.css`, causing Vite to bundle a redundant 196.9 kB duplicate of the entire NUICSS stylesheet.
-2. **Markon:** Originally built as a standalone TipTap editor. About 65% of its styles (canvas typography, task lists, markdown tables, headings) are already baked into NUICSS (`packages/nuicss/src/styles/theme.css` Section 6), but ~150 lines for toolbar, footer, and floating bubble menu were left in `markon.css`.
-3. **Kanban:** NUICSS only defines 3 minimal shortcuts in `widgets.ts` (`kanban-board`, `kanban-column`, `kanban-card`). The remaining 450 lines of drag-and-drop interaction geometry (drop indicators, dragging state, card lists, WIP limit badges) were placed inside `kanban/src/styles.css`, even though all 450 lines strictly consume NUICSS tokens.
-4. **Media:** Media has 7.4 kB of NUICSS token mappings, but 67 kB of external layout CSS from the `vidstack` npm package (`theme.css`, `video.css`, `audio.css`).
-
-### Architectural Hazards of the Current Setup
-
-- **Import Fatigue:** Developers must maintain up to 5 distinct stylesheet imports in their root layout.
-- **Silent Broken States:** If a developer forgets to import `@nofinite/kanban/styles.css` or `@nofinite/markon/styles.css`, components render completely unstyled or visually collapsed without build-time errors.
-- **Cascade & Specificity Wars:** If a user or bundler imports `@nofinite/kanban/styles.css` before `@nofinite/nuicss/styles.css`, CSS `@layer` rules and token overrides can clash or behave unpredictably.
-- **Severe Bloat:** Importing `@nofinite/charts/styles.css` injects an extra 196 kB stylesheet that duplicates NUICSS.
+1. **Style Fragmentation & Past AI Errors:** Previous AI agents created isolated `.css` bundles in downstream packages because `AGENTS.md` did not have an explicit "Zero Downstream CSS Invariant".
+2. **Release & Versioning Void:** Despite over 110 commits on `dev`, package versions remained statically at 1.0.0/2.0.0, `.changeset/` remained untouched since September 22, and 5 out of 8 packages had no `CHANGELOG.md`.
+3. **Documentation Drift:** Package documentation was scattered and ad-hoc. There was no centralized home in `d:\stack` for canonical Markdown specs, making syncing with `d:\oss-docs` manual and prone to drift.
+4. **Missing Developer Onboarding:** The monorepo lacked root-level `ARCHITECTURE.md`, `CONTRIBUTING.md`, and `CODE_OF_CONDUCT.md` files for human contributors and AI agents.
+5. **Brand Ambiguity:** AI agents frequently referred to packages using raw npm strings (`@nofinite/kanban`) or incorrect brand names ("NUI Kanban" instead of the official "Nofinite Kanban").
 
 ---
 
-## 2. Industry Standards & Architectural Comparison
+## 2. Proposed Architecture & System Design
 
-| Architecture                                          | Examples                                                                                           | Pros                                                                                                                            | Cons                                                                                 | Ecosystem Verdict                                 |
-| :---------------------------------------------------- | :------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------- | :------------------------------------------------ |
-| **Model A: Multi-Stylesheet Per Package**             | Mantine v7 (`@mantine/core/styles.css`, `@mantine/dates/styles.css`, `@mantine/charts/styles.css`) | Modular per package                                                                                                             | Extreme import fatigue; broken rendering on forgotten imports; cascade ordering bugs | ❌ **Rejected** (Current flawed state)            |
-| **Model B: Runtime / CSS-in-JS Injection**            | Emotion, Styled Components, StyleX                                                                 | Zero manual CSS imports                                                                                                         | SSR hydration mismatches; CSP unsafe-inline blocks; runtime performance penalty      | ❌ **Rejected** (Violates zero-runtime principle) |
-| **Model C: Unified Ecosystem Engine** _(Recommended)_ | Radix Themes, NextUI (HeroUI), Ant Design, Tailwind UI                                             | **Single `@import` styles entire ecosystem**; zero duplicate stylesheets; consistent tokens; optional subpaths for tree-shakers | Requires consolidating component layout rules into the design token compiler         | ✅ **Chosen Industry Standard**                   |
+### 2.1 The Two-Tier Commit vs. Release Protocol
 
-### Proposed Ecosystem Invariant:
+We explicitly formalize the distinction between local commits and NPM releases:
 
-> **One Import to Rule Them All:** Loading `@nofinite/nuicss/styles.css` (or CDN link) MUST provide all styles, tokens, and layout classes needed by NUI, Charts, Kanban, and Markon. No secondary stylesheets required.
+- **Tier 1 — Local Safety Commits (Frequent Checkpoints):**
+  Commits are made locally after every working step/refactor. This is a crucial safety savepoint preventing hallucination loss and providing zero-risk `git reset` anchors. A local commit is **not** an NPM release.
+- **Tier 2 — Changeset Intent Tracking:**
+  When a unit of feature or bugfix work is completed on a package, a `.changeset/<name>.md` file is committed. This records SemVer intent (`patch`, `minor`, `major`) and human-readable release notes without bumping `package.json`.
+- **Tier 3 — Batched Release Milestone:**
+  Releases happen in batched cycles (`npx changeset version`). This consumes changesets, bumps `package.json` versions, and compiles `CHANGELOG.md` files in a clean, isolated release commit.
 
----
+### 2.2 Official Brand Taxonomy
 
-## 3. Proposed Solution & Architecture
+All discussions, documentation, and agent reasoning must enforce:
 
-```mermaid
-flowchart TD
-    subgraph SingleSourceOfTruth ["@nofinite/nuicss (Single Source of Truth)"]
-        Tokens["OKLCH Tokens & Resets"]
-        Core["Core Components & Primitives"]
-        ChartsCSS["Charts SVG & Animation Tokens"]
-        KanbanCSS["Kanban Board & DND Drop Geometry"]
-        MarkonCSS["Markon Editor, Toolbar & Bubble Menu"]
-        MediaTokens["Media Player OKLCH Token Bridge"]
-    end
+- **NUICSS** (`@nofinite/nuicss`): Single-source CSS engine, tokens, OKLCH palettes, and semantic superclasses.
+- **NUI** (`@nofinite/nui`): Core headless & polymorphic React component library.
+- **Nofinite Charts** (`@nofinite/charts`): Data visualization primitives.
+- **Nofinite Kanban** (`@nofinite/kanban`): Drag-and-drop kanban boards and workflow cards.
+- **Nofinite Markon** (`@nofinite/markon`): Markdown WYSIWYG editor, floating bubble menus, codeblock highlight.
+- **Nofinite Media** (`@nofinite/media`): Video/audio player primitives and media token bridges.
+- **Nofinite Locale** (`@nofinite/locale`): Internationalization and localization primitives.
+- **Nofinite Utils** (`@nofinite/utils`): Shared TypeScript core utilities.
 
-    SingleSourceOfTruth --> SingleBundle["@nofinite/nuicss/styles.css (One Single Import)"]
-    SingleSourceOfTruth --> Subpaths["Modular Subpaths: /kanban.css, /markon.css, /widgets.css"]
+### 2.3 Central Monorepo Documentation Hub (`d:\stack\docs/`)
 
-    SingleBundle --> App["User Application / Browser CDN"]
-    App --> NUIComp["NUI Components"]
-    App --> ChartsComp["Charts Components"]
-    App --> KanbanComp["Kanban Board"]
-    App --> MarkonComp["Markon WYSIWYG"]
-    App --> MediaComp["Media Player"]
+Instead of scattering `docs/` inside each individual package, `d:\stack` maintains a central `docs/` directory that directly mirrors `d:\oss-docs/content/docs/`:
+
+```
+d:\stack/
+├── ARCHITECTURE.md          # Macro blueprint: System topology, NUICSS single-engine rule, package roles
+├── CONTRIBUTING.md          # How to clone, build, run tests, GitFlow rules, local commits, Changeset workflow
+├── CODE_OF_CONDUCT.md      # Ethics & community standards (Contributor Covenant 2.1)
+│
+├── docs/                    # Central Markdown Source of Truth (1-to-1 mirror with oss-docs)
+│   ├── architecture/        # Architectural Decision Records (ADRs)
+│   │   ├── 001-unified-nuicss-engine.md
+│   │   └── 002-package-boundaries-and-subpaths.md
+│   ├── nuicss/              # NUICSS styling engine, tokens, OKLCH, CLI
+│   ├── nui/                 # NUI core components
+│   ├── kanban/              # Nofinite Kanban
+│   ├── charts/              # Nofinite Charts
+│   ├── markon/              # Nofinite Markon
+│   ├── media/               # Nofinite Media
+│   ├── locale/              # Nofinite Locale
+│   └── utils/               # Nofinite Utils
+│
+└── packages/
+    ├── kanban/
+    │   ├── README.md        # Lightweight npm overview & quickstart (for npmjs.com)
+    │   ├── CHANGELOG.md     # Package changelog tracking releases
+    │   └── src/
+    └── ...
 ```
 
-### Strategy Per Package:
+### 2.4 The Cross-Repo Docs Sync Contract
 
-1. **Charts:**
-   - Eliminate `charts/src/styles.ts` and stop emitting `charts/dist/styles.css`.
-   - Charts SVG animations and token variables already reside in NUICSS (`theme.css` Section 15.b).
-   - Package export `./styles.css` in `packages/charts/package.json` will either be deprecated or aliased to `@nofinite/nuicss/styles.css` for backward compatibility.
-2. **Kanban:**
-   - Migrate all 455 lines of Kanban layout and drag-and-drop indicators from `packages/kanban/src/styles.css` into NUICSS (`packages/nuicss/src/styles/theme.css` or dedicated layered component module).
-   - Export `@nofinite/nuicss/kanban.css` from NUICSS for modular consumers.
-   - Kanban consumers only need `@nofinite/nuicss/styles.css`.
-   - Keep a backward-compatibility re-export in `packages/kanban` so legacy apps don't crash on import.
-3. **Markon:**
-   - Migrate the remaining ~150 lines (toolbar, footer, floating bubble menu pill) from `packages/markon/src/styles/markon.css` into NUICSS `packages/nuicss/src/styles/theme.css` (joining existing Section 6 TipTap styles).
-   - Export `@nofinite/nuicss/markon.css` (and existing `dist/tiptap.css`) from NUICSS for modular consumers.
-   - Markon consumers only need `@nofinite/nuicss/styles.css`.
-   - Keep a backward-compatibility re-export in `packages/markon`.
-4. **Media:**
-   - Ensure the 7.4 kB NUICSS OKLCH token bridge is compiled into NUICSS.
-   - For the 67 kB Vidstack layout chrome, maintain `@nofinite/media/styles.css` (or auto-inject via component) so users without video players do not pay a 67 kB video layout penalty in standard dashboards, but ensure all brand/token colors cascade seamlessly from NUICSS.
+- **In `d:\stack`:** Developers and AI agents write pure, standard Markdown in `d:\stack\docs/<pkg>/` and keep `packages/<pkg>/README.md` lean.
+- **In `d:\oss-docs`:** The documentation developers consume that Markdown and enrich it with interactive client components (`<ComponentPreview />`), live sandboxes, and Theme Studio pickers.
 
 ---
 
-## 4. Phased Implementation Roadmap
+## 3. Affected Files and Modules
 
-### Phase 1: Charts Single-NUICSS Migration
-
-- Remove `entry.styles` from `packages/charts/vite.config.ts`.
-- Remove `packages/charts/src/styles.ts`.
-- In `packages/charts/package.json`, point `./styles.css` to `@nofinite/nuicss/styles.css` (preventing breaking changes for existing consumers while eliminating the 196 kB duplicate file).
-- Rebuild Charts and verify package tarball via `npm pack --dry-run`.
-
-### Phase 2: Kanban Layout Migration to NUICSS
-
-- Port the 455 lines of `.kanban-*` layout, drop-indicators, and interaction classes from `packages/kanban/src/styles.css` into NUICSS `packages/nuicss/src/styles/theme.css` (Section 15.c: KANBAN TASK BOARD & DND LAYOUT).
-- Update `packages/nuicss/build-cdn.js` and package exports to emit `dist/kanban.css` as a dedicated modular subpath.
-- Update `packages/kanban/package.json` `./styles.css` export to alias the NUICSS kanban stylesheet or keep a thin shim.
-- Rebuild NUICSS and Kanban; verify that Kanban boards render 100% styled when ONLY `@nofinite/nuicss/styles.css` is imported.
-
-### Phase 3: Markon Toolbar & Bubble Menu Migration to NUICSS
-
-- Port the remaining ~150 lines (toolbar, footer, and `.markon-bubble-menu`) from `packages/markon/src/styles/markon.css` into NUICSS `packages/nuicss/src/styles/theme.css` Section 6.
-- Update `packages/nuicss/build-cdn.js` to ensure all Markon classes are included in `dist/styles.css` and `dist/tiptap.css`.
-- Update `packages/markon/package.json` `./styles.css` export to alias NUICSS or provide a thin shim.
-- Rebuild NUICSS and Markon; verify that Markon editors and bubble menus render 100% styled when ONLY `@nofinite/nuicss/styles.css` is imported.
-
-### Phase 4: Media Token Realignment & Documentation Updates
-
-- Verify that NUICSS contains all media tokens and player variables.
-- Update Quick Start guides across all packages:
-  - Clearly state that `@nofinite/nuicss/styles.css` is the **sole required stylesheet** for NUI, Charts, Kanban, and Markon.
-  - Remove all instructions telling users to import separate `@nofinite/charts/styles.css`, `@nofinite/kanban/styles.css`, and `@nofinite/markon/styles.css`.
-
-### Phase 5: Verification & Packaging Validation
-
-- Run unit tests across all affected packages (`charts`, `kanban`, `markon`, `media`, `nuicss`).
-- Run `npm pack` across all packages to inspect compiled tarball contents.
-- Visual verification: Render sample pages for Kanban, Markon, and Charts with **only** NUICSS loaded to visually prove zero regressions in layout, drop indicators, and bubble menus.
+| Area                     | File Path                                                           | Action                                                       |
+| :----------------------- | :------------------------------------------------------------------ | :----------------------------------------------------------- |
+| **Developer Governance** | `d:\stack\ARCHITECTURE.md`                                          | Create comprehensive system blueprint                        |
+| **Developer Governance** | `d:\stack\CONTRIBUTING.md`                                          | Create developer contribution & workflow guide               |
+| **Developer Governance** | `d:\stack\CODE_OF_CONDUCT.md`                                       | Create standard Contributor Covenant 2.1                     |
+| **Architecture ADRs**    | `d:\stack\docs\architecture\001-unified-nuicss-engine.md`           | Create ADR documenting single-engine CSS architecture        |
+| **Architecture ADRs**    | `d:\stack\docs\architecture\002-package-boundaries-and-subpaths.md` | Create ADR documenting package modularity & exports          |
+| **Central Docs Hub**     | `d:\stack\docs\nuicss\README.md`                                    | Create central NUICSS markdown documentation                 |
+| **Central Docs Hub**     | `d:\stack\docs\nui\README.md`                                       | Create central NUI markdown documentation                    |
+| **Central Docs Hub**     | `d:\stack\docs\kanban\README.md`                                    | Create central Nofinite Kanban markdown documentation        |
+| **Central Docs Hub**     | `d:\stack\docs\charts\README.md`                                    | Create central Nofinite Charts markdown documentation        |
+| **Central Docs Hub**     | `d:\stack\docs\markon\README.md`                                    | Create central Nofinite Markon markdown documentation        |
+| **Central Docs Hub**     | `d:\stack\docs\media\README.md`                                     | Create central Nofinite Media markdown documentation         |
+| **Central Docs Hub**     | `d:\stack\docs\locale\README.md`                                    | Create central Nofinite Locale markdown documentation        |
+| **Central Docs Hub**     | `d:\stack\docs\utils\README.md`                                     | Create central Nofinite Utils markdown documentation         |
+| **Package Changelogs**   | `packages/charts/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
+| **Package Changelogs**   | `packages/kanban/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
+| **Package Changelogs**   | `packages/locale/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
+| **Package Changelogs**   | `packages/markon/CHANGELOG.md`                                      | Initialize standard Keep-a-Changelog template                |
+| **Package Changelogs**   | `packages/media/CHANGELOG.md`                                       | Initialize standard Keep-a-Changelog template                |
+| **Changesets**           | `.changeset/consolidate-ecosystem-architecture.md`                  | Create Changeset documenting styling consolidation           |
+| **AI Rules (stack)**     | `d:\stack\AGENTS.md`                                                | Add 9-stage workflow, brand rules, two-tier commit protocol  |
+| **AI Rules (stack)**     | `d:\stack\.agents\rules\architecture.md`                            | Add Zero Downstream CSS Invariant & Brand Taxonomy           |
+| **AI Rules (stack)**     | `d:\stack\.agents\rules\release.md`                                 | Add compulsory package changelog integrity & Changeset rules |
+| **AI Rules (nuix)**      | `d:\nuix\AGENTS.md`                                                 | Sync Zero Downstream CSS, Brand Taxonomy, and Doc Sync rules |
+| **AI Rules (oss-docs)**  | `d:\oss-docs\AGENTS.md`                                             | Sync Brand Taxonomy, Cross-Repo Docs Sync Contract           |
 
 ---
 
-## 5. Affected Files & Modules
+## 4. Implementation Steps (Phased Execution)
 
-| File                                   | Action     | Description                                                                |
-| :------------------------------------- | :--------- | :------------------------------------------------------------------------- |
-| `packages/nuicss/src/styles/theme.css` | **Modify** | Add Kanban board/DND layout classes and Markon toolbar/bubble menu classes |
-| `packages/nuicss/build-cdn.js`         | **Modify** | Add `dist/kanban.css` and enhanced `dist/tiptap.css` subpath bundles       |
-| `packages/nuicss/package.json`         | **Modify** | Add `./kanban.css` export to `exports`                                     |
-| `packages/charts/vite.config.ts`       | **Modify** | Remove redundant `styles.ts` entry                                         |
-| `packages/charts/src/styles.ts`        | **Delete** | Remove redundant NUICSS re-import file                                     |
-| `packages/charts/package.json`         | **Modify** | Update/alias `./styles.css`                                                |
-| `packages/charts/README.md`            | **Modify** | Clarify that only NUICSS stylesheet is required                            |
-| `packages/kanban/package.json`         | **Modify** | Provide shim/alias for `./styles.css`                                      |
-| `packages/kanban/README.md`            | **Modify** | Remove dual-track stylesheet requirement                                   |
-| `packages/markon/package.json`         | **Modify** | Provide shim/alias for `./styles.css`                                      |
-| `packages/markon/README.md`            | **Modify** | Remove dual-track stylesheet requirement                                   |
+### Phase 1: Developer Governance & Architecture
+
+1. Write `d:\stack\ARCHITECTURE.md` defining the macro ecosystem topology, NUICSS single-engine architecture, and package roles.
+2. Write `d:\stack\CONTRIBUTING.md` detailing local safety commit etiquette, Changesets, branch promotion (`feature` → `dev` → `main`), and verification steps.
+3. Write `d:\stack\CODE_OF_CONDUCT.md` establishing open-source community ethics and professional conduct.
+4. Establish `d:\stack\docs\architecture/` with ADRs:
+   - `001-unified-nuicss-engine.md` (documents eliminating dual-track styles and migrating 450+ lines of Kanban/Markon styles to NUICSS).
+   - `002-package-boundaries-and-subpaths.md` (documents headless package boundaries, modular CSS subpaths, and backward-compatible shims).
+
+### Phase 2: Central Documentation Hub Setup (`d:\stack\docs/`)
+
+1. Create `d:\stack\docs/{nuicss,nui,kanban,charts,markon,media,locale,utils}/`.
+2. Populate clean, canonical Markdown specifications for each package (installation, zero-config quickstart, architecture, key APIs).
+3. Validate that the directory structure seamlessly maps 1-to-1 with `d:\oss-docs/content/docs/`.
+
+### Phase 3: Changelog Initialization & Changeset Creation
+
+1. Create initial `CHANGELOG.md` in `packages/{charts,kanban,locale,markon,media}` following Keep-a-Changelog format.
+2. Create `.changeset/consolidate-ecosystem-architecture.md` documenting:
+   - `@nofinite/nuicss`: minor (incorporated Kanban DND, Markon floating toolbar, modular subpaths).
+   - `@nofinite/kanban`: minor (migrated styles to NUICSS, lightweight shim).
+   - `@nofinite/markon`: minor (migrated editor chrome to NUICSS, lightweight shim).
+   - `@nofinite/charts`: minor (removed duplicate NUICSS bundle, lightweight shim).
+   - `@nofinite/media`: patch (NUICSS OKLCH token bridge integration).
+
+### Phase 4: AI Engineering Rules & Constitutions Modernization
+
+1. Update `d:\stack\AGENTS.md` with:
+   - 9-stage engineering workflow: `UNDERSTAND → PLAN → STOP → APPROVAL → IMPLEMENT → VERIFY → DOCUMENT & VERSION → REVIEW → COMMIT`.
+   - Two-tier commit vs release protocol.
+   - Zero Downstream CSS Invariant.
+   - Official Brand Taxonomy.
+2. Update `d:\stack\.agents\rules\architecture.md` and `d:\stack\.agents\rules\release.md`.
+3. Update `d:\nuix\AGENTS.md` and `d:\oss-docs\AGENTS.md` to guarantee ecosystem alignment.
 
 ---
 
-## 6. Risk Assessment & Mitigations
+## 5. Alternatives Considered
 
-- **Risk: Breaking Existing Projects that Import `@nofinite/kanban/styles.css` or `@nofinite/markon/styles.css`:**
-  - _Mitigation:_ Preserve `./styles.css` export in `package.json` as a thin shim or re-export of the NUICSS styles. No import error will occur for existing users.
-- **Risk: CSS Specificity Collision:**
-  - _Mitigation:_ All migrated styles will be wrapped in `@layer components { ... }` inside NUICSS, ensuring strict cascade layering order (base -> components -> utilities).
-- **Risk: Bundle Size Inflation of Core NUICSS:**
-  - _Mitigation:_ Kanban layout is ~10 kB unminified (~2.5 kB gzipped); Markon toolbar is ~4 kB unminified (~1 kB gzipped). Adding ~3.5 kB gzipped to NUICSS eliminates over 200 kB of duplicate stylesheets across the ecosystem and enables modular subpath imports (`@nofinite/nuicss/kanban.css`) for tree-shaking.
+1. **Scattered `docs/` in each package:**
+   - _Rejected:_ Clutters packages, makes cross-package guides difficult, and complicates `oss-docs` syncing.
+2. **Single Git Submodule for `oss-docs`:**
+   - _Rejected:_ Fragile in multi-developer setups, causes detached HEAD and submodule pointer conflicts.
+3. **Automated Version Bumps on Every Local Commit:**
+   - _Rejected:_ Bloats versions, causes version churn, and conflicts with local checkpoint safety commits.
+
+---
+
+## 6. Risks & Mitigations
+
+| Risk                                             | Impact | Mitigation Strategy                                                                                                                                        |
+| :----------------------------------------------- | :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Accidental Breaking Change to Existing Rules** | High   | Merge new rules cleanly by extending existing constitution sections without removing existing safeguards (e.g. "Green Test Fallacy", "Upstream Fix Rule"). |
+| **Documentation Inconsistencies**                | Low    | Derive all package documentation directly from verified TypeScript exports and actual source implementations.                                              |
+| **Changeset Tooling Conflicts**                  | Low    | Verify Changeset format against `.changeset/config.json` before committing.                                                                                |
 
 ---
 
 ## 7. Verification Strategy
 
-1. **Compilation Check:** Run `pnpm nx run-many -t build -p nuicss charts kanban markon` to verify error-free build.
-2. **NPM Package Verification:** Run `npm pack --dry-run` in each package directory and inspect the tarball contents to confirm all expected files are present and no empty folders exist.
-3. **Automated Unit Tests:** Run test suites across `nuicss`, `charts`, `kanban`, `markon`.
-4. **Visual Inspection:** Create test HTML harness in `/temp/` loading **only** `@nofinite/nuicss/dist/styles.css` with a Kanban board, Markon editor, and Chart, verifying full layout correctness, drop indicator styling, and glassmorphic aesthetics.
+1. **File System Verification:** Ensure all files exist in their target locations (`ARCHITECTURE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `d:\stack\docs/**`, `CHANGELOG.md` in all packages).
+2. **Changeset Validation:** Run `npx changeset status` in `d:\stack` to verify that the changeset is valid and recognized by the Changeset CLI.
+3. **Git Status & Boundary Check:** Ensure no rogue `.css` files were created and all workspaces have clean working trees.
+4. **Mandatory Savepoint Commit:** Create a local git commit checkpoint in `d:\stack` immediately after verification.
+
+---
+
+## 8. Rollback Considerations
+
+Since this task creates documentation files, governance guides, and rule updates without altering compiled package runtime logic, rollback can be achieved cleanly via `git reset --hard HEAD~1` in the owning repository if needed.

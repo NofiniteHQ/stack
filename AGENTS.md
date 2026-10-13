@@ -14,7 +14,7 @@ The workspace may contain one or more independent Git repositories. Never assume
 
 For every non-trivial task:
 
-**UNDERSTAND → PLAN → STOP → APPROVAL → IMPLEMENT → VERIFY → REVIEW → COMMIT**
+**UNDERSTAND → PLAN → STOP → APPROVAL → IMPLEMENT → VERIFY → DOCUMENT & VERSION → REVIEW → COMMIT**
 
 ### Understand
 
@@ -108,8 +108,19 @@ Run the appropriate:
 - Builds
 - Integration checks
 - Runtime checks
+- Visual inspection (Playwright screenshot or browser verification for UI/styling changes)
 
 Never claim something was verified unless it was actually verified.
+
+### Document & Version
+
+Before proceeding to review and commit:
+
+1. **Central Docs Sync:** Whenever public APIs, components, props, or setup instructions change, update the corresponding Markdown documentation in `d:\stack\docs/<pkg>/`. Keep `packages/<pkg>/README.md` lean and focused on npm quickstart.
+2. **Two-Tier Commit vs. Release Protocol:**
+   - **Local Commits are Safety Checkpoints:** Local git commits are made frequently after each working step to protect code from hallucination loss and provide rollback points. A local commit is **NOT** an NPM release.
+   - **Changesets for Package Work:** When completing a publishable feature, bugfix, or breaking change in `packages/*`, create a `.changeset/<descriptive-name>.md` file tracking the SemVer impact (`patch`, `minor`, `major`).
+   - **No Premature Version Bumps:** Do not manually edit `version` in `package.json` or create manual empty changelogs during local development. Version bumps and compiled `CHANGELOG.md` generation occur at batched release cut milestones via `npx changeset version`.
 
 ### Review
 
@@ -127,7 +138,7 @@ Check for:
 
 ### Commit
 
-After successful verification and review, create a logical local commit in the repository that owns the changed files.
+After successful verification, documentation, and review, create a logical local commit in the repository that owns the changed files.
 
 Never commit at the workspace level unless the workspace itself is a Git repository.
 
@@ -376,3 +387,38 @@ More specific repository-scoped instructions may add constraints, but must not c
 If instructions conflict and the conflict cannot be safely resolved:
 
 **STOP and ask the user.**
+
+---
+
+## 14. The Zero Downstream CSS Invariant & Single-Engine Architecture
+
+- **NUICSS (`@nofinite/nuicss`) is the sole and absolute styling engine for the entire ecosystem.**
+- Downstream packages (`NUI`, `Nofinite Kanban`, `Nofinite Markon`, `Nofinite Charts`, `Nofinite Media`, `Nofinite Locale`, `Nofinite Utils`) **MUST NEVER** author, compile, or bundle independent `.css` files.
+- All component layouts, geometry, animations, drag-and-drop indicators, and token maps belong exclusively in `packages/nuicss`.
+- Downstream packages are strictly headless or pure React/TypeScript logic that apply NUICSS semantic superclasses (`kanban-board`, `markon-editor`, `chart-container`, `btn`, `card`, `input`).
+- Any downstream package `styles.css` is strictly an architectural violation (or at most an `@import '@nofinite/nuicss/styles.css'` backward-compatibility bridge).
+
+---
+
+## 15. Official Brand Taxonomy & Identity Standards
+
+In all discussions, implementation plans, release notes, and documentation, engineers and AI agents MUST use official brand names rather than raw package strings:
+
+- **NUICSS** (`@nofinite/nuicss`, CLI: `nuicss`)
+- **NUI** (`@nofinite/nui`)
+- **Nofinite Charts** (`@nofinite/charts`)
+- **Nofinite Kanban** (`@nofinite/kanban`)
+- **Nofinite Markon** (`@nofinite/markon`)
+- **Nofinite Media** (`@nofinite/media`)
+- **Nofinite Locale** (`@nofinite/locale`)
+- **Nofinite Utils** (`@nofinite/utils`)
+
+Raw `@nofinite/*` strings are reserved strictly for code imports and CLI package manager commands.
+
+---
+
+## 16. Cross-Repo Docs Sync Contract
+
+- **Central Markdown Ground Truth:** All canonical Markdown documentation lives in the central `docs/` directory in `d:\stack` (`docs/nuicss/`, `docs/kanban/`, `docs/charts/`, etc.).
+- **Lean Package READMEs:** Inside `packages/<pkg>/README.md`, keep documentation focused on npm installation, zero-config quickstart, and direct links to full documentation.
+- **Consumption by `oss-docs`:** `d:\oss-docs` consumes this canonical Markdown and enriches it with interactive Next.js client components (`<ComponentPreview />`), live sandboxes, and Theme Studio pickers.

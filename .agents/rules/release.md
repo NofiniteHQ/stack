@@ -1,10 +1,22 @@
 # Stack Release Rules
 
+## Two-Tier Commit vs. Release Protocol
+
+1. **Tier 1 — Local Safety Commits (Frequent Checkpoints):**
+
+   - Make local git commits frequently after each working step or refactor.
+   - Local commits act as safety savepoints to prevent code loss and enable instant rollback (`git reset`).
+   - **A local commit is NOT an NPM release.** Do not manually bump `package.json` version numbers on local commits.
+
+2. **Tier 2 — Changeset Intent Tracking:**
+   - All publishable package changes under `packages/*` MUST include an appropriate `.changeset/<descriptive-name>.md` file when a feature or fix is completed.
+   - Never manually edit the `version` field in `package.json`.
+   - Never create manual empty changelogs during development.
+3. **Tier 3 — Batched Release Milestone Cuts:**
+   - Version bumps and compiled `CHANGELOG.md` generation occur only when executing an official release cut via `npx changeset version`.
+   - This batches accumulated changesets into a single clean release commit across the monorepo.
+
 ## Changesets
-
-All publishable package changes MUST use Changesets.
-
-Never manually edit the `version` field in `package.json`.
 
 Use:
 
