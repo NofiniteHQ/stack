@@ -47,6 +47,23 @@ function extractCssLayers(fullBaseCss: string): {
   };
 }
 
+export function resolveBaseStyles(cwd: string): string {
+  const localCandidates = [
+    path.join(cwd, 'node_modules/@nofinite/nuicss/dist/styles.css'),
+    path.join(cwd, 'node_modules/@nofinite/nuicss/styles.css'),
+  ];
+  for (const candidate of localCandidates) {
+    if (fs.existsSync(candidate)) {
+      try {
+        return fs.readFileSync(candidate, 'utf8');
+      } catch {
+        // Fall back to next candidate or embedded snapshot
+      }
+    }
+  }
+  return getBaseStyles();
+}
+
 export function globToRegExp(glob: string): RegExp {
   const normalized = glob.replace(/\\/g, '/');
   let re = '';
@@ -269,8 +286,6 @@ export async function compileCommand(
   const config = await loadConfig(cwd, options.config);
   const uno = await createGenerator(config);
 
-  const baseCss = getBaseStyles();
-
   // Aggregate user patterns from CLI args, --watch-files, and config
   const allUserPatterns: string[] = [...(patterns || [])];
   if (options.watchFiles) {
@@ -369,10 +384,11 @@ export async function compileCommand(
     const generatedUtilities = genResult.css;
 
     // 4. Expand directives into final CSS
+    const currentBaseCss = resolveBaseStyles(cwd);
     let finalCss = '';
     const hasDirective = getDirectiveRegex().test(inputCss);
     if (hasDirective) {
-      const layers = extractCssLayers(baseCss);
+      const layers = extractCssLayers(currentBaseCss);
 
       finalCss = inputCss.replace(
         getDirectiveRegex(),
@@ -385,13 +401,14 @@ export async function compileCommand(
           } else if (directive === 'components') {
             return layers.components;
           }
-          return baseCss + '\n\n' + generatedUtilities;
+          return currentBaseCss + '\n\n' + generatedUtilities;
         }
       );
     } else if (inputCss.trim() === '') {
-      finalCss = baseCss + '\n\n' + generatedUtilities;
+      finalCss = currentBaseCss + '\n\n' + generatedUtilities;
     } else {
-      finalCss = baseCss + '\n\n' + inputCss + '\n\n' + generatedUtilities;
+      finalCss =
+        currentBaseCss + '\n\n' + inputCss + '\n\n' + generatedUtilities;
     }
 
     // Apply full CSS minification when requested

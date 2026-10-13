@@ -1722,6 +1722,111 @@
         "kind": "markdown",
         "value": "**NUICSS Design Token**\n\nDefault value: `#0ea5e9`"
       }
+    },
+    {
+      "name": "--media-brand",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
+      }
+    },
+    {
+      "name": "--media-focus-ring-color",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
+      }
+    },
+    {
+      "name": "--media-focus-ring",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `0 0 0 3px var(--media-focus-ring-color)`"
+      }
+    },
+    {
+      "name": "--media-font-family",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --font-sans,\n      system-ui,\n      -apple-system,\n      BlinkMacSystemFont,\n      'Segoe UI',\n      Roboto,\n      sans-serif\n    )`"
+      }
+    },
+    {
+      "name": "--media-border-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--radius-lg, 0.75rem)`"
+      }
+    },
+    {
+      "name": "--media-slider-thumb-bg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
+      }
+    },
+    {
+      "name": "--media-slider-track-fill-bg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --color-primary,\n      oklch(0.546 0.245 262.881)\n    )`"
+      }
+    },
+    {
+      "name": "--media-buffering-color",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
+      }
+    },
+    {
+      "name": "--media-slider-track-bg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --border-default,\n      oklch(0.929 0.013 255.508 / 0.8)\n    )`"
+      }
+    },
+    {
+      "name": "--media-menu-bg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--bg-surface, oklch(1 0 0))`"
+      }
+    },
+    {
+      "name": "--media-menu-border",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--border-default, oklch(0.929 0.013 255.508))`"
+      }
+    },
+    {
+      "name": "--media-menu-color",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --fg-default,\n      var(--text-default, oklch(0.208 0.042 265.755))\n    )`"
+      }
+    },
+    {
+      "name": "--media-tooltip-bg",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--bg-surface, oklch(1 0 0))`"
+      }
+    },
+    {
+      "name": "--media-tooltip-color",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --fg-default,\n      var(--text-default, oklch(0.208 0.042 265.755))\n    )`"
+      }
+    },
+    {
+      "name": "--media-controls-color",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --fg-default,\n      var(--text-default, oklch(0.208 0.042 265.755))\n    )`"
+      }
     }
   ],
   "atDirectives": [

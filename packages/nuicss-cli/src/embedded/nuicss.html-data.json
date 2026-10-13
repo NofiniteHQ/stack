@@ -654,10 +654,24 @@
           }
         },
         {
+          "name": "chart-area",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`transition-all duration-300`"
+          }
+        },
+        {
           "name": "chart-axes",
           "description": {
             "kind": "markdown",
             "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`fill-muted text-xs select-none`"
+          }
+        },
+        {
+          "name": "chart-bar",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`transition-opacity duration-150 cursor-pointer hover:opacity-85`"
           }
         },
         {
@@ -713,7 +727,21 @@
           "name": "chart-container",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`relative w-full overflow-hidden font-sans`"
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`relative w-full font-sans`"
+          }
+        },
+        {
+          "name": "chart-container-circular",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`flex items-center justify-center`"
+          }
+        },
+        {
+          "name": "chart-crosshair",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`stroke-default opacity-60 pointer-events-none`"
           }
         },
         {
@@ -721,6 +749,132 @@
           "description": {
             "kind": "markdown",
             "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`stroke-default opacity-50`"
+          }
+        },
+        {
+          "name": "chart-legend",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`flex flex-wrap items-center justify-center gap-4 mt-3 text-xs`"
+          }
+        },
+        {
+          "name": "chart-legend-dot",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`w-2.5 h-2.5 rounded-full shrink-0`"
+          }
+        },
+        {
+          "name": "chart-legend-item",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`inline-flex items-center gap-1.5 cursor-pointer select-none transition-opacity hover:opacity-80`"
+          }
+        },
+        {
+          "name": "chart-legend-label",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`font-medium text-muted`"
+          }
+        },
+        {
+          "name": "chart-line",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`transition-all duration-300`"
+          }
+        },
+        {
+          "name": "chart-point",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`transition-all duration-150`"
+          }
+        },
+        {
+          "name": "chart-reference-label",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`text-[10px] font-medium select-none pointer-events-none`"
+          }
+        },
+        {
+          "name": "chart-reference-line",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`pointer-events-none`"
+          }
+        },
+        {
+          "name": "chart-segment",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`transition-transform duration-150 cursor-pointer hover:scale-105`"
+          }
+        },
+        {
+          "name": "chart-tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`absolute pointer-events-none bg-surface/80 text-default border border-default/40 rounded-xl shadow-2xl px-3.5 py-2.5 text-xs backdrop-blur-xl saturate-150 z-50 whitespace-nowrap transition-opacity duration-150`"
+          }
+        },
+        {
+          "name": "chart-tooltip-container",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`flex flex-col gap-1 min-w-[110px]`"
+          }
+        },
+        {
+          "name": "chart-tooltip-item",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`flex items-center justify-between gap-3 text-xs leading-tight`"
+          }
+        },
+        {
+          "name": "chart-tooltip-items",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`flex flex-col gap-1.5`"
+          }
+        },
+        {
+          "name": "chart-tooltip-label",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`text-muted truncate opacity-90`"
+          }
+        },
+        {
+          "name": "chart-tooltip-label-group",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`flex items-center gap-1.5 min-w-0`"
+          }
+        },
+        {
+          "name": "chart-tooltip-swatch",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`w-2 h-2 rounded-full ring-2 ring-current/20 shrink-0`"
+          }
+        },
+        {
+          "name": "chart-tooltip-title",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`text-[11px] font-semibold text-muted tracking-wider uppercase pb-1.5 mb-1.5 border-b border-default/20 opacity-80`"
+          }
+        },
+        {
+          "name": "chart-tooltip-value",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`font-semibold font-mono text-default tabular-nums ml-auto`"
           }
         },
         {
@@ -2509,10 +2663,24 @@
           }
         },
         {
+          "name": "nui-chart-area",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-area`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`transition-all duration-300`"
+          }
+        },
+        {
           "name": "nui-chart-axes",
           "description": {
             "kind": "markdown",
             "value": "**NUICSS Isolated Superclass** (alias for `chart-axes`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`fill-muted text-xs select-none`"
+          }
+        },
+        {
+          "name": "nui-chart-bar",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-bar`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`transition-opacity duration-150 cursor-pointer hover:opacity-85`"
           }
         },
         {
@@ -2568,7 +2736,21 @@
           "name": "nui-chart-container",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `chart-container`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`relative w-full overflow-hidden font-sans`"
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-container`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`relative w-full font-sans`"
+          }
+        },
+        {
+          "name": "nui-chart-container-circular",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-container-circular`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`flex items-center justify-center`"
+          }
+        },
+        {
+          "name": "nui-chart-crosshair",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-crosshair`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`stroke-default opacity-60 pointer-events-none`"
           }
         },
         {
@@ -2576,6 +2758,132 @@
           "description": {
             "kind": "markdown",
             "value": "**NUICSS Isolated Superclass** (alias for `chart-grid`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`stroke-default opacity-50`"
+          }
+        },
+        {
+          "name": "nui-chart-legend",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-legend`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`flex flex-wrap items-center justify-center gap-4 mt-3 text-xs`"
+          }
+        },
+        {
+          "name": "nui-chart-legend-dot",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-legend-dot`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`w-2.5 h-2.5 rounded-full shrink-0`"
+          }
+        },
+        {
+          "name": "nui-chart-legend-item",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-legend-item`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`inline-flex items-center gap-1.5 cursor-pointer select-none transition-opacity hover:opacity-80`"
+          }
+        },
+        {
+          "name": "nui-chart-legend-label",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-legend-label`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`font-medium text-muted`"
+          }
+        },
+        {
+          "name": "nui-chart-line",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-line`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`transition-all duration-300`"
+          }
+        },
+        {
+          "name": "nui-chart-point",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-point`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`transition-all duration-150`"
+          }
+        },
+        {
+          "name": "nui-chart-reference-label",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-reference-label`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`text-[10px] font-medium select-none pointer-events-none`"
+          }
+        },
+        {
+          "name": "nui-chart-reference-line",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-reference-line`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`pointer-events-none`"
+          }
+        },
+        {
+          "name": "nui-chart-segment",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-segment`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`transition-transform duration-150 cursor-pointer hover:scale-105`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`absolute pointer-events-none bg-surface/80 text-default border border-default/40 rounded-xl shadow-2xl px-3.5 py-2.5 text-xs backdrop-blur-xl saturate-150 z-50 whitespace-nowrap transition-opacity duration-150`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-container",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-container`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`flex flex-col gap-1 min-w-[110px]`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-item",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-item`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`flex items-center justify-between gap-3 text-xs leading-tight`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-items",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-items`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`flex flex-col gap-1.5`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-label",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-label`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`text-muted truncate opacity-90`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-label-group",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-label-group`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`flex items-center gap-1.5 min-w-0`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-swatch",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-swatch`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`w-2 h-2 rounded-full ring-2 ring-current/20 shrink-0`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-title",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-title`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`text-[11px] font-semibold text-muted tracking-wider uppercase pb-1.5 mb-1.5 border-b border-default/20 opacity-80`"
+          }
+        },
+        {
+          "name": "nui-chart-tooltip-value",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `chart-tooltip-value`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`font-semibold font-mono text-default tabular-nums ml-auto`"
           }
         },
         {

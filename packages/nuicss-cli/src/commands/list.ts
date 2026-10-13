@@ -71,13 +71,22 @@ export const REGISTRY: Record<string, ComponentInfo> = {
     name: 'Kanban',
     pkg: '@nofinite/kanban',
     description: 'Fluid drag-and-drop task workflow board',
-    superclass: 'kanban-board, kanban-column, kanban-card',
+    superclass:
+      'kanban-board, kanban-column, kanban-card, kanban-add-column-btn',
   },
   editor: {
     name: 'Markon Editor',
     pkg: '@nofinite/markon',
     description: 'Modern Markdown WYSIWYG editor engine',
-    superclass: 'markon-editor, markon-toolbar, markon-preview',
+    superclass: 'markon-editor, markon-toolbar, editor-content',
+  },
+  media: {
+    name: 'Media Player',
+    pkg: '@nofinite/media',
+    description:
+      'Customizable glassmorphic audio and video player with token bridges',
+    superclass:
+      'nui-media-container, nui-vidstack-player, nui-vidstack-audio-player',
   },
 };
 

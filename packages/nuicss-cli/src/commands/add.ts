@@ -13,6 +13,7 @@ const TEMPLATES: Record<string, string> = {
   sparkline: `<svg class="sparkline-svg">\n  <!-- Sparkline trend path -->\n</svg>`,
   kanban: `<div class="kanban-board">\n  <div class="kanban-column">\n    <div class="kanban-card card">Task 1</div>\n  </div>\n</div>`,
   editor: `<div class="markon-editor">\n  <div class="markon-toolbar"></div>\n  <div class="editor-content"></div>\n</div>`,
+  media: `<div class="nui-media-container">\n  <media-player class="nui-vidstack-player" src="https://media-files.vidstack.io/720p.mp4">\n    <media-provider></media-provider>\n  </media-player>\n</div>`,
 };
 
 export async function addCommand(componentName?: string): Promise<void> {

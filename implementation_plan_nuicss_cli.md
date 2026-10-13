@@ -176,3 +176,12 @@ All 4 phases have been fully implemented, verified, and committed locally to `de
 
 - **Lightweight NPM Package:** Configured `files: ["bin/nuicss.js", "dist/"]` in `package.json`. Verified via `npm pack --dry-run` that package download size dropped from **171.5 MB** down to **168.7 kB** (unpacked 1.8 MB), with 0 missing files.
 - **Clean ESLint & Standalone Binaries:** Zero ESLint warnings or errors, and standalone binary builds succeed with Bun.
+
+---
+
+### Phase 5: Synchronize Upgraded NUICSS Architecture & Local-First Resolution (Completed)
+
+- **Embedded Assets Synchronized:** Synced latest `styles.css` (216.2 kB), `nuicss.html-data.json` (326.2 kB), and `nuicss.css-data.json` (48.7 kB) from `@nofinite/nuicss` and regenerated `src/embedded/assets.ts` with consolidated Kanban, Markon, Charts, and Media design system superclasses.
+- **Local-First Resolution:** Implemented `resolveBaseStyles(cwd)` in `compile.ts` to dynamically inspect `node_modules/@nofinite/nuicss/dist/styles.css` before falling back to embedded snapshot.
+- **Registry & Scaffolder Expansion:** Added `media` (`@nofinite/media`) to `REGISTRY` in `list.ts` and starter template in `add.ts`; updated Kanban and Editor superclasses.
+- **Clean Verification:** `build:ts`, `typecheck`, and `eslint` passed with 0 errors/warnings. `npm pack --dry-run` verified lightweight package size (182.5 kB tarball). Tested compile verified inclusion of `.nui-vidstack-player` and `.kanban-add-column-btn`.
