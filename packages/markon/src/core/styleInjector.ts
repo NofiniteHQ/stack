@@ -87,12 +87,14 @@ export const MARKON_CORE_CSS = `
 }
 
 .markon-editor .editor-toolbar .editor-typography-trigger {
-  width: auto;
+  width: 30px;
   height: 30px;
-  padding: 0 8px;
-  gap: 6px;
-  font-size: var(--text-xs, 0.75rem);
-  font-weight: 500;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .markon-editor .editor-toolbar .editor-toolbar-separator {
