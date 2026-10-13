@@ -12,23 +12,56 @@ import { common, createLowlight } from 'lowlight';
 
 export const lowlight = createLowlight(common);
 
-export const SUPPORTED_LANGUAGES = [
-  { label: 'Plain Text', value: 'plaintext' },
-  { label: 'TypeScript', value: 'typescript' },
-  { label: 'JavaScript', value: 'javascript' },
-  { label: 'Python', value: 'python' },
-  { label: 'HTML', value: 'html' },
-  { label: 'CSS', value: 'css' },
-  { label: 'JSON', value: 'json' },
-  { label: 'Markdown', value: 'markdown' },
-  { label: 'SQL', value: 'sql' },
-  { label: 'Bash', value: 'bash' },
-  { label: 'Rust', value: 'rust' },
-  { label: 'Go', value: 'go' },
-  { label: 'C++', value: 'cpp' },
-  { label: 'C#', value: 'csharp' },
-  { label: 'Java', value: 'java' },
-  { label: 'YAML', value: 'yaml' },
+export interface LanguageOption {
+  value: string;
+  label: string;
+  group?: 'Web' | 'Backend & Systems' | 'Data & Config';
+}
+
+export const LANGUAGE_ALIASES: Record<string, string> = {
+  ts: 'typescript',
+  js: 'javascript',
+  py: 'python',
+  sh: 'bash',
+  zsh: 'bash',
+  shell: 'bash',
+  yml: 'yaml',
+  md: 'markdown',
+  htm: 'html',
+  'c++': 'cpp',
+  cs: 'csharp',
+  text: 'plaintext',
+  txt: 'plaintext',
+};
+
+export function normalizeLanguage(lang: string | undefined | null): string {
+  if (!lang) return 'plaintext';
+  const clean = lang.trim().toLowerCase();
+  return LANGUAGE_ALIASES[clean] || clean;
+}
+
+export const SUPPORTED_LANGUAGES: LanguageOption[] = [
+  // Web Development
+  { label: 'TypeScript', value: 'typescript', group: 'Web' },
+  { label: 'JavaScript', value: 'javascript', group: 'Web' },
+  { label: 'HTML', value: 'html', group: 'Web' },
+  { label: 'CSS', value: 'css', group: 'Web' },
+
+  // Backend & Systems
+  { label: 'Python', value: 'python', group: 'Backend & Systems' },
+  { label: 'Go', value: 'go', group: 'Backend & Systems' },
+  { label: 'Rust', value: 'rust', group: 'Backend & Systems' },
+  { label: 'Java', value: 'java', group: 'Backend & Systems' },
+  { label: 'C++', value: 'cpp', group: 'Backend & Systems' },
+  { label: 'C#', value: 'csharp', group: 'Backend & Systems' },
+
+  // Data, Shell & Config
+  { label: 'SQL', value: 'sql', group: 'Data & Config' },
+  { label: 'Bash', value: 'bash', group: 'Data & Config' },
+  { label: 'JSON', value: 'json', group: 'Data & Config' },
+  { label: 'YAML', value: 'yaml', group: 'Data & Config' },
+  { label: 'Markdown', value: 'markdown', group: 'Data & Config' },
+  { label: 'Plain Text', value: 'plaintext', group: 'Data & Config' },
 ];
 
 export const MarkonCodeBlock =
@@ -150,14 +183,35 @@ export const MarkonCodeBlock =
           'select select-sm text-xs bg-transparent border-none py-0.5 pl-1 pr-6 cursor-pointer text-muted hover:text-default font-mono focus:ring-0';
         select.setAttribute('aria-label', 'Code Language');
 
+        const currentLang = normalizeLanguage(node.attrs.language);
+
+        const groups: Record<string, HTMLOptGroupElement> = {
+          Web: document.createElement('optgroup'),
+          'Backend & Systems': document.createElement('optgroup'),
+          'Data & Config': document.createElement('optgroup'),
+        };
+        groups['Web'].label = 'Web Development';
+        groups['Backend & Systems'].label = 'Backend & Systems';
+        groups['Data & Config'].label = 'Data & Config';
+
         SUPPORTED_LANGUAGES.forEach((lang) => {
           const option = document.createElement('option');
           option.value = lang.value;
           option.textContent = lang.label;
-          if ((node.attrs.language || 'plaintext') === lang.value) {
+          if (currentLang === lang.value) {
             option.selected = true;
           }
-          select.appendChild(option);
+          if (lang.group && groups[lang.group]) {
+            groups[lang.group].appendChild(option);
+          } else {
+            select.appendChild(option);
+          }
+        });
+
+        Object.values(groups).forEach((grp) => {
+          if (grp.children.length > 0) {
+            select.appendChild(grp);
+          }
         });
 
         if (editor.isEditable) {
@@ -184,7 +238,7 @@ export const MarkonCodeBlock =
         pre.className =
           'p-3 overflow-x-auto text-default m-0 leading-relaxed font-mono';
         const code = document.createElement('code');
-        code.className = `hljs language-${node.attrs.language || 'plaintext'}`;
+        code.className = `hljs language-${currentLang}`;
         pre.appendChild(code);
 
         // Copy Button
@@ -237,12 +291,11 @@ export const MarkonCodeBlock =
           update: (updatedNode) => {
             if (updatedNode.type.name !== 'codeBlock') return false;
             currentNode = updatedNode;
-            if (select.value !== (updatedNode.attrs.language || 'plaintext')) {
-              select.value = updatedNode.attrs.language || 'plaintext';
+            const updatedLang = normalizeLanguage(updatedNode.attrs.language);
+            if (select.value !== updatedLang) {
+              select.value = updatedLang;
             }
-            code.className = `hljs language-${
-              updatedNode.attrs.language || 'plaintext'
-            }`;
+            code.className = `hljs language-${updatedLang}`;
             return true;
           },
           destroy: () => {

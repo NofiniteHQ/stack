@@ -9,7 +9,7 @@
  */
 
 import katex from 'katex';
-import { lowlight, SUPPORTED_LANGUAGES } from './codeBlock';
+import { lowlight, SUPPORTED_LANGUAGES, normalizeLanguage } from './codeBlock';
 import { markdownToHtml } from './markdown';
 
 export interface MarkonAuthor {
@@ -1048,7 +1048,8 @@ export function jsonToHtml(
     }
 
     case 'codeBlock': {
-      const lang = (attrs.language || 'plaintext').toLowerCase();
+      const rawLang = (attrs.language || 'plaintext').toLowerCase();
+      const lang = normalizeLanguage(rawLang);
       const codeText = getRawText(node);
       const langLabel =
         LANG_LABEL_MAP[lang] ||
