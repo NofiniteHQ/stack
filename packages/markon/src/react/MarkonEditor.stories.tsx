@@ -3,6 +3,10 @@ import { useState } from 'react';
 import 'katex/dist/katex.min.css';
 import { MarkonEditor, useMarkon, MarkonRender } from './index';
 
+// ---------------------------------------------------------------------------
+// Shared High-Fidelity Enterprise AST Mock Content
+// ---------------------------------------------------------------------------
+
 const samplePublicationDoc = {
   type: 'doc',
   content: [
@@ -256,15 +260,19 @@ const sampleMetadata = {
       'High-contrast design system tokens rendered through Markon & NUICSS',
   },
   author: {
-    name: 'Karan Sharma',
+    name: 'Sarah Chen',
     title: 'Principal Systems Architect',
     avatar:
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
     url: 'https://github.com/nofinite',
   },
-  publishedAt: '2026-10-01',
+  publishedAt: '2026-10-10',
   tags: ['Design Systems', 'TipTap', 'Architecture', 'ProseMirror', 'NUICSS'],
 };
+
+// ---------------------------------------------------------------------------
+// Storybook Metadata
+// ---------------------------------------------------------------------------
 
 const meta: Meta = {
   title: 'Editor',
@@ -275,19 +283,24 @@ const meta: Meta = {
 
 export default meta;
 
+// ===========================================================================
+// CATEGORY 1: Core Editor Modes
+// ===========================================================================
+
 export const Default: StoryObj = {
+  name: '1. Core / Full Featured Editor',
   render: () => (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold">Document Editor</h2>
+    <div className="max-w-4xl mx-auto space-y-4">
+      <div className="mb-2">
+        <h2 className="text-xl font-bold">Full Featured Authoring Surface</h2>
         <p className="text-muted text-sm">
-          Universal rich text and content authoring engine powered by TipTap,
-          LaTeX math, and lowlight syntax highlighting.
+          Complete rich-text engine with modernized vector toolbar icons,
+          typography controls, color pickers, slash commands, and bubble menus.
         </p>
       </div>
       <MarkonEditor
         placeholder="Type '/' for commands or start writing..."
-        minHeight="350px"
+        minHeight="380px"
         showWordCount={true}
         showSaveStatus={true}
         showSlashCommands={true}
@@ -300,20 +313,54 @@ export const Default: StoryObj = {
   ),
 };
 
+export const CompactMinimal: StoryObj = {
+  name: '1. Core / Compact & Minimal (Comments & Notes)',
+  render: () => (
+    <div className="max-w-2xl mx-auto space-y-3">
+      <div>
+        <h3 className="text-base font-semibold">Compact Comment Box</h3>
+        <p className="text-xs text-muted">
+          Streamlined authoring container suitable for discussions, feedback
+          threads, and quick notes.
+        </p>
+      </div>
+      <MarkonEditor
+        placeholder="Write a reply or leave a note..."
+        minHeight="140px"
+        showWordCount={false}
+        showSaveStatus={false}
+        showSlashCommands={true}
+        showBubbleMenu={false}
+        value="<p>Great architectural breakdown! The zero-dependency AST traversal in <code>renderMarkon</code> solves our SSR hydration bottlenecks.</p>"
+      />
+    </div>
+  ),
+};
+
 export const ControlledState: StoryObj = {
+  name: '1. Core / Controlled State Sync',
   render: () => {
     const [content, setContent] = useState(
       '<p>Type here to test <strong>controlled state</strong> synchronization without cursor jumping.</p>'
     );
     return (
       <div className="max-w-3xl mx-auto space-y-4">
+        <div className="mb-2">
+          <h3 className="text-base font-semibold">
+            Two-Way Controlled Binding
+          </h3>
+          <p className="text-xs text-muted">
+            The parent component holds and updates state reactively via{' '}
+            <code>onChange(html, json)</code>.
+          </p>
+        </div>
         <MarkonEditor
           value={content}
           onChange={(html) => setContent(html)}
           minHeight="200px"
           showWordCount={true}
         />
-        <div className="p-3 rounded-lg border border-default bg-subtle text-xs font-mono break-all">
+        <div className="p-3 rounded-xl border border-default bg-subtle text-xs font-mono break-all">
           <strong className="text-muted block mb-1">
             Live Parent State (HTML):
           </strong>
@@ -325,10 +372,20 @@ export const ControlledState: StoryObj = {
 };
 
 export const EmptyWithPlaceholder: StoryObj = {
+  name: '1. Core / Empty State & Slash Hints',
   render: () => (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto space-y-3">
+      <div>
+        <h3 className="text-base font-semibold">
+          Clean Canvas with Slash Commands
+        </h3>
+        <p className="text-xs text-muted">
+          Press <code>/</code> anywhere on the canvas to trigger the floating
+          command palette.
+        </p>
+      </div>
       <MarkonEditor
-        placeholder="Write something brilliant... (Type / for commands)"
+        placeholder="Write something brilliant... (Type '/' for headings, tables, code, and callouts)"
         minHeight="250px"
         showWordCount={true}
         showSlashCommands={true}
@@ -337,44 +394,265 @@ export const EmptyWithPlaceholder: StoryObj = {
   ),
 };
 
-export const HookUsage: StoryObj = {
-  render: () => {
-    const { containerRef, wordCount, charCount, isEmpty } = useMarkon({
-      initialValue:
-        '<h3>Headless Hook API</h3><p>Manage editor state via <code>useMarkon()</code>.</p>',
-    });
-
-    return (
-      <div className="max-w-3xl mx-auto space-y-3">
-        <div className="flex items-center gap-3 text-xs text-muted">
-          <span>
-            Words: <strong>{wordCount}</strong>
-          </span>
-          <span>
-            Chars: <strong>{charCount}</strong>
-          </span>
-          <span>
-            Is Empty: <strong>{String(isEmpty)}</strong>
-          </span>
-        </div>
-        <div ref={containerRef} />
-      </div>
-    );
-  },
-};
-
 export const ReadOnly: StoryObj = {
+  name: '1. Core / Read Only Mode',
   render: () => (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto space-y-3">
+      <div>
+        <h3 className="text-base font-semibold">Immutable Canvas</h3>
+        <p className="text-xs text-muted">
+          The toolbar is disabled with aria-disabled attributes and user editing
+          is locked.
+        </p>
+      </div>
       <MarkonEditor
         readOnly={true}
-        value="<h3>Read Only Mode</h3><p>This content is immutable and cannot be edited by the user.</p><blockquote><p>Quotes and code remain fully styled.</p></blockquote>"
+        value="<h3>Verified Architecture Spec</h3><p>This content is immutable and cannot be modified by the client.</p><blockquote><p>All design tokens and code blocks remain beautifully formatted and selectable.</p></blockquote>"
       />
     </div>
   ),
 };
 
-export const ArticlePublication: StoryObj = {
+// ===========================================================================
+// CATEGORY 2: Specialized Feature Deep-Dives
+// ===========================================================================
+
+export const TablesAndDataGrid: StoryObj = {
+  name: '2. Features / Tables & Data Grid Editing',
+  render: () => (
+    <div className="max-w-4xl mx-auto space-y-4">
+      <div>
+        <h3 className="text-lg font-bold">Interactive Table Management</h3>
+        <p className="text-xs text-muted">
+          Click inside any cell to activate the dynamic table bubble menu. Add
+          or remove rows, columns, and toggle header formatting.
+        </p>
+      </div>
+      <MarkonEditor
+        minHeight="320px"
+        showWordCount={true}
+        value={`
+          <h2>Database Replication Topology</h2>
+          <p>Click inside the table to access column and row actions:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Cluster Node</th>
+                <th>Region</th>
+                <th>Latency (p99)</th>
+                <th>Health Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>us-east-primary</td>
+                <td>us-east-1 (N. Virginia)</td>
+                <td>1.2 ms</td>
+                <td>ACTIVE / PRIMARY</td>
+              </tr>
+              <tr>
+                <td>eu-central-replica</td>
+                <td>eu-central-1 (Frankfurt)</td>
+                <td>74.6 ms</td>
+                <td>SYNCED / STANDBY</td>
+              </tr>
+              <tr>
+                <td>ap-southeast-replica</td>
+                <td>ap-southeast-1 (Singapore)</td>
+                <td>148.2 ms</td>
+                <td>SYNCED / STANDBY</td>
+              </tr>
+            </tbody>
+          </table>
+        `}
+      />
+    </div>
+  ),
+};
+
+export const MathAndFormulas: StoryObj = {
+  name: '2. Features / Mathematical Formulas (LaTeX & KaTeX)',
+  render: () => (
+    <div className="max-w-3xl mx-auto space-y-4">
+      <div>
+        <h3 className="text-lg font-bold">
+          Scientific & Mathematical Typesetting
+        </h3>
+        <p className="text-xs text-muted">
+          Powered by KaTeX for instant formula compilation with fractions,
+          integrals, matrices, and roots.
+        </p>
+      </div>
+      <MarkonEditor
+        minHeight="340px"
+        showWordCount={true}
+        value={`
+          <h2>Quantum Field & Optics Relations</h2>
+          <p>Gaussian integral with infinite limits:</p>
+          <div data-math-block="" data-equation="\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}"></div>
+          <p>Euler's identity linking the five fundamental mathematical constants:</p>
+          <div data-math-block="" data-equation="e^{i\\pi} + 1 = 0"></div>
+          <p>Special relativity mass-energy equivalence:</p>
+          <div data-math-block="" data-equation="E = \\frac{m_0 c^2}{\\sqrt{1 - \\frac{v^2}{c^2}}}"></div>
+        `}
+      />
+    </div>
+  ),
+};
+
+export const CodeAndSyntax: StoryObj = {
+  name: '2. Features / Multi-Language Code & Syntax Highlighting',
+  render: () => (
+    <div className="max-w-4xl mx-auto space-y-4">
+      <div>
+        <h3 className="text-lg font-bold">
+          Syntax Highlighting & Language Switcher
+        </h3>
+        <p className="text-xs text-muted">
+          Lowlight syntax parsing with language badge, code copy trigger, and
+          theme-adaptive OKLCH token colors.
+        </p>
+      </div>
+      <MarkonEditor
+        minHeight="360px"
+        showWordCount={true}
+        value={`
+          <h2>Systems Programming in Rust & TypeScript</h2>
+          <p>Fast AST traversal implementation in Rust:</p>
+          <pre><code class="language-rust">pub struct NodeVisitor<'a> {
+    depth: usize,
+    buffer: &'a mut String,
+}
+
+impl<'a> NodeVisitor<'a> {
+    pub fn visit(&mut self, node: &AstNode) -> Result<(), Error> {
+        self.buffer.push_str(&format!("<node depth=\\"{}\\" />", self.depth));
+        Ok(())
+    }
+}</code></pre>
+          <p>High-level orchestration in TypeScript:</p>
+          <pre><code class="language-typescript">interface PublicationEngine {
+  readonly version: string;
+  render(content: JSONContent): Promise<RenderOutput>;
+}</code></pre>
+        `}
+      />
+    </div>
+  ),
+};
+
+export const CalloutsAndAlertBanners: StoryObj = {
+  name: '2. Features / Callout Notes & Alert Diagnostics',
+  render: () => (
+    <div className="max-w-3xl mx-auto space-y-4">
+      <div>
+        <h3 className="text-lg font-bold">Semantic Callout Banners</h3>
+        <p className="text-xs text-muted">
+          Five distinct callout types styled with self-contained OKLAB tints,
+          crisp icons, and border accents.
+        </p>
+      </div>
+      <MarkonEditor
+        minHeight="380px"
+        showWordCount={true}
+        value={`
+          <h2>Enterprise Security & Compliance Notices</h2>
+          <div data-callout="" data-callout-type="info" class="markon-callout alert alert-info my-3">
+            <div class="alert-content"><p><strong>Informational Note:</strong> All API requests require valid TLS 1.3 certificates and mTLS mutual authentication.</p></div>
+          </div>
+          <div data-callout="" data-callout-type="warning" class="markon-callout alert alert-warning my-3">
+            <div class="alert-content"><p><strong>Operational Warning:</strong> Scheduled maintenance window begins at 02:00 UTC. Secondary read replicas will be drained.</p></div>
+          </div>
+          <div data-callout="" data-callout-type="danger" class="markon-callout alert alert-danger my-3">
+            <div class="alert-content"><p><strong>Critical Advisory:</strong> Never commit production encryption keys or credentials to version control.</p></div>
+          </div>
+          <div data-callout="" data-callout-type="success" class="markon-callout alert alert-success my-3">
+            <div class="alert-content"><p><strong>Deployment Complete:</strong> All 58 unit and integration test assertions passed without regression.</p></div>
+          </div>
+        `}
+      />
+    </div>
+  ),
+};
+
+export const MediaAndEmbeds: StoryObj = {
+  name: '2. Features / Rich Media, Videos & File Attachments',
+  render: () => (
+    <div className="max-w-4xl mx-auto space-y-4">
+      <div>
+        <h3 className="text-lg font-bold">Rich Media & Video Embeds</h3>
+        <p className="text-xs text-muted">
+          Embed YouTube, Vimeo, and MP4 videos with responsive 16:9 aspect
+          ratios, captioned images, and file attachments.
+        </p>
+      </div>
+      <MarkonEditor
+        minHeight="380px"
+        showWordCount={true}
+        value={`
+          <h2>Multi-Media Documentation</h2>
+          <p>Interactive video walkthrough:</p>
+          <div class="markon-video-block my-4 mx-auto" style="width: 100%; max-width: 100%;">
+            <div class="relative aspect-video w-full rounded-xl overflow-hidden border border-default bg-subtle shadow-sm">
+              <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" class="w-full aspect-video rounded-xl border border-default shadow-sm" frameborder="0" allowfullscreen></iframe>
+            </div>
+          </div>
+          <figure class="markon-rendered-image my-4 mx-auto" style="width: 100%; max-width: 100%;">
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80" alt="Hardware Rack" class="rounded-xl border border-default shadow-sm w-full h-auto block" />
+            <figcaption class="text-xs text-muted text-center mt-2">Figure 1.2 — Dedicated bare-metal clusters in Dublin data center</figcaption>
+          </figure>
+        `}
+      />
+    </div>
+  ),
+};
+
+export const ListsAndTaskManagement: StoryObj = {
+  name: '2. Features / Bullet, Numbered & Task Checklists',
+  render: () => (
+    <div className="max-w-3xl mx-auto space-y-4">
+      <div>
+        <h3 className="text-lg font-bold">Reset-Proof List Typography</h3>
+        <p className="text-xs text-muted">
+          Guaranteed bullet discs, numbering, and interactive task checkboxes
+          regardless of CSS resets.
+        </p>
+      </div>
+      <MarkonEditor
+        minHeight="320px"
+        showWordCount={true}
+        value={`
+          <h2>Release Readiness Checklist</h2>
+          <ul class="task-list">
+            <li data-checked="true"><input type="checkbox" checked /> Design token synchronization with @nofinite/nuicss</li>
+            <li data-checked="true"><input type="checkbox" checked /> Isomorphic AST renderer with zero DOM dependencies</li>
+            <li data-checked="true"><input type="checkbox" checked /> Lucide-grade SVG vector toolbar icons</li>
+            <li data-checked="false"><input type="checkbox" /> Publish to NPM registry under @nofinite/markon</li>
+          </ul>
+          <h3>Key Features</h3>
+          <ul>
+            <li>Full TipTap 3.x ProseMirror foundation</li>
+            <li>Interactive table bubble menus with column/row tools</li>
+            <li>Embedded KaTeX formulas and Lowlight syntax highlighting</li>
+          </ul>
+          <h3>Verification Steps</h3>
+          <ol>
+            <li>Run unit tests across all core modules</li>
+            <li>Perform Playwright visual verification in Light & Dark modes</li>
+            <li>Verify tarball integrity with npm pack --dry-run</li>
+          </ol>
+        `}
+      />
+    </div>
+  ),
+};
+
+// ===========================================================================
+// CATEGORY 3: Publication & Presentation Layouts (MarkonRender)
+// ===========================================================================
+
+export const PublicationArticle: StoryObj = {
+  name: '3. Publication / Article Layout (Hero, Byline & Sticky TOC)',
   render: () => (
     <div className="w-full bg-page min-h-screen">
       <MarkonRender
@@ -386,7 +664,8 @@ export const ArticlePublication: StoryObj = {
   ),
 };
 
-export const DocumentPublication: StoryObj = {
+export const PublicationDocument: StoryObj = {
+  name: '3. Publication / Documentation Layout (Sidebar Nav & Kicker)',
   render: () => (
     <div className="w-full bg-page min-h-screen">
       <MarkonRender
@@ -401,7 +680,8 @@ export const DocumentPublication: StoryObj = {
   ),
 };
 
-export const NewsroomPublication: StoryObj = {
+export const PublicationNewsroom: StoryObj = {
+  name: '3. Publication / Newsroom Layout (Headline & Dateline)',
   render: () => (
     <div className="w-full bg-page min-h-screen">
       <MarkonRender
@@ -416,7 +696,21 @@ export const NewsroomPublication: StoryObj = {
   ),
 };
 
-export const LiveAuthoringPipeline: StoryObj = {
+export const PublicationStandalone: StoryObj = {
+  name: '3. Publication / Standalone (Unadorned Content)',
+  render: () => (
+    <div className="max-w-3xl mx-auto p-6 bg-surface rounded-2xl border border-default shadow-sm my-6">
+      <MarkonRender content={samplePublicationDoc} layout="minimal" />
+    </div>
+  ),
+};
+
+// ===========================================================================
+// CATEGORY 4: Interactive Workflows & Headless Integrations
+// ===========================================================================
+
+export const LiveDualSurfacePipeline: StoryObj = {
+  name: '4. Workflows / Live Dual-Surface Authoring Pipeline',
   render: () => {
     const [content, setContent] = useState<any>(samplePublicationDoc);
 
@@ -465,6 +759,34 @@ export const LiveAuthoringPipeline: StoryObj = {
             />
           </div>
         </div>
+      </div>
+    );
+  },
+};
+
+export const HeadlessHookAPI: StoryObj = {
+  name: '4. Workflows / Headless Hook API (useMarkon)',
+  render: () => {
+    const { containerRef, wordCount, charCount, isEmpty } = useMarkon({
+      initialValue:
+        '<h3>Headless Hook Integration</h3><p>Build custom toolbars or headless authoring flows via <code>useMarkon()</code>.</p>',
+    });
+
+    return (
+      <div className="max-w-3xl mx-auto space-y-3">
+        <div className="flex items-center gap-3 text-xs text-muted p-2 rounded-lg bg-subtle border border-default">
+          <span>
+            Words: <strong className="text-default">{wordCount}</strong>
+          </span>
+          <span>
+            Chars: <strong className="text-default">{charCount}</strong>
+          </span>
+          <span>
+            Is Empty:{' '}
+            <strong className="text-default">{String(isEmpty)}</strong>
+          </span>
+        </div>
+        <div ref={containerRef} />
       </div>
     );
   },

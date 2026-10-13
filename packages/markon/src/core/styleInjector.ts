@@ -28,14 +28,79 @@ export const MARKON_CORE_CSS = `
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 2px;
+  padding: 6px 8px;
   background-color: var(--bg-subtle);
   border-bottom: 1px solid var(--border-default);
   position: sticky;
   top: 0;
   z-index: 10;
   user-select: none;
+}
+
+.markon-editor .editor-toolbar .editor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: var(--fg-default);
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 0.15s) ease,
+    color var(--transition-fast, 0.15s) ease,
+    border-color var(--transition-fast, 0.15s) ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.markon-editor .editor-toolbar .editor-btn:hover {
+  background-color: var(--bg-surface);
+  border-color: var(--border-default);
+  color: var(--color-primary);
+}
+
+.markon-editor .editor-toolbar .editor-btn.btn-active,
+.markon-editor .editor-toolbar .editor-btn[aria-pressed="true"] {
+  background-color: color-mix(in oklab, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  border-color: color-mix(in oklab, var(--color-primary) 30%, transparent);
+}
+
+.markon-editor .editor-toolbar .editor-btn svg {
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  min-height: 15px;
+  display: block;
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.markon-editor .editor-toolbar .editor-typography-trigger {
+  width: auto;
+  height: 30px;
+  padding: 0 8px;
+  gap: 6px;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 500;
+}
+
+.markon-editor .editor-toolbar .editor-toolbar-separator {
+  width: 1px;
+  height: 18px;
+  background-color: var(--border-default);
+  margin: 0 4px;
+  flex-shrink: 0;
 }
 
 .markon-editor .editor-footer {

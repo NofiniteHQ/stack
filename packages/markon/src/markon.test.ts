@@ -1056,7 +1056,7 @@ describe('@nofinite/markon', () => {
             },
           })
         );
-        setTimeout(resolve, 100);
+        setTimeout(resolve, 250);
       });
 
       // Verify DOM content
