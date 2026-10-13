@@ -65,7 +65,7 @@ Markon's editor typography, bubble menus, and toolbar controls are styled native
 import '@nofinite/nuicss/styles.css';
 ```
 
-> **Note:** Alternatively, Markon also exports a standalone stylesheet (`@nofinite/markon/styles.css`) if consumed in projects without the full NUICSS utility suite.
+> **Note:** For modular or bundle-isolated setups, NUICSS also exports a dedicated subpath stylesheet: `@nofinite/nuicss/markon.css`.
 
 ---
 

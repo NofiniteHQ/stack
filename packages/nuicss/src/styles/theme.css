@@ -995,6 +995,415 @@ input[type='number'] {
     background-color: var(--color-primary);
     pointer-events: none;
   }
+
+  /* ------------------------------------------------------------
+     Markon Container, Toolbar & Footer Chrome
+     ------------------------------------------------------------ */
+  .markon-editor {
+    position: relative;
+    width: 100%;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl, 0.75rem);
+    box-shadow: var(--shadow-sm);
+    color: var(--fg-default);
+    font-family: var(
+      --font-sans,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif
+    );
+    overflow: hidden;
+    transition: border-color var(--transition-fast, 0.15s) ease,
+      box-shadow var(--transition-fast, 0.15s) ease;
+  }
+
+  .markon-editor:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px
+      color-mix(in oklab, var(--color-primary) 15%, transparent);
+  }
+
+  .markon-editor .editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background-color: var(--bg-subtle);
+    border-bottom: 1px solid var(--border-default);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    user-select: none;
+  }
+
+  .markon-editor .editor-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    font-size: var(--text-xs, 0.75rem);
+    color: var(--fg-muted);
+    border-top: 1px solid var(--border-default);
+    background-color: var(--bg-subtle);
+    user-select: none;
+  }
+
+  /* ------------------------------------------------------------
+     Markon Floating Bubble Menu (Unified Pill Container)
+     ------------------------------------------------------------ */
+  .markon-bubble-menu {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl, 0.75rem);
+    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    width: max-content;
+    white-space: nowrap;
+    user-select: none;
+    font-family: var(
+      --font-sans,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif
+    );
+  }
+
+  .markon-bubble-menu .markon-bubble-block-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding-right: 4px;
+    margin-right: 4px;
+    border-right: 1px solid var(--border-default);
+  }
+
+  .markon-bubble-menu button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md, 0.375rem);
+    color: var(--fg-default);
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: var(--text-xs, 0.75rem);
+    line-height: 1;
+    transition: background-color var(--transition-fast, 0.15s) ease,
+      color var(--transition-fast, 0.15s) ease;
+  }
+
+  .markon-bubble-menu button:hover {
+    background-color: var(--bg-subtle);
+  }
+
+  .markon-bubble-menu button.btn-active,
+  .markon-bubble-menu button.is-active,
+  .markon-bubble-menu button[data-active='true'] {
+    background-color: color-mix(
+      in oklab,
+      var(--color-primary) 15%,
+      transparent
+    );
+    color: var(--color-primary);
+    font-weight: var(--weight-bold, 700);
+  }
+
+  .markon-bubble-menu button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+  }
+
+  /* ------------------------------------------------------------
+     Markon Slash Menu Dropdown
+     ------------------------------------------------------------ */
+  .markon-slash-menu {
+    position: fixed;
+    z-index: 9999;
+    width: 280px;
+    max-height: 300px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl, 0.75rem);
+    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 4px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    user-select: none;
+    font-family: var(
+      --font-sans,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif
+    );
+  }
+
+  .markon-slash-menu::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .markon-slash-menu::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .markon-slash-menu::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: var(--radius-full, 9999px);
+  }
+
+  .markon-slash-menu .dropdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: var(--radius-lg, 0.5rem);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--transition-fast, 0.15s) ease;
+  }
+
+  .markon-slash-menu .dropdown-item:hover,
+  .markon-slash-menu .dropdown-item.btn-active {
+    background-color: var(--bg-subtle);
+  }
+
+  .markon-slash-menu .dropdown-item .item-title {
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: var(--weight-semibold, 600);
+    color: var(--fg-default);
+    line-height: 1.25;
+  }
+
+  .markon-slash-menu .dropdown-item .item-desc {
+    font-size: 0.7rem;
+    color: var(--fg-muted);
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+
+  /* ------------------------------------------------------------
+     Markon Popover Menus
+     ------------------------------------------------------------ */
+  .markon-popover-menu,
+  .markon-typography-menu,
+  .markon-font-family-menu,
+  .markon-font-size-menu,
+  .markon-color-menu,
+  .markon-table-menu {
+    position: fixed;
+    z-index: 9999;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl, 0.75rem);
+    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 4px;
+    font-family: var(
+      --font-sans,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif
+    );
+  }
+
+  /* ------------------------------------------------------------
+     Markon Drag Handle & Drop Indicator
+     ------------------------------------------------------------ */
+  .markon-drag-handle {
+    position: absolute;
+    z-index: 20;
+    width: 20px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: var(--fg-muted);
+    border-radius: var(--radius-sm, 0.25rem);
+    user-select: none;
+    touch-action: manipulation;
+    transition: opacity var(--transition-fast, 0.15s) ease,
+      background-color var(--transition-fast, 0.15s) ease,
+      color var(--transition-fast, 0.15s) ease;
+  }
+
+  @media (pointer: coarse) {
+    .markon-drag-handle {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .markon-drag-handle:hover {
+    color: var(--fg-default);
+    background-color: var(--bg-subtle);
+  }
+
+  .markon-drop-indicator {
+    position: absolute;
+    left: 24px;
+    right: 12px;
+    height: 2px;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-full, 9999px);
+    z-index: 30;
+    pointer-events: none;
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-50%);
+  }
+
+  /* ------------------------------------------------------------
+     Markon Block Actions Menu
+     ------------------------------------------------------------ */
+  .markon-block-actions-menu {
+    position: fixed;
+    z-index: 10001;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl, 0.75rem);
+    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 4px;
+    min-width: 140px;
+    font-family: var(
+      --font-sans,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif
+    );
+  }
+
+  .markon-block-actions-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: var(--radius-md, 0.375rem);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--fg-default);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    user-select: none;
+    transition: background-color var(--transition-fast, 0.15s) ease,
+      color var(--transition-fast, 0.15s) ease;
+  }
+
+  .markon-block-actions-menu .dropdown-item:hover {
+    background-color: var(--bg-subtle);
+  }
+
+  .markon-block-actions-menu .dropdown-item.is-danger {
+    color: var(--color-danger);
+  }
+
+  .markon-block-actions-menu .dropdown-item.is-danger:hover {
+    background-color: var(
+      --bg-danger-subtle,
+      color-mix(in oklab, var(--color-danger) 10%, transparent)
+    );
+  }
+
+  .markon-block-actions-menu .menu-divider {
+    height: 1px;
+    background-color: var(--border-default);
+    margin: 4px 0;
+    opacity: 0.6;
+  }
+
+  /* ------------------------------------------------------------
+     Markon Optimistic Upload Card & Resizable Image
+     ------------------------------------------------------------ */
+  .markon-uploading-card {
+    position: relative;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: var(--radius-xl, 0.75rem);
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+    user-select: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color var(--transition-fast, 0.15s) ease,
+      box-shadow var(--transition-fast, 0.15s) ease;
+  }
+
+  .markon-uploading-card.is-uploading {
+    border-color: var(--color-primary);
+  }
+
+  .markon-uploading-card.is-error {
+    border-color: var(--color-danger);
+    background-color: var(
+      --bg-danger-subtle,
+      color-mix(in oklab, var(--color-danger) 6%, transparent)
+    );
+  }
+
+  .markon-image-container {
+    user-select: none;
+    margin: 0.75rem 0;
+    display: flex;
+  }
+
+  .markon-image-wrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .markon-image-resize-handle {
+    position: absolute;
+    bottom: 8px !important;
+    right: 8px !important;
+    left: auto !important;
+    top: auto !important;
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-sm, 0.25rem);
+    background-color: var(--color-primary);
+    border: 1.5px solid var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+    cursor: se-resize;
+    opacity: 0;
+    transition: opacity var(--transition-fast, 0.15s) ease;
+    z-index: 20;
+    touch-action: none;
+  }
+
+  .markon-image-wrapper:hover .markon-image-resize-handle {
+    opacity: 1;
+  }
 }
 
 @keyframes shimmer {
@@ -1081,6 +1490,497 @@ input[type='number'] {
   transform-box: fill-box;
   transform-origin: left;
   animation: chartBarGrowX 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ------------------------------------------------------------
+15.c. KANBAN TASK BOARD & DND LAYOUT
+------------------------------------------------------------ */
+
+@layer components {
+  .kanban,
+  .kanban-board {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    align-items: flex-start;
+    user-select: none;
+    min-height: 400px;
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+    box-sizing: border-box;
+  }
+
+  .kanban-column {
+    width: 20rem;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-2xl, 1rem);
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
+    color: var(--text-default, var(--fg-default));
+    box-shadow: var(--shadow-xs, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+    max-height: 85vh;
+    position: relative;
+    transition: all 0.15s ease-in-out;
+    box-sizing: border-box;
+  }
+
+  .kanban-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.875rem;
+    border-bottom: 1px solid var(--border-default);
+    user-select: none;
+    cursor: grab;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .kanban-column-header > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .kanban-column-header:active {
+    cursor: grabbing;
+  }
+
+  .kanban-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.75rem;
+    overflow-y: auto;
+    flex: 1 1 0%;
+    min-height: 140px;
+    box-sizing: border-box;
+  }
+
+  .kanban-card {
+    position: relative;
+    padding: 0.875rem;
+    border-radius: var(--radius-xl, 0.75rem);
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
+    color: var(--text-default, var(--fg-default));
+    box-shadow: var(--shadow-xs, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+    cursor: grab;
+    user-select: none;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+  }
+
+  .kanban-card:active {
+    cursor: grabbing;
+  }
+
+  .kanban-card:hover {
+    border-color: color-mix(
+      in oklch,
+      var(--color-primary) 50%,
+      var(--border-default)
+    );
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  }
+
+  .kanban-card:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .kanban-card svg,
+  .kanban-meta-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+    max-width: 0.875rem !important;
+    max-height: 0.875rem !important;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .kanban-add-btn svg {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+    flex-shrink: 0;
+  }
+
+  .kanban-column-options svg {
+    width: 1rem !important;
+    height: 1rem !important;
+    flex-shrink: 0;
+  }
+
+  .kanban-card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text-default, var(--fg-default));
+    word-break: break-word;
+  }
+
+  .kanban-card:hover .kanban-card-title {
+    color: var(--color-primary);
+  }
+
+  .kanban-card-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted, var(--fg-muted));
+    margin-top: 0.25rem;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .kanban-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid
+      color-mix(in oklch, var(--border-default) 50%, transparent);
+    font-size: 0.75rem;
+    color: var(--text-muted, var(--fg-muted));
+  }
+
+  .kanban-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .kanban-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+  }
+
+  .kanban-meta-overdue {
+    color: var(--color-danger);
+    font-weight: 600;
+  }
+
+  .kanban-empty-placeholder {
+    height: 6rem;
+    border: 1px dashed
+      color-mix(in oklch, var(--border-default) 60%, transparent);
+    border-radius: var(--radius-xl, 0.75rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--text-muted, var(--fg-muted));
+    opacity: 0.7;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .kanban-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: 100%;
+    padding: 0.375rem 0.625rem;
+    border-radius: var(--radius-lg, 0.5rem);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted, var(--fg-muted));
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .kanban-add-btn:hover {
+    color: var(--text-default, var(--fg-default));
+    background-color: var(--bg-subtle);
+  }
+
+  .kanban-add-btn:hover svg {
+    color: var(--color-primary);
+  }
+
+  .kanban-drop-indicator-top,
+  .kanban-card-drop-top::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0.25rem;
+    right: 0.25rem;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: 9999px;
+    box-shadow: 0 0 6px var(--color-primary);
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .kanban-drop-indicator-bottom,
+  .kanban-card-drop-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0.25rem;
+    right: 0.25rem;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: 9999px;
+    box-shadow: 0 0 6px var(--color-primary);
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .kanban-drop-indicator-left,
+  .kanban-col-drop-left::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -3px;
+    width: 3px;
+    background-color: var(--color-primary);
+    border-radius: 9999px;
+    box-shadow: 0 0 6px var(--color-primary);
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .kanban-drop-indicator-right,
+  .kanban-col-drop-right::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -3px;
+    width: 3px;
+    background-color: var(--color-primary);
+    border-radius: 9999px;
+    box-shadow: 0 0 6px var(--color-primary);
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .kanban-add-column-container {
+    width: 20rem;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+
+  .kanban-add-column-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 1rem;
+    border-radius: var(--radius-2xl, 1rem);
+    border: 2px dashed var(--border-default);
+    background-color: color-mix(in oklch, var(--bg-surface) 60%, transparent);
+    color: var(--text-muted, var(--fg-muted));
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+  }
+
+  .kanban-add-column-btn:hover {
+    border-color: var(--color-primary);
+    background-color: var(--bg-surface);
+    color: var(--text-default, var(--fg-default));
+  }
+
+  .kanban-add-column-btn:hover .kanban-icon {
+    color: var(--color-primary);
+  }
+
+  .kanban-add-column-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .kanban-column-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.25rem);
+    width: 10rem;
+    border-radius: var(--radius-xl, 0.75rem);
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    padding: 0.25rem 0;
+    z-index: 50;
+    box-sizing: border-box;
+  }
+
+  .kanban-column-menu button {
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--text-default, var(--fg-default));
+    transition: background-color 0.15s ease;
+    box-sizing: border-box;
+  }
+
+  .kanban-column-menu button svg,
+  .kanban-column-menu button .kanban-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  .kanban-column-menu button:hover {
+    background-color: var(--bg-subtle);
+  }
+
+  .kanban-column-menu button.text-danger {
+    color: var(--color-danger);
+  }
+
+  .kanban-column-menu button.text-danger:hover {
+    background-color: color-mix(in oklch, var(--color-danger) 12%, transparent);
+  }
+}
+
+/* ------------------------------------------------------------
+15.d. MEDIA PLAYER DESIGN SYSTEM TOKEN BRIDGE
+------------------------------------------------------------ */
+
+@layer components {
+  .nui-vidstack-player,
+  .nui-vidstack-audio-player,
+  .nui-media-container media-player {
+    --media-brand: var(--color-primary, oklch(0.546 0.245 262.881));
+    --media-focus-ring-color: var(--color-primary, oklch(0.546 0.245 262.881));
+    --media-focus-ring: 0 0 0 3px var(--media-focus-ring-color);
+    --media-font-family: var(
+      --font-sans,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif
+    );
+    --media-border-radius: var(--radius-lg, 0.75rem);
+    --media-slider-thumb-bg: var(--color-primary, oklch(0.546 0.245 262.881));
+    --media-slider-track-fill-bg: var(
+      --color-primary,
+      oklch(0.546 0.245 262.881)
+    );
+    --media-buffering-color: var(--color-primary, oklch(0.546 0.245 262.881));
+    display: block;
+    width: 100%;
+    font-family: var(--media-font-family);
+  }
+
+  :where(:root:not(.dark):not([data-theme='dark'])) .nui-vidstack-player,
+  .light .nui-vidstack-player,
+  [data-theme='light'] .nui-vidstack-player,
+  .nui-vidstack-player[data-color-scheme='light'],
+  :where(:root:not(.dark):not([data-theme='dark'])) .nui-vidstack-audio-player,
+  .light .nui-vidstack-audio-player,
+  [data-theme='light'] .nui-vidstack-audio-player,
+  .nui-vidstack-audio-player[data-color-scheme='light'],
+  :where(:root:not(.dark):not([data-theme='dark']))
+    .nui-media-container
+    media-player,
+  .light .nui-media-container media-player,
+  [data-theme='light'] .nui-media-container media-player {
+    --media-brand: var(--color-primary, oklch(0.546 0.245 262.881));
+    --media-focus-ring-color: var(--color-primary, oklch(0.546 0.245 262.881));
+    --media-focus-ring: 0 0 0 3px var(--media-focus-ring-color);
+    --media-slider-track-bg: var(
+      --border-default,
+      oklch(0.929 0.013 255.508 / 0.8)
+    );
+    --media-slider-track-fill-bg: var(
+      --color-primary,
+      oklch(0.546 0.245 262.881)
+    );
+    --media-menu-bg: var(--bg-surface, oklch(1 0 0));
+    --media-menu-border: var(--border-default, oklch(0.929 0.013 255.508));
+    --media-menu-color: var(
+      --fg-default,
+      var(--text-default, oklch(0.208 0.042 265.755))
+    );
+    --media-tooltip-bg: var(--bg-surface, oklch(1 0 0));
+    --media-tooltip-color: var(
+      --fg-default,
+      var(--text-default, oklch(0.208 0.042 265.755))
+    );
+    --media-controls-color: var(
+      --fg-default,
+      var(--text-default, oklch(0.208 0.042 265.755))
+    );
+    color-scheme: light;
+  }
+
+  .dark .nui-vidstack-player,
+  [data-theme='dark'] .nui-vidstack-player,
+  .nui-vidstack-player[data-color-scheme='dark'],
+  .dark .nui-vidstack-audio-player,
+  [data-theme='dark'] .nui-vidstack-audio-player,
+  .nui-vidstack-audio-player[data-color-scheme='dark'],
+  .dark .nui-media-container media-player,
+  [data-theme='dark'] .nui-media-container media-player,
+  .nui-media-container media-player[data-color-scheme='dark'] {
+    --media-brand: var(--color-primary, oklch(0.623 0.214 259.815));
+    --media-focus-ring-color: var(--color-primary, oklch(0.623 0.214 259.815));
+    --media-focus-ring: 0 0 0 3px var(--media-focus-ring-color);
+    --media-slider-track-bg: var(
+      --border-default,
+      oklch(0.279 0.041 260.031 / 0.8)
+    );
+    --media-slider-track-fill-bg: var(
+      --color-primary,
+      oklch(0.623 0.214 259.815)
+    );
+    --media-menu-bg: var(--bg-surface, oklch(0.208 0.042 265.755));
+    --media-menu-border: var(--border-default, oklch(0.279 0.041 260.031));
+    --media-menu-color: var(
+      --fg-default,
+      var(--text-default, oklch(0.984 0.006 247.858))
+    );
+    --media-tooltip-bg: var(
+      --bg-surface-raised,
+      var(--bg-surface, oklch(0.208 0.042 265.755))
+    );
+    --media-tooltip-color: var(
+      --fg-default,
+      var(--text-default, oklch(0.984 0.006 247.858))
+    );
+    --media-controls-color: var(
+      --fg-default,
+      var(--text-default, oklch(0.984 0.006 247.858))
+    );
+    color-scheme: dark;
+  }
+
+  .nui-media-container {
+    display: block;
+    position: relative;
+    width: 100%;
+  }
 }
 
 /* ------------------------------------------------------------

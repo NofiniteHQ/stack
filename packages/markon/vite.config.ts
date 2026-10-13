@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import path from 'node:path';
+import fs from 'node:fs';
 
 export default defineConfig({
   root: __dirname,
@@ -15,6 +16,17 @@ export default defineConfig({
       outDir: path.resolve(__dirname, 'dist/types'),
       insertTypesEntry: true,
     }),
+    {
+      name: 'emit-styles-shim',
+      closeBundle() {
+        const shim = `/**\n * @nofinite/markon - Backward Compatibility Stylesheet Shim\n * All Markon editor and typography styles are natively provided by @nofinite/nuicss.\n */\n@import '@nofinite/nuicss/styles.css';\n`;
+        fs.writeFileSync(
+          path.resolve(__dirname, 'dist/markon.css'),
+          shim,
+          'utf8'
+        );
+      },
+    },
   ],
 
   build: {

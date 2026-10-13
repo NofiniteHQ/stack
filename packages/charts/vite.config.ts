@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const assetFileNamePattern = (assetInfo: { name?: string }) => {
   if (assetInfo.name && assetInfo.name.endsWith('.css')) {
@@ -22,6 +23,17 @@ export default defineConfig({
       outDir: path.resolve(__dirname, 'dist/types'),
       insertTypesEntry: true,
     }),
+    {
+      name: 'emit-styles-shim',
+      closeBundle() {
+        const shim = `/**\n * @nofinite/charts - Backward Compatibility Stylesheet Shim\n * All vector charts and animations are styled natively via @nofinite/nuicss.\n */\n@import '@nofinite/nuicss/styles.css';\n`;
+        fs.writeFileSync(
+          path.resolve(__dirname, 'dist/styles.css'),
+          shim,
+          'utf8'
+        );
+      },
+    },
   ],
 
   build: {
@@ -32,7 +44,6 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         'react/index': path.resolve(__dirname, 'src/react/index.ts'),
-        styles: path.resolve(__dirname, 'src/styles.ts'),
       },
     },
     rollupOptions: {

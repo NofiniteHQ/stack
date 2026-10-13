@@ -60,19 +60,10 @@ yarn add @nofinite/kanban @nofinite/nuicss
 
 ## Styles Setup
 
-Kanban combines design tokens and glassmorphic surfaces from NUICSS with dedicated board layout geometry from `@nofinite/kanban/styles.css`. Import both stylesheets at your application root (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+Kanban is styled natively through NUICSS. All board geometry, glassmorphic column surfaces, card dragging states, and drag-and-drop indicators are compiled directly into the unified stylesheet. Import it once at your application root (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
 
 ```tsx
 import '@nofinite/nuicss/styles.css';
-import '@nofinite/kanban/styles.css';
-```
-
-Or via CSS `@import`:
-
-```css
-/* In your global stylesheet */
-@import '@nofinite/nuicss/styles.css';
-@import '@nofinite/kanban/styles.css';
 ```
 
 ---
@@ -83,7 +74,6 @@ Or via CSS `@import`:
 
 ```tsx
 import '@nofinite/nuicss/styles.css';
-import '@nofinite/kanban/styles.css';
 import { useState, useRef } from 'react';
 import {
   Kanban,
@@ -212,14 +202,10 @@ For rapid prototyping or server-rendered environments without a build step:
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- NUICSS Design Tokens & Kanban Geometry Styles -->
+    <!-- NUICSS Unified Design Tokens & Layout Stylesheet -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss/dist/styles.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@nofinite/kanban/dist/styles.css"
     />
   </head>
   <body class="bg-surface p-6">
