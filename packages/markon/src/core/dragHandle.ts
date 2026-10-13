@@ -205,8 +205,6 @@ export class MarkonDragHandle implements ActivePopover {
         if (e.dataTransfer) {
           e.dataTransfer.effectAllowed = 'move';
           e.dataTransfer.setData('application/x-markon-block', String(pos));
-          e.dataTransfer.setData('text/html', this.currentBlock.outerHTML);
-          e.dataTransfer.setData('text/plain', this.currentBlock.innerText);
         }
       } catch {
         // ignore
@@ -323,6 +321,7 @@ export class MarkonDragHandle implements ActivePopover {
 
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
 
       const fromPos = this.draggedPos;
       const toPos = this.dropTargetPos;
@@ -339,8 +338,14 @@ export class MarkonDragHandle implements ActivePopover {
             const mappedToPos = tr.mapping.map(toPos);
             tr.insert(mappedToPos, sourceNode);
 
-            const newSelection = NodeSelection.create(tr.doc, mappedToPos);
-            tr.setSelection(newSelection);
+            try {
+              if (tr.doc.nodeAt(mappedToPos)) {
+                const newSelection = NodeSelection.create(tr.doc, mappedToPos);
+                tr.setSelection(newSelection);
+              }
+            } catch {
+              // ignore selection fallback
+            }
 
             this.editor.view.dispatch(tr);
             this.editor.view.focus();
@@ -356,9 +361,13 @@ export class MarkonDragHandle implements ActivePopover {
       this.cleanupDrag();
     };
 
-    this.container.addEventListener('dragover', onDragOver);
-    this.container.addEventListener('dragleave', onDragLeave);
-    this.container.addEventListener('drop', onDrop);
+    editorDom.addEventListener('dragover', onDragOver, true);
+    editorDom.addEventListener('dragleave', onDragLeave, true);
+    editorDom.addEventListener('drop', onDrop, true);
+
+    this.container.addEventListener('dragover', onDragOver, true);
+    this.container.addEventListener('dragleave', onDragLeave, true);
+    this.container.addEventListener('drop', onDrop, true);
 
     // Global click-outside & Escape dismissal for Action Menu
     const onDocClick = (e: MouseEvent) => {
@@ -391,12 +400,19 @@ export class MarkonDragHandle implements ActivePopover {
       this.handleEl.removeEventListener('click', onHandleClick);
       this.handleEl.removeEventListener('dragstart', onDragStart);
       this.handleEl.removeEventListener('dragend', onDragEnd);
-      this.container.removeEventListener('dragover', onDragOver);
-      this.container.removeEventListener('dragleave', onDragLeave);
-      this.container.removeEventListener('drop', onDrop);
+      editorDom.removeEventListener('dragover', onDragOver, true);
+      editorDom.removeEventListener('dragleave', onDragLeave, true);
+      editorDom.removeEventListener('drop', onDrop, true);
+      this.container.removeEventListener('dragover', onDragOver, true);
+      this.container.removeEventListener('dragleave', onDragLeave, true);
+      this.container.removeEventListener('drop', onDrop, true);
       document.removeEventListener('click', onDocClick);
       document.removeEventListener('keydown', onKeyDown);
     };
+  }
+
+  public isDraggingInternal(): boolean {
+    return this.isDragging;
   }
 
   public toggleActionMenu(): void {

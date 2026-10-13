@@ -635,3 +635,42 @@
     padding: 10px 12px;
   }
 }
+
+/* ==========================================================================
+   9. Resizable Images & Handles
+   ========================================================================== */
+
+.markon-image-container {
+  user-select: none;
+  margin: 0.75rem 0;
+  display: flex;
+}
+
+.markon-image-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.markon-image-resize-handle {
+  position: absolute;
+  bottom: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+  top: auto !important;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-sm, 0.25rem);
+  background-color: var(--color-primary);
+  border: 1.5px solid var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  cursor: se-resize;
+  opacity: 0;
+  transition: opacity var(--transition-fast, 0.15s) ease;
+  z-index: 20;
+  touch-action: none;
+}
+
+.markon-image-wrapper:hover .markon-image-resize-handle {
+  opacity: 1;
+}

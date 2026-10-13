@@ -1800,6 +1800,36 @@ describe('@nofinite/markon', () => {
       editor.destroy();
     });
 
+    it('executes atomic block move on drop without duplicating content', () => {
+      const editor = new MarkonEditor({
+        element: container,
+        initialValue: '<p>Alpha</p><p>Beta</p><p>Gamma</p>',
+      });
+
+      const dragHandle = (editor as any).dragHandle as MarkonDragHandle;
+      expect(dragHandle).toBeDefined();
+
+      const pAlpha =
+        container.querySelectorAll<HTMLElement>('.editor-content p')[0];
+      expect(pAlpha.textContent).toBe('Alpha');
+
+      (dragHandle as any).currentBlock = pAlpha;
+      (dragHandle as any).draggedPos = 0;
+      (dragHandle as any).isDragging = true;
+      (dragHandle as any).dropTargetPos = 20;
+
+      const dropEvent = new Event('drop', { bubbles: true, cancelable: true });
+      (editor.tiptap.view.dom as HTMLElement).dispatchEvent(dropEvent);
+
+      const items = Array.from(
+        container.querySelectorAll('.editor-content p')
+      ).map((p) => p.textContent);
+      expect(items.length).toBe(3);
+      expect(items.filter((t) => t === 'Alpha').length).toBe(1);
+
+      editor.destroy();
+    });
+
     it('validates custom hex inputs and emits oklch color values on apply', () => {
       const trigger = document.createElement('button');
       document.body.appendChild(trigger);

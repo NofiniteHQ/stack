@@ -433,6 +433,9 @@ export class MarkonEditor {
       editable: !options.readOnly,
       editorProps: {
         handleDrop: (_view, event, _slice, moved) => {
+          if (this.dragHandle?.isDraggingInternal()) {
+            return true;
+          }
           if (moved || !event.dataTransfer?.files?.length) return false;
           const file = event.dataTransfer.files[0];
           this.handleUploadedFile(file);

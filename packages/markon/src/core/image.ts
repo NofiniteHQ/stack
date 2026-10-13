@@ -197,8 +197,7 @@ export const MarkonImage = Image.extend<MarkonImageOptions>({
 
         // Drag resize handle at bottom-right corner
         const resizeHandle = document.createElement('div');
-        resizeHandle.className =
-          'markon-image-resize-handle absolute bottom-1 right-1 w-3.5 h-3.5 rounded-sm bg-primary border border-surface shadow cursor-se-resize opacity-0 group-hover/img:opacity-100 transition-opacity z-10';
+        resizeHandle.className = 'markon-image-resize-handle';
         resizeHandle.title = 'Drag to resize image';
 
         let startX = 0;
