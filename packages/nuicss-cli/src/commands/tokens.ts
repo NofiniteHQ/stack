@@ -94,6 +94,8 @@ export async function tokensCommand(): Promise<void> {
     '  .input, .table-container, .skeleton-shimmer, .press-scale, .hover-lift'
   );
   console.log(
-    `\n${dim('💡 Learn more at')} ${cyan('https://docs.nofinite.dev/nuicss')}\n`
+    `\n${dim('💡 Learn more at')} ${cyan(
+      'https://opensource.nofinite.com/nuicss'
+    )}\n`
   );
 }

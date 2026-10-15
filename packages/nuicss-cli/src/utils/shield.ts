@@ -27,7 +27,7 @@ export function filterBrandLeakage(text: string): string {
   str = str.replace(/uno\.css/gi, 'dist/output.css');
   str = str.replace(
     /https:\/\/unocss\.dev[^\s]*/gi,
-    'https://docs.nofinite.dev/nuicss'
+    'https://opensource.nofinite.com/nuicss'
   );
   str = str.replace(/@unocss\/cli/gi, 'nuicss');
   str = str.replace(/@unocss\/core/gi, 'nuicss');
