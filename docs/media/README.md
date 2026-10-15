@@ -31,8 +31,9 @@ Import the unified NUICSS stylesheet:
 
 ```tsx
 import '@nofinite/nuicss/styles.css';
-import '@nofinite/media/styles.css'; // Optional Vidstack layout chrome
 ```
+
+> **Zero Downstream CSS Note:** Do **not** import `@nofinite/media/styles.css`. NUICSS provides all styling automatically.
 
 ### 3. Usage Example
 

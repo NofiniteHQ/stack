@@ -23,12 +23,13 @@ yarn add @nofinite/media @nofinite/nuicss
 
 ## 2. Stylesheet Configuration
 
-Import the unified NUICSS stylesheet and the media layout stylesheet:
+Import the unified NUICSS stylesheet:
 
 ```tsx
 import '@nofinite/nuicss/styles.css';
-import '@nofinite/media/styles.css';
 ```
+
+> **Zero Downstream CSS Note:** Do **not** import `@nofinite/media/styles.css`. NUICSS provides all necessary player layouts, scrubber timelines, and control tokens automatically.
 
 ---
 
