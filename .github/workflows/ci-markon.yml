@@ -1,0 +1,53 @@
+name: CI - markon
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'packages/markon/**'
+  pull_request:
+    paths:
+      - 'packages/markon/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test markon
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Tests
+        run: pnpm nx run markon:test
+
+      - name: Build
+        run: pnpm nx run markon:build
+
+      - name: Verify package contents
+        working-directory: packages/markon
+        run: |
+          TARBALL_FILES=$(npm pack --dry-run 2>&1)
+          if ! echo "$TARBALL_FILES" | grep -q "dist/index.d.ts"; then
+            echo "Error: dist/index.d.ts is missing from the tarball!"
+            echo "Tarball contents:"
+            echo "$TARBALL_FILES"
+            exit 1
+          fi
+          echo "Verification passed. dist/index.d.ts is present."

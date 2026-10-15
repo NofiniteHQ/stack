@@ -12,6 +12,7 @@ import {
 } from '@floating-ui/dom';
 import type { NormalizedDataPoint } from './math';
 import { formatMetricNumber } from './axis';
+import { escapeHtml } from './a11y';
 
 export interface TooltipItem {
   color: string;
@@ -81,7 +82,7 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
   }
 
   const titleHtml = payload.title
-    ? `<div class="chart-tooltip-title">${payload.title}</div>`
+    ? `<div class="chart-tooltip-title">${escapeHtml(payload.title)}</div>`
     : '';
 
   const itemsHtml = payload.items
@@ -91,19 +92,21 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
         Boolean(item.label) &&
         (payload.items.length > 1 || item.label !== payload.title);
 
+      const safeColor = escapeHtml(item.color);
+      const safeLabel = shouldRenderLabel
+        ? `<span class="chart-tooltip-label">${escapeHtml(item.label)}</span>`
+        : '';
+      const safeValue = `<span class="chart-tooltip-value">${escapeHtml(
+        item.value
+      )}</span>`;
+
       return `
     <div class="chart-tooltip-item">
       <div class="chart-tooltip-label-group">
-        <span class="chart-tooltip-swatch" style="background-color: ${
-          item.color
-        }; box-shadow: 0 0 6px ${item.color}55;"></span>
-        ${
-          shouldRenderLabel
-            ? `<span class="chart-tooltip-label">${item.label}</span>`
-            : ''
-        }
+        <span class="chart-tooltip-swatch" style="background-color: ${safeColor}; box-shadow: 0 0 6px ${safeColor}55;"></span>
+        ${safeLabel}
       </div>
-      <span class="chart-tooltip-value">${item.value}</span>
+      ${safeValue}
     </div>
   `;
     })

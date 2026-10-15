@@ -7,6 +7,16 @@ import type { ChartSeries } from './math';
 import { formatMetricNumber } from './axis';
 import { normalizeData } from './normalize';
 
+export function escapeHtml(str: unknown): string {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export interface A11yOptions {
   title?: string;
   description?: string;
@@ -21,6 +31,9 @@ export function generateA11yTableHtml<T = unknown>(
   const title = options?.title || 'Data visualization summary table';
   const description =
     options?.description || 'Semantic table representation for screen readers.';
+
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
 
   const normalizedSeries = seriesList.map((s) => ({
     name: s.name,
@@ -41,13 +54,13 @@ export function generateA11yTableHtml<T = unknown>(
 
   return `
     <div class="sr-only chart-a11y-container" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;" aria-live="polite">
-      <table class="nui-chart-sr-table chart-sr-table" aria-label="${title}">
-        <caption>${title}. ${description}</caption>
+      <table class="nui-chart-sr-table chart-sr-table" aria-label="${safeTitle}">
+        <caption>${safeTitle}. ${safeDescription}</caption>
         <thead>
           <tr>
             <th scope="col">Category</th>
             ${activeSeries
-              .map((s) => `<th scope="col">${s.name}</th>`)
+              .map((s) => `<th scope="col">${escapeHtml(s.name)}</th>`)
               .join('')}
           </tr>
         </thead>
@@ -56,7 +69,7 @@ export function generateA11yTableHtml<T = unknown>(
             .map(
               (xLabel) => `
             <tr>
-              <th scope="row">${xLabel}</th>
+              <th scope="row">${escapeHtml(xLabel)}</th>
               ${activeSeries
                 .map((s) => {
                   const pt = s.data.find((d) => d.label === xLabel);
@@ -65,7 +78,7 @@ export function generateA11yTableHtml<T = unknown>(
                       ? formatMetricNumber(pt.y)
                       : pt.y
                     : '-';
-                  return `<td>${val}</td>`;
+                  return `<td>${escapeHtml(val)}</td>`;
                 })
                 .join('')}
             </tr>

@@ -1,0 +1,11 @@
+name: "CodeQL config"
+
+paths-ignore:
+  - 'packages/nuicss-cli/bin/**'
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.ts'
+  - '**/*.spec.tsx'
+  - '**/*.stories.tsx'
+  - 'temp/**'
+  - 'docs/**'
