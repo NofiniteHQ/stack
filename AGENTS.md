@@ -33,7 +33,9 @@ Do not implement based solely on the user's description when repository inspecti
 
 For every non-trivial task, create or update:
 
-`implementation_plan.md`
+`temp/implementation_plan.md`
+
+Never create implementation plans in the repository root. All implementation plans, design proposals, and task roadmaps MUST be placed strictly inside the gitignored `temp/` directory (`temp/implementation_plan.md`).
 
 The plan must contain:
 
@@ -51,7 +53,7 @@ The plan must contain:
 
 ### STOP
 
-After creating or updating `implementation_plan.md`:
+After creating or updating `temp/implementation_plan.md`:
 
 **STOP.**
 
@@ -63,7 +65,7 @@ Do not modify configuration.
 
 Do not execute implementation steps.
 
-`implementation_plan.md` is a proposal, NOT authorization.
+`temp/implementation_plan.md` is a proposal, NOT authorization.
 
 ### Approval
 
@@ -309,16 +311,17 @@ STOP and ask the user when:
 
 ---
 
-## 9. Temporary Files
+## 9. Temporary Files & Implementation Plans
 
-All AI-generated temporary files MUST be placed inside the workspace-relative:
+All AI-generated temporary files, scratch scripts, testing files, and implementation plans (`temp/implementation_plan.md`) MUST be placed inside the workspace-relative:
 
 `temp/`
 
-Never create scratch files in the workspace root or unrelated source directories.
+Never create implementation plans, scratch files, or temporary artifacts in the workspace root or source directories. The root directory must remain pristine at all times.
 
-Examples include:
+Examples of files that belong exclusively in `temp/`:
 
+- Implementation plans (`temp/implementation_plan.md`)
 - Scratch scripts
 - Temporary HTML/JS/TS files
 - Debug files
