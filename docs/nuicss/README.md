@@ -11,7 +11,7 @@
 - **Perceptually Uniform OKLCH Tokens:** Ultra-vibrant color palettes with mathematically consistent contrast ratios across light and dark modes.
 - **Component Superclasses:** Pre-engineered, high-performance semantic classes (`btn`, `card`, `input`, `badge`, `table-container`, `kanban-board`, `markon-editor`) that eliminate verbose utility clusters.
 - **Unified Ecosystem Styling:** A single stylesheet import powers **NUI**, **Nofinite Kanban**, **Nofinite Markon**, **Nofinite Charts**, and **Nofinite Media**.
-- **Zero-Node Standalone CLI:** Native Go binary (`nuicss`) for instant CSS compilation and Tailwind-to-NUICSS migrations without Node.js overhead.
+- **Zero-Node Standalone CLI:** Native standalone binary and npm package (`nuicss`) for instant CSS compilation, codebase linting, and Tailwind migrations without Node.js overhead.
 
 ---
 
@@ -75,17 +75,22 @@ import '@nofinite/nuicss/dist/widgets.css'; // Combined domain widget styles
 
 ---
 
-## The Standalone Go CLI (`nuicss`)
+## The Standalone CLI & Compiler (`nuicss`)
 
-Install the standalone Go-native binary for zero-Node compilation:
+`nuicss` is the official standalone command-line compiler and developer toolkit for NUICSS. Available as a single native binary (zero Node.js required) or on-demand via `npx nuicss`:
 
 ```bash
-# Compile CSS with watching and minification
+# 1. Initialize configuration and IDE autocomplete
+nuicss init
+
+# 2. Compile CSS with live watching and minification
 nuicss -i input.css -o output.css -w -m
 
-# Migrate existing Tailwind classes to NUICSS superclasses
-nuicss migrate
+# 3. Lint codebase for hardcoded hex and legacy utility clusters
+nuicss check src/
 
-# Initialize VS Code / Cursor IDE autocomplete
-nuicss init
+# 4. Migrate existing Tailwind classes to NUICSS superclasses
+nuicss migrate src/ --dry-run
 ```
+
+For full documentation on flags, custom watch patterns, component scaffolding, and configuration, see the [**NUICSS CLI Documentation**](./cli.md).

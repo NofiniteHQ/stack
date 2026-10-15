@@ -111,6 +111,21 @@ Import the CSS engine in your main CSS file:
 @import '@nofinite/nuicss/styles.css';
 ```
 
+### 4. Standalone CLI Compiler (`nuicss`)
+
+For frameworks without a Node-based bundler (Go, Python, PHP, Ruby) or standalone compilation workflows, use the official `nuicss` CLI:
+
+```bash
+# On-demand via npx
+npx nuicss -i input.css -o dist/output.css --watch --minify
+
+# Or install native binary (Zero Node.js required)
+# Windows: irm https://opensource.nofinite.com/nuicss/install.ps1 | iex
+# macOS/Linux: curl -fsSL https://opensource.nofinite.com/nuicss/install.sh | bash
+```
+
+See the [**NUICSS CLI Documentation**](https://opensource.nofinite.com/nuicss/cli) for complete command options and migration tools.
+
 ---
 
 ## Configuration & Extensibility
