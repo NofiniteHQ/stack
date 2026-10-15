@@ -14,7 +14,7 @@ export function filterBrandLeakage(text: string): string {
   }
 
   // Shield brand names
-  str = str.replace(/UnoCSS\s+v[0-9.]+/gi, 'NUICSS CLI v0.2.0');
+  str = str.replace(/UnoCSS\s+v[0-9.]+/gi, 'NUICSS CLI v0.1.0');
   str = str.replace(
     /UnoCSS\s+in\s+watch\s+mode/gi,
     'NUICSS watching for changes'

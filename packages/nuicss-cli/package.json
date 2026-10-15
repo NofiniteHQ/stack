@@ -1,6 +1,6 @@
 {
   "name": "nuicss",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Lightning-fast standalone compiler and toolkit for the NUICSS design system.",
   "type": "module",
   "bin": {

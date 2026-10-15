@@ -185,3 +185,57 @@ All 4 phases have been fully implemented, verified, and committed locally to `de
 - **Local-First Resolution:** Implemented `resolveBaseStyles(cwd)` in `compile.ts` to dynamically inspect `node_modules/@nofinite/nuicss/dist/styles.css` before falling back to embedded snapshot.
 - **Registry & Scaffolder Expansion:** Added `media` (`@nofinite/media`) to `REGISTRY` in `list.ts` and starter template in `add.ts`; updated Kanban and Editor superclasses.
 - **Clean Verification:** `build:ts`, `typecheck`, and `eslint` passed with 0 errors/warnings. `npm pack --dry-run` verified lightweight package size (182.5 kB tarball). Tested compile verified inclusion of `.nui-vidstack-player` and `.kanban-add-column-btn`.
+
+---
+
+## 13. Phase 6: In-CLI Self-Updater, Professional Ecosystem README, One-Line Installers & Automated Release Pipeline
+
+### Objective
+
+Elevate `@nofinite/nuicss-cli` (pure package `nuicss`) into a turnkey production release with an in-CLI self-updater (`nuicss upgrade`), an ecosystem-standard professional README mimicking other Nofinite libraries, static one-line installer scripts on `opensource.nofinite.com/nuicss/`, and complete GitHub Actions release automation.
+
+### Proposed Scope
+
+1. **In-CLI Self-Updater Command (`src/commands/upgrade.ts`):**
+
+   - Add `nuicss upgrade` (and alias `nuicss update`).
+   - Detect execution mode:
+     - **Standalone Binary Mode:** Queries GitHub Releases API (`https://api.github.com/repos/NofiniteHQ/stack/releases/latest`), checks whether a newer version is available compared to current `VERSION`, resolves the platform-specific binary asset (`nuicss-windows-amd64.exe`, `nuicss-darwin-arm64`, `nuicss-darwin-amd64`, `nuicss-linux-amd64`, `nuicss-linux-arm64`), downloads the new binary, safely swaps the executable (handling Windows `.old` rename lock and Unix `chmod +x` atomic replace), and prints success.
+     - **Node / NPM Mode:** Detects execution via Node/npm and guides user to run `npm install -g nuicss@latest` or `pnpm add -g nuicss@latest`.
+   - Register `upgrade` and `update` commands in `src/index.ts`.
+
+2. **Debut Version Alignment (`0.1.0`):**
+
+   - Update `packages/nuicss-cli/package.json` to `"version": "0.1.0"`.
+   - Update `packages/nuicss-cli/src/index.ts` to `export const VERSION = '0.1.0';`.
+   - Update `packages/nuicss-cli/src/utils/shield.ts` to reflect `0.1.0`.
+
+3. **One-Line Install Scripts (`d:\oss-docs\public\nuicss/`):**
+
+   - Create `d:\oss-docs\public\nuicss\install.ps1` for Windows (TLS 1.2/1.3, User PATH configuration, active session PATH refresh, banner).
+   - Create `d:\oss-docs\public\nuicss\install.sh` for macOS / Linux (OS/arch detection, Apple Silicon / Intel / Linux ARM64 support, shell profile PATH update).
+   - Add 302 convenience redirect in `d:\oss-docs\public\_redirects` from `/install.ps1` and `/install.sh` to `/nuicss/install.ps1` and `/nuicss/install.sh`.
+
+4. **Professional Ecosystem README (`packages/nuicss-cli/README.md`):**
+
+   - Match the exact visual standard of `packages/nuicss/README.md` and `packages/charts/README.md`.
+   - Include official branded `<picture>` banner (dark/light mode logo), badges (TypeScript Strict, Docs `opensource.nofinite.com/nuicss`, License, NPM Version `nuicss`).
+   - Clear sections:
+     - Overview & Key Capabilities (Zero dependencies, $<3\text{ms}$ startup, multi-template arbitrary file watching, modular directives).
+     - Installation matrix: Windows 1-liner (`irm`), macOS/Linux 1-liner (`curl`), and NPM/NPX (`npx nuicss`).
+     - Command Reference: `compile`, `watch`, `--watch-files`, `init`, `add <component>`, `check`, `migrate`, `tokens`, `upgrade`.
+     - Configuration (`nuicss.config.ts`).
+     - Ecosystem architecture & Local-first resolution.
+
+5. **Release Pipeline Automation (`.github/workflows/release.yml`):**
+   - Integrate Bun setup and cross-compilation into `release.yml`.
+   - Upload the 5 compiled standalone binaries directly to the GitHub Release created by Changesets.
+
+### Verification Results
+
+- `pnpm --filter ./packages/nuicss-cli build:ts` and `typecheck`: Passed with 0 errors.
+- `npx eslint packages/nuicss-cli/src`: Passed with 0 warnings/errors.
+- `npm pack --dry-run`: Verified lightweight 187.4 kB tarball with 32 total files, including new professional README.md and upgrade command.
+- `nuicss upgrade --check`: Tested against GitHub API, detecting updates seamlessly and falling back safely.
+- One-line install scripts (`install.ps1` & `install.sh`) created in `d:\oss-docs\public\nuicss/` with 302 root redirects in `_redirects`.
+- Multi-repository changes tracked: `d:\stack` and `d:\oss-docs`.

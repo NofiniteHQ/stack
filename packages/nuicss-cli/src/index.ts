@@ -8,9 +8,10 @@ import { checkCommand } from './commands/check.js';
 import { tokensCommand } from './commands/tokens.js';
 import { listCommand } from './commands/list.js';
 import { addCommand } from './commands/add.js';
+import { upgradeCommand } from './commands/upgrade.js';
 import { installBrandShield } from './utils/shield.js';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.1.0';
 
 const KNOWN_COMMANDS = [
   'compile',
@@ -21,6 +22,8 @@ const KNOWN_COMMANDS = [
   'tokens',
   'list',
   'add',
+  'upgrade',
+  'update',
   'version',
 ];
 
@@ -203,6 +206,15 @@ export async function runCli(argv = process.argv): Promise<void> {
     )
     .action(async (component) => {
       await addCommand(component);
+    });
+
+  // Upgrade command
+  cli
+    .command('upgrade', 'Check and self-update nuicss to the latest release')
+    .alias('update')
+    .option('--check', 'Only check for updates without installing')
+    .action(async (flags) => {
+      await upgradeCommand(flags);
     });
 
   // Version command
