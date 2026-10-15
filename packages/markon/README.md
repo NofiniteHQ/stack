@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/markon/logos/markon-horizontal-white.svg">
   <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/markon/logos/markon-horizontal.svg">
-  <img alt="Markon" src="https://cdn.nofinite.com/brand/oss/markon/logos/markon-horizontal.svg" width="300">
+  <img alt="Nofinite Markon" src="https://cdn.nofinite.com/brand/oss/markon/logos/markon-horizontal.svg" width="300">
 </picture>
 
 <br/>
@@ -32,7 +32,7 @@
 
 ## Overview
 
-Markon is a modern document authoring and WYSIWYG rich text engine engineered for speed, modularity, and framework versatility. Built upon the robust foundation of TipTap and ProseMirror, Markon features declarative React wrappers, a zero-dependency vanilla JS class, and comprehensive styling driven by NUICSS design tokens.
+Nofinite Markon is a modern document authoring and WYSIWYG rich text engine engineered for speed, modularity, and framework versatility. Built upon the robust foundation of TipTap and ProseMirror, Markon features declarative React wrappers, a zero-dependency vanilla JS class, and comprehensive styling driven by NUICSS design tokens.
 
 - **Universal Core:** Framework-agnostic Vanilla DOM class (`MarkonEditor`). Works out of the box with plain HTML, HTMX, Vue, Svelte, and React.
 - **Idiomatic React Adapter:** Dedicated `@nofinite/markon/react` export with declarative `<MarkonEditor />` component and `useMarkon` hook.
@@ -59,7 +59,7 @@ yarn add @nofinite/markon @nofinite/nuicss
 
 ## Styles Setup
 
-Markon's editor typography, bubble menus, and toolbar controls are styled natively via NUICSS. Import the stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+Nofinite Markon's editor typography, bubble menus, and toolbar controls are styled natively via NUICSS. Import the stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
 
 ```tsx
 import '@nofinite/nuicss/styles.css';

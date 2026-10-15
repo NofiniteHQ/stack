@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/charts/logos/charts-horizontal-white.svg">
   <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/charts/logos/charts-horizontal.svg">
-  <img alt="Charts" src="https://cdn.nofinite.com/brand/oss/charts/logos/charts-horizontal.svg" width="300">
+  <img alt="Nofinite Charts" src="https://cdn.nofinite.com/brand/oss/charts/logos/charts-horizontal.svg" width="300">
 </picture>
 
 <br/>
@@ -32,7 +32,7 @@
 
 ## Overview
 
-Charts provides an ultra-lightweight, modular charting engine designed for modern web applications. Engineered on pure SVG vector rendering and mathematically grounded D3 layout primitives, it pairs seamlessly with the NUICSS design token ecosystem.
+Nofinite Charts provides an ultra-lightweight, modular charting engine designed for modern web applications. Engineered on pure SVG vector rendering and mathematically grounded D3 layout primitives, it pairs seamlessly with the NUICSS design token ecosystem.
 
 - **Universal Core:** Pure SVG vector rendering with smooth monotone cubic hermite splines (`curveMonotoneX`), multi-stop gradient falloffs, and responsive `viewBox`.
 - **Zero Framework Lock-in:** Works across plain HTML, HTMX, Vue, Svelte, and React.
@@ -59,7 +59,7 @@ yarn add @nofinite/charts @nofinite/nuicss
 
 ## Styles Setup
 
-Charts is styled natively via NUICSS design tokens (`var(--chart-1)`, `var(--color-primary)`, `var(--bg-surface)`). Import the stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+Nofinite Charts is styled natively via NUICSS design tokens (`var(--chart-1)`, `var(--color-primary)`, `var(--bg-surface)`). Import the stylesheet once at the root of your application (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
 
 ```tsx
 import '@nofinite/nuicss/styles.css';

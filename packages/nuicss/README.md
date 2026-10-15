@@ -32,7 +32,7 @@
 
 ## Overview
 
-NUI CSS provides a highly optimized **Just-In-Time (JIT) compiler**. By reading your source files, it compiles exactly the CSS you need—and absolutely nothing more—in milliseconds.
+NUICSS provides a highly optimized **Just-In-Time (JIT) compiler**. By reading your source files, it compiles exactly the CSS you need—and absolutely nothing more—in milliseconds.
 
 - **Semantic Tokens:** Built-in shortcuts for scalable UI design (`.bg-surface`, `.text-muted`, `.border-subtle`).
 - **Zero-Config by Default:** Drop it into Vite, PostCSS, or a `<script>` tag and instantly start using standard utilities like `.flex`, `.text-primary`, and `.p-4`.

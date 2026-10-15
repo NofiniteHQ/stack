@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/kanban/logos/kanban-horizontal-white.svg">
   <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/kanban/logos/kanban-horizontal.svg">
-  <img alt="Kanban" src="https://cdn.nofinite.com/brand/oss/kanban/logos/kanban-horizontal.svg" width="300">
+  <img alt="Nofinite Kanban" src="https://cdn.nofinite.com/brand/oss/kanban/logos/kanban-horizontal.svg" width="300">
 </picture>
 
 <br/>
@@ -32,7 +32,7 @@
 
 ## Overview
 
-Kanban is a universal, framework-agnostic task board and workflow suite engineered on Atlassian's Pragmatic Drag and Drop. It combines high-performance DOM reconciliation with strict NUICSS design tokens and glassmorphic surfaces.
+Nofinite Kanban is a universal, framework-agnostic task board and workflow suite engineered on Atlassian's Pragmatic Drag and Drop. It combines high-performance DOM reconciliation with strict NUICSS design tokens and glassmorphic surfaces.
 
 - **Universal Architecture:** Pure TypeScript core (`createKanbanBoard`, `renderKanbanHTML`) with first-class React bindings (`<Kanban />`). Works seamlessly in vanilla HTML/JS, Next.js, React, Vue, or Svelte.
 - **Single-Engine NUICSS Architecture:** Natively styled via `@nofinite/nuicss` design tokens (`var(--bg-surface)`, `var(--color-primary)`, `var(--border-default)`) and modern glassmorphic surfaces (`backdrop-blur-sm`) with zero downstream CSS bundling.
@@ -60,7 +60,7 @@ yarn add @nofinite/kanban @nofinite/nuicss
 
 ## Styles Setup
 
-Kanban is styled natively through NUICSS. All board geometry, glassmorphic column surfaces, card dragging states, and drag-and-drop indicators are compiled directly into the unified stylesheet. Import it once at your application root (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
+Nofinite Kanban is styled natively through NUICSS. All board geometry, glassmorphic column surfaces, card dragging states, and drag-and-drop indicators are compiled directly into the unified stylesheet. Import it once at your application root (e.g., `main.tsx`, `_app.tsx`, or `layout.tsx`):
 
 ```tsx
 import '@nofinite/nuicss/styles.css';

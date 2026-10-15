@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/media/logos/media-horizontal-white.svg">
   <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/media/logos/media-horizontal.svg">
-  <img alt="Media" src="https://cdn.nofinite.com/brand/oss/media/logos/media-horizontal.svg" width="300">
+  <img alt="Nofinite Media" src="https://cdn.nofinite.com/brand/oss/media/logos/media-horizontal.svg" width="300">
 </picture>
 
 <br/>
@@ -58,7 +58,7 @@ yarn add @nofinite/media @nofinite/nuicss
 
 ## Styles Setup
 
-Media player layout chrome, scrubber timelines, responsive aspect ratios, and glassmorphic OKLCH design tokens are styled natively via NUICSS. Import the stylesheet once at your application root (e.g., `layout.tsx`, `main.tsx`, or `_app.tsx`):
+Nofinite Media player layout chrome, scrubber timelines, responsive aspect ratios, and glassmorphic OKLCH design tokens are styled natively via NUICSS. Import the stylesheet once at your application root (e.g., `layout.tsx`, `main.tsx`, or `_app.tsx`):
 
 ```tsx
 import '@nofinite/nuicss/styles.css';
