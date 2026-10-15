@@ -7,7 +7,7 @@ import {
 import { Settings2 } from 'lucide-react';
 
 const meta: Meta<typeof Collapsible> = {
-  title: 'Widgets/Collapsible',
+  title: 'Collapsible',
   component: Collapsible,
   tags: ['autodocs'],
   parameters: { layout: 'centered' },

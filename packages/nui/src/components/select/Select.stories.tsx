@@ -3,7 +3,7 @@ import { within, userEvent, expect, waitFor, fn } from 'storybook/test';
 import { Select } from './Select';
 
 const meta: Meta<typeof Select> = {
-  title: 'Forms/Select',
+  title: 'Select',
   component: Select,
   decorators: [
     (Story) => (

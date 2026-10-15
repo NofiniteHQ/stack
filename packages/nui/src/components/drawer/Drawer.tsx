@@ -180,6 +180,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
                   'fixed inset-0 bg-overlay z-[9998]',
                   overlayClassName
                 )}
+                style={{ zIndex: 9998 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -191,15 +192,16 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(
                 className={cn(
                   'fixed z-[9999] flex flex-col bg-surface backdrop-blur-md text-default shadow-2xl will-change-transform',
                   position === 'left' &&
-                    'top-0 bottom-0 left-0 w-full max-w-[320px] border-r border-glassBorder',
+                    'top-0 bottom-0 left-0 w-[75vw] sm:w-[320px] max-w-[320px] border-r border-glassBorder',
                   position === 'right' &&
-                    'top-0 bottom-0 right-0 w-full max-w-[320px] border-l border-glassBorder',
+                    'top-0 bottom-0 right-0 w-[75vw] sm:w-[320px] max-w-[320px] border-l border-glassBorder',
                   position === 'top' &&
                     'top-0 left-0 right-0 h-auto min-h-[250px] max-h-[90vh] border-b border-glassBorder',
                   position === 'bottom' &&
                     'bottom-0 left-0 right-0 h-auto min-h-[250px] max-h-[90vh] border-t border-glassBorder rounded-t-xl',
                   className
                 )}
+                style={{ zIndex: 9999, ...props.style }}
                 initial={{
                   x:
                     position === 'left'

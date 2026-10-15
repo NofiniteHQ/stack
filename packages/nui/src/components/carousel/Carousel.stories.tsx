@@ -5,7 +5,7 @@ import { Carousel } from './Carousel';
 import { Card } from '../card/Card';
 
 export default {
-  title: 'Media/Carousel',
+  title: 'Carousel',
   tags: ['autodocs'],
   component: Carousel,
   parameters: {

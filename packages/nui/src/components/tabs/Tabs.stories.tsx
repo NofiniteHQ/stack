@@ -4,7 +4,7 @@ import { within, userEvent, expect } from 'storybook/test';
 import { Tabs } from './Tabs';
 
 const meta: Meta<typeof Tabs> = {
-  title: 'Widgets/Tabs',
+  title: 'Tabs',
   component: Tabs,
   parameters: { layout: 'padded' },
   tags: ['autodocs'],

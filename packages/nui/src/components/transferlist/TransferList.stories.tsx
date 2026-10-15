@@ -4,7 +4,7 @@ import { within, userEvent, expect } from 'storybook/test';
 import { TransferList, TransferListProps } from './TransferList';
 
 const meta: Meta<typeof TransferList> = {
-  title: 'Widgets/TransferList',
+  title: 'TransferList',
   component: TransferList,
   parameters: {
     layout: 'centered',

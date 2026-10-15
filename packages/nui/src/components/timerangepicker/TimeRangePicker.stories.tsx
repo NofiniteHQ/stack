@@ -4,7 +4,7 @@ import { within, userEvent, expect, fn } from 'storybook/test';
 import { TimeRangePicker, TimeRange } from './TimeRangePicker';
 
 const meta: Meta<typeof TimeRangePicker> = {
-  title: 'Pickers/TimeRangePicker',
+  title: 'TimeRangePicker',
   component: TimeRangePicker,
   parameters: { layout: 'centered' },
   tags: ['autodocs'],

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Timeline, TimelineItem } from './Timeline';
 
 const meta = {
-  title: 'Primitives/Timeline',
+  title: 'Timeline',
   tags: ['autodocs'],
   component: Timeline,
   parameters: {

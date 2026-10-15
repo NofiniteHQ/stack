@@ -29,7 +29,7 @@ const items: ContextMenuItem[] = [
 ];
 
 const meta: Meta<typeof ContextMenu> = {
-  title: 'Overlays/ContextMenu',
+  title: 'ContextMenu',
   tags: ['autodocs'],
   component: ContextMenu,
   parameters: {

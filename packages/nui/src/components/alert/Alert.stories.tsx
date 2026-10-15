@@ -4,7 +4,7 @@ import { within, userEvent, expect, fn } from 'storybook/test';
 import { Alert } from './Alert';
 
 const meta: Meta<typeof Alert> = {
-  title: 'Feedback/Alert',
+  title: 'Alert',
   component: Alert,
   parameters: {
     layout: 'padded',

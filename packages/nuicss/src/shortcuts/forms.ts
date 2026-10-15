@@ -230,4 +230,12 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'editor-content',
     'p-4 outline-none text-default leading-relaxed text-sm overflow-y-auto',
   ],
+  [
+    'editor-footer',
+    'flex items-center justify-between px-3 py-2 border-t border-default text-xs text-muted bg-subtle select-none',
+  ],
+  [
+    'editor-select',
+    'text-xs font-medium bg-transparent border border-default rounded-md px-2 py-1 text-default cursor-pointer outline-none hover:bg-subtle focus:border-primary',
+  ],
 ];

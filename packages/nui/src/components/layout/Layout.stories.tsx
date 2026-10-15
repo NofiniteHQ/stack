@@ -4,7 +4,7 @@ import { Grid } from './Grid';
 import { Flex, Stack, HStack } from './Flex';
 
 const meta: Meta = {
-  title: 'Layout/Layout',
+  title: 'Layout',
   tags: ['autodocs'],
 };
 export default meta;

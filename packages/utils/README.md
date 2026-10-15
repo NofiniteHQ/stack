@@ -16,10 +16,10 @@
 Nofinite Utils provides a collection of carefully designed, reusable utilities for real-world applications.  
 It focuses on **security, correctness, and developer experience**, so you don’t have to rewrite critical logic again and again.
 
-* **Secure by Default:** Modern cryptography (Argon2id, SHA-256, JWT best practices).
-* **Type-Safe:** Fully written in TypeScript with strict typings.
-* **Tree-Shakable:** Modular design for optimal bundle size.
-* **Framework-Agnostic:** Works with Node.js, serverless, and modern runtimes.
+- **Secure by Default:** Modern cryptography (Argon2id, SHA-256, JWT best practices).
+- **Type-Safe:** Fully written in TypeScript with strict typings.
+- **Tree-Shakable:** Modular design for optimal bundle size.
+- **Framework-Agnostic:** Works with Node.js, serverless, and modern runtimes.
 
 ---
 
@@ -34,18 +34,18 @@ npm install @nofinite/utils
 
 # yarn
 yarn add @nofinite/utils
-````
+```
 
 ---
 
 ## What’s Included
 
-* **OTP Utilities:** Secure OTP generation, verification, expiry, and attempt guards.
-* **Crypto Helpers:** Password hashing & verification using Argon2id.
-* **JWT Utilities:** Token signing and verification with safe defaults.
-* **UUID Utilities:** UUID v7 generation and binary conversions.
-* **Env Helpers:** Safe environment variable accessors.
-* **Email Utilities:** ZeptoMail helpers with typed, env-driven configuration.
+- **OTP Utilities:** Secure OTP generation, verification, expiry, and attempt guards.
+- **Crypto Helpers:** Password hashing & verification using Argon2id.
+- **JWT Utilities:** Token signing and verification with safe defaults.
+- **UUID Utilities:** UUID v7 generation and binary conversions.
+- **Env Helpers:** Safe environment variable accessors.
+- **Email Utilities:** ZeptoMail helpers with typed, env-driven configuration.
 
 All utilities are **independent and tree-shakable**, so you only ship what you use.
 
@@ -54,7 +54,7 @@ All utilities are **independent and tree-shakable**, so you only ship what you u
 ## Documentation
 
 For full usage examples, API references, and best practices,
-[read documentation](https://opensource.nofinite.com/docs/utils).
+[read documentation](https://opensource.nofinite.com/utils).
 
 ---
 

@@ -3,7 +3,7 @@ import { within, userEvent, expect } from 'storybook/test';
 import { NUIProvider, useTheme } from './NUIProvider';
 
 const meta: Meta<typeof NUIProvider> = {
-  title: 'Core/NUIProvider',
+  title: 'NUIProvider',
   component: NUIProvider,
   tags: ['autodocs'],
   parameters: {

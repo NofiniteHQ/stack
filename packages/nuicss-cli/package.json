@@ -1,0 +1,55 @@
+{
+  "name": "nuicss",
+  "version": "0.1.0",
+  "description": "Lightning-fast standalone compiler and toolkit for the NUICSS design system.",
+  "type": "module",
+  "bin": {
+    "nuicss": "./bin/nuicss.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "bin/nuicss.js",
+    "dist/"
+  ],
+  "scripts": {
+    "build": "powershell -ExecutionPolicy Bypass -File ./build.ps1",
+    "build:ts": "tsc && node --input-type=module -e \"import fs from 'node:fs'; for(const f of ['nuicss.html-data.json', 'nuicss.css-data.json', 'styles.css']) fs.copyFileSync('src/embedded/' + f, 'dist/embedded/' + f);\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nofinite/nuicss": "workspace:*",
+    "@unocss/cli": "^66.10.5",
+    "@unocss/core": "^66.10.5",
+    "cac": "^7.0.0",
+    "chokidar": "^5.0.0",
+    "colorette": "^2.0.20",
+    "jiti": "^2.7.0",
+    "jsonc-parser": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "nuicss",
+    "nui",
+    "css",
+    "compiler",
+    "design-system",
+    "oklch",
+    "cli",
+    "tailwindcss",
+    "unocss"
+  ],
+  "author": "NofiniteHQ",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NofiniteHQ/stack.git",
+    "directory": "packages/nuicss-cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

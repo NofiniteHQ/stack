@@ -13,7 +13,7 @@ import {
 import { StatCard } from './StatCard';
 
 const meta: Meta<typeof StatCard> = {
-  title: 'Primitives/StatCard',
+  title: 'StatCard',
   component: StatCard,
   parameters: {
     layout: 'padded',

@@ -4,7 +4,7 @@ import { Watermark } from './Watermark';
 import { Card } from '../card/Card';
 
 const meta: Meta<typeof Watermark> = {
-  title: 'Primitives/Watermark',
+  title: 'Watermark',
   component: Watermark,
   parameters: {
     layout: 'centered',

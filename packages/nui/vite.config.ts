@@ -67,36 +67,7 @@ export default defineConfig({
           const themeCss = fs.existsSync(themePath)
             ? fs.readFileSync(themePath, 'utf8')
             : '';
-
-          let vidstackCss = '';
-          try {
-            const v1 = require.resolve(
-              '@vidstack/react/player/styles/default/theme.css',
-              { paths: [__dirname] }
-            );
-            const v2 = require.resolve(
-              '@vidstack/react/player/styles/default/layouts/video.css',
-              { paths: [__dirname] }
-            );
-            vidstackCss = `${fs.readFileSync(v1, 'utf8')}\n${fs.readFileSync(
-              v2,
-              'utf8'
-            )}`;
-          } catch {
-            /* optional vidstack styles */
-          }
-
-          let katexCss = '';
-          try {
-            const k1 = require.resolve('katex/dist/katex.min.css', {
-              paths: [__dirname],
-            });
-            katexCss = fs.readFileSync(k1, 'utf8');
-          } catch {
-            /* optional katex styles */
-          }
-
-          const baseBlock = `/* Design Tokens & Theme (Standalone NUI) */\n${themeCss}\n\n/* Video Player Styles */\n${vidstackCss}\n\n/* KaTeX Math Styles */\n${katexCss}`;
+          const baseBlock = `/* Design Tokens & Theme (Standalone NUI) */\n${themeCss}`;
 
           // Ensure layer preamble and theme tokens are present
           if (!raw.includes('@layer base, components, utilities;')) {

@@ -14,7 +14,7 @@ import { Button } from '../button/Button';
 import { useForm } from 'react-hook-form';
 
 const meta: Meta<typeof Form> = {
-  title: 'Forms/Form Layout',
+  title: 'Form',
   tags: ['autodocs'],
   component: Form,
   parameters: {

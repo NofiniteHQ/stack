@@ -5,7 +5,7 @@ import { Button } from '../button/Button';
 import { useState } from 'react';
 
 const meta: Meta<typeof Drawer> = {
-  title: 'Overlays/Drawer',
+  title: 'Drawer',
   tags: ['autodocs'],
   component: Drawer,
   parameters: {

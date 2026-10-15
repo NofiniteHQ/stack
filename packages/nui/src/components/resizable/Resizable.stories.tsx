@@ -5,7 +5,7 @@ import { Resizable } from './Resizable';
 import { cn } from '../../utils';
 
 const meta: Meta<typeof Resizable> = {
-  title: 'Layout/Resizable',
+  title: 'Resizable',
   component: Resizable,
   parameters: {
     layout: 'fullscreen',

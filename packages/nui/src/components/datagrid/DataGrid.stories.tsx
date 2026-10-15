@@ -27,7 +27,7 @@ const columns: DataGridColumn<User>[] = [
 ];
 
 const meta: Meta<typeof DataGrid<User>> = {
-  title: 'Data Display/DataGrid',
+  title: 'DataGrid',
   component: DataGrid,
   parameters: { layout: 'fullscreen' },
   decorators: [
