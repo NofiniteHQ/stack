@@ -66,6 +66,8 @@ Kanban is styled natively through NUICSS. All board geometry, glassmorphic colum
 import '@nofinite/nuicss/styles.css';
 ```
 
+> **Note:** For modular or bundle-isolated setups, NUICSS also exports a dedicated subpath stylesheet: `@nofinite/nuicss/kanban.css`.
+
 ---
 
 ## Quick Start

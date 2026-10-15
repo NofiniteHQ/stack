@@ -38,7 +38,7 @@ import '@nofinite/nuicss/styles.css';
 If your application uses fine-grained CSS tree-shaking, you can import only the Kanban stylesheet:
 
 ```tsx
-import '@nofinite/nuicss/dist/kanban.css';
+import '@nofinite/nuicss/kanban.css';
 ```
 
 ---

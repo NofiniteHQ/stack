@@ -38,5 +38,5 @@ import '@nofinite/nuicss/styles.css';
 For modular tree-shaking:
 
 ```tsx
-import '@nofinite/nuicss/dist/markon.css';
+import '@nofinite/nuicss/markon.css';
 ```

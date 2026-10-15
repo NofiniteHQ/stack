@@ -31,6 +31,14 @@ import '@nofinite/nuicss/styles.css';
 
 > **Zero Downstream CSS Note:** Do **not** import `@nofinite/media/styles.css`. NUICSS provides all necessary player layouts, scrubber timelines, and control tokens automatically.
 
+### Optional: Modular Subpath Import
+
+If your application uses fine-grained CSS tree-shaking, you can import only the media player stylesheet:
+
+```tsx
+import '@nofinite/nuicss/media.css';
+```
+
 ---
 
 ## 3. Basic Import

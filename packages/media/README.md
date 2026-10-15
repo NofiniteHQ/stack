@@ -58,20 +58,13 @@ yarn add @nofinite/media @nofinite/nuicss
 
 ## Styles Setup
 
-Media combines modern glassmorphic OKLCH design tokens from NUICSS with player layout chrome from `@nofinite/media/styles`. Import both stylesheets at your application root:
+Media player layout chrome, scrubber timelines, responsive aspect ratios, and glassmorphic OKLCH design tokens are styled natively via NUICSS. Import the stylesheet once at your application root (e.g., `layout.tsx`, `main.tsx`, or `_app.tsx`):
 
-```ts
-// In your root layout (Next.js layout.tsx, Vite main.tsx, or index.ts)
+```tsx
 import '@nofinite/nuicss/styles.css';
-import '@nofinite/media/styles';
 ```
 
-Alternatively, you can import the raw CSS files directly:
-
-```css
-@import '@nofinite/nuicss/styles.css';
-@import '@nofinite/media/styles.css';
-```
+> **Note:** For modular or bundle-isolated setups, NUICSS also exports a dedicated subpath stylesheet: `@nofinite/nuicss/media.css`.
 
 ---
 
@@ -81,7 +74,6 @@ Alternatively, you can import the raw CSS files directly:
 
 ```tsx
 import '@nofinite/nuicss/styles.css';
-import '@nofinite/media/styles';
 import { VideoPlayer } from '@nofinite/media/react';
 
 export function MoviePlayer() {
@@ -193,10 +185,6 @@ For rapid prototyping or server-rendered HTML/HTMX environments without a build 
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss/dist/styles.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@nofinite/media/dist/styles.css"
     />
   </head>
   <body class="bg-surface p-6">

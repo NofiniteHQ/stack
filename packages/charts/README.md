@@ -65,6 +65,8 @@ Charts is styled natively via NUICSS design tokens (`var(--chart-1)`, `var(--col
 import '@nofinite/nuicss/styles.css';
 ```
 
+> **Note:** For modular or bundle-isolated setups, NUICSS also exports widget and chart tokens via: `@nofinite/nuicss/widgets.css`.
+
 ---
 
 ## Quick Start

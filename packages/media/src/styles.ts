@@ -1,1 +1,9 @@
-import './styles/media.css';
+/**
+ * @nofinite/media - Backward Compatibility Stylesheet Shim
+ * All media player layout chrome and OKLCH design tokens are natively
+ * compiled and provided by @nofinite/nuicss.
+ *
+ * For new applications, simply import:
+ *   import '@nofinite/nuicss/styles.css';
+ */
+export {};

@@ -34,6 +34,8 @@ import '@nofinite/nuicss/styles.css';
 ```
 
 > **Zero Downstream CSS Note:** Do **not** import `@nofinite/media/styles.css`. NUICSS provides all styling automatically.
+>
+> **Note:** For modular setups, NUICSS also exports a dedicated subpath: `@nofinite/nuicss/media.css`.
 
 ### 3. Usage Example
 

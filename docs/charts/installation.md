@@ -33,6 +33,14 @@ import '@nofinite/nuicss/styles.css';
 
 > **Zero Downstream CSS Note:** Do **not** import `@nofinite/charts/styles.css`. NUICSS provides all necessary styling classes and OKLCH color variables automatically.
 
+### Optional: Modular Subpath Import
+
+If your application uses fine-grained CSS tree-shaking, you can import only the widgets & chart styling tokens:
+
+```tsx
+import '@nofinite/nuicss/widgets.css';
+```
+
 ---
 
 ## 3. Basic Import
