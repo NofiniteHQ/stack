@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import path from 'node:path';
-import fs from 'node:fs';
 
 export default defineConfig({
   root: __dirname,
@@ -16,27 +15,6 @@ export default defineConfig({
       outDir: path.resolve(__dirname, 'dist/types'),
       insertTypesEntry: true,
     }),
-    {
-      name: 'emit-styles-shim',
-      closeBundle() {
-        const shim = `/**\n * @nofinite/media - Backward Compatibility Stylesheet Shim\n * All media player layout chrome and OKLCH design tokens are natively\n * compiled and provided by @nofinite/nuicss.\n *\n * For new applications, simply import:\n *   import '@nofinite/nuicss/styles.css';\n */\n@import '@nofinite/nuicss/styles.css';\n`;
-        fs.writeFileSync(
-          path.resolve(__dirname, 'dist/styles.css'),
-          shim,
-          'utf8'
-        );
-        fs.writeFileSync(
-          path.resolve(__dirname, 'dist/styles.js'),
-          `import './styles.css';\n`,
-          'utf8'
-        );
-        fs.writeFileSync(
-          path.resolve(__dirname, 'dist/styles.cjs'),
-          `'use strict';\nrequire('./styles.css');\n`,
-          'utf8'
-        );
-      },
-    },
   ],
 
   build: {
@@ -47,13 +25,10 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         'react/index': path.resolve(__dirname, 'src/react/index.ts'),
-        styles: path.resolve(__dirname, 'src/styles.ts'),
       },
     },
     rollupOptions: {
       external: (id) => {
-        if (id.includes('@nofinite/nuicss')) return true;
-        if (id.endsWith('.css')) return false;
         if (
           [
             'react',
@@ -81,12 +56,6 @@ export default defineConfig({
             }
             return '';
           },
-          assetFileNames: (assetInfo) => {
-            if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-              return 'styles.css';
-            }
-            return 'assets/[name]-[hash][extname]';
-          },
         },
         {
           format: 'cjs',
@@ -101,12 +70,6 @@ export default defineConfig({
               return "'use client';";
             }
             return '';
-          },
-          assetFileNames: (assetInfo) => {
-            if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-              return 'styles.css';
-            }
-            return 'assets/[name]-[hash][extname]';
           },
         },
       ],
