@@ -44,7 +44,7 @@ Determine:
 
 Create or update:
 
-`implementation_plan.md`
+`temp/<project>_implementation_plan.md`
 
 Include:
 

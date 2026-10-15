@@ -158,7 +158,7 @@ Do not create a parent repository automatically.
 If one approved task affects multiple independent repositories:
 
 1. Identify every affected repository.
-2. List the affected repositories in `implementation_plan.md`.
+2. List the affected repositories in `temp/<project>_implementation_plan.md`.
 3. Check the status of every affected repository.
 4. Implement only the approved changes.
 5. Verify each repository independently.

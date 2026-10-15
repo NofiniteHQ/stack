@@ -37,7 +37,7 @@ Compare reasonable alternatives when the decision is significant.
 
 Create or update:
 
-`implementation_plan.md`
+`temp/<project>_implementation_plan.md`
 
 Include:
 

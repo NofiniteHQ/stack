@@ -26,7 +26,7 @@ Determine:
 
 ## Phase 2 — Plan
 
-Create `implementation_plan.md`.
+Create `temp/<project>_implementation_plan.md`.
 
 Include:
 

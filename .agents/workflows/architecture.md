@@ -52,7 +52,7 @@ Do not declare an option "best" without explaining the criteria.
 
 ## Phase 3 — Plan
 
-Create `implementation_plan.md`.
+Create `temp/<project>_implementation_plan.md`.
 
 The plan must contain:
 

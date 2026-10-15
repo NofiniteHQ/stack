@@ -31,11 +31,11 @@ Do not implement based solely on the user's description when repository inspecti
 
 ### Plan
 
-For every non-trivial task, create or update:
+For every non-trivial task, create or update a project/task-specific implementation plan:
 
-`temp/implementation_plan.md`
+`temp/<project>_implementation_plan.md` (e.g., `temp/markon_implementation_plan.md`, `temp/kanban_implementation_plan.md`, `temp/nui_implementation_plan.md`, `temp/charts_implementation_plan.md`)
 
-Never create implementation plans in the repository root. All implementation plans, design proposals, and task roadmaps MUST be placed strictly inside the gitignored `temp/` directory (`temp/implementation_plan.md`).
+Never create generic or root-level implementation plans. All plans, design proposals, and task roadmaps MUST be placed strictly inside the gitignored `temp/` directory with project-specific naming to prevent collisions or accidental overwrites across monorepo packages.
 
 The plan must contain:
 
@@ -53,7 +53,7 @@ The plan must contain:
 
 ### STOP
 
-After creating or updating `temp/implementation_plan.md`:
+After creating or updating the project-specific implementation plan in `temp/`:
 
 **STOP.**
 
@@ -65,7 +65,7 @@ Do not modify configuration.
 
 Do not execute implementation steps.
 
-`temp/implementation_plan.md` is a proposal, NOT authorization.
+The implementation plan is a proposal, NOT authorization.
 
 ### Approval
 
@@ -311,17 +311,19 @@ STOP and ask the user when:
 
 ---
 
-## 9. Temporary Files & Implementation Plans
+## 9. Temporary Files & Project-Specific Implementation Plans
 
-All AI-generated temporary files, scratch scripts, testing files, and implementation plans (`temp/implementation_plan.md`) MUST be placed inside the workspace-relative:
+All AI-generated temporary files, scratch scripts, testing files, and implementation plans MUST be placed inside the workspace-relative:
 
 `temp/`
 
 Never create implementation plans, scratch files, or temporary artifacts in the workspace root or source directories. The root directory must remain pristine at all times.
 
+Implementation plans must always use project/task-specific filenames (e.g., `temp/markon_implementation_plan.md`, `temp/kanban_implementation_plan.md`, `temp/charts_implementation_plan.md`, `temp/nuicss_implementation_plan.md`) to prevent collisions across multiple packages in the monorepo.
+
 Examples of files that belong exclusively in `temp/`:
 
-- Implementation plans (`temp/implementation_plan.md`)
+- Project implementation plans (`temp/<project>_implementation_plan.md`)
 - Scratch scripts
 - Temporary HTML/JS/TS files
 - Debug files
