@@ -28,24 +28,55 @@ export function parseVideoUrl(url: string): {
 } {
   const trimmed = url.trim();
 
-  // YouTube match: regular watch, short, embed
-  const ytMatch = trimmed.match(
-    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i
-  );
-  if (ytMatch && ytMatch[1]) {
-    return {
-      service: 'youtube',
-      embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`,
-    };
-  }
+  try {
+    const parsed = new URL(
+      trimmed.startsWith('http') ? trimmed : `https://${trimmed}`
+    );
+    const host = parsed.hostname.toLowerCase();
 
-  // Vimeo match
-  const vimeoMatch = trimmed.match(/(?:vimeo\.com\/)(\d+)/i);
-  if (vimeoMatch && vimeoMatch[1]) {
-    return {
-      service: 'vimeo',
-      embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
-    };
+    // youtu.be/<id>
+    if (host === 'youtu.be' || host.endsWith('.youtu.be')) {
+      const id = parsed.pathname.slice(1).split('/')[0];
+      if (/^[a-zA-Z0-9_-]{11}$/.test(id)) {
+        return {
+          service: 'youtube',
+          embedUrl: `https://www.youtube-nocookie.com/embed/${id}`,
+        };
+      }
+    }
+
+    // youtube.com
+    if (host === 'youtube.com' || host.endsWith('.youtube.com')) {
+      const v = parsed.searchParams.get('v');
+      if (v && /^[a-zA-Z0-9_-]{11}$/.test(v)) {
+        return {
+          service: 'youtube',
+          embedUrl: `https://www.youtube-nocookie.com/embed/${v}`,
+        };
+      }
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      const lastPart = parts[parts.length - 1];
+      if (lastPart && /^[a-zA-Z0-9_-]{11}$/.test(lastPart)) {
+        return {
+          service: 'youtube',
+          embedUrl: `https://www.youtube-nocookie.com/embed/${lastPart}`,
+        };
+      }
+    }
+
+    // vimeo.com/<id>
+    if (host === 'vimeo.com' || host.endsWith('.vimeo.com')) {
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      const id = parts[parts.length - 1];
+      if (id && /^\d+$/.test(id)) {
+        return {
+          service: 'vimeo',
+          embedUrl: `https://player.vimeo.com/video/${id}`,
+        };
+      }
+    }
+  } catch {
+    // Fallback if URL constructor fails
   }
 
   // Custom direct video (mp4, webm, etc.) or raw video link

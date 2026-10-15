@@ -25,7 +25,7 @@ import {
   type AutoSaveConfig,
   type SaveStatusState,
 } from './draftManager';
-import { htmlToMarkdown, markdownToHtml } from './markdown';
+import { htmlToMarkdown, markdownToHtml, stripHtmlTags } from './markdown';
 import { ensureMarkonStyles } from './styleInjector';
 
 export type { AutoSaveConfig, SaveStatusState };
@@ -63,9 +63,7 @@ export function renderMarkonEditor(options: MarkonEditorOptions = {}): string {
   const showWordCount = options.showWordCount !== false;
   const showSaveStatus = options.showSaveStatus !== false;
 
-  const initialCounts = getCounts(
-    (options.initialValue || '').replace(/<[^>]*>/g, '')
-  );
+  const initialCounts = getCounts(stripHtmlTags(options.initialValue || ''));
 
   return `
     <div class="editor markon-editor relative w-full rounded-xl border border-default bg-surface shadow-sm overflow-hidden font-sans focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all"

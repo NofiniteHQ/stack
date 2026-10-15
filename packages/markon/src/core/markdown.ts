@@ -4,11 +4,28 @@
  * supporting headings, lists, tables, code blocks, math formulas, and details.
  */
 
+export function stripHtmlTags(input: string): string {
+  if (!input) return '';
+  let output = '';
+  let inTag = false;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (ch === '<') {
+      inTag = true;
+    } else if (ch === '>') {
+      inTag = false;
+    } else if (!inTag) {
+      output += ch;
+    }
+  }
+  return output;
+}
+
 export function htmlToMarkdown(html: string): string {
   if (!html) return '';
 
   if (typeof document === 'undefined') {
-    return html
+    const converted = html
       .replace(/<h1>(.*?)<\/h1>/gi, '# $1\n\n')
       .replace(/<h2>(.*?)<\/h2>/gi, '## $1\n\n')
       .replace(/<h3>(.*?)<\/h3>/gi, '### $1\n\n')
@@ -22,9 +39,8 @@ export function htmlToMarkdown(html: string): string {
       .replace(/<sub>(.*?)<\/sub>/gi, '~$1~')
       .replace(/<sup>(.*?)<\/sup>/gi, '^$1^')
       .replace(/<code>(.*?)<\/code>/gi, '`$1`')
-      .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
-      .replace(/<[^>]+>/g, '')
-      .trim();
+      .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+    return stripHtmlTags(converted).trim();
   }
 
   const temp = document.createElement('div');
@@ -219,6 +235,7 @@ export function htmlToMarkdown(html: string): string {
             });
             return cellContent
               .trim()
+              .replace(/\\/g, '\\\\')
               .replace(/\n+/g, ' ')
               .replace(/\|/g, '\\|');
           });
@@ -268,7 +285,16 @@ export function markdownToHtml(md: string): string {
         '<table class="table border border-default w-full my-3 rounded-lg overflow-hidden text-sm"><tbody>';
       tableBuffer.forEach((row, idx) => {
         // Skip separator line (e.g. | --- | --- |)
-        if (row.match(/^\|?\s*[-:]+[-|\s:]*\|?$/)) return;
+        const strippedRow = row
+          .trim()
+          .replace(/^\||\|$/g, '')
+          .trim();
+        if (
+          strippedRow.length > 0 &&
+          strippedRow.split('|').every((col) => /^\s*:?-{3,}:?\s*$/.test(col))
+        ) {
+          return;
+        }
         const cells = row
           .split('|')
           .map((c) => c.trim())
@@ -424,12 +450,20 @@ export function markdownToHtml(md: string): string {
         !rawDetails.includes('data-details-content') &&
         !rawDetails.includes('markon-details-content')
       ) {
-        const summaryMatch = rawDetails.match(
-          /<summary>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/i
-        );
-        if (summaryMatch) {
-          const summaryHtml = summaryMatch[1].trim();
-          const bodyHtml = summaryMatch[2].trim();
+        const lowerDetails = rawDetails.toLowerCase();
+        const summaryStart = lowerDetails.indexOf('<summary>');
+        const summaryEnd = lowerDetails.indexOf('</summary>');
+        const detailsEnd = lowerDetails.lastIndexOf('</details>');
+
+        if (
+          summaryStart !== -1 &&
+          summaryEnd > summaryStart &&
+          detailsEnd > summaryEnd
+        ) {
+          const summaryHtml = rawDetails
+            .slice(summaryStart + 9, summaryEnd)
+            .trim();
+          const bodyHtml = rawDetails.slice(summaryEnd + 10, detailsEnd).trim();
           const wrapped = `<details><summary class="markon-summary font-semibold text-sm cursor-pointer select-none text-default hover:text-primary list-none flex items-center gap-2 py-1">${summaryHtml}</summary><div data-details-content="" class="markon-details-content pt-2 pl-4 border-l-2 border-primary/40 mt-1 space-y-2">${
             bodyHtml.startsWith('<')
               ? bodyHtml
@@ -521,45 +555,52 @@ export function markdownToHtml(md: string): string {
     }
 
     // Task List
-    const taskMatch = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
-    if (taskMatch) {
+    const isTaskList =
+      line.startsWith('- [ ] ') ||
+      line.startsWith('- [x] ') ||
+      line.startsWith('- [X] ') ||
+      line.startsWith('* [ ] ') ||
+      line.startsWith('* [x] ') ||
+      line.startsWith('* [X] ');
+
+    if (isTaskList) {
       if (inList !== 'ul') {
         flushList();
         inList = 'ul';
         htmlParts.push('<ul class="task-list list-none p-0 my-2 space-y-1">');
       }
-      const isChecked = taskMatch[1].toLowerCase() === 'x';
+      const isChecked = line[3].toLowerCase() === 'x';
+      const taskText = line.slice(6).trim();
       htmlParts.push(
         `<li class="task-item flex items-center gap-2" data-checked="${isChecked}"><label><input type="checkbox" ${
           isChecked ? 'checked' : ''
-        } disabled /></label><span>${inlineFormatting(
-          taskMatch[2].trim()
-        )}</span></li>`
+        } disabled /></label><span>${inlineFormatting(taskText)}</span></li>`
       );
       continue;
     }
 
     // Unordered List
-    if (line.match(/^[-*]\s+(.*)$/)) {
-      const content = line.replace(/^[-*]\s+/, '');
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      const content = line.slice(2).trim();
       if (inList !== 'ul') {
         flushList();
         inList = 'ul';
         htmlParts.push('<ul>');
       }
-      htmlParts.push(`<li>${inlineFormatting(content.trim())}</li>`);
+      htmlParts.push(`<li>${inlineFormatting(content)}</li>`);
       continue;
     }
 
     // Ordered List
-    const olMatch = line.match(/^(\d+)\.\s+(.*)$/);
-    if (olMatch) {
+    const dotIdx = line.indexOf('. ');
+    if (dotIdx > 0 && /^\d+$/.test(line.slice(0, dotIdx))) {
+      const content = line.slice(dotIdx + 2).trim();
       if (inList !== 'ol') {
         flushList();
         inList = 'ol';
         htmlParts.push('<ol>');
       }
-      htmlParts.push(`<li>${inlineFormatting(olMatch[2].trim())}</li>`);
+      htmlParts.push(`<li>${inlineFormatting(content)}</li>`);
       continue;
     }
 

@@ -44,10 +44,10 @@ jobs:
         working-directory: packages/kanban
         run: |
           TARBALL_FILES=$(npm pack --dry-run 2>&1)
-          if ! echo "$TARBALL_FILES" | grep -q "dist/index.d.ts"; then
-            echo "Error: dist/index.d.ts is missing from the tarball!"
+          if ! echo "$TARBALL_FILES" | grep -q "dist/types/index.d.ts"; then
+            echo "Error: dist/types/index.d.ts is missing from the tarball!"
             echo "Tarball contents:"
             echo "$TARBALL_FILES"
             exit 1
           fi
-          echo "Verification passed. dist/index.d.ts is present."
+          echo "Verification passed. dist/types/index.d.ts is present."

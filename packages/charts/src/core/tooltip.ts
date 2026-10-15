@@ -78,7 +78,7 @@ export function defaultTooltipPayload(
 
 export function renderTooltipHtml(payload: TooltipPayload | string): string {
   if (typeof payload === 'string') {
-    return `<div class="chart-tooltip-content">${payload}</div>`;
+    return `<div class="chart-tooltip-content">${escapeHtml(payload)}</div>`;
   }
 
   const titleHtml = payload.title

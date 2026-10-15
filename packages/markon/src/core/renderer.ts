@@ -10,7 +10,7 @@
 
 import katex from 'katex';
 import { lowlight, SUPPORTED_LANGUAGES, normalizeLanguage } from './codeBlock';
-import { markdownToHtml } from './markdown';
+import { markdownToHtml, stripHtmlTags } from './markdown';
 
 export interface MarkonAuthor {
   name: string;
@@ -819,8 +819,9 @@ export function slugify(
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'heading';
+      .replace(/[\s_]+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '') || 'heading';
 
   const count = existingSlugs.get(base) || 0;
   existingSlugs.set(base, count + 1);
@@ -1242,11 +1243,11 @@ export function extractTOC(content: any): TOCItem[] {
   const slugMap = new Map<string, number>();
 
   if (str.includes('<h') && str.includes('</h')) {
-    const headingRegex = /<h([1-6])[^>]*>(.*?)<\/h\1>/gi;
+    const headingRegex = /<h([1-6])([^<>]*)>(.*?)<\/h\1>/gi;
     let match: RegExpExecArray | null;
     while ((match = headingRegex.exec(str)) !== null) {
       const level = parseInt(match[1], 10);
-      const text = match[2].replace(/<[^>]+>/g, '').trim();
+      const text = stripHtmlTags(match[3]).trim();
       const slug = slugify(text, slugMap);
       toc.push({ id: slug, text, level });
     }
@@ -1254,12 +1255,17 @@ export function extractTOC(content: any): TOCItem[] {
     // Markdown headings (# Title)
     const lines = str.split('\n');
     lines.forEach((line) => {
-      const m = line.match(/^(#{1,6})\s+(.*)$/);
-      if (m) {
-        const level = m[1].length;
-        const text = m[2].trim();
-        const slug = slugify(text, slugMap);
-        toc.push({ id: slug, text, level });
+      const trimmed = line.trim();
+      if (trimmed.startsWith('#')) {
+        let level = 0;
+        while (level < trimmed.length && trimmed[level] === '#' && level < 6) {
+          level++;
+        }
+        if (level > 0 && level <= 6 && trimmed[level] === ' ') {
+          const text = trimmed.slice(level + 1).trim();
+          const slug = slugify(text, slugMap);
+          toc.push({ id: slug, text, level });
+        }
       }
     });
   }
@@ -1337,17 +1343,17 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
     // Process headings in HTML string to inject IDs and anchors
     const slugMap = new Map<string, number>();
     bodyHtml = html.replace(
-      /<h([1-6])([^>]*)>(.*?)<\/h\1>/gi,
+      /<h([1-6])([^<>]*)>(.*?)<\/h\1>/gi,
       (_match, levelStr, _attrs, inner) => {
         const level = parseInt(levelStr, 10);
-        const text = inner.replace(/<[^>]+>/g, '').trim();
+        const text = stripHtmlTags(inner).trim();
         const slug = slugify(text, slugMap);
         toc.push({ id: slug, text, level });
         return `<h${level} id="${slug}" class="markon-heading text-default group scroll-mt-20 flex items-center"><span>${inner}</span><a href="#${slug}" class="heading-anchor opacity-0 group-hover:opacity-100 text-muted hover:text-primary transition-opacity ml-2 no-underline text-base font-normal select-none" aria-label="Link to section">#</a></h${level}>`;
       }
     );
 
-    textBuffer.push(bodyHtml.replace(/<[^>]+>/g, ' '));
+    textBuffer.push(stripHtmlTags(bodyHtml));
   }
 
   // Calculate words and reading time
@@ -1416,13 +1422,14 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
     ? `<style data-markon-renderer="">${MARKON_RENDERER_CSS}</style>`
     : '';
 
+  const safeClassName = className ? escapeHtml(className) : '';
   let finalHtml = '';
 
   // ==========================================
   // Layout 1: Minimal (Embedded / Dashboard)
   // ==========================================
   if (layout === 'minimal') {
-    finalHtml = `${styleTag}<div class="markon-render markon-minimal prose max-w-none text-default ${className}">${bodyHtml}</div>`;
+    finalHtml = `${styleTag}<div class="markon-render markon-minimal prose max-w-none text-default ${safeClassName}">${bodyHtml}</div>`;
   }
 
   // ==========================================
@@ -1501,7 +1508,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
       </div>`;
     }
 
-    finalHtml = `${styleTag}<article class="markon-render markon-article text-default ${className}">
+    finalHtml = `${styleTag}<article class="markon-render markon-article text-default ${safeClassName}">
       <header class="markon-header">
         ${badgeHtml}
         ${titleHtml}
@@ -1536,7 +1543,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
           )}</p>`
         : '';
 
-    finalHtml = `${styleTag}<div class="markon-render markon-document text-default ${className}">
+    finalHtml = `${styleTag}<div class="markon-render markon-document text-default ${safeClassName}">
       <header class="markon-doc-header">
         <div class="markon-doc-header-top">
           <span class="markon-doc-badge">${escapeHtml(category)}</span>
@@ -1584,7 +1591,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
           )}</div>`
         : '';
 
-    finalHtml = `${styleTag}<article class="markon-render markon-newsroom text-default ${className}">
+    finalHtml = `${styleTag}<article class="markon-render markon-newsroom text-default ${safeClassName}">
       <header>
         <div class="markon-newsroom-kicker">${escapeHtml(kicker)}</div>
         ${titleHtml}
