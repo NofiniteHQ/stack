@@ -5,7 +5,7 @@ import { Chip } from './Chip';
 import { Check, Star, User } from 'lucide-react';
 
 const meta: Meta<typeof Chip> = {
-  title: 'Feedback/Chip',
+  title: 'Chip',
   tags: ['autodocs'],
   component: Chip,
   parameters: {

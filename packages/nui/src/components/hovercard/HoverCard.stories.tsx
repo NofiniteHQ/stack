@@ -4,7 +4,7 @@ import { HoverCard } from './HoverCard';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof HoverCard> = {
-  title: 'Overlays/HoverCard',
+  title: 'HoverCard',
   tags: ['autodocs'],
   component: HoverCard,
   parameters: {

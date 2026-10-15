@@ -4,7 +4,7 @@ import { within, userEvent, expect } from 'storybook/test';
 import { PasswordInput, PasswordInputProps } from './PasswordInput';
 
 const meta: Meta<typeof PasswordInput> = {
-  title: 'Forms/PasswordInput',
+  title: 'PasswordInput',
   component: PasswordInput,
   parameters: {
     layout: 'centered',

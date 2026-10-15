@@ -95,6 +95,47 @@ async function build() {
   // 1g. Media Only (media.css & media.min.css)
   await generateShortcutBundle('media', mediaShortcuts);
 
+  // 1h. Kanban Subpath (kanban.css & kanban.min.css)
+  const themeCss = fs.readFileSync('src/styles/theme.css', 'utf8');
+  const kanbanMatch = themeCss.match(
+    /\/\* -+\s*15\.c\. KANBAN TASK BOARD[\s\S]*?(?=\/\* -+\s*16\. WCAG|$)/
+  );
+  if (kanbanMatch) {
+    const rawContent = kanbanMatch[0]
+      .replace(/@layer components\s*\{/, '')
+      .replace(/\}\s*$/, '');
+    const kanbanCss = `@layer components {\n${rawContent}\n}`;
+    fs.writeFileSync('dist/kanban.css', kanbanCss, 'utf8');
+    const minKanban = minifyCss('kanban.min.css', kanbanCss);
+    fs.writeFileSync('dist/kanban.min.css', minKanban, 'utf8');
+    console.log(
+      `Generated dist/kanban.css (${Buffer.byteLength(
+        kanbanCss,
+        'utf8'
+      )} bytes, minified: ${Buffer.byteLength(minKanban, 'utf8')} bytes)`
+    );
+  }
+
+  // 1i. Markon Subpath (markon.css & markon.min.css)
+  const markonMatch = themeCss.match(
+    /\/\* -+\s*6\. TIPTAP EDITOR COMPONENT STYLES[\s\S]*?(?=@keyframes shimmer|\/\* -+\s*15\.b|$)/
+  );
+  if (markonMatch) {
+    const rawContent = markonMatch[0]
+      .replace(/@layer components\s*\{/, '')
+      .replace(/\}\s*$/, '');
+    const markonCss = `@layer components {\n${rawContent}\n}`;
+    fs.writeFileSync('dist/markon.css', markonCss, 'utf8');
+    const minMarkon = minifyCss('markon.min.css', markonCss);
+    fs.writeFileSync('dist/markon.min.css', minMarkon, 'utf8');
+    console.log(
+      `Generated dist/markon.css (${Buffer.byteLength(
+        markonCss,
+        'utf8'
+      )} bytes, minified: ${Buffer.byteLength(minMarkon, 'utf8')} bytes)`
+    );
+  }
+
   // ========================================================
   // 2. Generate One-Link Browser Runtime (dist/index.global.js)
   // ========================================================

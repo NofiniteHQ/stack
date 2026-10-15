@@ -157,7 +157,7 @@ function ModalRoot({
             <motion.div
               ref={dialogRef}
               className={cn(
-                'modal-box relative z-[9999] w-[calc(100%-2rem)] max-w-[500px] outline-none will-change-[transform,opacity] p-0 overflow-hidden',
+                'modal-box relative z-[9999] w-[calc(100%-2rem)] max-w-[500px] outline-none will-change-[transform,opacity] p-6 overflow-hidden',
                 className
               )}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -173,11 +173,7 @@ function ModalRoot({
               {...(props as any)}
             >
               {(title || description) && (
-                <div
-                  className={cn(
-                    'modal-header px-6 pt-6 pb-2 pr-12 block border-none mb-0'
-                  )}
-                >
+                <div className="mb-4 pr-8">
                   {title && (
                     <h2
                       id={titleId}
@@ -196,9 +192,8 @@ function ModalRoot({
 
               <div
                 className={cn(
-                  'modal-body px-6 py-4 overflow-y-auto flex-1',
-                  !footer && 'pb-6',
-                  !(title || description) && 'pt-6'
+                  'modal-body p-0 overflow-y-auto flex-1',
+                  footer ? 'mb-6' : ''
                 )}
               >
                 {children}
@@ -207,7 +202,7 @@ function ModalRoot({
               {footer && (
                 <div
                   className={cn(
-                    'modal-footer px-6 py-4 border-t border-default bg-subtle/20 flex items-center justify-end gap-3 mt-0'
+                    'modal-footer pt-4 border-t border-default flex items-center justify-end gap-3 mt-auto'
                   )}
                 >
                   {footer}

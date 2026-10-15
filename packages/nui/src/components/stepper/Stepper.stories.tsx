@@ -5,7 +5,7 @@ import { Stepper } from './Stepper';
 import { Button } from '../button/Button'; // Assumes you have your Button component
 
 const meta: Meta<typeof Stepper> = {
-  title: 'Widgets/Stepper',
+  title: 'Stepper',
   component: Stepper,
   parameters: { layout: 'padded' },
   tags: ['autodocs'],

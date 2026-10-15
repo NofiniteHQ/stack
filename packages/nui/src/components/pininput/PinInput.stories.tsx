@@ -4,7 +4,7 @@ import { within, userEvent, expect, fn } from 'storybook/test';
 import { PinInput, PinInputProps } from './PinInput';
 
 const meta: Meta<typeof PinInput> = {
-  title: 'Forms/PinInput',
+  title: 'PinInput',
   component: PinInput,
   parameters: {
     layout: 'centered',

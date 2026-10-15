@@ -5,7 +5,7 @@ import { ToastProvider, useToast } from './Toast';
 import { Button } from '../button/Button';
 
 const meta: Meta = {
-  title: 'Feedback/Toast',
+  title: 'Toast',
   tags: ['autodocs'],
   decorators: [
     (Story) => (

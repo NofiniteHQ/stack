@@ -1,9 +1,6 @@
 import React, { forwardRef, useMemo } from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { LinePath } from '@visx/shape';
-import { scaleLinear } from '@visx/scale';
-import { curveMonotoneX } from '@visx/curve';
 import { cn } from '../../utils';
 import { Card } from '../card/Card';
 import { Skeleton } from '../skeleton/Skeleton';
@@ -35,26 +32,19 @@ function Sparkline({
   const width = 64;
   const height = 24;
 
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-
-  const xScale = useMemo(
-    () =>
-      scaleLinear({
-        domain: [0, Math.max(1, data.length - 1)],
-        range: [0, width],
-      }),
-    [data.length]
-  );
-
-  const yScale = useMemo(
-    () =>
-      scaleLinear({
-        domain: [min === max ? 0 : min, max],
-        range: [height - 2, 2],
-      }),
-    [min, max]
-  );
+  const points = useMemo(() => {
+    if (!data.length) return '';
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+    return data
+      .map((val, i) => {
+        const x = (i / Math.max(1, data.length - 1)) * width;
+        const y = height - 2 - ((val - min) / range) * (height - 4);
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+  }, [data]);
 
   const colorClass =
     trend === 'up'
@@ -71,13 +61,13 @@ function Sparkline({
         className="overflow-visible"
         aria-hidden="true"
       >
-        <LinePath
-          data={data}
-          x={(_, i) => xScale(i) ?? 0}
-          y={(d) => yScale(d) ?? 0}
+        <polyline
+          fill="none"
+          points={points}
           stroke="currentColor"
           strokeWidth={2}
-          curve={curveMonotoneX}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </div>

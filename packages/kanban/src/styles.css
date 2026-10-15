@@ -1,0 +1,9 @@
+/**
+ * @nofinite/kanban - Backward Compatibility Stylesheet Shim
+ * All Kanban board, column, card, and drag-and-drop interaction styles are natively
+ * compiled and provided by @nofinite/nuicss.
+ *
+ * For new applications, simply import:
+ *   import '@nofinite/nuicss/styles.css';
+ */
+@import '@nofinite/nuicss/styles.css';

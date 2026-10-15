@@ -32,6 +32,8 @@ node_modules
 npm-debug.log
 yarn-error.log
 testem.log
+*.log
+tsc-errors.txt
 /typings
 *.tgz
 
@@ -51,5 +53,8 @@ vitest.config.*.timestamp*
 .nx/polygraph
 
 storybook-static
+*.tsbuildinfo
 # AI Temporary Files
 /temp/
+.bun-cache/
+

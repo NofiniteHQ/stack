@@ -236,9 +236,61 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   // 13. Chart, Metrics & Data Visualizations
   // ==========================================
-  ['chart-container', 'relative w-full overflow-hidden font-sans'],
+  ['chart-container', 'relative w-full font-sans'],
+  ['chart-container-circular', 'flex items-center justify-center'],
   ['chart-grid', 'stroke-default opacity-50'],
   ['chart-axes', 'fill-muted text-xs select-none'],
+  ['chart-point', 'transition-all duration-150'],
+  ['chart-line', 'transition-all duration-300'],
+  ['chart-area', 'transition-all duration-300'],
+  [
+    'chart-bar',
+    'transition-opacity duration-150 cursor-pointer hover:opacity-85',
+  ],
+  [
+    'chart-segment',
+    'transition-transform duration-150 cursor-pointer hover:scale-105',
+  ],
+  ['chart-crosshair', 'stroke-default opacity-60 pointer-events-none'],
+  [
+    'chart-tooltip',
+    'absolute pointer-events-none bg-surface/80 text-default border border-default/40 rounded-xl shadow-2xl px-3.5 py-2.5 text-xs backdrop-blur-xl saturate-150 z-50 whitespace-nowrap transition-opacity duration-150',
+  ],
+  ['chart-tooltip-container', 'flex flex-col gap-1 min-w-[110px]'],
+  [
+    'chart-tooltip-title',
+    'text-[11px] font-semibold text-muted tracking-wider uppercase pb-1.5 mb-1.5 border-b border-default/20 opacity-80',
+  ],
+  ['chart-tooltip-items', 'flex flex-col gap-1.5'],
+  [
+    'chart-tooltip-item',
+    'flex items-center justify-between gap-3 text-xs leading-tight',
+  ],
+  ['chart-tooltip-label-group', 'flex items-center gap-1.5 min-w-0'],
+  [
+    'chart-tooltip-swatch',
+    'w-2 h-2 rounded-full ring-2 ring-current/20 shrink-0',
+  ],
+  ['chart-tooltip-label', 'text-muted truncate opacity-90'],
+  [
+    'chart-tooltip-value',
+    'font-semibold font-mono text-default tabular-nums ml-auto',
+  ],
+  [
+    'chart-legend',
+    'flex flex-wrap items-center justify-center gap-4 mt-3 text-xs',
+  ],
+  [
+    'chart-legend-item',
+    'inline-flex items-center gap-1.5 cursor-pointer select-none transition-opacity hover:opacity-80',
+  ],
+  ['chart-legend-dot', 'w-2.5 h-2.5 rounded-full shrink-0'],
+  ['chart-legend-label', 'font-medium text-muted'],
+  ['chart-reference-line', 'pointer-events-none'],
+  [
+    'chart-reference-label',
+    'text-[10px] font-medium select-none pointer-events-none',
+  ],
   ['sparkline', 'inline-block align-middle overflow-visible'],
   ['sparkline-container', 'flex items-end gap-1 h-8 w-24 overflow-hidden'],
   [

@@ -40,6 +40,7 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['btn-md', 'h-9 px-4 text-sm'],
   ['btn-lg', 'h-11 px-8 text-sm font-semibold'],
   ['btn-icon', 'h-9 w-9 p-0'],
+  ['btn-active', 'bg-primary/10 text-primary border-primary/30 shadow-xs'],
   [
     'btn-loading',
     "relative !text-transparent pointer-events-none after:content-[''] after:absolute after:inset-0 after:m-auto after:w-4 after:h-4 after:border-2 after:border-solid after:border-current after:border-t-transparent after:rounded-full after:animate-spin",

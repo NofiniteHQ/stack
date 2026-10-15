@@ -4,7 +4,7 @@ import { within, userEvent, expect } from 'storybook/test';
 import { RadioGroup } from './RadioGroup';
 
 const meta: Meta<typeof RadioGroup> = {
-  title: 'Forms/Radio',
+  title: 'RadioGroup',
   component: RadioGroup,
   parameters: {
     layout: 'centered',

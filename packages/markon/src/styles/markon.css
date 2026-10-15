@@ -1,0 +1,9 @@
+/**
+ * @nofinite/markon - Backward Compatibility Stylesheet Shim
+ * All Markon editor, typography, bubble menu, and toolbar styles are natively
+ * compiled and provided by @nofinite/nuicss.
+ *
+ * For new applications, simply import:
+ *   import '@nofinite/nuicss/styles.css';
+ */
+@import '@nofinite/nuicss/styles.css';

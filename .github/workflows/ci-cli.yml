@@ -1,4 +1,4 @@
-name: CI - cli
+name: CI - nuicss-cli
 
 on:
   push:
@@ -6,18 +6,19 @@ on:
       - main
       - dev
     paths:
-      - 'packages/cli/**'
+      - 'packages/nuicss-cli/**'
   pull_request:
     paths:
-      - 'packages/cli/**'
+      - 'packages/nuicss-cli/**'
   workflow_dispatch:
 
 jobs:
   build-and-test:
-    name: Build & Test cli
+    name: Build & Test nuicss-cli
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v7
       
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -31,7 +32,21 @@ jobs:
           
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build nuicss
+        run: pnpm nx run nuicss:build
         
       - name: Build CLI
-        working-directory: ./packages/cli
-        run: pnpm run build
+        run: pnpm nx run nuicss-cli:build
+
+      - name: Verify package contents
+        working-directory: packages/nuicss-cli
+        run: |
+          TARBALL_FILES=$(npm pack --dry-run 2>&1)
+          if ! echo "$TARBALL_FILES" | grep -q "dist/index.js"; then
+            echo "Error: dist/index.js is missing from the tarball!"
+            echo "Tarball contents:"
+            echo "$TARBALL_FILES"
+            exit 1
+          fi
+          echo "Verification passed. dist/index.js is present."

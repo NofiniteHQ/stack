@@ -1,0 +1,15 @@
+name: "CodeQL config"
+
+paths-ignore:
+  - 'packages/nuicss-cli/bin/**'
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.ts'
+  - '**/*.spec.tsx'
+  - '**/*.stories.tsx'
+  - 'temp/**'
+  - 'docs/**'
+
+query-filters:
+  - exclude:
+      id: js/html-constructed-from-input

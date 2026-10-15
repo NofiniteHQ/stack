@@ -5,7 +5,7 @@ import { Card } from './Card';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof Card> = {
-  title: 'Primitives/Card',
+  title: 'Card',
   component: Card,
   tags: ['autodocs'],
   parameters: {

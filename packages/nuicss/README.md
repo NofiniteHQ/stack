@@ -1,11 +1,21 @@
 <div align="center">
 
-# NUI CSS
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.nofinite.com/brand/oss/nuicss/logos/nuicss-horizontal-white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.nofinite.com/brand/oss/nuicss/logos/nuicss-horizontal.svg">
+  <img alt="NUI CSS" src="https://cdn.nofinite.com/brand/oss/nuicss/logos/nuicss-horizontal.svg" width="300">
+</picture>
+
+<br/>
+<br/>
 
 **The next-generation JIT utility CSS engine. Blazing fast, zero-configuration out of the box, and perfectly compliant with modern web standards.**
 
 <p align="center">
-  <a href="https://opensource.nofinite.com/docs/nuicss">
+  <a href="https://www.typescriptlang.org/">
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  </a>
+  <a href="https://opensource.nofinite.com/nuicss">
     <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
   <a href="./LICENSE">
@@ -22,13 +32,13 @@
 
 ## Overview
 
-NUI CSS provides a highly optimized **Just-In-Time (JIT) compiler**. By reading your source files, it compiles exactly the CSS you need—and absolutely nothing more—in milliseconds.
+NUICSS provides a highly optimized **Just-In-Time (JIT) compiler**. By reading your source files, it compiles exactly the CSS you need—and absolutely nothing more—in milliseconds.
 
-* **Semantic Tokens:** Built-in shortcuts for scalable UI design (`.bg-surface`, `.text-muted`, `.border-subtle`).
-* **Zero-Config by Default:** Drop it into Vite, PostCSS, or a `<script>` tag and instantly start using standard utilities like `.flex`, `.text-primary`, and `.p-4`.
-* **Arbitrary Values:** Compile custom layouts using brackets: `w-[343px]`, `grid-cols-[200px_1fr]`, or `bg-[#ff0055]`.
-* **Logic-Driven Variants:** Fully supports modern pseudo-classes and state logic (`has-[:checked]`, `peer-focus`, `group-has-[.active]`).
-* **Built-in Keyframes:** Ships with modern animations: `animate-zoom-in`, `animate-zoom-out`, `animate-slide-up`, `animate-slide-down`.
+- **Semantic Tokens:** Built-in shortcuts for scalable UI design (`.bg-surface`, `.text-muted`, `.border-subtle`).
+- **Zero-Config by Default:** Drop it into Vite, PostCSS, or a `<script>` tag and instantly start using standard utilities like `.flex`, `.text-primary`, and `.p-4`.
+- **Arbitrary Values:** Compile custom layouts using brackets: `w-[343px]`, `grid-cols-[200px_1fr]`, or `bg-[#ff0055]`.
+- **Logic-Driven Variants:** Fully supports modern pseudo-classes and state logic (`has-[:checked]`, `peer-focus`, `group-has-[.active]`).
+- **Built-in Keyframes:** Ships with modern animations: `animate-zoom-in`, `animate-zoom-out`, `animate-slide-up`, `animate-slide-down`.
 
 ---
 
@@ -65,9 +75,7 @@ import { defineConfig } from 'vite';
 import { nuicssVitePlugin } from '@nofinite/nuicss';
 
 export default defineConfig({
-  plugins: [
-    nuicssVitePlugin()
-  ],
+  plugins: [nuicssVitePlugin()],
 });
 ```
 
@@ -92,9 +100,7 @@ If you aren't using Vite, NUI CSS operates as a standard PostCSS plugin.
 import nuicssPostcss from '@nofinite/nuicss/postcss';
 
 export default {
-  plugins: [
-    nuicssPostcss()
-  ]
+  plugins: [nuicssPostcss()],
 };
 ```
 
@@ -104,6 +110,21 @@ Import the CSS engine in your main CSS file:
 /* index.css */
 @import '@nofinite/nuicss/styles.css';
 ```
+
+### 4. Standalone CLI Compiler (`nuicss`)
+
+For frameworks without a Node-based bundler (Go, Python, PHP, Ruby) or standalone compilation workflows, use the official `nuicss` CLI:
+
+```bash
+# On-demand via npx
+npx nuicss -i input.css -o dist/output.css --watch --minify
+
+# Or install native binary (Zero Node.js required)
+# Windows: irm https://opensource.nofinite.com/nuicss/install.ps1 | iex
+# macOS/Linux: curl -fsSL https://opensource.nofinite.com/nuicss/install.sh | bash
+```
+
+See the [**NUICSS CLI Documentation**](https://opensource.nofinite.com/nuicss/cli) for complete command options and migration tools.
 
 ---
 
@@ -115,21 +136,19 @@ NUI CSS works instantly out of the box, but you can heavily customize the engine
 import { defineConfig, nuicssPreset } from '@nofinite/nuicss';
 
 export default defineConfig({
-  presets: [
-    nuicssPreset()
-  ],
+  presets: [nuicssPreset()],
   // 1. Scan specific files
   content: {
     pipeline: {
-      include: ['./src/**/*.{tsx,jsx,html}']
-    }
+      include: ['./src/**/*.{tsx,jsx,html}'],
+    },
   },
   // 2. Override default theme tokens
   theme: {
     colors: {
-      primary: '#ff0055'
-    }
-  }
+      primary: '#ff0055',
+    },
+  },
 });
 ```
 
@@ -140,16 +159,18 @@ export default defineConfig({
 NUI CSS comes with helper utilities designed for modern web apps.
 
 ### JS/TS Theme Resolver
+
 When you need to draw on a `<canvas>` or use charting libraries, you often need the exact hex value of a CSS variable.
 
 ```ts
 import { getThemeValue } from '@nofinite/nuicss';
 
 // Safely extracts the computed value (e.g., "#2563eb")
-const primaryColor = getThemeValue('color', 'primary'); 
+const primaryColor = getThemeValue('color', 'primary');
 ```
 
 ### Anti-FOUC Dark Mode Sync
+
 When implementing dark mode via the `.dark` class, users might see a Flash of Unstyled Content (FOUC) while React boots up. Inject our provided script into your HTML `<head>` to fix this perfectly.
 
 ```tsx
@@ -166,6 +187,7 @@ export function Head() {
 ```
 
 ---
+
 ## Acknowledgements
 
 NUI CSS's underlying compilation engine is powered by the incredible [UnoCSS](https://github.com/unocss/unocss) ecosystem.
@@ -173,4 +195,3 @@ NUI CSS's underlying compilation engine is powered by the incredible [UnoCSS](ht
 ## License
 
 This project is licensed under the [Apache License, Version 2.0](./LICENSE).
-

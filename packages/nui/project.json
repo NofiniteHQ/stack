@@ -13,9 +13,10 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
+        "configFile": "packages/nui/vite.config.ts",
         "passWithNoTests": true,
         "reportsDirectory": "../../coverage/packages/nui"
       }

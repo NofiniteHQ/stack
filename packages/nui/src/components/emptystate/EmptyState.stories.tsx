@@ -5,7 +5,7 @@ import { FolderSearch, Inbox, Search, Plus } from 'lucide-react';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof EmptyState> = {
-  title: 'Primitives/EmptyState',
+  title: 'EmptyState',
   component: EmptyState,
   parameters: {
     layout: 'centered',

@@ -1,186 +1,123 @@
-# Stack Architecture & Engineering Standards
+# Nofinite Ecosystem Architecture
 
-## `@nofinite/nuicss` and `@nofinite/nui`
-
-This document defines the systemic architectural foundations, design system contracts, component paradigms, and engineering standards for the **Stack** monorepo (`@nofinite/nuicss` and `@nofinite/nui`).
+Welcome to the architectural specification for the Nofinite open-source ecosystem. This document defines the macro system topology, packaging boundaries, styling engine invariants, and design principles governing all packages in this monorepo.
 
 ---
 
-## 1. System Topology & Dual-Layer Architecture
+## 1. System Topology & Package Roles
 
-The Stack architecture strictly decouples design tokens and visual style generation from UI component logic:
+The Nofinite ecosystem is structured as a multi-package monorepo designed for high performance, zero runtime overhead, and strict separation of concerns.
 
-```mermaid
-flowchart TD
-    subgraph NUICSS_ENGINE["Design Engine: @nofinite/nuicss"]
-        TOKENS["OKLCH Design Token System
-        • Tier 1: Raw Primitives (Slate, Brand scales)
-        • Tier 2: Semantic System Colors (primary, danger, success)
-        • Tier 3: Contextual Variables (bg-surface, fg-default, border-default)
-        • Visual Data: 8-color chart tokens"]
-
-        PRESET["Compiler & AST Processor
-        • UnoCSS presetWind4 core
-        • color-mix(in oklch, ...) dynamic opacity engine
-        • Directional border token resolver
-        • Protected prefix shielding"]
-
-        SHORTCUTS["Semantic Superclasses
-        • Pre-composed component classes (.btn, .card, .input)
-        • Layered via W3C @layer components
-        • Automatic dual aliasing: unprefixed + 'nui-' prefixed"]
-
-        OUTPUTS["Distribution & Tooling
-        • Standalone styles.css with layer preamble
-        • Modular CSS bundles (primitives, forms, overlays, widgets)
-        • Zero-FOUC inline scripts & SSR critical extractors
-        • IDE custom data manifests for HTML/CSS autocomplete"]
-    end
-
-    subgraph NUI_REACT["UI Framework: @nofinite/nui"]
-        COMP_MODEL["Component Model
-        • Polymorphic composition via Slot (asChild)
-        • Compound subcomponents pattern (Header, Body, Footer)
-        • Declarative convenience props with compound fallback
-        • Ref merging across React 18 & 19"]
-
-        A11Y_HEADLESS["Accessibility & Headless Utilities
-        • Focus management (trapFocus, restoreFocus, roving tabindex)
-        • DOM isolation (inertManager, scrollLock, portal)
-        • Headless integrations (rich text, video, charts, drag-and-drop)"]
-
-        BUILD_SYS["Packaging & Distribution
-        • preserveModules: true for tree-shaking
-        • Automatic 'use client' chunk header injection
-        • CSS layer isolation (@layer base, components, utilities;)"]
-    end
-
-    TOKENS --> PRESET
-    PRESET --> SHORTCUTS
-    SHORTCUTS --> OUTPUTS
-    SHORTCUTS -->|UnoCSS Compile-Time Extraction| NUI_REACT
-    COMP_MODEL --> BUILD_SYS
-    A11Y_HEADLESS --> COMP_MODEL
+```
+                      ┌────────────────────────────────────────┐
+                      │                 NUICSS                 │
+                      │  Sole styling & token engine (OKLCH)   │
+                      └──────────────────┬─────────────────────┘
+                                         │ Consumed by all
+         ┌───────────────────────────────┼───────────────────────────────┐
+         ▼                               ▼                               ▼
+┌─────────────────┐             ┌─────────────────┐             ┌─────────────────┐
+│       NUI       │             │ Nofinite Kanban │             │ Nofinite Markon │
+│ Core components │             │ Workflow boards │             │ Markdown editor │
+└─────────────────┘             └─────────────────┘             └─────────────────┘
+         ▼                               ▼                               ▼
+┌─────────────────┐             ┌─────────────────┐             ┌─────────────────┐
+│ Nofinite Charts │             │ Nofinite Media  │             │ Nofinite Locale │
+│ Visualizations  │             │ Audio & video   │             │ i18n & l10n     │
+└─────────────────┘             └─────────────────┘             └─────────────────┘
 ```
 
----
+### Official Brand Taxonomy
 
-## 2. Design System Architecture: `@nofinite/nuicss`
+| Brand Name          | Package Specifier  | Core Responsibility                                                                                         |
+| :------------------ | :----------------- | :---------------------------------------------------------------------------------------------------------- |
+| **NUICSS**          | `@nofinite/nuicss` | Single source of truth CSS engine, OKLCH design tokens, resets, superclasses, and layout primitives.        |
+| **NUI**             | `@nofinite/nui`    | Core headless & polymorphic React UI component library (buttons, modals, dialogs, inputs, tabs, dropdowns). |
+| **Nofinite Charts** | `@nofinite/charts` | Modern, responsive data visualizations and chart components.                                                |
+| **Nofinite Kanban** | `@nofinite/kanban` | Accessible drag-and-drop kanban boards, columns, and task cards.                                            |
+| **Nofinite Markon** | `@nofinite/markon` | Modern markdown WYSIWYG editor with floating bubble menus, codeblock highlight, and task lists.             |
+| **Nofinite Media**  | `@nofinite/media`  | Media player primitives (video/audio) and media token bridges.                                              |
+| **Nofinite Locale** | `@nofinite/locale` | Internationalization, timezone formatting, and locale translation engines.                                  |
+| **Nofinite Utils**  | `@nofinite/utils`  | Pure TypeScript utilities, collection helpers, and runtime guards.                                          |
 
-`@nofinite/nuicss` is the sole source of truth for all visual presentation across the ecosystem. It replaces ad-hoc atomic utility styling with a structured token hierarchy and semantic superclasses.
-
-### 2.1. The Three-Tier OKLCH Token Model
-
-1. **Tier 1 — Raw Primitives:** High-gamut OKLCH values paired with sRGB hex fallbacks. Primitives are never used directly in component templates.
-2. **Tier 2 — System Semantics:** Functional variables representing intent (`--color-primary`, `--color-danger`, `--color-success`, `--color-warning`).
-3. **Tier 3 — Contextual Surfaces, Foregrounds & Borders:** Theme-reactive variables (`--bg-page`, `--bg-surface`, `--bg-subtle`, `--fg-default`, `--fg-muted`, `--border-default`, `--border-strong`).
-4. **Data Visualization Tokens:** Strict 8-color chart tokens (`--chart-1` through `--chart-8`).
-
-### 2.2. CSS Engine & AST Processing
-
-- **Dynamic Opacity Generator:** Uses CSS `color-mix(in oklch, var(...) ${opacity}%, transparent)` instead of fragile alpha hexes or opacity classes that degrade text rendering.
-- **Directional Property Mapping:** Resolves directional modifiers (`border-t-subtle`, `border-x-strong`) directly to discrete CSS properties without utility bloat.
-- **Protected Prefix Shielding:** Prevents pseudo-variant processors from corrupting compound class names.
-
-### 2.3. Layered Superclasses & Dual Aliasing
-
-- **Layer Encapsulation:** Every shortcut is injected into the W3C `@layer components` cascade.
-- **Dual-Namespace Aliasing:** Automatically generates concise (`.btn`, `.card`) and namespace-safe (`.nui-btn`, `.nui-card`) selectors, preventing collisions in mixed-library environments.
-
-### 2.4. Tooling & Platform Integrations
-
-- **Layer Preamble:** Standalone stylesheets enforce `@layer base, components, utilities;`, guaranteeing that user styles override components without `!important`.
-- **SSR & Anti-FOUC Engine:** Critical CSS extraction during SSR and inline dark-mode synchronization scripts to ensure zero flash of unstyled content.
-- **IDE IntelliSense Custom Data:** Automated generation of `nuicss.html-data.json` and `nuicss.css-data.json` for IDE autocomplete across HTML and CSS.
+> **Brand Invariant:** In all documentation, natural conversation, and commit summaries, engineers and AI agents must refer to packages using their official brand names (**NUICSS**, **NUI**, **Nofinite Kanban**, etc.) rather than raw npm package strings, which are reserved for code imports and CLI commands.
 
 ---
 
-## 3. Component Architecture: `@nofinite/nui`
+## 2. The Zero Downstream CSS Invariant
 
-`@nofinite/nui` implements accessible, tree-shakable React components that strictly consume `@nofinite/nuicss` tokens and superclasses.
+### Single Source of Truth for Styling
 
-### 3.1. Component Model & Composition
+**NUICSS (`@nofinite/nuicss`) is the sole and absolute CSS engine for the entire ecosystem.**
 
-- **Polymorphism via `Slot` (`asChild`):** Enables swapping the underlying HTML element while merging props, styles, class names, and forwarded refs across React 18 and React 19.
-- **Compound Component Ergonomics:** Complex components provide compound subcomponents (`.Header`, `.Body`, `.Footer`, `.Title`, `.Description`) while maintaining backwards-compatible declarative convenience props.
-- **Ref Composition:** Safely chains forwarded refs and child refs without memory leaks or unnecessary re-renders.
+All downstream packages (**NUI**, **Nofinite Kanban**, **Nofinite Markon**, **Nofinite Charts**, **Nofinite Media**, **Nofinite Locale**, **Nofinite Utils**) **MUST NEVER** author, bundle, or emit independent `.css` files.
 
-### 3.2. Headless Accessibility Architecture
+### Why Downstream Packages Never Author CSS:
 
-- Components avoid heavy external UI runtime dependencies. Instead, they consume modular, focused internal utilities:
-  - **Focus Management:** Focus trapping inside active overlays, automatic return-of-focus upon dismissal, and roving `tabindex` for lists and menus.
-  - **DOM State Isolation:** Body scroll locking without layout shift, `inert` attribute management on inactive background trees, and portal rendering.
+1. **Zero Import Fatigue:** End users only need a single stylesheet import (`import '@nofinite/nuicss/styles.css'`) or CDN link to style all Nofinite components across their entire application.
+2. **Elimination of Cascade Conflicts:** Multiple independent CSS bundles inevitably clash with `@layer` order, CSS custom property scopes, and specificity.
+3. **No Bundle Duplication:** Independent build scripts bundling UnoCSS or Tailwind duplicate base resets and token maps across every package (previously injecting over 400 kB of redundant CSS).
+4. **Instant Theming Across Every Library:** Because Kanban, Markon, and Charts consume semantic NUICSS superclasses (`kanban-board`, `markon-editor`, `chart-container`), switching the OKLCH theme in NUICSS automatically themes the entire ecosystem simultaneously.
 
-### 3.3. Build, Packaging & Module Tree-Shaking
+### Modular Subpath Architecture
 
-- **Preserved Modules:** The build pipeline maintains the source directory structure (`preserveModules: true`), enabling direct single-component imports with zero unused bundle weight.
-- **React Server Components (RSC) Readiness:** A Rollup post-processor scans component chunks and injects `"use client";` headers at the top of client boundary modules.
+For developers who do not want the complete unified stylesheet, NUICSS exports standalone, modular CSS subpaths:
 
----
+- `@nofinite/nuicss/styles.css` — Complete ecosystem stylesheet (base tokens + core + all widgets).
+- `@nofinite/nuicss/kanban.css` — Kanban board layout & drag-and-drop indicator geometry.
+- `@nofinite/nuicss/markon.css` — Markon editor toolbar, footer, bubble menu pill & TipTap styles.
+- `@nofinite/nuicss/widgets.css` — All interactive domain widget styles combined.
 
-## 4. Architectural Invariants (Non-Negotiables)
-
-1. **Single Source of Truth Rule:**
-   - **Zero Raw Color Literals:** Never write hardcoded hex/sRGB color literals (`#3b82f6`, `rgb(...)`) or raw Tailwind color palettes (`bg-blue-600`, `text-slate-900`) in component code.
-   - **Semantic Variables Only:** Always use semantic tokens (`var(--color-primary)`, `var(--bg-surface)`, `var(--fg-default)`).
-   - **Charts:** Exclusively consume `var(--chart-1)` through `var(--chart-8)`.
-2. **Superclass Enforcement:**
-   - UI components must declare official NUICSS superclasses (`btn`, `card`, `input`, `badge`, `table-container`) rather than assembling verbose clusters of 10–15 atomic classes.
-3. **Automatic ARIA-Driven State Styling:**
-   - Visual states bind directly to native WAI-ARIA attributes (`aria-invalid`, `aria-selected`, `aria-expanded`, `aria-checked`). Avoid custom JS toggle classes.
-4. **CSS Cascade Safety & Container Hierarchies:**
-   - Avoid utility collision traps (such as overlapping padding/margin resets).
-   - Maintain structural separation between header, content, and action containers.
-5. **Root-Cause Upstream Fix Rule (Zero Downstream Monkey-Patching):**
-   - NEVER add quick-fix CSS classes, utility overrides, or manual style monkey-patches in consumer applications (`oss-docs`, demo apps, or `globals.css`) to patch component styling, colors, or token bugs.
-   - If a component looks broken or unstyled downstream, the bug is 100% in `@nofinite/nui` or `@nofinite/nuicss`. All fixes must be implemented at the root library source, built, verified, and consumed cleanly.
-6. **Strict Compound Component & Hierarchy Contracts:**
-   - Wrapper components (e.g. `DialogProvider`, `ToastProvider`, `DropdownMenu`) must explicitly configure subcomponent defaults.
-   - Modals designed for binary confirmation or destructive decisions must enforce `hideCloseButton={true}`; never present an ambiguous corner '✕' close button alongside explicit "Cancel" and "Confirm" action buttons.
-   - Overlays and modal backdrops must combine `bg-overlay` with `backdrop-blur-sm` to guarantee modern glassmorphic visual separation rather than flat, muddy dimming.
-7. **Strict Package Isolation:**
-   - Public packages in this repository must NEVER mention or reference internal packages (`nuix`). Public packages must remain 100% self-contained and free of internal aliases.
+Downstream package stylesheets (`@nofinite/kanban/styles.css`, `@nofinite/markon/styles.css`, `@nofinite/charts/styles.css`) are strictly maintained as thin, backward-compatible `@import '@nofinite/nuicss/styles.css'` shims for legacy compatibility.
 
 ---
 
-## 5. Developer & Agent Operating Protocol
+## 3. Package Boundaries & Component Model
 
-All engineers and AI agents working in this repository must strictly adhere to this 7-pillar operational protocol:
+### Headless & Polymorphic Logic
 
-### Pillar 1: Implementation Plans (`implementation_plan.md`)
+- Downstream packages provide pure React component trees, state machines, keyboard navigation, and accessibility contracts.
+- Components use `asChild` / `Slot` polymorphic composition to allow consumers to render custom DOM elements while retaining full behavior.
+- Styling is applied purely via semantic superclasses and data attributes:
+  ```tsx
+  // Example: Nofinite Kanban applying NUICSS superclasses
+  <div className="kanban-board" data-orientation="horizontal">
+    <div className="kanban-column" data-droppable="true">
+      <div className="kanban-card" data-dragging={isDragging}>
+        {children}
+      </div>
+    </div>
+  </div>
+  ```
 
-- Mandatory for any architectural changes, major refactors, or modifications spanning multiple files.
-- Document user review requirements, proposed changes, and verification steps; obtain approval before modifying code.
+### Build & Packaging Architecture
 
-### Pillar 2: Industry Standards & Dependency Evaluation
+- **Preserved Modules:** NUI and domain packages compile with `preserveModules: true` in Rollup, ensuring fine-grained tree-shaking where unused components are completely eliminated from consumer bundles.
+- **Node.js Tooling Safety:** Never import raw CSS into TypeScript modules evaluated directly by Node.js tooling (such as Nx project graph processing, Vitest, or Jiti).
+- **Public Package Isolation:** Public packages must remain self-contained and never import private workspace-internal development packages.
 
-- Never introduce dependencies on whim.
-- Evaluate performance, bundle footprint, license, and architectural fit; explicitly document rationale.
+---
 
-### Pillar 3: Scratch File Quarantine (`/temp/`)
+## 4. Documentation Strategy: Central Hub (`docs/`)
 
-- ALL temporary scripts, test runners, diagnostic tools, and screenshots MUST reside in `/temp/`.
-- The `/temp/` directory is gitignored to ensure zero clutter in repository roots.
+To prevent package directory clutter while ensuring documentation never drifts from code:
 
-### Pillar 4: Multi-Tier Verification & The "Green Test" Fallacy
+- **Central Markdown Ground Truth (`d:\stack\docs/`):**  
+  All canonical documentation lives in the central `docs/` folder at the root of `stack`. Each subfolder (`docs/nuicss/`, `docs/kanban/`, `docs/charts/`, etc.) directly mirrors the route structure of the public documentation portal at `d:\oss-docs/content/docs/`.
+- **Package `README.md`:**  
+  Inside `packages/<pkg>/README.md`, maintain lean, focused documentation specifically tailored for npmjs.com and GitHub package landing pages (installation, zero-config quickstart, and direct links to full docs).
+- **The Cross-Repo Docs Sync Contract:**  
+  Developers working in `stack` update the pure Markdown in `docs/<pkg>/`. The `oss-docs` portal consumes this content and enriches it with interactive Next.js client components (`<ComponentPreview />`), live sandboxes, and Theme Studio pickers.
 
-- **The "Green Test" Fallacy:** Passing unit tests (`vitest`, `happy-dom`) only proves state logic and DOM presence; it NEVER proves visual aesthetics, spatial harmony, or layout correctness. Tests will happily pass when a modal has redundant buttons, missing borders, or flat muddy backdrops.
-- **Mandatory Visual Inspection:** For ANY UI, styling, or interactive component change, you MUST perform visual verification (Playwright screenshot in `/temp/` or live browser inspection). Never declare a UI task complete purely based on green unit test passes.
-- **Production Builds:** Verify package builds succeed with zero errors (`pnpm nx build nui`).
+---
 
-### Pillar 5: Ground Truth Verification Before Diagnosis
+## 5. Release & Versioning Strategy
 
-- Never diagnose an issue or claim a token or class "does not exist" or "was never generated" based on surface grepping of source files.
-- You MUST inspect compiled artifacts (`dist/styles.css`, build chunks) and runtime computed styles before making diagnostic claims.
+### Two-Tier Commit vs. Release Protocol
 
-### Pillar 6: NPM Package Verification (`npm pack`)
-
-- Always execute `npm pack --dry-run` before finalizing releases.
-- Verify tarball manifests: confirm `dist/`, TypeScript declarations (`dist/types/`), and stylesheets are physically present.
-- Never publish empty or null directories.
-
-### Pillar 7: Compulsory Local Git Commits
-
-- Immediately commit changes locally after completing and verifying each phase or fix.
-- Local commits serve as immutable checkpoints for auditability and rollback.
-- Follow Conventional Commits format (`refactor(nui): ...`, `feat(nuicss): ...`, `fix(nui): ...`).
+- **Local Commits = Safety Checkpoints:**  
+  Local git commits are made frequently after each working functional step. They serve as safety savepoints to protect working code and enable instant rollback. A local commit is **not** an NPM release.
+- **Changesets = Pre-Release Intent Tracking:**  
+  When a feature, bugfix, or architectural consolidation is completed in `packages/*`, create a `.changeset/<name>.md` file with that commit. This records the SemVer impact (`patch`, `minor`, `major`) without modifying `package.json`.
+- **Release Cuts = Batched Milestones:**  
+  When ready to publish to NPM, running `npx changeset version` automatically consumes pending changesets, bumps `package.json` versions, and compiles `CHANGELOG.md` files in a clean, isolated release commit.

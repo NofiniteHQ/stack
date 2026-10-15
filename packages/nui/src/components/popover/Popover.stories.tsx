@@ -10,7 +10,7 @@ import { Popover } from './Popover';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof Popover> = {
-  title: 'Overlays/Popover',
+  title: 'Popover',
   component: Popover,
   parameters: {
     layout: 'centered',

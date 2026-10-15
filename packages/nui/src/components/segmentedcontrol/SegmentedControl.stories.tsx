@@ -4,7 +4,7 @@ import { within, userEvent, expect, fn } from 'storybook/test';
 import { SegmentedControl, SegmentedControlProps } from './SegmentedControl';
 
 const meta: Meta<typeof SegmentedControl> = {
-  title: 'Forms/SegmentedControl',
+  title: 'SegmentedControl',
   component: SegmentedControl,
   parameters: {
     layout: 'centered',

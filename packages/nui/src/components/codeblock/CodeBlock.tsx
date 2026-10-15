@@ -15,17 +15,50 @@ export interface CodeBlockProps {
   readOnlyLanguage?: boolean;
 }
 
-const LANG_OPTIONS = [
-  { value: 'text', label: 'Plain Text' },
-  { value: 'javascript', label: 'JavaScript' },
+export const LANGUAGE_ALIASES: Record<string, string> = {
+  ts: 'typescript',
+  js: 'javascript',
+  py: 'python',
+  sh: 'bash',
+  zsh: 'bash',
+  shell: 'bash',
+  yml: 'yaml',
+  md: 'markdown',
+  htm: 'html',
+  'c++': 'cpp',
+  cs: 'csharp',
+  text: 'plaintext',
+  txt: 'plaintext',
+};
+
+export function normalizeLanguage(lang: string | undefined | null): string {
+  if (!lang) return 'plaintext';
+  const clean = lang.trim().toLowerCase();
+  return LANGUAGE_ALIASES[clean] || clean;
+}
+
+export const LANG_OPTIONS = [
+  // Web Development
   { value: 'typescript', label: 'TypeScript' },
+  { value: 'javascript', label: 'JavaScript' },
   { value: 'html', label: 'HTML' },
   { value: 'css', label: 'CSS' },
+
+  // Backend & Systems
   { value: 'python', label: 'Python' },
+  { value: 'go', label: 'Go' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'java', label: 'Java' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'csharp', label: 'C#' },
+
+  // Data, Shell & Config
+  { value: 'sql', label: 'SQL' },
   { value: 'bash', label: 'Bash' },
   { value: 'json', label: 'JSON' },
-  { value: 'rust', label: 'Rust' },
-  { value: 'go', label: 'Go' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'markdown', label: 'Markdown' },
+  { value: 'plaintext', label: 'Plain Text' },
 ];
 
 const tokenColorMap: Record<string, string> = {
@@ -90,11 +123,10 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     if (children && typeof children !== 'string') return children;
     const codeToHighlight = typeof children === 'string' ? children : code;
 
+    const normLang = normalizeLanguage(language);
+
     try {
-      const ast = lowlight.highlight(
-        language === 'text' ? 'plaintext' : language || 'plaintext',
-        codeToHighlight
-      );
+      const ast = lowlight.highlight(normLang, codeToHighlight);
       return ast.children.map(renderAst);
     } catch (e) {
       // Fallback if language is missing
@@ -102,23 +134,18 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     }
   }, [code, children, language]);
 
+  const currentNormLang = normalizeLanguage(language);
+
   return (
-    <div
-      className={cn(
-        'relative rounded-lg bg-surface-raised border border-default shadow-sm overflow-hidden group font-mono text-sm',
-        className
-      )}
-    >
-      <div className="flex items-center justify-between px-3 py-2 bg-surface border-b border-default select-none">
+    <div className={cn('code-block group', className)}>
+      <div className="code-header select-none">
         <div className="flex items-center">
           {readOnlyLanguage ? (
-            <span className="text-xs font-semibold uppercase text-muted tracking-wider px-2 py-1">
-              {language || 'text'}
-            </span>
+            <span className="code-lang px-2 py-1">{currentNormLang}</span>
           ) : (
             <Select
               data={LANG_OPTIONS}
-              value={language || 'text'}
+              value={currentNormLang}
               onChange={onLanguageChange}
               className="w-auto min-h-0 h-auto py-1 px-2 text-xs font-semibold uppercase tracking-wider bg-transparent border-none shadow-none hover:text-default hover:bg-transparent text-muted focus-visible:ring-0"
             />
@@ -126,7 +153,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         </div>
         <button
           onClick={copyToClipboard}
-          className="text-muted hover:text-default bg-transparent border border-transparent rounded-md transition-all flex items-center justify-center p-1.5"
+          className="code-copy-btn btn btn-ghost btn-xs flex items-center justify-center p-1.5 transition-colors"
           title="Copy code"
         >
           {copied ? (
@@ -136,7 +163,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
           )}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto m-0 text-default bg-subtle leading-relaxed">
+      <pre className="code-pre p-4 overflow-x-auto m-0 leading-relaxed font-mono">
         <code>{highlightedCode}</code>
       </pre>
     </div>

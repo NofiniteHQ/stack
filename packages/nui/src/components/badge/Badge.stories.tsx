@@ -3,7 +3,7 @@ import { within, userEvent, expect, fn } from 'storybook/test';
 import { Badge } from './Badge';
 
 const meta: Meta<typeof Badge> = {
-  title: 'Primitives/Badge',
+  title: 'Badge',
   component: Badge,
   tags: ['autodocs'],
   parameters: {

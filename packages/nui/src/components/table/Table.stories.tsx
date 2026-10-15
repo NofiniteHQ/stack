@@ -11,7 +11,7 @@ interface Product {
 }
 
 const meta: Meta<typeof Table> = {
-  title: 'Widgets/Table',
+  title: 'Table',
   component: Table,
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
