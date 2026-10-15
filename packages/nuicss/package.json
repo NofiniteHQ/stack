@@ -1,6 +1,6 @@
 {
   "name": "@nofinite/nuicss",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "The next-generation JIT utility CSS engine with semantic tokens and zero configuration.",
   "license": "Apache-2.0",
   "private": false,

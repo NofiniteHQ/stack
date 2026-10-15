@@ -119,8 +119,9 @@ Before proceeding to review and commit:
 1. **Central Docs Sync:** Whenever public APIs, components, props, or setup instructions change, update the corresponding Markdown documentation in `d:\stack\docs/<pkg>/`. Keep `packages/<pkg>/README.md` lean and focused on npm quickstart.
 2. **Two-Tier Commit vs. Release Protocol:**
    - **Local Commits are Safety Checkpoints:** Local git commits are made frequently after each working step to protect code from hallucination loss and provide rollback points. A local commit is **NOT** an NPM release.
-   - **Changesets for Package Work:** When completing a publishable feature, bugfix, or breaking change in `packages/*`, create a `.changeset/<descriptive-name>.md` file tracking the SemVer impact (`patch`, `minor`, `major`).
-   - **No Premature Version Bumps:** Do not manually edit `version` in `package.json` or create manual empty changelogs during local development. Version bumps and compiled `CHANGELOG.md` generation occur at batched release cut milestones via `npx changeset version`.
+   - **Separation of Task Logging from Changesets:** Technical task descriptions, architectural rationale, and ongoing change notes belong in commit messages, PR descriptions, and central documentation (`d:\stack\docs/<pkg>/`). Never misuse `.changeset/` as an everyday engineering work log or development diary.
+   - **The Unreleased Package & Launch Version Invariant:** When a package is brand new/unpublished on NPM (`404` status, e.g. v1.0.0, v0.1.0) or is being staged for an explicit milestone release (e.g. v2.0.0), AI agents **MUST NEVER** generate bump changesets for it. Its version in `package.json` IS its ground-truth launch version. Changeset bump headers (`patch`, `minor`, `major`) are reserved strictly for incremental SemVer updates on **already-published** packages on NPM.
+   - **No Premature Version Bumps:** Do not manually edit `version` in `package.json` for published packages during local development. Incremental version bumps and compiled `CHANGELOG.md` generation occur at batched release cut milestones via `npx changeset version`.
 
 ### Review
 
