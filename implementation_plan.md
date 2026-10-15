@@ -1,182 +1,113 @@
-# Implementation Plan: Glassmorphic Popover Card & Enterprise UI Layout Perfection for `@nofinite/charts`
+# Implementation Plan: Phased Documentation & Limelight Showcase Suite
 
 ## 1. Objective
 
-Elevate `@nofinite/charts` to true **Tier-1 enterprise grade quality** (matching Apple visionOS/macOS, Linear, and Vercel standards) by resolving all 3 visual/layout defects identified during Playwright audits and redesigning the tooltip card into a modern, frosted glass popover with pristine micro-typography.
+Deliver a comprehensive, production-grade documentation expansion across the four core domain packages (**Nofinite Markon**, **Nofinite Kanban**, **Nofinite Charts**, and **Nofinite Media**). The work is structured into **four distinct sequential phases**, executed one by one with extreme depth, zero rush, and rigorous verification at each milestone.
+
+### Core Architectural Invariants
+
+1. **The Pure Markdown Invariant:** 100% valid GitHub-Flavored Markdown (`.md`). Absolutely ZERO live JSX component tags (no `<Preview />`, `<ComponentPreview />`, or `<PackageHero />`).
+2. **The Zero Downstream CSS Invariant:** All code examples strictly import only the unified styling engine: `import '@nofinite/nuicss/styles.css'`.
+3. **Official Brand Taxonomy:** Strictly use official brand names: **NUICSS**, **NUI**, **Nofinite Charts**, **Nofinite Kanban**, **Nofinite Markon**, and **Nofinite Media**.
+4. **Cross-Repo Docs Parity:** Canonical documentation created in `d:\stack\docs/` and mirrored identically to `d:\oss-docs\docs/`.
+5. **Two-Tier Safety Protocol:** Dedicated verification and local git commits at the conclusion of each phase.
 
 ---
 
-## 2. Current Behavior & Identified Problems
+## 2. Phased Execution Roadmap
 
-### A. Flat & Clipping Popover Card (User Reported & Verified)
-
-- **Current Behavior:** The tooltip renders as a flat, opaque rectangle (`bg-surface/90`) with a basic border and abrupt appearance.
-- **Problems:**
-  1. **Aesthetic Deficiency:** Lacks modern frosted glass translucency (`backdrop-blur-xl`, saturation boost, specular hairline reflections).
-  2. **Boundary Clipping:** Near top borders (e.g. data points with values near the top scale), Floating-UI pushes the tooltip past the container boundary, slicing off the title header (measured in [`tooltip-dark.png`](file:///d:/stack/temp/tooltip-dark.png) and [`tooltip-light.png`](file:///d:/stack/temp/tooltip-light.png)).
-  3. **Visual Hierarchy:** Header is cramped with no dividing separator; dots lack glowing depth; value metrics lack mono-space tabular alignment.
-
-### B. Defect 1: Legend Overflowing Container & Card Borders
-
-- **Current Behavior:** `<div style={{ height }}>` contains `<svg className="w-full h-full">` followed by `<ChartLegend />`.
-- **Problem:** The SVG consumes 100% of the allocated height (`height: 260px`), forcing `<ChartLegend />` to overflow past the bottom of the container by 28px and cross over the parent card's padded border (`overflowPixels: 7px`).
-
-### C. Defect 2: Horizontal Bar Chart Long-Label Clipping
-
-- **Current Behavior:** Horizontal bar chart category labels longer than 25 characters are clipped off on the left canvas edge.
-- **Problem:** Left margin formula does not scale high enough for realistic enterprise KPI labels (e.g., `"Enterprise Cloud Platform Architecture"` measured `rectLeft: 7.59px, parentLeft: 61px`).
-
-### D. Defect 3: Axis Origin Collision at $(0, 0)$
-
-- **Current Behavior:** The bottom Y-axis tick (`"0"`) and first X-axis tick (`"0"` or `"Jan"`) are positioned almost identically at the bottom-left vertex.
-- **Problem:** Text elements collide and create a visual smudge at the corner.
+```
+PHASE 1: Nofinite Markon & The Renderer Limelight (8 files + index)
+   ↓ (Verify & Commit)
+PHASE 2: Nofinite Kanban Advanced Suite (5 files + index)
+   ↓ (Verify & Commit)
+PHASE 3: Nofinite Charts Multi-Series & Theming (6 files + index)
+   ↓ (Verify & Commit)
+PHASE 4: Nofinite Media Streaming & Headless Suite (6 files + index)
+   ↓ (Verify & Final Parity Check)
+```
 
 ---
 
-## 3. Proposed Solution
+## 3. Phase Breakdown & Scope
 
-### Step 1: Upstream Frosted Glass Design Superclass in `@nofinite/nuicss`
+### Phase 1: Nofinite Markon & The Renderer Limelight (Immediate Focus)
 
-1. In [`packages/nuicss/src/shortcuts/widgets.ts`](file:///d:/stack/packages/nuicss/src/shortcuts/widgets.ts):
-   - Upgrade `.chart-tooltip`:
-     ```ts
-     [
-       'chart-tooltip',
-       'absolute pointer-events-none bg-surface/75 backdrop-blur-xl saturate-150 border border-white/10 dark:border-white/10 rounded-xl shadow-2xl px-3.5 py-2.5 text-xs text-default z-50 whitespace-nowrap transition-all duration-150 ease-out',
-     ];
-     ```
-   - Upgrade `.chart-tooltip-title`:
-     ```ts
-     [
-       'chart-tooltip-title',
-       'text-[11px] font-semibold text-muted tracking-wider uppercase pb-1.5 mb-1.5 border-b border-default/20 opacity-80',
-     ];
-     ```
-   - Upgrade `.chart-tooltip-swatch`:
-     ```ts
-     [
-       'chart-tooltip-swatch',
-       'w-2 h-2 rounded-full ring-2 ring-current/25 shrink-0',
-     ];
-     ```
-   - Upgrade `.chart-tooltip-value`:
-     ```ts
-     [
-       'chart-tooltip-value',
-       'font-semibold font-mono text-default tabular-nums ml-auto',
-     ];
-     ```
-2. In [`packages/nuicss/src/styles/theme.css`](file:///d:/stack/packages/nuicss/src/styles/theme.css):
-   - Add specular hairline reflection and layered ambient shadow:
-     ```css
-     .chart-tooltip {
-       box-shadow: 0 16px 36px -6px oklch(0 0 0 / 0.35), inset 0 1px 0 0 oklch(1
-               0 0 / 0.15);
-     }
-     [data-theme='light'] .chart-tooltip,
-     .light .chart-tooltip {
-       box-shadow: 0 12px 30px -4px oklch(0 0 0 / 0.12), inset 0 1px 0 0 oklch(1
-               0 0 / 0.6);
-     }
-     ```
-3. Rebuild `nuicss` via `pnpm nx run nuicss:build` so changes compile into distribution bundles.
+**Goal:** Put Markon's publication renderer (`MarkonRender` and core `renderMarkon`) in the limelight, and document all advanced editor capabilities with complete API references and enterprise examples.
 
-### Step 2: Tooltip Smart Collision & Boundary Guard in `@nofinite/charts`
-
-1. In [`packages/charts/src/core/tooltip.ts`](file:///d:/stack/packages/charts/src/core/tooltip.ts):
-   - In `positionTooltip`, configure Floating-UI to prioritize `'bottom'` fallback placement or smart offset if point Y coordinate is within 65px of the container's top boundary.
-   - Add padding boundaries to `shift({ padding: 12, limiter: limitShift() })` to prevent overflowing outside the chart canvas.
-2. In [`packages/charts/src/react/useChartTooltip.ts`](file:///d:/stack/packages/charts/src/react/useChartTooltip.ts):
-   - Ensure `positionTooltip` receives the container reference so boundary calculations are pinned to the chart widget.
-
-### Step 3: Zero-Overflow Flex Column Layout for Legends
-
-1. In [`AreaChart.tsx`](file:///d:/stack/packages/charts/src/react/AreaChart.tsx), [`LineChart.tsx`](file:///d:/stack/packages/charts/src/react/LineChart.tsx), [`BarChart.tsx`](file:///d:/stack/packages/charts/src/react/BarChart.tsx), [`ScatterChart.tsx`](file:///d:/stack/packages/charts/src/react/ScatterChart.tsx):
-   - Add `legendPosition?: 'top' | 'bottom'` prop (default `'bottom'`).
-   - Wrap chart container in `flex flex-col`:
-     ```tsx
-     <div className="chart-container nui-chart-container relative w-full flex flex-col select-none ..." style={{ height }}>
-       {showLegend && legendPosition === 'top' && <ChartLegend ... />}
-       <div className="chart-plot-wrapper relative w-full flex-1 min-h-0">
-         <svg viewBox={`0 0 ${width} ${plotHeight}`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
-           ...
-         </svg>
-       </div>
-       {showLegend && legendPosition === 'bottom' && <ChartLegend ... />}
-     </div>
-     ```
-   - Dynamically calculate SVG `plotHeight` in `useChartDimensions` (or subtract legend height `~36px` when `showLegend` is active), ensuring the total height matches `props.height` with **zero bottom-border overflow**.
-
-### Step 4: Horizontal Bar Adaptive Left Margin & Ellipsis
-
-1. In [`packages/charts/src/core/math.ts`](file:///d:/stack/packages/charts/src/core/math.ts):
-   - In `calculateHorizontalBarLayout` and category margin calculation:
-     - Measure max category label length (`maxLabelLength = Math.max(...data.map(d => String(d.label || '').length))`).
-     - Adaptively scale `margin.left = Math.max(margin.left, Math.min(innerWidth * 0.42, maxLabelLength * 7.5 + 24))`.
-     - For labels exceeding available width, cleanly truncate with ellipsis (`…`) and attach SVG `<title>` or tooltip for hover accessibility.
-
-### Step 5: Axis Origin Collision Elimination
-
-1. In [`packages/charts/src/core/axis.ts`](file:///d:/stack/packages/charts/src/core/axis.ts) and React chart axis generators:
-   - When mapping X-axis ticks, check proximity to the origin coordinate:
-     ```ts
-     // Suppress or offset the first tick if within 12px of the Y-axis zero tick
-     if (Math.abs(x - 0) < 12 && showAxes) {
-       // Offset textAnchor or suppress to avoid smudge
-     }
-     ```
+1. **`docs/markon/renderer.md` (The Premier Publication Showcase):**
+   - **Architectural Overview:** Isomorphic AST-to-HTML publication engine. Zero DOM dependencies, enabling execution in Next.js Server Components (SSR), Edge workers, or Node.js scripts.
+   - **The 4 Built-In Layout Modes:**
+     - `'article'`: Magazine/editorial layout with responsive hero cover image, author byline (avatar, title, URL), reading time badge, tags, and sticky auto-scrolling Table of Contents.
+     - `'document'`: Technical documentation layout with breadcrumbs, last-modified timestamp, and sidebar TOC with active scrollspy.
+     - `'newsroom'`: Press release layout with bold kicker badge, headline, and dateline.
+     - `'minimal'`: Bare prose container for comments, modals, and embeds.
+   - **Format Agnosticism:** Automatic format detection and parsing for TipTap `JSONContent`, HTML strings, and Markdown strings.
+   - **Metadata Schema:** Complete reference for `MarkonMetadata` (`title`, `subtitle`, `description`, `cover`, `author`, `publishedAt`, `readingTime`, `tags`, `category`, `badge`).
+   - **Pre-rendered KaTeX:** Server-side math formula rendering with zero client-side KaTeX JS overhead.
+   - **Code Highlighting & Copy Buttons:** Lowlight syntax highlighting across 16 languages with built-in clipboard copy handlers.
+   - **Client Hydration:** `MarkonRenderer.mount(container)` for zero-framework copy buttons and smooth anchor scrolling.
+   - **React Component `<MarkonRender />`:** Full TypeScript props table, callbacks (`onRendered` returning `{ html, toc, readingTimeMinutes, wordCount }`), and SSR integration.
+2. **`docs/markon/slash-commands.md`:** Command menu keyboard triggers (`/`), item registration, custom command items.
+3. **`docs/markon/block-handles.md`:** Drag handle grips, block reordering, and hover controls.
+4. **`docs/markon/tables-and-grids.md`:** Interactive table editing, row/column insertion, cell merging, context menus.
+5. **`docs/markon/callouts-and-details.md`:** Alert callouts in 4 semantic variants (`info`, `success`, `warning`, `danger`) and collapsible `<details>` accordions.
+6. **`docs/markon/media-and-uploads.md`:** Image resizing, captions, video embeds, and file upload handlers.
+7. **`docs/markon/draft-management.md`:** Autosaving with `DraftManager`, localStorage/IndexedDB persistence, and conflict recovery.
+8. **`docs/markon/examples.md`:** 4 copy-paste production implementations (Engineering Blog with Hero & TOC, Technical API Handbook, Editorial Press Release, Next.js App Router Server Component post).
+9. **Update `docs/markon/index.md`:** Comprehensive table of contents and documentation map.
+10. **Parity Sync & Commit:** Mirror to `d:\oss-docs\docs/markon/` and create Phase 1 git commits in both repos.
 
 ---
 
-## 4. Affected Files & Modules
+### Phase 2: Nofinite Kanban Advanced Suite
 
-| File                                                                                                                  | Purpose of Change                                                  |
-| :-------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
-| [`packages/nuicss/src/shortcuts/widgets.ts`](file:///d:/stack/packages/nuicss/src/shortcuts/widgets.ts)               | Upstream glassmorphism superclasses (`chart-tooltip*`)             |
-| [`packages/nuicss/src/styles/theme.css`](file:///d:/stack/packages/nuicss/src/styles/theme.css)                       | Specular hairline glass reflection and ambient shadow tokens       |
-| [`packages/charts/src/core/tooltip.ts`](file:///d:/stack/packages/charts/src/core/tooltip.ts)                         | Floating-UI boundary, auto-flip near top edge, markup enhancements |
-| [`packages/charts/src/react/useChartTooltip.ts`](file:///d:/stack/packages/charts/src/react/useChartTooltip.ts)       | Connect container boundary to positionTooltip                      |
-| [`packages/charts/src/react/AreaChart.tsx`](file:///d:/stack/packages/charts/src/react/AreaChart.tsx)                 | Flex column layout, `legendPosition` prop, zero overflow           |
-| [`packages/charts/src/react/LineChart.tsx`](file:///d:/stack/packages/charts/src/react/LineChart.tsx)                 | Flex column layout, `legendPosition` prop, zero overflow           |
-| [`packages/charts/src/react/BarChart.tsx`](file:///d:/stack/packages/charts/src/react/BarChart.tsx)                   | Flex column layout, `legendPosition` prop, zero overflow           |
-| [`packages/charts/src/react/ScatterChart.tsx`](file:///d:/stack/packages/charts/src/react/ScatterChart.tsx)           | Flex column layout, `legendPosition` prop, zero overflow           |
-| [`packages/charts/src/core/math.ts`](file:///d:/stack/packages/charts/src/core/math.ts)                               | Horizontal bar adaptive left margin & label clipping fix           |
-| [`packages/charts/src/core/axis.ts`](file:///d:/stack/packages/charts/src/core/axis.ts)                               | Origin $(0, 0)$ tick collision suppression                         |
-| [`packages/charts/src/react/charts.react.test.tsx`](file:///d:/stack/packages/charts/src/react/charts.react.test.tsx) | Update unit tests to verify `legendPosition` and flex plot wrapper |
+**Goal:** Expand Kanban documentation beyond basic setup to cover custom slots, enterprise validation rules, imperative control, and vanilla DOM usage.
+
+1. **`docs/kanban/customization.md`:** Custom card rendering via `renderCard(item, columnId)` slot, custom column header via `renderHeader(column)` slot, priority badges, assignees, subtask progress.
+2. **`docs/kanban/permissions-and-validation.md`:** WIP limits enforcement (`enforceWipLimit: true`), movement validation rules (`canMoveCard: (event) => boolean`), role-based drag-and-drop restrictions.
+3. **`docs/kanban/imperative-api.md`:** Controlling the board programmatically via `ref={kanbanRef}` (`KanbanHandle`: `moveCard`, `addCard`, `updateCard`, `removeCard`, `addColumn`, `removeColumn`, `clearColumn`, `focusCard`, `setFilter`, `getFilter`, `getColumns`).
+4. **`docs/kanban/vanilla-core.md`:** Using the framework-agnostic `KanbanBoard` class with vanilla JavaScript/TypeScript and DOM containers.
+5. **`docs/kanban/examples.md`:** 3 enterprise copy-paste examples: Agile Sprint Board with WIP Limits, Support Ticket Triage Board with validation, Live Search & Multi-Filter board.
+6. **Update `docs/kanban/index.md`:** Refresh navigation links.
+7. **Parity Sync & Commit:** Mirror to `d:\oss-docs\docs/kanban/` and commit Phase 2.
 
 ---
 
-## 5. Dependencies & Alternatives Considered
+### Phase 3: Nofinite Charts Multi-Series & Theming
 
-- **Dependencies:** Zero new external dependencies. Utilizes existing `@floating-ui/dom`, `@nofinite/nuicss`, and standard SVG/CSS primitives.
-- **Alternatives Considered:**
-  - _Hardcoding CSS directly in React components:_ Rejected per constitutional rule **The Zero Downstream CSS Invariant** and **Root-Cause Upstream Fix Rule**. Styling belongs in `@nofinite/nuicss`.
-  - _Rendering Tooltip in `document.body` Portal:_ Floating-UI inside the relative chart container keeps self-contained isolation without z-index collisions in complex dashboard layouts. With smart boundary flipping, portal is unnecessary.
+**Goal:** Provide deep architectural documentation on multi-series charts, sparklines, frosted glass theming, screen reader accessibility, and high-frequency algorithms.
+
+1. **`docs/charts/multi-series.md`:** Multi-series area charts with overlapping gradients, grouped/stacked bar charts, and multi-scatter plots on shared scales.
+2. **`docs/charts/sparklines.md`:** Standalone `<Sparkline />` component for KPI cards, table rows, and metrics summaries.
+3. **`docs/charts/theming.md`:** NUICSS OKLCH design token integration, frosted glass popovers (`backdrop-blur-xl`, specular hairline reflections, tabular numbers), dark/light mode switching.
+4. **`docs/charts/accessibility.md`:** Accessible SVG markup, automated W3C data table generation (`generateA11yTable`), and keyboard navigation.
+5. **`docs/charts/vanilla-core.md`:** Direct D3 vector math (`calculateAreaPath`, `calculateBarLayout`), and Largest Triangle Three Buckets (`downsampleLTTB`) downsampling for 100k+ points.
+6. **`docs/charts/examples.md`:** Executive SaaS Revenue & Churn Dashboard, Financial KPI Summary Grid, High-Density Telemetry Monitor.
+7. **Update `docs/charts/index.md`:** Refresh navigation links.
+8. **Parity Sync & Commit:** Mirror to `d:\oss-docs\docs/charts/` and commit Phase 3.
 
 ---
 
-## 6. Risks & Security Considerations
+### Phase 4: Nofinite Media Streaming & Headless Suite
 
-- **Risks:** Modifying `useChartDimensions` and plot layout must preserve exact coordinate synchronization with active point hover detection (`handlePointerMove`). Verified via existing unit tests and Playwright touch/hover scripts.
-- **Security:** Tooltip HTML sanitization remains intact; all values are metric numbers or sanitized strings. Zero XSS surface.
+**Goal:** Document advanced adaptive streaming (HLS/DASH), multi-language captions, interactive scrubbers, custom headless layouts, and reactive hooks.
+
+1. **`docs/media/streaming-and-hls.md`:** Adaptive Bitrate Streaming with HLS (`.m3u8`), auto-detection, quality level switching, live DVR streams.
+2. **`docs/media/tracks-and-captions.md`:** Multi-language WebVTT subtitles, closed captions, chapters, and thumbnail scrubbers (`thumbnails="thumbnails.vtt"`).
+3. **`docs/media/custom-layouts.md`:** Headless player architecture using `MediaPlayer`, `MediaProvider`, and custom UI controls.
+4. **`docs/media/podcast-and-audio.md`:** Standalone `<AudioPlayer />` with podcast artwork, chapters, playback speeds, and Media Session API.
+5. **`docs/media/react-hooks.md`:** Reactive state hooks: `useMediaState`, `useMediaRemote`, `useMediaPlayer`, `useActiveTextTrack`, `useVideoQualityOptions`, `useCaptionOptions`.
+6. **`docs/media/examples.md`:** Production VOD Player with HLS & Scrubbing, Episode-Based Podcast Show, Floating PiP Widget.
+7. **Update `docs/media/index.md`:** Refresh navigation links.
+8. **Parity Sync & Commit:** Mirror to `d:\oss-docs\docs/media/` and commit Phase 4.
 
 ---
 
-## 7. Verification Strategy
+## 4. Verification Protocol (Run After Each Phase)
 
-1. **Build Verification:**
-   - Run `pnpm nx build nuicss` to compile CSS and CDN assets.
-   - Run `pnpm nx build charts` to compile ESM, CJS, and `.d.ts` declarations.
-2. **Lint & Unit Tests:**
-   - Run `npx eslint packages/charts` (must maintain 0 errors, 0 warnings).
-   - Run `npx vitest run packages/charts` (all tests passing).
-3. **Visual & DOM Ground Truth Verification (Playwright):**
-   - Run Playwright test script (`temp/verify-glass-and-layout.mjs`).
-   - Capture high-resolution screenshots in `temp/` of:
-     - Active tooltip in Dark Mode (confirm frosted glass, specular highlight, no clipped header).
-     - Active tooltip in Light Mode (confirm frosted glass, specular highlight, no clipped header).
-     - Card container with Legend (confirm 0px overflow past bottom card border).
-     - Horizontal Bar Chart (confirm long labels up to 40 chars are completely readable and unclipped).
-     - Origin $(0, 0)$ corner (confirm zero tick collision).
-4. **Git Commit Safety Checkpoint:**
-   - Commit changes to `dev` branch once fully verified.
+1. **Pure Markdown Invariant:** Execute regex scan confirming zero unescaped `<Preview />` or `<ComponentPreview />` JSX elements.
+2. **Zero Downstream CSS Invariant:** Verify all code examples import exclusively `import '@nofinite/nuicss/styles.css'`.
+3. **Brand Taxonomy Invariant:** Verify official brand names (**NUICSS**, **NUI**, **Nofinite Charts**, **Nofinite Kanban**, **Nofinite Markon**, **Nofinite Media**).
+4. **Cross-Repo Parity:** Automated diff between `d:\stack\docs/<pkg>/` and `d:\oss-docs\docs/<pkg>/` confirming exact file and content match.
+5. **Git Safety Checkpoint:** Local git commit in both `d:\stack` and `d:\oss-docs`.
