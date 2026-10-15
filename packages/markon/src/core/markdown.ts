@@ -21,25 +21,61 @@ export function stripHtmlTags(input: string): string {
   return output;
 }
 
+function replaceTagPairs(
+  input: string,
+  openTag: string,
+  closeTag: string,
+  prefix: string,
+  suffix: string
+): string {
+  let result = '';
+  let pos = 0;
+  const openLower = openTag.toLowerCase();
+  const closeLower = closeTag.toLowerCase();
+  const inputLower = input.toLowerCase();
+
+  while (pos < input.length) {
+    const start = inputLower.indexOf(openLower, pos);
+    if (start === -1) {
+      result += input.slice(pos);
+      break;
+    }
+    result += input.slice(pos, start);
+    const tagEnd = input.indexOf('>', start + openLower.length);
+    if (tagEnd === -1) {
+      result += input.slice(start);
+      break;
+    }
+    const end = inputLower.indexOf(closeLower, tagEnd + 1);
+    if (end === -1) {
+      result += input.slice(start);
+      break;
+    }
+    const inner = input.slice(tagEnd + 1, end);
+    result += prefix + inner + suffix;
+    pos = end + closeLower.length;
+  }
+  return result;
+}
+
 export function htmlToMarkdown(html: string): string {
   if (!html) return '';
 
   if (typeof document === 'undefined') {
-    const converted = html
-      .replace(/<h1>(.*?)<\/h1>/gi, '# $1\n\n')
-      .replace(/<h2>(.*?)<\/h2>/gi, '## $1\n\n')
-      .replace(/<h3>(.*?)<\/h3>/gi, '### $1\n\n')
-      .replace(/<p>(.*?)<\/p>/gi, '$1\n\n')
-      .replace(/<strong>(.*?)<\/strong>/gi, '**$1**')
-      .replace(/<em>(.*?)<\/em>/gi, '*$1*')
-      .replace(/<u>(.*?)<\/u>/gi, '<u>$1</u>')
-      .replace(/<s(?:trike)?>(.*?)<\/s(?:trike)?>/gi, '~~$1~~')
-      .replace(/<del>(.*?)<\/del>/gi, '~~$1~~')
-      .replace(/<mark[^>]*>(.*?)<\/mark>/gi, '==$1==')
-      .replace(/<sub>(.*?)<\/sub>/gi, '~$1~')
-      .replace(/<sup>(.*?)<\/sup>/gi, '^$1^')
-      .replace(/<code>(.*?)<\/code>/gi, '`$1`')
-      .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+    let converted = html;
+    converted = replaceTagPairs(converted, '<h1', '</h1>', '# ', '\n\n');
+    converted = replaceTagPairs(converted, '<h2', '</h2>', '## ', '\n\n');
+    converted = replaceTagPairs(converted, '<h3', '</h3>', '### ', '\n\n');
+    converted = replaceTagPairs(converted, '<p', '</p>', '', '\n\n');
+    converted = replaceTagPairs(converted, '<strong', '</strong>', '**', '**');
+    converted = replaceTagPairs(converted, '<em', '</em>', '*', '*');
+    converted = replaceTagPairs(converted, '<u', '</u>', '<u>', '</u>');
+    converted = replaceTagPairs(converted, '<s', '</s>', '~~', '~~');
+    converted = replaceTagPairs(converted, '<del', '</del>', '~~', '~~');
+    converted = replaceTagPairs(converted, '<mark', '</mark>', '==', '==');
+    converted = replaceTagPairs(converted, '<sub', '</sub>', '~', '~');
+    converted = replaceTagPairs(converted, '<sup', '</sup>', '^', '^');
+    converted = replaceTagPairs(converted, '<code', '</code>', '`', '`');
     return stripHtmlTags(converted).trim();
   }
 

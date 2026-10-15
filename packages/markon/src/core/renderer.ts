@@ -814,15 +814,18 @@ export function slugify(
   text: string,
   existingSlugs: Map<string, number>
 ): string {
-  const base =
-    text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_]+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '') || 'heading';
+  const clean = text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_]+/g, '-');
 
+  let start = 0;
+  while (start < clean.length && clean[start] === '-') start++;
+  let end = clean.length;
+  while (end > start && clean[end - 1] === '-') end--;
+
+  const base = clean.slice(start, end) || 'heading';
   const count = existingSlugs.get(base) || 0;
   existingSlugs.set(base, count + 1);
   return count === 0 ? base : `${base}-${count}`;
@@ -841,14 +844,14 @@ function formatDate(d: string | Date | undefined): string {
   if (!d) return '';
   try {
     const date = typeof d === 'string' ? new Date(d) : d;
-    if (isNaN(date.getTime())) return String(d);
+    if (isNaN(date.getTime())) return escapeHtml(String(d));
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
   } catch {
-    return String(d);
+    return escapeHtml(String(d));
   }
 }
 
@@ -1243,13 +1246,29 @@ export function extractTOC(content: any): TOCItem[] {
   const slugMap = new Map<string, number>();
 
   if (str.includes('<h') && str.includes('</h')) {
-    const headingRegex = /<h([1-6])([^<>]*)>(.*?)<\/h\1>/gi;
-    let match: RegExpExecArray | null;
-    while ((match = headingRegex.exec(str)) !== null) {
-      const level = parseInt(match[1], 10);
-      const text = stripHtmlTags(match[3]).trim();
-      const slug = slugify(text, slugMap);
-      toc.push({ id: slug, text, level });
+    let pos = 0;
+    const lower = str.toLowerCase();
+    while (pos < str.length) {
+      const hIdx = lower.indexOf('<h', pos);
+      if (hIdx === -1) break;
+      const levelChar = str[hIdx + 2];
+      if (levelChar >= '1' && levelChar <= '6') {
+        const level = parseInt(levelChar, 10);
+        const tagEnd = str.indexOf('>', hIdx + 3);
+        const closeTag = `</h${level}>`;
+        if (tagEnd !== -1) {
+          const closeIdx = lower.indexOf(closeTag, tagEnd);
+          if (closeIdx !== -1) {
+            const inner = str.slice(tagEnd + 1, closeIdx);
+            const text = stripHtmlTags(inner).trim();
+            const slug = slugify(text, slugMap);
+            toc.push({ id: slug, text, level });
+            pos = closeIdx + closeTag.length;
+            continue;
+          }
+        }
+      }
+      pos = hIdx + 2;
     }
   } else {
     // Markdown headings (# Title)
@@ -1342,16 +1361,38 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
 
     // Process headings in HTML string to inject IDs and anchors
     const slugMap = new Map<string, number>();
-    bodyHtml = html.replace(
-      /<h([1-6])([^<>]*)>(.*?)<\/h\1>/gi,
-      (_match, levelStr, _attrs, inner) => {
-        const level = parseInt(levelStr, 10);
-        const text = stripHtmlTags(inner).trim();
-        const slug = slugify(text, slugMap);
-        toc.push({ id: slug, text, level });
-        return `<h${level} id="${slug}" class="markon-heading text-default group scroll-mt-20 flex items-center"><span>${inner}</span><a href="#${slug}" class="heading-anchor opacity-0 group-hover:opacity-100 text-muted hover:text-primary transition-opacity ml-2 no-underline text-base font-normal select-none" aria-label="Link to section">#</a></h${level}>`;
+    let result = '';
+    let pos = 0;
+    const lower = html.toLowerCase();
+    while (pos < html.length) {
+      const hIdx = lower.indexOf('<h', pos);
+      if (hIdx === -1) {
+        result += html.slice(pos);
+        break;
       }
-    );
+      const levelChar = html[hIdx + 2];
+      if (levelChar >= '1' && levelChar <= '6') {
+        const level = parseInt(levelChar, 10);
+        const tagEnd = html.indexOf('>', hIdx + 3);
+        const closeTag = `</h${level}>`;
+        if (tagEnd !== -1) {
+          const closeIdx = lower.indexOf(closeTag, tagEnd);
+          if (closeIdx !== -1) {
+            result += html.slice(pos, hIdx);
+            const inner = html.slice(tagEnd + 1, closeIdx);
+            const text = stripHtmlTags(inner).trim();
+            const slug = slugify(text, slugMap);
+            toc.push({ id: slug, text, level });
+            result += `<h${level} id="${slug}" class="markon-heading text-default group scroll-mt-20 flex items-center"><span>${inner}</span><a href="#${slug}" class="heading-anchor opacity-0 group-hover:opacity-100 text-muted hover:text-primary transition-opacity ml-2 no-underline text-base font-normal select-none" aria-label="Link to section">#</a></h${level}>`;
+            pos = closeIdx + closeTag.length;
+            continue;
+          }
+        }
+      }
+      result += html.slice(pos, hIdx + 2);
+      pos = hIdx + 2;
+    }
+    bodyHtml = result;
 
     textBuffer.push(stripHtmlTags(bodyHtml));
   }
@@ -1494,7 +1535,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
           <div class="markon-byline-meta">
             ${
               metadata.publishedAt
-                ? `<span>${formatDate(metadata.publishedAt)}</span>`
+                ? `<span>${escapeHtml(formatDate(metadata.publishedAt))}</span>`
                 : ''
             }
             ${
@@ -1502,7 +1543,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
                 ? '<span style="opacity: 0.4;">•</span>'
                 : ''
             }
-            <span>${readingTimeText}</span>
+            <span>${escapeHtml(readingTimeText)}</span>
           </div>
         </div>
       </div>`;
@@ -1549,8 +1590,8 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
           <span class="markon-doc-badge">${escapeHtml(category)}</span>
           ${
             metadata.publishedAt
-              ? `<span class="markon-doc-updated">Updated: ${formatDate(
-                  metadata.publishedAt
+              ? `<span class="markon-doc-updated">Updated: ${escapeHtml(
+                  formatDate(metadata.publishedAt)
                 )}</span>`
               : ''
           }

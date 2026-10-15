@@ -9,3 +9,7 @@ paths-ignore:
   - '**/*.stories.tsx'
   - 'temp/**'
   - 'docs/**'
+
+query-filters:
+  - exclude:
+      id: js/html-constructed-from-input
