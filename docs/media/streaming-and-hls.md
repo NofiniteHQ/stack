@@ -1,26 +1,86 @@
 # Adaptive Bitrate Streaming and HLS
 
-**Nofinite Media** provides built-in, zero-configuration support for **HTTP Live Streaming (HLS)** (`.m3u8`) and **DASH** (`.mpd`) video distribution.
+**Nofinite Media** provides built-in, zero-configuration support for **HTTP Live Streaming (HLS)** (`.m3u8`) and **Dynamic Adaptive Streaming over HTTP (DASH)** (`.mpd`) video distribution.
 
-The player automatically detects streaming manifests, dynamically loads the lightweight `hls.js` engine on non-Safari platforms, and falls back to native AVFoundation HLS hardware decoding on Apple devices (macOS Safari, iOS).
+The engine automatically detects streaming manifests, dynamically loads the lightweight MSE demuxing engine on Chromium and Firefox, and seamlessly utilizes native Apple AVFoundation hardware decoding on Safari and iOS WebKit.
 
----
+```ts
+// Framework-Agnostic Core (Zero React Dependency)
+import { createMediaPlayer, isHlsSource, isDashSource } from '@nofinite/media';
 
-## Key Capabilities
-
-- **Automatic Protocol Detection:** Passing an `.m3u8` manifest to `src` automatically activates the adaptive streaming pipeline.
-- **Adaptive Bitrate (ABR) Switching:** Continuously monitors bandwidth and frame drops to switch between 4K, 1080p, 720p, and 480p renditions without stuttering.
-- **Manual Quality Selection:** Populates an accessible resolution picker in the player settings menu.
-- **Live Stream DVR:** Supports live broadcasts with seekable time-shifted buffers (`streamType="live"`).
-- **Zero Style Overhead:** Controlled entirely through **NUICSS** superclasses.
+// React Adapter
+import { VideoPlayer } from '@nofinite/media/react';
+```
 
 ---
 
-## Quickstart: Streaming an HLS Master Manifest
+## Manifest Detection Architecture
 
-Pass an `.m3u8` manifest directly to `<VideoPlayer />`:
+The core player evaluates source URLs using internal pattern matchers before requesting the stream:
+
+```ts
+import { isHlsSource, isDashSource } from '@nofinite/media';
+
+console.log(isHlsSource('https://stream.mux.com/v69R127x.m3u8')); // true
+console.log(isDashSource('https://dash.example.com/stream.mpd')); // true
+console.log(isHlsSource('https://cdn.example.com/asset.mp4')); // false
+```
+
+When an `.m3u8` source is detected:
+
+1. **Apple WebKit (macOS / iOS Safari):** The browser's native hardware decoder executes the stream with maximum power efficiency and FairPlay DRM support.
+2. **Chromium & Firefox:** The engine automatically initializes an MSE (Media Source Extensions) worker, downloads the master manifest, and negotiates video/audio elementary streams.
+
+---
+
+## 1. Usage in Vanilla TypeScript / DOM (Core First)
+
+In pure JavaScript or TypeScript, pass the `.m3u8` or `.mpd` URL directly to `createMediaPlayer()`:
+
+```ts
+import { createMediaPlayer, isHlsSource } from '@nofinite/media';
+import '@nofinite/nuicss/styles.css';
+
+const container = document.getElementById('streaming-mount')!;
+
+const hlsStreamUrl =
+  'https://stream.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA.m3u8';
+
+// Verify manifest format
+if (isHlsSource(hlsStreamUrl)) {
+  console.log('Detected valid HLS manifest stream');
+}
+
+// 1. Initialize Adaptive Stream Player
+const player = createMediaPlayer({
+  src: hlsStreamUrl,
+  type: 'video',
+  poster:
+    'https://image.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA/thumbnail.webp?time=2',
+  title: 'Distributed Cloud Architecture Keynote',
+  aspectRatio: '16/9',
+  controls: true,
+  autoplay: false,
+});
+
+// 2. Mount player into DOM
+container.appendChild(player.element);
+
+// 3. Listen for streaming lifecycle events
+player.on('canplay', () => console.log('HLS manifest loaded; ready to stream'));
+player.on('waiting', () => console.log('Buffering next segment chunks...'));
+player.on('error', (err) => console.error('Streaming error detected:', err));
+```
+
+---
+
+## 2. Usage in React
+
+In React applications, import `VideoPlayer` from `@nofinite/media/react`:
 
 ```tsx
+'use client';
+
 import React from 'react';
 import { VideoPlayer } from '@nofinite/media/react';
 import '@nofinite/nuicss/styles.css';
@@ -42,78 +102,43 @@ export function HlsStreamPlayer() {
 
 ---
 
-## Cross-Platform HLS Engine Architecture
+## Live Streaming with DVR Windows
 
-```
-                       [Video Source (.m3u8)]
-                                 │
-                 ┌───────────────┴───────────────┐
-                 ▼                               ▼
-       [Safari / Apple iOS]             [Chromium / Firefox / Edge]
-                 │                               │
-                 ▼                               ▼
-     Native Hardware Decoder            hls.js Managed Isolates
-   (AVFoundation / WebKit)         (WebWorker Demuxing & MSE Buffers)
-```
+For live broadcasts, the player supports real-time stream synchronization and live DVR timeline scrub navigation (jumping backward into live buffer cache and clicking "Live" to return to edge):
 
-1. **Native Platform (Apple Safari & iOS WebKit):** The browser handles HLS natively. Nofinite Media hooks directly into `<video>` element events without third-party JavaScript overhead.
-2. **Modern Browsers (Chrome, Brave, Edge, Firefox):** Automatically mounts `hls.js` inside Media Source Extensions (MSE), enabling multi-audio track switching, closed captions demuxing, and cryptographic AES-128 stream decryption.
+### Vanilla TypeScript Live Stream
 
----
+```ts
+const livePlayer = createMediaPlayer({
+  src: 'https://live.example.com/broadcast/event.m3u8',
+  type: 'video',
+  title: 'Keynote Address (Live Broadcast)',
+  controls: true,
+  autoplay: true,
+  muted: true, // Recommended for browser autoplay compliance
+});
 
-## Quality Level Controls & Hooks
-
-Access and manipulate available video qualities programmatically using `useVideoQualityOptions`:
-
-```tsx
-import React from 'react';
-import { useVideoQualityOptions } from '@nofinite/media/react';
-
-export function CustomQualitySelector() {
-  const options = useVideoQualityOptions();
-
-  if (options.length <= 1) {
-    return null; // Single bitrate stream
-  }
-
-  return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="text-muted">Quality:</span>
-      <select
-        value={options.selectedValue}
-        onChange={(e) => options.select(e.target.value)}
-        className="bg-surface border border-default rounded px-2 py-1 text-default"
-      >
-        <option value="auto">Auto (Adaptive)</option>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label} (
-            {opt.bitrate ? `${(opt.bitrate / 1000000).toFixed(1)} Mbps` : ''})
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+document.getElementById('live-mount')!.appendChild(livePlayer.element);
 ```
 
----
-
-## Live DVR Streaming
-
-For live events, webinar broadcasts, and continuous telemetry feeds, configure the player for live streaming:
+### React Live Stream
 
 ```tsx
 <VideoPlayer
   src="https://live.example.com/broadcast/event.m3u8"
-  streamType="live"
-  title="Keynote Address (Live)"
-  poster="https://live.example.com/poster.jpg"
+  title="Keynote Address (Live Broadcast)"
+  controls={true}
+  autoplay={true}
+  muted={true}
 />
 ```
 
-When `streamType="live"`:
+---
 
-- The progress bar displays a red **LIVE** indicator badge.
-- Clicking the badge seeks to the live broadcast edge.
-- Scrubbing backward scrubs through the time-shifted DVR sliding window.
+## Network Resiliency & Auto Quality Adaptation
+
+The adaptive bitrate (ABR) engine measures network bandwidth in real time during chunk downloads:
+
+- **Bandwidth Throttling:** If network throughput drops, the player seamlessly steps down resolution (e.g., `1080p` → `720p` → `480p`) to eliminate buffering pauses.
+- **Bandwidth Recovery:** When connection stabilizes, the player automatically steps back up to higher bitrates without interrupting audio.
+- **Manual Quality Override:** Users can click the settings gear in the player toolbar to lock playback to specific target resolutions (`1080p`, `720p`, `480p`, or `Auto`).

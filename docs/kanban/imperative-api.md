@@ -1,14 +1,67 @@
-# Kanban Imperative API (`KanbanHandle`)
+# Kanban Imperative API (`KanbanBoardInstance` & `KanbanHandle`)
 
-While **Nofinite Kanban** follows standard declarative React state patterns, complex dashboards frequently require **imperative programmatic control** (e.g., automated websocket task updates, global search bars, keyboard shortcuts, or batch operations).
+While **Nofinite Kanban** provides declarative bindings, complex platforms frequently require **imperative programmatic control** (e.g. automated websocket updates, global command palettes, shortcut keys, or batch database operations).
 
-By passing a React `ref` to `<Kanban />`, you obtain a `KanbanHandle` instance exposing 12 programmatic methods.
+Every method available through the React `KanbanHandle` is exposed directly by the **Framework-Agnostic Core instance**.
+
+```ts
+// Framework-Agnostic Core
+import { createKanbanBoard, type KanbanBoardInstance } from '@nofinite/kanban';
+
+// React Adapter
+import { Kanban, type KanbanHandle } from '@nofinite/kanban/react';
+```
 
 ---
 
-## Obtaining the Handle
+## 1. Framework-Agnostic Core Imperative Control
 
-Attach a React `ref` typed as `KanbanHandle`:
+When instantiating the board via `createKanbanBoard()`, you receive a `KanbanBoardInstance` object exposing 12 programmatic control methods:
+
+```ts
+import { createKanbanBoard } from '@nofinite/kanban';
+import '@nofinite/nuicss/styles.css';
+
+const board = createKanbanBoard(document.getElementById('board'), {
+  columns: initialColumns,
+});
+
+// 1. Add a card programmatically
+board.addCard('backlog', {
+  id: 'task-101',
+  title: 'Automated CI Pipeline Failure',
+  badge: { text: 'Critical', variant: 'danger' },
+});
+
+// 2. Move a card between columns
+board.moveCard({
+  cardId: 'task-101',
+  sourceColumnId: 'backlog',
+  targetColumnId: 'in-progress',
+  sourceIndex: 0,
+  targetIndex: 0,
+});
+
+// 3. Update task metadata
+board.updateCard('in-progress', 'task-101', {
+  title: 'CI Pipeline (Resolved)',
+});
+
+// 4. Focus card for keyboard accessibility
+board.focusCard('task-101');
+
+// 5. Update filter search
+board.setFilter({ query: 'Pipeline' });
+
+// 6. Clean up board
+board.destroy();
+```
+
+---
+
+## 2. React Adapter Imperative Control (`KanbanHandle`)
+
+In React, attach a React `useRef` typed as `KanbanHandle`:
 
 ```tsx
 import React, { useRef } from 'react';
@@ -23,7 +76,6 @@ export function ControlledKanban() {
   const kanbanRef = useRef<KanbanHandle>(null);
 
   const handleExternalAction = () => {
-    // Access methods directly on the ref
     kanbanRef.current?.addCard('backlog', {
       id: `task-${Date.now()}`,
       title: 'New Automated Story',
@@ -32,8 +84,10 @@ export function ControlledKanban() {
 
   return (
     <div>
-      <button onClick={handleExternalAction}>Create Task</button>
-      <Kanban ref={kanbanRef} columns={/* ... */} />
+      <button onClick={handleExternalAction} className="btn btn-primary mb-4">
+        Create Task
+      </button>
+      <Kanban ref={kanbanRef} columns={columns} onChange={setColumns} />
     </div>
   );
 }
@@ -51,126 +105,10 @@ export function ControlledKanban() {
 | `moveCard`     | `(event: CardMoveEvent) => boolean`                                        | Programmatically moves a card between or within columns            |
 | `focusCard`    | `(cardId: string) => void`                                                 | Scrolls to and focuses a specific card for keyboard navigation     |
 | `addColumn`    | `(column: KanbanColumn) => void`                                           | Appends a new column to the board                                  |
-| `removeColumn` | `(columnId: string) => void`                                               | Removes a column and its items                                     |
+| `removeColumn` | `(columnId: string) => void`                                               | Removes a column and all its child cards                           |
 | `clearColumn`  | `(columnId: string) => void`                                               | Removes all cards from a column while preserving the column itself |
 | `setFilter`    | `(filter: KanbanFilterOptions) => void`                                    | Programmatically updates the active search query or filter tags    |
 | `getFilter`    | `() => KanbanFilterOptions`                                                | Returns the current active filter object                           |
 | `getColumns`   | `() => KanbanColumn[]`                                                     | Returns a deep snapshot of current column and card data            |
 | `setColumns`   | `(columns: KanbanColumn[]) => void`                                        | Replaces the entire board column dataset                           |
-
----
-
-## Practical Use Cases
-
-### 1. Real-Time Websocket Updates
-
-Synchronize external task updates from team members without re-rendering the entire board:
-
-```tsx
-useEffect(() => {
-  const socket = new WebSocket('wss://api.example.com/kanban-sync');
-
-  socket.onmessage = (message) => {
-    const event = JSON.parse(message.data);
-
-    switch (event.type) {
-      case 'TASK_CREATED':
-        kanbanRef.current?.addCard(event.columnId, event.item);
-        break;
-
-      case 'TASK_UPDATED':
-        kanbanRef.current?.updateCard(
-          event.columnId,
-          event.cardId,
-          event.changes
-        );
-        break;
-
-      case 'TASK_MOVED':
-        kanbanRef.current?.moveCard({
-          cardId: event.cardId,
-          sourceColumnId: event.sourceColumnId,
-          targetColumnId: event.targetColumnId,
-          sourceIndex: event.sourceIndex,
-          targetIndex: event.targetIndex,
-        });
-        break;
-
-      case 'TASK_DELETED':
-        kanbanRef.current?.removeCard(event.columnId, event.cardId);
-        break;
-    }
-  };
-
-  return () => socket.close();
-}, []);
-```
-
----
-
-### 2. Global Quick Search & Filtering
-
-Connect an external search input to the board's internal filter engine:
-
-```tsx
-export function SearchableKanbanToolbar({
-  kanbanRef,
-}: {
-  kanbanRef: React.RefObject<KanbanHandle>;
-}) {
-  const handleSearchChange = (query: string) => {
-    kanbanRef.current?.setFilter({
-      filterQuery: query,
-    });
-  };
-
-  const handleAssigneeFilter = (assigneeName: string) => {
-    kanbanRef.current?.setFilter({
-      filterAssignee: assigneeName,
-    });
-  };
-
-  const handleClearFilters = () => {
-    kanbanRef.current?.setFilter({
-      filterQuery: '',
-      filterAssignee: undefined,
-      filterBadge: undefined,
-    });
-  };
-
-  return (
-    <div className="flex items-center gap-3 p-4 bg-surface border-b border-default">
-      <input
-        type="search"
-        placeholder="Filter tasks across columns..."
-        onChange={(e) => handleSearchChange(e.target.value)}
-        className="px-3 py-1.5 text-xs bg-surface-active border border-default rounded-lg text-default"
-      />
-      <button
-        onClick={() => handleAssigneeFilter('Sarah Chen')}
-        className="text-xs text-muted hover:text-default"
-      >
-        Sarah's Tasks
-      </button>
-      <button
-        onClick={handleClearFilters}
-        className="text-xs text-muted hover:text-danger"
-      >
-        Clear Filters
-      </button>
-    </div>
-  );
-}
-```
-
----
-
-### 3. Programmatic Focus & Deep-Linking
-
-When navigating to a task from a notification or URL hash (`#task-928`), scroll to and highlight the card:
-
-```tsx
-const focusNotificationTask = (taskId: string) => {
-  kanbanRef.current?.focusCard(taskId);
-};
-```
+| `destroy`      | `() => void`                                                               | Unbinds all Pragmatic Drag-and-Drop listeners and cleans DOM       |
