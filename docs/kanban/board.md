@@ -1,99 +1,123 @@
 # Board & Columns Architecture
 
-Learn about the data structures, column definitions, and drag events that power **Nofinite Kanban**.
+Understand the underlying data model, event flows, and spatial drag mechanics of **Nofinite Kanban**.
+
+```ts
+// Framework-Agnostic Core
+import {
+  createKanbanBoard,
+  type KanbanColumn,
+  type KanbanItem,
+  type CardMoveEvent,
+  type ColumnMoveEvent,
+} from '@nofinite/kanban';
+
+// React Adapter
+import { Kanban, type KanbanColumnProps } from '@nofinite/kanban/react';
+```
 
 ---
 
 ## Data Model
 
-```tsx
-import {
-  Kanban,
-  type KanbanColumnProps,
-  type ReactKanbanItem,
-} from '@nofinite/kanban';
-```
+The data structures are pure, framework-agnostic TypeScript interfaces shared across Vanilla JS, Vue, Svelte, and React:
 
-### 1. `KanbanColumnProps`
+### `KanbanColumn`
 
-Each column represents an independent workflow stage (e.g., "To Do", "In Progress", "Code Review", "Done"):
+Represents a workflow column / stage:
 
 ```typescript
-export interface KanbanColumnProps {
+export interface KanbanColumn {
   id: string; // Unique column identifier
   title?: string; // Human-readable header title
   wipLimit?: number; // Maximum recommended card capacity
-  items: ReactKanbanItem[]; // Array of card items in this column
-  allowAdd?: boolean; // Displays an interactive "+ Add Task" button
-  headerActions?: boolean; // Renders column action ellipsis dropdown menu
-  header?: React.ReactNode; // Custom column header component override
-  footer?: React.ReactNode; // Custom column footer component override
+  items: KanbanItem[]; // Array of card items in this column
+  allowAdd?: boolean; // Renders "+ Add Task" button
+  headerActions?: boolean; // Renders column action ellipsis menu
 }
 ```
 
-### 2. `ReactKanbanItem`
+### `KanbanItem`
 
-Each item represents a single task card inside a column:
+Represents a task card:
 
 ```typescript
-export interface ReactKanbanItem {
+export interface KanbanItem {
   id: string; // Unique card identifier
-  title?: string; // Primary card headline
-  description?: string; // Secondary card summary text
+  title?: string; // Primary card title
+  description?: string; // Secondary card summary
   badge?: {
-    // Status or priority pill
+    // Priority or status badge
     text: string;
     variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
   };
   assignee?: {
-    // Assigned team member avatar and name
+    // Assigned team member
     name: string;
     avatarUrl?: string;
+    initials?: string;
   };
   dueDate?: string; // Target deadline date string
-  isOverdue?: boolean; // Flags overdue visual state
+  isOverdue?: boolean; // Overdue visual state flag
   subtasks?: {
-    // Subtask completion progress
+    // Subtask count progress
     completed: number;
     total: number;
   };
-  content?: React.ReactNode; // Custom JSX content overriding standard card layout
 }
 ```
 
 ---
 
-## Drag-and-Drop Event Flow
+## 1. Framework-Agnostic Core Event Flow
 
-`@nofinite/kanban` fires granular callbacks when cards or columns are reordered:
+When using the core DOM engine, pass callbacks to intercept lifecycle and drag actions:
 
-```tsx
-<Kanban
-  columns={columns}
-  onChange={(newColumns) => {
-    // Fired whenever columns or items are dropped in a new order
-    setColumns(newColumns);
-  }}
-  onCardMove={({ sourceColumnId, targetColumnId, itemId, targetIndex }) => {
-    // Fired specifically when a card moves between or within columns
+```ts
+import { createKanbanBoard } from '@nofinite/kanban';
+import '@nofinite/nuicss/styles.css';
+
+const board = createKanbanBoard(document.getElementById('board'), {
+  columns: initialColumns,
+  enforceWipLimit: true,
+  onCardMove: (event: CardMoveEvent) => {
     console.log(
-      `Task ${itemId} moved to column ${targetColumnId} at index ${targetIndex}`
+      `Card ${event.cardId} moved from ${event.sourceColumnId} (index ${event.sourceIndex}) to ${event.targetColumnId} (index ${event.targetIndex})`
     );
-    // Sync with backend API:
-    api.updateCardPosition({ itemId, targetColumnId, targetIndex });
-  }}
-  onColumnMove={({ columnId, sourceIndex, targetIndex }) => {
-    // Fired when an entire column is dragged to a new position
-    console.log(`Column ${columnId} moved to index ${targetIndex}`);
-    api.updateColumnOrder({ columnId, targetIndex });
-  }}
-/>
+  },
+  onColumnMove: (event: ColumnMoveEvent) => {
+    console.log(
+      `Column ${event.columnId} moved from index ${event.sourceIndex} to ${event.targetIndex}`
+    );
+  },
+  onCardClick: (item, columnId) => {
+    console.log('Opened task detail drawer:', item.id);
+  },
+});
 ```
 
-### Event Payload Definitions
+---
 
-| Callback       | Arguments                                                           | Description                                                                   |
-| :------------- | :------------------------------------------------------------------ | :---------------------------------------------------------------------------- |
-| `onChange`     | `(columns: KanbanColumnProps[]) => void`                            | Primary state synchronization hook containing the complete new board layout.  |
-| `onCardMove`   | `({ sourceColumnId, targetColumnId, itemId, targetIndex }) => void` | Detailed payload for synchronizing card reordering with persistence backends. |
-| `onColumnMove` | `({ columnId, sourceIndex, targetIndex }) => void`                  | Detailed payload for persisting column arrangement changes.                   |
+## 2. React Adapter Integration
+
+In React applications, bind standard React state to `<Kanban />`:
+
+```tsx
+import React, { useState } from 'react';
+import { Kanban, type KanbanColumnProps } from '@nofinite/kanban/react';
+import '@nofinite/nuicss/styles.css';
+
+export function SprintBoard() {
+  const [columns, setColumns] = useState<KanbanColumnProps[]>(initialColumns);
+
+  return (
+    <Kanban
+      columns={columns}
+      onChange={setColumns}
+      onCardMove={(event) => console.log('Card moved:', event)}
+      onColumnMove={(event) => console.log('Column moved:', event)}
+      enforceWipLimit={true}
+    />
+  );
+}
+```
