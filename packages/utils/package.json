@@ -69,7 +69,7 @@
   "dependencies": {
     "argon2": "^0.45.1",
     "jose": "^6.2.12",
-    "uuid": "^14.0.2",
+    "uuid": "^14.0.3",
     "zeptomail": "^8.0.1"
   }
 }
