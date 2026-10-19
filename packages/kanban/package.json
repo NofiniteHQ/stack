@@ -65,8 +65,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@atlaskit/pragmatic-drag-and-drop": "^3.1.0",
-    "@atlaskit/pragmatic-drag-and-drop-hitbox": "^2.2.2",
+    "@atlaskit/pragmatic-drag-and-drop": "^4.0.0",
+    "@atlaskit/pragmatic-drag-and-drop-hitbox": "^3.0.0",
     "clsx": "^2.1.1"
   },
   "devDependencies": {

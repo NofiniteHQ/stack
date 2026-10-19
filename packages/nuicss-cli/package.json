@@ -19,17 +19,17 @@
   },
   "dependencies": {
     "@nofinite/nuicss": "workspace:*",
-    "@unocss/cli": "^66.10.5",
-    "@unocss/core": "^66.10.5",
-    "cac": "^7.0.0",
+    "@unocss/cli": "^66.11.0",
+    "@unocss/core": "^66.11.0",
+    "cac": "^7.1.0",
     "chokidar": "^5.0.0",
     "colorette": "^2.0.20",
     "jiti": "^2.7.0",
     "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
-    "@types/node": "^20.19.0",
-    "typescript": "^5.9.3"
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
   },
   "keywords": [
     "nuicss",
