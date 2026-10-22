@@ -1,12 +1,67 @@
 # Charts Production Examples
 
-Below are production-ready, copy-paste implementations of **Nofinite Charts** showcasing multi-series area plots, KPI sparkline grids, and high-frequency telemetry downsampling.
+Below are production-ready, copy-paste implementations of **Nofinite Charts** showcasing both **Framework-Agnostic Core** and **React** integrations.
 
 ---
 
-## Example 1: Executive SaaS Revenue & Retention Dashboard
+## Example 1: Vanilla TypeScript / DOM High-Frequency Dashboard
 
-Combines a multi-series Area Chart (New vs Expansion Revenue) with an executive summary cards grid featuring inline `<Sparkline />` trendlines.
+Direct DOM mounting with real-time streaming data updates and instant PNG export without React:
+
+```ts
+import { Chart, downsampleLTTB } from '@nofinite/charts';
+import '@nofinite/nuicss/styles.css';
+
+// 1. Initialize container
+const container = document.getElementById('telemetry-dashboard')!;
+
+// 2. Generate initial telemetry series
+let telemetryPoints = Array.from({ length: 5000 }, (_, i) => ({
+  time: new Date(Date.now() - (5000 - i) * 1000).toISOString(),
+  cpu: 20 + Math.random() * 40 + Math.sin(i / 50) * 15,
+}));
+
+// Downsample 5,000 points to 400 visually pristine points
+let renderedData = downsampleLTTB(telemetryPoints, 400);
+
+// 3. Mount interactive chart
+const chart = new Chart({
+  element: container,
+  variant: 'line',
+  data: renderedData,
+  xAccessor: (d) => d.time,
+  yAccessor: (d) => d.cpu,
+  color: 'var(--color-primary)',
+  height: 320,
+  showGrid: true,
+  showAxes: true,
+  showCrosshair: true,
+  showTooltip: true,
+});
+
+// 4. Simulate real-time streaming ticks every second
+const interval = setInterval(() => {
+  telemetryPoints.push({
+    time: new Date().toISOString(),
+    cpu: 20 + Math.random() * 40,
+  });
+  if (telemetryPoints.length > 5000) telemetryPoints.shift();
+
+  // Re-downsample and update
+  chart.update(downsampleLTTB(telemetryPoints, 400));
+}, 1000);
+
+// 5. Export to PNG button
+document.getElementById('export-btn')?.addEventListener('click', async () => {
+  await chart.exportPNG('telemetry-report.png', 2);
+});
+```
+
+---
+
+## Example 2: React Executive SaaS Revenue Dashboard
+
+Combines a multi-series Area Chart (New vs Expansion Revenue) with an executive summary cards grid featuring inline `<Sparkline />` trendlines:
 
 ```tsx
 import React from 'react';
@@ -25,8 +80,8 @@ const revenueData = [
 export function SaasExecutiveDashboard() {
   return (
     <div className="w-full p-6 bg-surface space-y-6">
-      {/* Top Stat Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Top Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="card p-5 bg-surface border border-default rounded-2xl shadow-sm flex items-center justify-between">
           <div>
             <span className="text-xs font-medium text-muted uppercase">
@@ -50,26 +105,6 @@ export function SaasExecutiveDashboard() {
         <div className="card p-5 bg-surface border border-default rounded-2xl shadow-sm flex items-center justify-between">
           <div>
             <span className="text-xs font-medium text-muted uppercase">
-              Net Retention (NDR)
-            </span>
-            <h3 className="text-2xl font-bold font-mono text-default mt-1">
-              128.4%
-            </h3>
-            <span className="text-xs font-semibold text-success">
-              +3.2% vs Q1
-            </span>
-          </div>
-          <Sparkline
-            data={[121, 122, 124, 125, 127, 128.4]}
-            width={90}
-            height={36}
-            color="var(--color-primary)"
-          />
-        </div>
-
-        <div className="card p-5 bg-surface border border-default rounded-2xl shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-xs font-medium text-muted uppercase">
               Gross Churn
             </span>
             <h3 className="text-2xl font-bold font-mono text-default mt-1">
@@ -86,17 +121,8 @@ export function SaasExecutiveDashboard() {
         </div>
       </div>
 
-      {/* Main Revenue Trajectory Chart */}
+      {/* Main Multi-Series Area Chart */}
       <div className="card p-6 bg-surface border border-default rounded-2xl shadow-sm">
-        <div className="mb-4">
-          <h2 className="text-base font-bold text-default">
-            Monthly Recurring Revenue Trajectory
-          </h2>
-          <p className="text-xs text-muted">
-            Comparison of New Logo Acquisition vs Account Expansion MRR
-          </p>
-        </div>
-
         <AreaChart
           data={revenueData}
           xKey="month"
@@ -117,160 +143,8 @@ export function SaasExecutiveDashboard() {
           showGrid={true}
           showTooltip={true}
           showLegend={true}
-          legendPosition="bottom"
         />
       </div>
-    </div>
-  );
-}
-```
-
----
-
-## Example 2: Financial Asset Performance Grid
-
-A high-density financial card overview with color-coded trendlines and tabular pricing:
-
-```tsx
-import React from 'react';
-import { Sparkline } from '@nofinite/charts/react';
-import '@nofinite/nuicss/styles.css';
-
-const assets = [
-  {
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    price: '$67,420',
-    change: '+3.8%',
-    trend: [64200, 65100, 64900, 66300, 65800, 67420],
-  },
-  {
-    symbol: 'ETH',
-    name: 'Ethereum',
-    price: '$3,510',
-    change: '+1.9%',
-    trend: [3410, 3440, 3420, 3490, 3480, 3510],
-  },
-  {
-    symbol: 'SOL',
-    name: 'Solana',
-    price: '$158.20',
-    change: '-2.4%',
-    trend: [165, 163, 161, 162, 159, 158.2],
-  },
-];
-
-export function CryptoMarketGrid() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-surface">
-      {assets.map((asset) => {
-        const isUp = asset.change.startsWith('+');
-        const color = isUp ? 'var(--color-success)' : 'var(--color-danger)';
-
-        return (
-          <div
-            key={asset.symbol}
-            className="p-4 bg-surface border border-default rounded-2xl flex items-center justify-between"
-          >
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-default">
-                  {asset.symbol}
-                </span>
-                <span className="text-xs text-muted">{asset.name}</span>
-              </div>
-              <div className="text-lg font-mono font-bold text-default mt-1">
-                {asset.price}
-              </div>
-              <span
-                className={`text-xs font-semibold ${
-                  isUp ? 'text-success' : 'text-danger'
-                }`}
-              >
-                {asset.change}
-              </span>
-            </div>
-
-            <Sparkline
-              data={asset.trend}
-              width={90}
-              height={32}
-              color={color}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-```
-
----
-
-## Example 3: High-Density Telemetry with LTTB Downsampling
-
-Demonstrates using `downsampleLTTB` to downsample a simulated 20,000-point sensor dataset down to 600 points before rendering:
-
-```tsx
-import React, { useMemo } from 'react';
-import { LineChart } from '@nofinite/charts/react';
-import { downsampleLTTB } from '@nofinite/charts';
-import '@nofinite/nuicss/styles.css';
-
-// Generate synthetic 20,000 data point telemetry stream
-function generateSyntheticStream(count: number) {
-  const points = [];
-  let baseValue = 50;
-  const now = Date.now();
-
-  for (let i = 0; i < count; i++) {
-    baseValue += (Math.random() - 0.49) * 4;
-    points.push({
-      x: new Date(now - (count - i) * 1000),
-      y: Number(baseValue.toFixed(2)),
-    });
-  }
-  return points;
-}
-
-export function HighDensityTelemetryMonitor() {
-  // 1. Raw 20,000 data points
-  const rawData = useMemo(() => generateSyntheticStream(20000), []);
-
-  // 2. Downsample to 600 points using Largest Triangle Three Buckets
-  const downsampledData = useMemo(() => {
-    return downsampleLTTB(rawData, 600).map((p) => ({
-      timestamp: p.x.toISOString().slice(11, 19),
-      utilization: p.y,
-    }));
-  }, [rawData]);
-
-  return (
-    <div className="card p-6 bg-surface border border-default rounded-2xl shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-base font-bold text-default">
-            Cluster Memory Saturation
-          </h3>
-          <p className="text-xs text-muted">
-            Original: 20,000 samples • LTTB Downsampled: 600 points
-          </p>
-        </div>
-        <span className="text-xs font-mono bg-success/10 text-success border border-success/20 px-2 py-0.5 rounded-full font-semibold">
-          60 FPS Fluid
-        </span>
-      </div>
-
-      <LineChart
-        data={downsampledData}
-        xKey="timestamp"
-        yKey="utilization"
-        height={320}
-        color="var(--color-primary)"
-        showGrid={true}
-        showAxes={true}
-        showTooltip={true}
-      />
     </div>
   );
 }
