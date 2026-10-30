@@ -1024,6 +1024,11 @@ describe('@nofinite/markon', () => {
             content: [{ type: 'text', text: 'Section Alpha' }],
           },
           {
+            type: 'heading',
+            attrs: { level: 2 },
+            content: [{ type: 'text', text: 'Section Beta' }],
+          },
+          {
             type: 'paragraph',
             content: [
               {
@@ -1068,8 +1073,9 @@ describe('@nofinite/markon', () => {
 
       // Verify onRendered callback
       expect(renderedResult).not.toBeNull();
-      expect(renderedResult.toc.length).toBe(1);
+      expect(renderedResult.toc.length).toBe(2);
       expect(renderedResult.toc[0].text).toBe('Section Alpha');
+      expect(renderedResult.toc[1].text).toBe('Section Beta');
       expect(renderedResult.readingTimeMinutes).toBeGreaterThanOrEqual(1);
 
       root.unmount();
@@ -1332,6 +1338,23 @@ describe('@nofinite/markon', () => {
       expect(newsResult.html).toContain('PRESS RELEASE');
       expect(newsResult.html).toContain('Nofinite Launches Markon 2.0');
       expect(newsResult.html).toContain('By Press Office');
+    });
+
+    it('omits inline <style> by default conforming to Zero Downstream CSS, but supports includeStyles', () => {
+      const doc = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Clean HTML.' }],
+          },
+        ],
+      };
+      const defaultResult = renderMarkon({ content: doc });
+      expect(defaultResult.html).not.toContain('<style data-markon-renderer');
+
+      const styledResult = renderMarkon({ content: doc, includeStyles: true });
+      expect(styledResult.html).toContain('<style data-markon-renderer=""');
     });
 
     it('extracts Table of Contents accurately from JSON, HTML, and Markdown', () => {

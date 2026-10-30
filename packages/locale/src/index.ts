@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import './styles/index.scss';
 export type { Country } from './data/countries';
 export { countries } from './data/countries';
-export * from "./core";
+export * from './core';
+export * from './react';

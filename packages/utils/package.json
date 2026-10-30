@@ -26,6 +26,11 @@
       "import": "./dist/otp/index.js",
       "default": "./dist/otp/index.js"
     },
+    "./server": {
+      "types": "./dist/types/server/index.d.ts",
+      "import": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
     "./password": {
       "types": "./dist/types/password/index.d.ts",
       "import": "./dist/password/index.js",

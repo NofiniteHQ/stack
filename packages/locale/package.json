@@ -20,12 +20,15 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./react": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
     "./style": "./dist/style.css",
     "./dist/style.css": "./dist/style.css"
   },
   "sideEffects": [
-    "*.css",
-    "*.scss",
     "dist/style.css"
   ],
   "files": [
@@ -33,6 +36,18 @@
     "LICENSE",
     "README.md"
   ],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -47,7 +62,6 @@
     "flags",
     "nui"
   ],
-  "packageManager": "pnpm@10.26.2",
   "engines": {
     "node": ">=18.0.0"
   }

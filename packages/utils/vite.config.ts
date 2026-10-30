@@ -27,6 +27,7 @@ export default defineConfig({
         'env/index': 'src/env/index.ts',
         'jwt/index': 'src/jwt/index.ts',
         'otp/index': 'src/otp/index.ts',
+        'server/index': 'src/server/index.ts',
         'password/index': 'src/password/index.ts',
         'uuid/index': 'src/uuid/index.ts',
         'zeptomail/index': 'src/zeptomail/index.ts',

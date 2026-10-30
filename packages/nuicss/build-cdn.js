@@ -92,13 +92,25 @@ async function build() {
   // 1f. Widgets Only (widgets.css & widgets.min.css)
   await generateShortcutBundle('widgets', widgetShortcuts);
 
-  // 1g. Media Only (media.css & media.min.css)
-  await generateShortcutBundle('media', mediaShortcuts);
+  // 1g. Media Only (media.css & media.min.css + Section 15.d Vidstack Token Bridge)
+  const layeredMediaCss = await generateShortcutBundle('media', mediaShortcuts);
+  const themeCss = fs.readFileSync('src/styles/theme.css', 'utf8');
+  const mediaMatch = themeCss.match(
+    /\/\* -+\s*15\.d\. MEDIA PLAYER DESIGN SYSTEM TOKEN BRIDGE[\s\S]*?(?=\/\* -+\s*16\. WCAG|$)/
+  );
+  if (mediaMatch && layeredMediaCss) {
+    const rawMediaTokens = mediaMatch[0]
+      .replace(/@layer components\s*\{/, '')
+      .replace(/\}\s*$/, '');
+    const combinedMediaCss = `${layeredMediaCss}\n\n@layer components {\n${rawMediaTokens}\n}`;
+    fs.writeFileSync('dist/media.css', combinedMediaCss, 'utf8');
+    const minMedia = minifyCss('media.min.css', combinedMediaCss);
+    fs.writeFileSync('dist/media.min.css', minMedia, 'utf8');
+  }
 
   // 1h. Kanban Subpath (kanban.css & kanban.min.css)
-  const themeCss = fs.readFileSync('src/styles/theme.css', 'utf8');
   const kanbanMatch = themeCss.match(
-    /\/\* -+\s*15\.c\. KANBAN TASK BOARD[\s\S]*?(?=\/\* -+\s*16\. WCAG|$)/
+    /\/\* -+\s*15\.c\. KANBAN TASK BOARD[\s\S]*?(?=\/\* -+\s*15\.d\. MEDIA|$)/
   );
   if (kanbanMatch) {
     const rawContent = kanbanMatch[0]
@@ -116,15 +128,12 @@ async function build() {
     );
   }
 
-  // 1i. Markon Subpath (markon.css & markon.min.css)
+  // 1i. Markon Subpath (markon.css & markon.min.css - Editor + Publication Styles)
   const markonMatch = themeCss.match(
-    /\/\* -+\s*6\. TIPTAP EDITOR COMPONENT STYLES[\s\S]*?(?=@keyframes shimmer|\/\* -+\s*15\.b|$)/
+    /\/\* -+\s*6\. TIPTAP EDITOR COMPONENT STYLES[\s\S]*?(?=\/\* -+\s*15\.b\. DATA VISUALIZATION|$)/
   );
   if (markonMatch) {
-    const rawContent = markonMatch[0]
-      .replace(/@layer components\s*\{/, '')
-      .replace(/\}\s*$/, '');
-    const markonCss = `@layer components {\n${rawContent}\n}`;
+    const markonCss = markonMatch[0].trim();
     fs.writeFileSync('dist/markon.css', markonCss, 'utf8');
     const minMarkon = minifyCss('markon.min.css', markonCss);
     fs.writeFileSync('dist/markon.min.css', minMarkon, 'utf8');
@@ -133,6 +142,24 @@ async function build() {
         markonCss,
         'utf8'
       )} bytes, minified: ${Buffer.byteLength(minMarkon, 'utf8')} bytes)`
+    );
+  }
+
+  // 1j. Charts Subpath (charts.css & charts.min.css)
+  const chartsMatch = themeCss.match(
+    /\/\* -+\s*15\.b\. DATA VISUALIZATION & CHARTS INTEGRATION[\s\S]*?(?=\/\* -+\s*15\.c\. KANBAN|$)/
+  );
+  if (chartsMatch) {
+    const rawCharts = chartsMatch[0];
+    const chartsCss = `@layer components {\n${rawCharts}\n}`;
+    fs.writeFileSync('dist/charts.css', chartsCss, 'utf8');
+    const minCharts = minifyCss('charts.min.css', chartsCss);
+    fs.writeFileSync('dist/charts.min.css', minCharts, 'utf8');
+    console.log(
+      `Generated dist/charts.css (${Buffer.byteLength(
+        chartsCss,
+        'utf8'
+      )} bytes, minified: ${Buffer.byteLength(minCharts, 'utf8')} bytes)`
     );
   }
 

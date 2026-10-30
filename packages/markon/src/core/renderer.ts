@@ -57,7 +57,7 @@ export interface MarkonRenderOptions {
   className?: string;
   highlightCode?: boolean;
   renderMath?: boolean;
-  includeStyles?: boolean; // Default true: embeds self-contained stylesheet
+  includeStyles?: boolean; // Default false: styles provided canonically by @nofinite/nuicss
 }
 
 export interface RenderResult {
@@ -1328,7 +1328,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
     className = '',
     highlightCode = true,
     renderMath = true,
-    includeStyles = true,
+    includeStyles = false,
   } = options;
 
   let bodyHtml = '';

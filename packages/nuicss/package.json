@@ -84,6 +84,8 @@
     "./widgets.min.css": "./dist/widgets.min.css",
     "./media.css": "./dist/media.css",
     "./media.min.css": "./dist/media.min.css",
+    "./charts.css": "./dist/charts.css",
+    "./charts.min.css": "./dist/charts.min.css",
     "./kanban.css": "./dist/kanban.css",
     "./kanban.min.css": "./dist/kanban.min.css",
     "./markon.css": "./dist/markon.css",
