@@ -84,6 +84,8 @@
     "access": "public"
   },
   "scripts": {
+    "build": "nx run nui:build",
+    "test": "nx run nui:test",
     "test-storybook": "test-storybook -c ../../.storybook",
     "generate": "node scripts/generate.js"
   },
