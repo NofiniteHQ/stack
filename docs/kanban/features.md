@@ -1,143 +1,97 @@
-# WIP Limits, Filtering & Imperative Handle
+# WIP Limits, Filtering & Keyboard Accessibility
 
-Explore advanced workflow management capabilities in **Nofinite Kanban**.
+Deep-dive into advanced productivity features in **Nofinite Kanban**, available across both the framework-agnostic DOM core and the React adapter.
 
----
+```ts
+// Framework-Agnostic Core
+import { createKanbanBoard } from '@nofinite/kanban';
 
-## 1. Work-In-Progress (WIP) Limits
-
-Enforce capacity limits and agile bottlenecks by providing a `wipLimit` number on any column:
-
-```tsx
-const columns: KanbanColumnProps[] = [
-  {
-    id: 'in-review',
-    title: 'Code Review',
-    wipLimit: 3, // Highlights warning if more than 3 tasks exist here
-    items: [
-      /* ... */
-    ],
-  },
-];
+// React Adapter
+import { Kanban } from '@nofinite/kanban/react';
 ```
 
-### Visual Behavior:
+---
 
-- When the column item count exceeds `wipLimit`, the column header badge automatically switches to a warning/danger pill (`badge-danger`).
-- The column container receives visual boundary emphasis to alert engineers to workflow bottlenecks.
+## 1. Framework-Agnostic Core Features
+
+### Enforceable WIP Limits
+
+Enforce column capacity constraints and hard reject invalid drag drops:
+
+```ts
+import { createKanbanBoard } from '@nofinite/kanban';
+
+const board = createKanbanBoard(document.getElementById('board'), {
+  columns: [
+    {
+      id: 'in-review',
+      title: 'In Review',
+      wipLimit: 3, // Capacity limit of 3 cards
+      items: [
+        /* ... */
+      ],
+    },
+  ],
+  enforceWipLimit: true, // Rejects drop and animates card back to source if target column exceeds capacity
+});
+```
+
+### Real-Time Filtering (`setFilter`)
+
+Filter tasks programmatically without losing drag-and-drop hitboxes or reordering state:
+
+```ts
+// Filter by search query, assignee, or tag
+board.setFilter({
+  query: 'Authentication',
+  assignee: 'Sarah Connor',
+  badge: 'Critical',
+});
+
+// Clear filters
+board.setFilter({});
+```
+
+### Keyboard Navigation & WAI-ARIA
+
+The board includes built-in keyboard navigation conforming to W3C standards:
+
+- <kbd>Tab</kbd>: Navigate through columns and cards.
+- <kbd>Space</kbd> / <kbd>Enter</kbd>: Grab or drop active card.
+- <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd>: Move grabbed card between columns.
+- <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd>: Reorder grabbed card within column.
+- <kbd>Escape</kbd>: Cancel active drag and restore original position.
 
 ---
 
-## 2. Card Filtering & Search Engine
+## 2. React Adapter Usage
 
-Filter cards dynamically across all columns without writing custom array manipulation logic:
+In React applications, bind filtering and WIP bounds via component props:
 
 ```tsx
 import React, { useState } from 'react';
-import { Kanban } from '@nofinite/kanban';
+import { Kanban, type KanbanColumnProps } from '@nofinite/kanban/react';
 
-export function SearchableBoard({ columns }) {
-  const [query, setQuery] = useState('');
-  const [assignee, setAssignee] = useState('');
+export function ManagedBoard() {
+  const [columns, setColumns] = useState<KanbanColumnProps[]>(/* ... */);
+  const [search, setSearch] = useState('');
 
   return (
-    <div>
-      <div className="flex gap-4 mb-4">
-        <input
-          className="input max-w-xs"
-          placeholder="Search tasks..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
-
+    <div className="space-y-4">
+      <input
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Filter cards..."
+        className="input"
+      />
       <Kanban
         columns={columns}
-        filterQuery={query} // Searches card titles and descriptions
-        filterAssignee={assignee} // Filters cards assigned to this person
-        filterPriority="urgent" // Filters by badge priority variant
+        onChange={setColumns}
+        enforceWipLimit={true}
+        filterQuery={search}
       />
     </div>
   );
 }
 ```
-
-Cards that do not match the filter criteria are hidden without collapsing column layouts or disrupting drag-and-drop drop-target calculations.
-
----
-
-## 3. Imperative Control (`KanbanHandle`)
-
-Control board state programmatically using a React `ref`:
-
-```tsx
-import React, { useRef } from 'react';
-import { Kanban, type KanbanHandle } from '@nofinite/kanban';
-
-export function ProgrammaticBoard({ columns }) {
-  const kanbanRef = useRef<KanbanHandle>(null);
-
-  const handleAddNewColumn = () => {
-    kanbanRef.current?.addColumn({
-      id: 'qa-testing',
-      title: 'QA Testing',
-      items: [],
-    });
-  };
-
-  const handlePromoteCard = (cardId: string) => {
-    kanbanRef.current?.moveCard(cardId, 'todo', 'doing', 0);
-  };
-
-  return (
-    <div>
-      <div className="flex gap-2 mb-4">
-        <button className="btn btn-primary" onClick={handleAddNewColumn}>
-          Add QA Column
-        </button>
-      </div>
-
-      <Kanban ref={kanbanRef} columns={columns} />
-    </div>
-  );
-}
-```
-
-### `KanbanHandle` Methods
-
-| Method                                    | Parameters                                                                                 | Description                                        |
-| :---------------------------------------- | :----------------------------------------------------------------------------------------- | :------------------------------------------------- |
-| `addColumn(column)`                       | `(column: KanbanColumnProps) => void`                                                      | Appends a new column to the board.                 |
-| `removeColumn(columnId)`                  | `(columnId: string) => void`                                                               | Removes an existing column by its unique ID.       |
-| `moveCard(cardId, fromCol, toCol, index)` | `(cardId: string, sourceColId: string, targetColId: string, targetIndex?: number) => void` | Programmatically transfers a card between columns. |
-| `getColumns()`                            | `() => KanbanColumnProps[]`                                                                | Returns the current state of all columns.          |
-
----
-
-## 4. WAI-ARIA Keyboard Navigation
-
-Nofinite Kanban adheres to accessibility standards for drag-and-drop patterns:
-
-- **Focus:** Press `Tab` to navigate between column headers and cards.
-- **Pick Up:** Press `Space` or `Enter` to pick up the active focused card.
-- **Move Columns:** Press `Left Arrow` (`←`) and `Right Arrow` (`→`) to transfer the card to adjacent columns.
-- **Reorder Position:** Press `Up Arrow` (`↑`) and `Down Arrow` (`↓`) to adjust the card's vertical index within the column.
-- **Drop Card:** Press `Space` or `Enter` again to confirm placement.
-- **Cancel:** Press `Escape` to cancel the drag operation and restore the card to its original position.
-- **Screen Reader Announcements:** Built-in ARIA live region automatically announces: _"Moved card Design System Audit to In Progress, position 2 of 4."_
-
----
-
-## 5. Complete Props Reference
-
-| Prop             | Type                                     | Default     | Description                                             |
-| :--------------- | :--------------------------------------- | :---------- | :------------------------------------------------------ |
-| `columns`        | `KanbanColumnProps[]`                    | Required    | Array of columns and nested cards.                      |
-| `onChange`       | `(columns: KanbanColumnProps[]) => void` | `undefined` | Callback fired on any card or column reordering.        |
-| `onCardMove`     | `(details: CardMoveDetails) => void`     | `undefined` | Callback fired when a card transitions between columns. |
-| `onColumnMove`   | `(details: ColumnMoveDetails) => void`   | `undefined` | Callback fired when a column changes order.             |
-| `filterQuery`    | `string`                                 | `undefined` | Search term matching card titles and descriptions.      |
-| `filterAssignee` | `string`                                 | `undefined` | Filter cards by assignee name.                          |
-| `filterPriority` | `string`                                 | `undefined` | Filter cards by badge status or priority.               |
-| `className`      | `string`                                 | `undefined` | Additional CSS class for the board container.           |
-| `readOnly`       | `boolean`                                | `false`     | Disables drag-and-drop interaction across the board.    |

@@ -1,42 +1,146 @@
 # LineChart
 
-LineChart visualizes discrete continuous data points connected by straight or smoothed line segments, ideal for time-series metrics.
+LineChart visualizes continuous data sequences, dynamic rates, and time-series fluctuations with precision Bézier curves, active marker points, and interactive crosshair scrubbing.
 
----
+```ts
+// Framework-Agnostic Core
+import { Chart, downsampleLTTB } from '@nofinite/charts';
 
-## Import
-
-```tsx
+// React Adapter
 import { LineChart } from '@nofinite/charts/react';
 ```
 
 ---
 
-## Usage Example
+## Interactive Preview
 
-```tsx
-import React from 'react';
-import { LineChart } from '@nofinite/charts/react';
+<Preview
+name="charts-line"
+vanillaCode={`import { Chart } from '@nofinite/charts';
+import '@nofinite/nuicss/styles.css';
 
-const CPU_METRICS = [
-  { time: '10:00', load: 24 },
-  { time: '10:05', load: 38 },
-  { time: '10:10', load: 85 },
-  { time: '10:15', load: 62 },
-  { time: '10:20', load: 45 },
+const container = document.getElementById('line-chart-container');
+
+const chart = new Chart({
+element: container,
+variant: 'line',
+data: [
+{ time: '00:00', cpu: 22 },
+{ time: '04:00', cpu: 35 },
+{ time: '08:00', cpu: 68 },
+{ time: '12:00', cpu: 84 },
+{ time: '16:00', cpu: 52 },
+{ time: '20:00', cpu: 40 }
+],
+xAccessor: (d) => d.time,
+yAccessor: (d) => d.cpu,
+color: 'var(--color-primary)',
+height: 240,
+showGrid: true,
+showAxes: true,
+showTooltip: true,
+showCrosshair: true
+});`}
+/>
+
+---
+
+## 1. Framework-Agnostic Core Usage
+
+### Direct DOM Mounting (`new Chart`)
+
+Mount an interactive line chart directly to any HTML DOM node:
+
+```ts
+import { Chart } from '@nofinite/charts';
+import '@nofinite/nuicss/styles.css';
+
+const container = document.querySelector('#cpu-trend-chart');
+
+const chart = new Chart({
+  element: container,
+  variant: 'line',
+  data: [
+    { time: '00:00', cpu: 22 },
+    { time: '04:00', cpu: 35 },
+    { time: '08:00', cpu: 68 },
+    { time: '12:00', cpu: 84 },
+    { time: '16:00', cpu: 52 },
+    { time: '20:00', cpu: 40 },
+  ],
+  xAccessor: (d) => d.time,
+  yAccessor: (d) => d.cpu,
+  color: 'var(--color-primary)',
+  showGrid: true,
+  showAxes: true,
+  showTooltip: true,
+  showCrosshair: true,
+});
+
+// Real-time telemetry tick update
+chart.update([
+  { time: '00:00', cpu: 22 },
+  { time: '04:00', cpu: 35 },
+  { time: '08:00', cpu: 68 },
+  { time: '12:00', cpu: 84 },
+  { time: '16:00', cpu: 52 },
+  { time: '20:00', cpu: 40 },
+  { time: '24:00', cpu: 38 },
+]);
+
+// Cleanup
+chart.destroy();
+```
+
+### High-Density Time-Series Downsampling (`downsampleLTTB`)
+
+When monitoring 10,000 to 1,000,000 telemetry points, use the built-in **Largest Triangle Three Buckets (LTTB)** algorithm to preserve visual peaks and troughs while keeping SVG frame rates at 60 FPS:
+
+```ts
+import { downsampleLTTB, Chart } from '@nofinite/charts';
+
+const rawHighFrequencyData = [
+  // 50,000 high-frequency sensor ticks
 ];
 
-export function CpuMonitor() {
+// Downsample 50,000 points to 600 visually identical points
+const optimizedData = downsampleLTTB(rawHighFrequencyData, 600);
+
+const chart = new Chart({
+  element: document.querySelector('#telemetry-chart'),
+  variant: 'line',
+  data: optimizedData,
+});
+```
+
+---
+
+## 2. React Adapter Usage
+
+Declarative React JSX component for React 18 & 19:
+
+```tsx
+import { LineChart } from '@nofinite/charts/react';
+
+const serverLoad = [
+  { time: '00:00', cpu: 22 },
+  { time: '04:00', cpu: 35 },
+  { time: '08:00', cpu: 68 },
+  { time: '12:00', cpu: 84 },
+  { time: '16:00', cpu: 52 },
+  { time: '20:00', cpu: 40 },
+];
+
+export default function CpuLoadChart() {
   return (
     <div className="w-full h-64 p-4 border border-default rounded-xl bg-surface">
       <LineChart
-        data={CPU_METRICS}
+        data={serverLoad}
         xAccessor={(d) => d.time}
-        yAccessor={(d) => d.load}
+        yAccessor={(d) => d.cpu}
         strokeColor="var(--color-primary)"
-        strokeWidth={2.5}
-        showDots={true}
         showTooltip={true}
+        showCrosshair={true}
       />
     </div>
   );
@@ -45,16 +149,20 @@ export function CpuMonitor() {
 
 ---
 
-## Props Reference
+## API Reference
 
-| Prop             | Type                                | Default                  | Description                                            |
-| :--------------- | :---------------------------------- | :----------------------- | :----------------------------------------------------- |
-| `data`           | `T[]`                               | Required                 | Array of data points.                                  |
-| `xAccessor`      | `(d: T) => string \| number`        | Required                 | Function returning the X-axis coordinate.              |
-| `yAccessor`      | `(d: T) => number`                  | Required                 | Function returning the numerical Y-axis value.         |
-| `strokeColor`    | `string`                            | `'var(--color-primary)'` | OKLCH color token or CSS variable for the line stroke. |
-| `strokeWidth`    | `number`                            | `2`                      | Width of the line stroke in pixels.                    |
-| `showDots`       | `boolean`                           | `true`                   | Renders circle markers on individual data points.      |
-| `curve`          | `'monotoneX' \| 'linear' \| 'step'` | `'monotoneX'`            | Interpolation curve algorithm.                         |
-| `showTooltip`    | `boolean`                           | `true`                   | Enables hover tooltip crosshairs.                      |
-| `legendPosition` | `'top' \| 'bottom'`                 | `'bottom'`               | Zero-overflow placement for multi-series legend.       |
+### Framework-Agnostic Core Options (`ChartOptions`)
+
+| Option          | Type                 | Default                  | Description                                     |
+| :-------------- | :------------------- | :----------------------- | :---------------------------------------------- |
+| `element`       | `HTMLElement`        | —                        | Target DOM container to mount into.             |
+| `variant`       | `'line'`             | `'line'`                 | Specifies continuous line visualization engine. |
+| `data`          | `DataPoint[]`        | `[]`                     | Array of continuous sequence data objects.      |
+| `xAccessor`     | `(d: any) => any`    | `d => d.x`               | Extracts sequential X key or timestamp.         |
+| `yAccessor`     | `(d: any) => number` | `d => d.y`               | Extracts numeric trend value.                   |
+| `color`         | `string`             | `'var(--color-primary)'` | Line stroke color or token variable.            |
+| `height`        | `number`             | `260`                    | Height in pixels.                               |
+| `showCrosshair` | `boolean`            | `true`                   | Renders dual-axis interactive scrubbing lines.  |
+| `showTooltip`   | `boolean`            | `true`                   | Renders glassmorphic hover popover.             |
+
+### React Component Props

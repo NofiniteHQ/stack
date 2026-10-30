@@ -1,10 +1,55 @@
-# React Media Hooks
+# React Media Hooks & Core Event Architecture
 
-**Nofinite Media** re-exports a comprehensive suite of high-performance React hooks for controlling playback, querying live player state, and managing tracks without unnecessary component re-renders.
+**Nofinite Media** provides a dual-model state architecture:
+
+1. **Core Event & State API (`@nofinite/media`):** Universal, zero-framework DOM event listeners and synchronous `player.getState()` queries.
+2. **React Hooks Suite (`@nofinite/media/react`):** Granular reactive hooks that subscribe to media states without triggering unnecessary component re-renders.
 
 ---
 
-## Core Hooks Summary
+## 1. Core Event & State API in Vanilla TypeScript (Core First)
+
+In pure JavaScript/TypeScript, reactive UI updates are implemented via `player.on()` and `player.getState()`:
+
+```ts
+import { createMediaPlayer, type MediaPlayerState } from '@nofinite/media';
+import '@nofinite/nuicss/styles.css';
+
+const player = createMediaPlayer({
+  src: 'https://media.example.com/stream.mp4',
+  type: 'video',
+});
+
+// 1. Synchronous State Inspection
+const state: MediaPlayerState = player.getState();
+console.log({
+  paused: state.paused,
+  currentTime: state.currentTime,
+  duration: state.duration,
+  volume: state.volume,
+  buffered: state.buffered,
+});
+
+// 2. Lifecycle Event Subscriptions
+const unsubscribePlay = player.on('play', () => {
+  console.log('Playback commenced');
+});
+
+const unsubscribeTime = player.on('timeupdate', () => {
+  const current = player.getState().currentTime;
+  console.log(`Current time: ${current}s`);
+});
+
+// 3. Clean up listeners when done
+// unsubscribePlay();
+// unsubscribeTime();
+```
+
+---
+
+## 2. React Hooks Suite (`@nofinite/media/react`)
+
+When building inside React component hierarchies under `<MediaPlayer>`, hooks re-exported from `@nofinite/media/react` provide declarative bindings:
 
 | Hook                         | Returns                       | Primary Purpose                                                                                      |
 | :--------------------------- | :---------------------------- | :--------------------------------------------------------------------------------------------------- |
@@ -14,31 +59,35 @@
 | **`useVideoQualityOptions`** | Array of quality options      | Lists adaptive HLS video resolutions with a `.select(quality)` method                                |
 | **`useCaptionOptions`**      | Array of text tracks          | Lists available subtitle languages with a `.select(lang)` method                                     |
 | **`usePlaybackRateOptions`** | Array of playback speeds      | Lists playback rates (`0.75x`–`2x`) with a `.select(rate)` method                                    |
-| **`useActiveTextTrack`**     | Active track object           | Reactively monitors the active subtitles or chapters track                                           |
 
 ---
 
-## Controlling Playback (`useMediaRemote`)
-
-`useMediaRemote` provides a clean imperative controller to dispatch actions from anywhere inside a `<MediaPlayer>` tree:
+### React Transport Controls Example
 
 ```tsx
-import React from 'react';
-import { useMediaRemote } from '@nofinite/media/react';
+'use client';
 
-export function CustomMediaControls() {
+import React from 'react';
+import { useMediaRemote, useMediaState } from '@nofinite/media/react';
+
+export function CustomTransportControls() {
   const remote = useMediaRemote();
+  const paused = useMediaState('paused');
+  const currentTime = useMediaState('currentTime');
+  const duration = useMediaState('duration');
 
   return (
-    <div className="flex items-center gap-2">
-      <button onClick={() => remote.play()}>Play</button>
-      <button onClick={() => remote.pause()}>Pause</button>
-      <button onClick={() => remote.seek(30)}>Jump to 0:30</button>
-      <button onClick={() => remote.changeVolume(0.5)}>Set 50% Volume</button>
-      <button onClick={() => remote.toggleMuted()}>Toggle Mute</button>
-      <button onClick={() => remote.enterPictureInPicture()}>
-        Pop out (PiP)
+    <div className="flex items-center gap-3 p-3 bg-surface border border-default rounded-xl shadow-xs">
+      <button
+        onClick={() => (paused ? remote.play() : remote.pause())}
+        className="btn btn-primary btn-sm"
+      >
+        {paused ? '▶ Play' : '❚❚ Pause'}
       </button>
+
+      <span className="font-mono text-xs text-muted">
+        {Math.floor(currentTime)}s / {Math.floor(duration || 0)}s
+      </span>
     </div>
   );
 }
@@ -46,102 +95,36 @@ export function CustomMediaControls() {
 
 ---
 
-## Fine-Grained Reactive State (`useMediaState`)
-
-Rather than subscribing to the entire player state object (which causes expensive re-renders on every animation frame), `useMediaState` listens **only to the specific property** your component needs:
+### React Adaptive Quality Selector Example
 
 ```tsx
-import React from 'react';
-import { useMediaState } from '@nofinite/media/react';
+'use client';
 
-// Re-renders ONLY when play/pause state flips (NOT during time updates)
-export function PlayButtonIndicator() {
-  const paused = useMediaState('paused');
-
-  return <span>Current Status: {paused ? 'Paused' : 'Playing'}</span>;
-}
-
-// Re-renders ONLY when volume changes
-export function VolumeIndicator() {
-  const volume = useMediaState('volume');
-  const muted = useMediaState('muted');
-
-  return (
-    <span>Volume: {muted ? 'Muted' : `${Math.round(volume * 100)}%`}</span>
-  );
-}
-```
-
-### Supported State Keys
-
-- `'currentTime'` (seconds)
-- `'duration'` (seconds)
-- `'paused'` (boolean)
-- `'playing'` (boolean)
-- `'volume'` (0.0 to 1.0)
-- `'muted'` (boolean)
-- `'buffered'` (seconds)
-- `'fullscreen'` (boolean)
-- `'pictureInPicture'` (boolean)
-- `'waiting'` (boolean - buffering)
-- `'canPlay'` (boolean)
-
----
-
-## Selecting Video Quality (`useVideoQualityOptions`)
-
-Manage multi-bitrate HLS quality levels:
-
-```tsx
 import React from 'react';
 import { useVideoQualityOptions } from '@nofinite/media/react';
 
-export function QualityDropdown() {
-  const qualities = useVideoQualityOptions();
+export function QualitySelector() {
+  const options = useVideoQualityOptions();
+
+  if (!options || options.length === 0) return null;
 
   return (
-    <select
-      value={qualities.selectedValue}
-      onChange={(e) => qualities.select(e.target.value)}
-      className="text-xs bg-surface border border-default rounded px-2 py-1"
-    >
-      <option value="auto">Auto (Adaptive)</option>
-      {qualities.map((q) => (
-        <option key={q.value} value={q.value}>
-          {q.label}
-        </option>
-      ))}
-    </select>
-  );
-}
-```
-
----
-
-## Selecting Subtitles & Captions (`useCaptionOptions`)
-
-Render a custom closed captions language selector:
-
-```tsx
-import React from 'react';
-import { useCaptionOptions } from '@nofinite/media/react';
-
-export function CaptionsPicker() {
-  const captions = useCaptionOptions();
-
-  return (
-    <select
-      value={captions.selectedValue}
-      onChange={(e) => captions.select(e.target.value)}
-      className="text-xs bg-surface border border-default rounded px-2 py-1"
-    >
-      <option value="off">Captions Off</option>
-      {captions.map((track) => (
-        <option key={track.value} value={track.value}>
-          {track.label}
-        </option>
-      ))}
-    </select>
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-muted">Resolution:</span>
+      <select
+        className="select select-sm bg-surface border border-default rounded-md text-xs"
+        onChange={(e) => {
+          const selected = options.find((opt) => opt.id === e.target.value);
+          selected?.select();
+        }}
+      >
+        {options.map((opt) => (
+          <option key={opt.id} value={opt.id}>
+            {opt.height ? `${opt.height}p` : 'Auto'}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 ```

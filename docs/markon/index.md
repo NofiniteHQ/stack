@@ -1,85 +1,142 @@
 # Nofinite Markon
 
-> Enterprise rich text editing and isomorphic publication engine. Features Notion-style slash commands, gutter drag handles, multi-language codeblocks, KaTeX math typesetting, and a standalone 4-layout publication renderer.
+> Zero-DOM isomorphic Markdown compiler, TipTap publication editor, and editorial reading engine.
 
 ---
 
-## Overview
+## Interactive Preview
 
-**Nofinite Markon** (`@nofinite/markon`) is a comprehensive content editing and publication suite. It bridges the gap between authoring rich, structured documents and publishing them into beautiful, responsive web pages.
+<Preview
+name="editor"
+vanillaCode={`import { MarkonEditor } from '@nofinite/markon';
+import '@nofinite/nuicss/styles.css';
 
-### Architectural Invariants
+const container = document.getElementById('editor-container');
 
-- **Single Styling Engine:** 100% styled by **NUICSS** (`@nofinite/nuicss`). Zero secondary stylesheets required—simply `import '@nofinite/nuicss/styles.css'`.
-- **Zero DOM Server Renderer:** The standalone publication engine (`renderMarkon` / `<MarkonRender />`) renders TipTap JSON, HTML, or Markdown into production-grade HTML on the server (Next.js Server Components, Edge, Node.js) with zero DOM dependencies.
-- **Bi-Directional Format Agnosticism:** Seamlessly convert between TipTap JSONContent, sanitized HTML, and GitHub-Flavored Markdown.
+// Mount rich authoring canvas directly to DOM
+const editor = new MarkonEditor({
+element: container,
+initialValue: '<h2>Project Vision</h2><p>Start writing with rich formatting...</p>',
+showSlashCommands: true,
+showBubbleMenu: true,
+placeholder: "Type '/' for commands..."
+});
+
+// Programmatic export:
+// const markdown = editor.getMarkdown();
+// const html = editor.getHTML();
+// editor.destroy();`}
+/>
 
 ---
 
-## Key Features
+## Architecture: Authoring & Publication Pipeline
 
-- **Standalone Publication Engine (`<MarkonRender />`):** 4 built-in publication layouts (`'article'`, `'document'`, `'newsroom'`, `'minimal'`), automated sticky Table of Contents with scrollspy, pre-rendered KaTeX math, and code copy buttons.
-- **Notion-Style Slash Commands:** Type `/` to open an animated command palette with 20 built-in commands or register custom application workflows.
-- **Gutter Block Drag Handles:** Hover handles (`⋮⋮`) for tactile drag-and-drop block reordering, selection, and contextual block transformations.
-- **Data Tables & Visual Picker:** 10×10 visual dimension picker, floating cell context menus, cell merging, and column operations.
-- **Semantic Callouts & Accordions:** 4 advisory variants (`info`, `success`, `warning`, `danger`) and collapsible toggle sections.
-- **Rich Media & File Cards:** Corner-anchored image resizing, responsive video embeds (YouTube, Vimeo, MP4), and downloadable attachment cards.
-- **Draft Auto-Save & Recovery:** Debounced persistence with live save states (`saving`, `saved`, `error`) and crash recovery banners.
+**Nofinite Markon** provides an end-to-end publishing pipeline split across two complementary subsystems:
+
+```
+[Authoring Canvas]                [Compiled Document AST]              [Publication Engine]
+  MarkonEditor      ─── Exports ───>  TipTap JSON AST   ─── Renders ───>  renderMarkdown()
+(Slash commands, DND)                or Markdown String                 (Article, Newsroom, Docs)
+```
+
+1. **Authoring Layer ([`MarkonEditor`](/markon/editor)):** A rich, keyboard-driven authoring canvas featuring Notion-style slash commands (`/`), gutter block drag handles (`⋮⋮`), interactive table pickers, and debounced draft auto-saving.
+2. **UI Publication Layer ([`MarkonRender`](/markon/render)):** The visual presentation engine for compiled Markon JSON and Markdown documents. It transforms abstract ASTs into publication-grade editorial layouts (`article`, `document`, `newsroom`, `minimal`), generating automated sticky Table of Contents with scrollspy, compiling server-side KaTeX mathematics, and formatting author bylines and hero cover images.
 
 ---
 
 ## Quickstart
 
-```tsx
-import React from 'react';
-import { MarkonRender } from '@nofinite/markon/react';
+### 1. Framework-Agnostic Core (`@nofinite/markon`)
+
+Mount the editor canvas directly to any HTML DOM node, or compile Markdown to HTML with zero DOM dependencies in **Vanilla JavaScript**, **TypeScript**, **Node.js**, **Vue 3**, **Svelte 5**, or **Astro**:
+
+```ts
+import { MarkonEditor, renderMarkdown } from '@nofinite/markon';
 import '@nofinite/nuicss/styles.css';
 
-const markdown = `
-# Designing with Perceptual Color Spaces
-Euler's equation $e^{i\\pi} + 1 = 0$ is considered one of the most elegant mathematical formulations.
-`;
+// A. Interactive Authoring Canvas in pure DOM
+const container = document.getElementById('editor')!;
+const editor = new MarkonEditor({
+  element: container,
+  initialValue: '# Hello World\n\nType `/` for slash commands...',
+  showSlashCommands: true,
+  showBubbleMenu: true,
+  onChange: (html, json, text) => {
+    console.log('Document updated:', text);
+  },
+});
 
-export function PublicationView() {
+// B. Isomorphic Publication Compiler (runs in Node.js, SSR, or browser)
+const publicationHtml = renderMarkdown(
+  '# Architectural Whitepaper\n\n$$e^{i\\pi} + 1 = 0$$',
+  {
+    layout: 'article',
+    showTOC: true,
+  }
+);
+```
+
+### 2. React Adapter (`@nofinite/markon/react`)
+
+Declarative React JSX components for React 18 & 19:
+
+```tsx
+import React, { useState } from 'react';
+import { MarkonEditor, MarkonRender } from '@nofinite/markon/react';
+import '@nofinite/nuicss/styles.css';
+
+export default function DocumentEditor() {
+  const [content, setContent] = useState(
+    '<h2>Project Vision</h2><p>Start writing with rich formatting...</p>'
+  );
+
   return (
-    <main className="p-6 bg-surface">
-      <MarkonRender
-        content={markdown}
-        format="markdown"
-        layout="article"
-        metadata={{
-          title: 'Designing with Perceptual Color Spaces',
-          publishedAt: '2026-10-15',
-          author: 'Engineering Team',
-        }}
-        showTOC={true}
+    <div className="w-full max-w-3xl p-6 rounded-2xl border border-default bg-surface shadow-xs space-y-6">
+      <MarkonEditor
+        content={content}
+        onChange={setContent}
+        slashCommands={true}
+        dragHandle={true}
+        placeholder="Type '/' for commands..."
       />
-    </main>
+
+      {/* Render compiled article */}
+      <MarkonRender content={content} layout="article" />
+    </div>
   );
 }
 ```
 
 ---
 
+## Core Capabilities
+
+- **Framework-Agnostic Isomorphic Core**: The root `@nofinite/markon` package runs in pure DOM or server-side Node.js with zero React requirements.
+- **4 Specialized Publication Layouts**: Built-in responsive presentation modes for articles, technical documentation, press releases, and minimal embeds.
+- **Notion-Style Slash Commands (`/`)**: Type `/` anywhere on a blank line to open a floating command palette for headings, tables, callout boxes, code blocks, and math equations.
+- **Gutter Block Drag Handles**: Hover handles for tactile drag-and-drop block reordering, selection, and contextual block transformations.
+- **Interactive Data Tables**: 10×10 visual dimension picker, cell merging/splitting, and contextual table action toolbars.
+- **Pre-Rendered KaTeX Math**: Math equations are compiled server-side into accessible SVG/HTML without requiring client-side KaTeX runtime scripts.
+- **Lowlight Syntax Highlighting**: High-speed AST syntax highlighting across 16 programming languages with 1-click clipboard copy buttons.
+- **Draft Auto-Save & Recovery**: Background debounced persistence with live status indicators (`saving`, `saved`, `error`) and crash recovery dialogs.
+
+---
+
 ## Documentation Directory
 
-### Publication & Renderer Suite _(The Limelight)_
+### Advanced Architecture & Deep Guides
 
-- **[Publication Renderer (`MarkonRender`)](./renderer.md)** — Complete deep dive into the isomorphic AST publication engine, 4 layout modes, KaTeX math, code copy buttons, and SSR architecture.
-- **[Publication Examples](./examples.md)** — Production-grade copy-paste implementations for blogs, API handbooks, newsroom releases, and Next.js App Router Server Components.
+- [Markon Publication Renderer](/markon/render) — Complete guide to compiled publication layouts (`article`, `document`, `newsroom`, `minimal`) and SSR execution.
+- [Slash Commands Palette](/markon/slash-commands) — Notion-style floating `/` command palette and extension options.
+- [Gutter Block Drag Handles](/markon/block-handles) — Tactile block drag handles (`⋮⋮`) and reordering mechanics.
+- [Tables & Grids](/markon/tables-and-grids) — Interactive matrix pickers, row/column operations, and cell styling.
+- [Callouts & Collapsible Details](/markon/callouts-and-details) — GitHub-style callouts (`:::info`) and interactive accordions.
+- [Draft Management & Auto-Save](/markon/draft-management) — Local persistence, debounced auto-saving, and crash recovery.
+- [Media & File Uploads](/markon/media-and-uploads) — Direct S3/R2 uploads, drag-and-drop images, and video embedding.
+- [Production Examples](/markon/examples) — Production-grade CMS editors, newsroom publication pipelines, and technical documentation hubs.
 
-### Editor & Interactive Capabilities
+### Primitives & Setup
 
-- **[Slash Commands](./slash-commands.md)** — Keyboard-driven `/` command palette, built-in commands registry, and custom action extensions.
-- **[Block Drag Handles](./block-handles.md)** — Notion-style gutter drag handles, drop indicator lines, and contextual block action menus.
-- **[Tables and Grids](./tables-and-grids.md)** — 10×10 visual dimension picker, cell merging/splitting, and floating table toolbars.
-- **[Callouts & Collapsible Sections](./callouts-and-details.md)** — 4 semantic alert boxes (`info`, `success`, `warning`, `danger`) and toggle accordions.
-- **[Media & File Uploads](./media-and-uploads.md)** — Interactive image resizing, video embeds, downloadable file cards, and upload placeholders.
-- **[Draft Auto-Save & Recovery](./draft-management.md)** — Debounced persistence, save state indicators, and crash recovery workflows.
-
-### Getting Started & Setup
-
-- **[Installation & Setup](./getting-started/installation.md)** — Installing packages and configuring the single NUICSS stylesheet.
-- **[Editor Setup](./getting-started/setup.md)** — Initializing `<MarkonEditor />` and core editor instances.
-- **[Syntax & Formatting](./usage/markon-syntax.md)** — Supported Markdown syntax and 16 codeblock languages.
-- **[CDN Distribution](./getting-started/cdn.md)** — Loading Markon via unpkg/jsdelivr in vanilla HTML applications.
+- [Installation & Setup](/markon/installation) — Package installation, styling configuration, and peer dependencies.
+- [MarkonEditor Authoring Canvas](/markon/editor) — Full API reference for the rich text editor canvas.

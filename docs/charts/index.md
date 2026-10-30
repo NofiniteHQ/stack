@@ -4,30 +4,84 @@
 
 ---
 
-## Overview
+## Interactive Preview
 
-**Nofinite Charts** (`@nofinite/charts`) is an enterprise-grade data visualization suite engineered for analytical dashboards, cloud metrics telemetry, and high-density financial platforms.
+<Preview
+name="chart"
+vanillaCode={`import { Chart } from '@nofinite/charts';
+import '@nofinite/nuicss/styles.css';
 
-### Architectural Invariants
+const container = document.getElementById('chart-container');
 
-- **Precision D3 Mathematical Engine:** Built on precision D3 algorithms (`d3-shape`, `d3-scale`, `d3-array`) with native SVG rendering and zero virtual DOM rendering bottlenecks.
-- **Zero Downstream CSS Invariant:** All chart containers, frosted glass popovers, and animated keyframes are bundled directly into **NUICSS**. You only ever need a single stylesheet import (`import '@nofinite/nuicss/styles.css'`).
-- **OKLCH Perceptual Theming:** Automatically synchronizes with your active **NUICSS** palette (`var(--color-primary)`, `var(--color-success)`, `var(--color-warning)`, `var(--color-danger)`) with 0ms light/dark mode reactivity.
-- **High-Frequency Downsampling:** Built-in Largest Triangle Three Buckets (`downsampleLTTB`) downsamples 100,000+ points to preserve 60 FPS fluidity.
+// Mount responsive interactive bar chart directly to DOM
+const chart = new Chart({
+element: container,
+variant: 'bar',
+data: [
+{ label: 'Jan', value: 45 },
+{ label: 'Feb', value: 52 },
+{ label: 'Mar', value: 68 },
+{ label: 'Apr', value: 84 },
+{ label: 'May', value: 95 },
+{ label: 'Jun', value: 110 }
+],
+height: 240,
+showGrid: true,
+showAxes: true,
+showTooltip: true
+});
 
----
+// Update data dynamically
+// chart.update(newSampleData);
 
-## Key Capabilities
-
-- **Multi-Series Synchronization:** Synchronized Area, Grouped/Stacked Bar, and Multi-Scatter plots sharing unified scales.
-- **Micro-Charts (`<Sparkline />`):** Lightweight trendlines for KPI stat cards, table rows, and dashboard summaries.
-- **Frosted Glass Popovers:** Apple-grade popover cards featuring `backdrop-blur-xl`, specular hairline reflections, and tabular monospace numerals.
-- **Automated Accessibility (`generateA11yTable`):** Automated W3C data tables and ARIA regions for screen reader users.
-- **Universal DOM Core:** Zero-React math and render methods (`renderChart`) for vanilla JS, Vue, and Svelte integration.
+// Clean up when unmounting
+// chart.destroy();`}
+/>
 
 ---
 
 ## Quickstart
+
+### 1. Framework-Agnostic Core (`@nofinite/charts`)
+
+Mount directly to any DOM element without React. Works in **Vanilla JavaScript**, **TypeScript**, **Vue 3**, **Svelte 5**, **SolidJS**, or backend **Node.js**:
+
+```ts
+import { Chart, renderChart } from '@nofinite/charts';
+import '@nofinite/nuicss/styles.css';
+
+const container = document.getElementById('chart')!;
+
+// Method A: State-managed, responsive interactive instance
+const chart = new Chart({
+  element: container,
+  variant: 'area', // 'area' | 'line' | 'bar' | 'pie' | 'donut' | 'scatter'
+  data: [
+    { date: '2026-01-01', value: 42 },
+    { date: '2026-02-01', value: 58 },
+    { date: '2026-03-01', value: 74 },
+  ],
+  height: 280,
+  showGrid: true,
+  showAxes: true,
+  showTooltip: true,
+});
+
+// Method B: Pure isomorphic SVG HTML generator (zero DOM required)
+const svgHtml = renderChart({
+  variant: 'area',
+  data: [
+    { x: 1, y: 10 },
+    { x: 2, y: 25 },
+  ],
+  width: 600,
+  height: 300,
+});
+```
+
+### 2. React Adapter (`@nofinite/charts/react`)
+
+Declarative JSX components for React 18 & 19 applications:
 
 ```tsx
 import React from 'react';
@@ -48,11 +102,10 @@ export function LatencyChart() {
     <div className="w-full h-64 p-5 border border-default rounded-2xl bg-surface">
       <AreaChart
         data={metrics}
-        xKey="time"
-        yKey="latency"
-        color="var(--color-primary)"
+        xAccessor={(d) => d.time}
+        yAccessor={(d) => d.latency}
+        strokeColor="var(--color-primary)"
         showTooltip={true}
-        showAxes={true}
       />
     </div>
   );
@@ -61,24 +114,47 @@ export function LatencyChart() {
 
 ---
 
+## Architectural Invariants
+
+- **Universal Framework-Agnostic Core:** Zero React dependency required. The root export (`@nofinite/charts`) provides class-based DOM mounting, D3 math, downsampling, and SVG path generation. React (`@nofinite/charts/react`) is an optional adapter.
+- **Precision D3 Mathematical Engine:** Built on precision D3 algorithms (`d3-shape`, `d3-scale`, `d3-array`) with native SVG rendering and zero virtual DOM rendering bottlenecks.
+- **Zero Downstream CSS Invariant:** All chart containers, frosted glass popovers, and animated keyframes are bundled directly into **NUICSS**. You only ever need a single stylesheet import (`import '@nofinite/nuicss/styles.css'`).
+- **OKLCH Perceptual Theming:** Automatically synchronizes with your active **NUICSS** palette (`var(--color-primary)`, `var(--color-success)`, `var(--color-warning)`, `var(--color-danger)`) with 0ms light/dark mode reactivity.
+- **High-Frequency Downsampling:** Built-in Largest Triangle Three Buckets (`downsampleLTTB`) downsamples 100,000+ points to preserve 60 FPS fluidity.
+
+---
+
+## Supported Visualizations
+
+| Framework-Agnostic (`variant`) | React Component                             | Description                            | Best For                                         |
+| :----------------------------- | :------------------------------------------ | :------------------------------------- | :----------------------------------------------- |
+| `variant: 'area'`              | [`<AreaChart />`](/charts/area-chart)       | Filled area curves with gradient fills | Cumulative volume, bandwidth, time-series growth |
+| `variant: 'bar'`               | [`<BarChart />`](/charts/bar-chart)         | Vertical or categorical columns        | Categorical comparisons, revenue per quarter     |
+| `variant: 'line'`              | [`<LineChart />`](/charts/line-chart)       | Continuous smooth trendlines           | CPU load, real-time rates, stock prices          |
+| `variant: 'pie'` / `'donut'`   | [`<PieChart />`](/charts/pie-chart)         | Proportional circular segments         | Market share, segment allocation                 |
+| `variant: 'scatter'`           | [`<ScatterChart />`](/charts/scatter-chart) | Multidimensional X/Y coordinate points | Statistical distribution, clusters, correlations |
+| Direct Vector Path             | [`<Sparkline />`](/charts/sparklines)       | Ultra-lightweight trendline            | KPI summary cards, inline table rows             |
+
+---
+
 ## Documentation Directory
 
 ### Advanced Architecture & Deep Guides
 
-- **[Multi-Series Visualizations](./multi-series.md)** — Multi-series area charts, grouped/stacked bars, and multi-scatter plots on shared scales.
-- **[Sparklines & Micro-Charts](./sparklines.md)** — Minimalist `<Sparkline />` component for KPI cards and data table rows.
-- **[Theming & Glassmorphism](./theming.md)** — OKLCH palettes, frosted glass popovers (`backdrop-blur-xl`), and dark mode switching.
-- **[Accessibility (A11y) Standards](./accessibility.md)** — Screen reader support, automated data table generation (`generateA11yTable`), and keyboard navigation.
-- **[Vanilla Core & Math Engine](./vanilla-core.md)** — Pure D3 vector path generators and Largest Triangle Three Buckets (`downsampleLTTB`) downsampling.
-- **[Production Examples](./examples.md)** — SaaS Revenue Dashboard, Financial KPI Grid, and High-Density Telemetry.
+- [Vanilla Core & Math Engine](/charts/vanilla-core) — Pure D3 vector path generators, DOM mounting API, and Largest Triangle Three Buckets (`downsampleLTTB`) downsampling.
+- [Multi-Series Visualizations](/charts/multi-series) — Multi-series area charts, grouped/stacked bars, and multi-scatter plots on shared scales.
+- [Sparklines & Micro-Charts](/charts/sparklines) — Minimalist trendlines for KPI cards and data table rows.
+- [Theming & Glassmorphism](/charts/theming) — OKLCH palettes, frosted glass popovers (`backdrop-blur-xl`), and dark mode switching.
+- [Accessibility (A11y) Standards](/charts/accessibility) — Screen reader support, automated data table generation (`generateA11yTable`), and keyboard navigation.
+- [Exporting Charts](/charts/export) — Exporting SVG charts to PNG or standalone vector files.
+- [Production Examples](/charts/examples) — SaaS Revenue Dashboard, Financial KPI Grid, and High-Density Telemetry.
+- [Installation & Setup](/charts/installation) — Package installation, peer dependencies, and styling configuration.
 
-### Chart Components Catalog
+### Visualizations Catalog
 
-- **[AreaChart](./area-chart.md)** — Quantitative volume progression with smooth Bézier curves and gradient fills.
-- **[BarChart](./bar-chart.md)** — Categorical data distributions, stacked bars, and hover highlights.
-- **[LineChart](./line-chart.md)** — Multi-series trend monitoring with interactive marker points.
-- **[PieChart & DonutChart](./pie-chart.md)** — Radial distributions and central summary callouts.
-- **[ScatterChart](./scatter-chart.md)** — Two-dimensional coordinate projections and metric correlations.
-- **[ChartLegend](./legend.md)** — Interactive series toggles and categorical color keys.
-- **[Exporting Charts](./export.md)** — Exporting SVG charts to PNG or standalone vector files.
-- **[Installation & Setup](./installation.md)** — Package installation, peer dependencies, and styling configuration.
+- [AreaChart](/charts/area-chart) — Quantitative volume progression with smooth Bézier curves and gradient fills.
+- [BarChart](/charts/bar-chart) — Categorical data distributions, stacked bars, and hover highlights.
+- [LineChart](/charts/line-chart) — Multi-series trend monitoring with interactive marker points.
+- [PieChart & DonutChart](/charts/pie-chart) — Radial distributions and central summary callouts.
+- [ScatterChart](/charts/scatter-chart) — Two-dimensional coordinate projections and metric correlations.
+- [ChartLegend](/charts/legend) — Interactive series toggles and categorical color keys.

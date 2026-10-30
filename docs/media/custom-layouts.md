@@ -1,36 +1,99 @@
 # Headless Custom Player Layouts
 
-While `<VideoPlayer />` and `<AudioPlayer />` provide complete turnkey interfaces out of the box, applications often require **fully customized, brand-specific media experiences** (e.g., minimalist floating video widgets, background ambient loopers, or bespoke podcast bars).
+While turnkey players provide complete interfaces out of the box, applications frequently require **custom, brand-specific media experiences** (e.g. minimalist floating video widgets, background ambient loopers, or bespoke podcast bars).
 
-**Nofinite Media** re-exports low-level primitives (`MediaPlayer`, `MediaProvider`, `Track`) allowing you to compose completely custom UIs with standard HTML and **NUICSS** superclasses.
+**Nofinite Media** is designed as a headless engine first: you can disable default controls (`controls: false`) and compose custom interfaces with standard HTML/DOM elements or declarative React components using **NUICSS** superclasses.
 
----
+```ts
+// Framework-Agnostic Core (Zero React Dependency)
+import { createMediaPlayer, formatMediaTime } from '@nofinite/media';
 
-## Headless Architecture Overview
-
-```
-┌────────────────────────────────────────────────────────┐
-│ <MediaPlayer>                                          │
-│   ┌──────────────────────────────────────────────────┐ │
-│   │ <MediaProvider /> (Renders native video/audio)   │ │
-│   └──────────────────────────────────────────────────┘ │
-│   ┌──────────────────────────────────────────────────┐ │
-│   │ Custom UI Controls Layer (React + NUICSS)        │ │
-│   │   - Play/Pause Button                            │ │
-│   │   - Timeline Scrubber (useMediaState)            │ │
-│   │   - Volume Popover                               │ │
-│   │   - Picture-in-Picture Button (useMediaRemote)   │ │
-│   └──────────────────────────────────────────────────┘ │
-└────────────────────────────────────────────────────────┘
+// React Adapter (Headless Primitives & Hooks)
+import {
+  MediaPlayer,
+  MediaProvider,
+  useMediaState,
+  useMediaRemote,
+} from '@nofinite/media/react';
 ```
 
 ---
 
-## Complete Custom Player Implementation
+## 1. Usage in Vanilla TypeScript / DOM (Core First)
 
-Below is a complete, custom video player built using headless primitives:
+In pure JavaScript or TypeScript, pass `controls: false` to `createMediaPlayer()`. This initializes the video engine without default control bars, allowing you to attach your own bespoke control elements:
+
+```ts
+import { createMediaPlayer, formatMediaTime } from '@nofinite/media';
+import '@nofinite/nuicss/styles.css';
+
+const container = document.getElementById('headless-mount')!;
+
+// 1. Initialize Headless Video Player (No Default Controls)
+const player = createMediaPlayer({
+  src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+  type: 'video',
+  aspectRatio: '16/9',
+  controls: false, // Disables default Vidstack video layout
+  autoplay: false,
+});
+
+// 2. Mount Player Container
+container.appendChild(player.element);
+
+// 3. Build Custom Control Overlay in Vanilla DOM
+const overlay = document.createElement('div');
+overlay.className =
+  'absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between text-white text-xs z-10';
+
+const playBtn = document.createElement('button');
+playBtn.className =
+  'w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center font-bold transition-colors';
+playBtn.textContent = '▶';
+
+const timeDisplay = document.createElement('span');
+timeDisplay.className = 'font-mono text-xs opacity-90';
+timeDisplay.textContent = '0:00 / 0:00';
+
+overlay.appendChild(playBtn);
+overlay.appendChild(timeDisplay);
+player.element.appendChild(overlay);
+
+// 4. Bind Control Logic to Player Instance
+playBtn.addEventListener('click', () => {
+  const state = player.getState();
+  if (state.paused) {
+    player.play();
+  } else {
+    player.pause();
+  }
+});
+
+player.on('play', () => {
+  playBtn.textContent = '❚❚';
+});
+
+player.on('pause', () => {
+  playBtn.textContent = '▶';
+});
+
+player.on('timeupdate', () => {
+  const { currentTime, duration } = player.getState();
+  timeDisplay.textContent = `${formatMediaTime(
+    currentTime
+  )} / ${formatMediaTime(duration)}`;
+});
+```
+
+---
+
+## 2. Usage in React
+
+In React, compose low-level headless primitives re-exported from `@nofinite/media/react`:
 
 ```tsx
+'use client';
+
 import React, { useRef } from 'react';
 import {
   MediaPlayer,
@@ -46,60 +109,19 @@ function CustomVideoControls() {
   const paused = useMediaState('paused');
   const currentTime = useMediaState('currentTime');
   const duration = useMediaState('duration');
-  const volume = useMediaState('volume');
-  const isFullscreen = useMediaState('fullscreen');
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
 
   return (
-    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col gap-2 text-white">
-      {/* Timeline Scrubber */}
-      <input
-        type="range"
-        min={0}
-        max={duration || 100}
-        value={currentTime}
-        onChange={(e) => remote.seek(Number(e.target.value))}
-        className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-primary"
-      />
+    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between text-white text-xs z-10">
+      <button
+        onClick={() => (paused ? remote.play() : remote.pause())}
+        className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center font-bold transition-colors"
+      >
+        {paused ? '▶' : '❚❚'}
+      </button>
 
-      <div className="flex items-center justify-between text-xs">
-        {/* Play/Pause & Time */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => (paused ? remote.play() : remote.pause())}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors font-bold"
-          >
-            {paused ? '▶' : '❚❚'}
-          </button>
-          <span className="font-mono">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-        </div>
-
-        {/* Volume & Fullscreen */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => remote.changeVolume(volume === 0 ? 0.8 : 0)}
-            className="hover:opacity-80 transition-opacity"
-          >
-            {volume === 0 ? '🔇' : '🔊'}
-          </button>
-
-          <button
-            onClick={() =>
-              isFullscreen ? remote.exitFullscreen() : remote.enterFullscreen()
-            }
-            className="hover:opacity-80 transition-opacity"
-          >
-            ⛶
-          </button>
-        </div>
-      </div>
+      <span className="font-mono text-xs">
+        {Math.floor(currentTime)}s / {Math.floor(duration || 0)}s
+      </span>
     </div>
   );
 }
@@ -125,37 +147,43 @@ export function HeadlessVideoPlayer() {
 
 ---
 
-## Ambient Background Video Looper
+## Recipe: Ambient Hero Background Video Looper
 
-Create silent, looping background hero videos with zero player chrome:
+Zero-UI background video with muted autoplay and loop:
+
+### Vanilla TypeScript
+
+```ts
+const backgroundLooper = createMediaPlayer({
+  src: '/assets/ambient-aurora.mp4',
+  type: 'video',
+  controls: false,
+  autoplay: true,
+  muted: true,
+  loop: true,
+  playsinline: true,
+  aspectRatio: '16/9',
+  className: 'w-full h-full object-cover pointer-events-none opacity-40',
+});
+
+document
+  .getElementById('hero-background')!
+  .appendChild(backgroundLooper.element);
+```
+
+### React
 
 ```tsx
-export function HeroAmbientVideo() {
-  return (
-    <div className="relative w-full h-[480px] overflow-hidden rounded-3xl">
-      <MediaPlayer
-        src="https://media.example.com/ambient-loop.mp4"
-        autoplay={true}
-        loop={true}
-        muted={true}
-        playsinline={true}
-        className="w-full h-full object-cover pointer-events-none"
-      >
-        <MediaProvider />
-      </MediaPlayer>
-
-      {/* Hero Headline Overlay */}
-      <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-6 text-white">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight">
-            Enterprise Infrastructure Scaled
-          </h1>
-          <p className="mt-2 text-sm text-white/80">
-            Powering high-frequency global clusters with zero latency.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+<div className="relative w-full h-[500px] overflow-hidden">
+  <MediaPlayer
+    src="/assets/ambient-aurora.mp4"
+    autoplay={true}
+    muted={true}
+    loop={true}
+    playsinline={true}
+    className="w-full h-full object-cover pointer-events-none opacity-40"
+  >
+    <MediaProvider />
+  </MediaPlayer>
+</div>
 ```

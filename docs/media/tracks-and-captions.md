@@ -2,49 +2,92 @@
 
 **Nofinite Media** provides comprehensive support for WebVTT text tracks, covering multi-language closed captions, subtitles, interactive chapter markers, and timeline thumbnail scrubbing.
 
+```ts
+// Framework-Agnostic Core (Zero React Dependency)
+import { createMediaPlayer, type MediaTrack } from '@nofinite/media';
+
+// React Adapter
+import { VideoPlayer } from '@nofinite/media/react';
+```
+
 ---
 
-## Key Capabilities
+## 1. Usage in Vanilla TypeScript / DOM (Core First)
 
-- **Multi-Language Subtitles & Captions:** Add localized tracks with language tags and default activation flags.
-- **Interactive Chapter Markers:** Segments the timeline into named chapters that display in a popover menu.
-- **Thumbnail Preview Scrubbing:** Hovering or dragging across the timeline displays synchronized visual video frame previews.
-- **Accessible Text Styling:** Complies with FCC and W3C caption standards with customizable typography and backgrounds.
+In pure JavaScript or TypeScript, pass an array of `MediaTrack` objects and a storyboard `.vtt` URL to `createMediaPlayer()`:
 
----
-
-## Configuring WebVTT Tracks
-
-Pass an array of `MediaTrack` objects to `<VideoPlayer />` or `<AudioPlayer />`:
-
-```tsx
-import React from 'react';
-import { VideoPlayer, type MediaTrack } from '@nofinite/media/react';
+```ts
+import { createMediaPlayer, type MediaTrack } from '@nofinite/media';
 import '@nofinite/nuicss/styles.css';
 
-const videoTracks: MediaTrack[] = [
-  // Subtitles
+const container = document.getElementById('player-root')!;
+
+// 1. Define Subtitle, Caption & Chapter Tracks
+const tracks: MediaTrack[] = [
   {
-    src: 'https://media.example.com/subs/english.vtt',
+    src: 'https://media.example.com/subs/en.vtt',
     label: 'English',
     language: 'en',
     kind: 'subtitles',
     default: true,
   },
   {
-    src: 'https://media.example.com/subs/spanish.vtt',
+    src: 'https://media.example.com/subs/es.vtt',
     label: 'Español',
     language: 'es',
     kind: 'subtitles',
   },
   {
-    src: 'https://media.example.com/subs/japanese.vtt',
-    label: '日本語',
-    language: 'ja',
+    src: 'https://media.example.com/chapters/architecture.vtt',
+    label: 'Chapters',
+    language: 'en',
+    kind: 'chapters',
+    default: true,
+  },
+];
+
+// 2. Initialize Media Player with WebVTT Tracks & Storyboard Thumbnails
+const player = createMediaPlayer({
+  src: 'https://stream.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA.m3u8',
+  type: 'video',
+  tracks,
+  thumbnails:
+    'https://image.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA/storyboard.vtt',
+  aspectRatio: '16/9',
+  controls: true,
+});
+
+// 3. Mount into DOM
+container.appendChild(player.element);
+```
+
+---
+
+## 2. Usage in React
+
+In React applications, pass `tracks` and `thumbnails` directly to `<VideoPlayer />`:
+
+```tsx
+'use client';
+
+import React from 'react';
+import { VideoPlayer, type MediaTrack } from '@nofinite/media/react';
+import '@nofinite/nuicss/styles.css';
+
+const videoTracks: MediaTrack[] = [
+  {
+    src: 'https://media.example.com/subs/en.vtt',
+    label: 'English',
+    language: 'en',
+    kind: 'subtitles',
+    default: true,
+  },
+  {
+    src: 'https://media.example.com/subs/es.vtt',
+    label: 'Español',
+    language: 'es',
     kind: 'subtitles',
   },
-
-  // Chapter Markers
   {
     src: 'https://media.example.com/chapters/architecture.vtt',
     label: 'Chapters',
@@ -56,73 +99,86 @@ const videoTracks: MediaTrack[] = [
 
 export function CaptionedVideoPlayer() {
   return (
-    <VideoPlayer
-      src="https://media.example.com/video/master.mp4"
-      poster="https://media.example.com/video/poster.jpg"
-      tracks={videoTracks}
-      thumbnails="https://media.example.com/video/thumbnails.vtt"
-      aspectRatio="16/9"
-    />
+    <div className="w-full max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-default bg-black">
+      <VideoPlayer
+        src="https://stream.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA.m3u8"
+        tracks={videoTracks}
+        thumbnails="https://image.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA/storyboard.vtt"
+        aspectRatio="16/9"
+        controls={true}
+      />
+    </div>
   );
 }
 ```
 
 ---
 
-## Chapter Markers Structure (`chapters.vtt`)
+## WebVTT Track Formats
 
-WebVTT chapter files divide the timeline into distinct, named segments. Hovering over chapter boundaries displays the chapter title:
+### 1. Subtitles & Closed Captions (`subtitles.vtt`)
+
+Standard WebVTT time-coded cues for dialog translation and accessibility:
 
 ```vtt
 WEBVTT
 
-00:00.000 --> 01:15.000
-Introduction & Distributed Architecture
+00:00:01.000 --> 00:00:04.500
+Welcome to the Nofinite Media architecture deep dive.
 
-01:15.000 --> 04:30.000
-Vector Math Engine Benchmarks
-
-04:30.000 --> 08:45.000
-OKLCH Design Token Invariants
-
-08:45.000 --> 12:00.000
-Summary & Production Rollout
+00:00:05.000 --> 00:00:09.000
+In this session, we examine framework-agnostic video pipelines.
 ```
 
-When chapter tracks are loaded:
+### 2. Interactive Chapter Notches (`chapters.vtt`)
 
-- The progress bar visually renders subtle divider notches between chapters.
-- The chapter title appears in the timeline tooltip during scrubbing.
-- The settings menu reveals a **Chapters** drawer for jumping directly between sections.
+Chapters generate interactive visual segments along the timeline scrubber with title tooltip callouts:
+
+```vtt
+WEBVTT
+
+00:00:00.000 --> 00:02:15.000
+1. Executive Summary & Overview
+
+00:02:15.000 --> 00:07:45.000
+2. Custom Element Video Pipelines
+
+00:07:45.000 --> 00:15:30.000
+3. ABR Manifest Demuxing (HLS/DASH)
+```
+
+### 3. Storyboard Thumbnails (`thumbnails.vtt`)
+
+Thumbnail scrubbers allow viewers to preview video frames by hovering over the timeline scrubber before seeking. Coordinates reference a mosaic sprite sheet:
+
+```vtt
+WEBVTT
+
+00:00:00.000 --> 00:00:05.000
+/sprites/storyboard.webp#xywh=0,0,160,90
+
+00:00:05.000 --> 00:00:10.000
+/sprites/storyboard.webp#xywh=160,0,160,90
+
+00:00:10.000 --> 00:00:15.000
+/sprites/storyboard.webp#xywh=320,0,160,90
+```
 
 ---
 
-## WebVTT Thumbnail Scrubbers (`thumbnails.vtt`)
+## `MediaTrack` Interface Reference
 
-Thumbnail scrubbers allow viewers to preview video frames by hovering over the timeline scrubber before seeking.
-
-### WebVTT Format with Image Sprites
-
-```vtt
-WEBVTT
-
-00:00.000 --> 00:05.000
-sprite.webp#xywh=0,0,160,90
-
-00:05.000 --> 00:10.000
-sprite.webp#xywh=160,0,160,90
-
-00:10.000 --> 00:15.000
-sprite.webp#xywh=320,0,160,90
+```ts
+export interface MediaTrack {
+  /** URL to the .vtt track file */
+  src: string;
+  /** Human-readable label displayed in the settings track picker */
+  label: string;
+  /** Two-letter BCP 47 language code (e.g. 'en', 'es', 'fr', 'ja') */
+  language: string;
+  /** Track role: 'subtitles' | 'captions' | 'chapters' | 'descriptions' | 'metadata' */
+  kind?: 'subtitles' | 'captions' | 'chapters' | 'descriptions' | 'metadata';
+  /** Set to true to activate track by default */
+  default?: boolean;
+}
 ```
-
-Simply pass the URL of the `.vtt` file to the `thumbnails` prop:
-
-```tsx
-<VideoPlayer
-  src="https://stream.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA.m3u8"
-  thumbnails="https://image.mux.com/v69R127x00KSKGrGQgahP800ugny00JvlA/storyboard.vtt"
-/>
-```
-
-The player automatically loads the sprite image, extracts the coordinate slice for the hovered timestamp, and renders a frosted thumbnail card above the playhead.
