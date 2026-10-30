@@ -15,6 +15,17 @@ const externalDeps = [
   'react/jsx-runtime',
 ].map((dep) => new RegExp(`^${dep}(\\/.*)?$`));
 
+const componentsDir = path.resolve(__dirname, 'src/components');
+const componentEntries = Object.fromEntries(
+  fs
+    .readdirSync(componentsDir, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => [
+      `components/${dirent.name}/index`,
+      path.resolve(componentsDir, dirent.name, 'index.ts'),
+    ])
+);
+
 export default defineConfig({
   root: __dirname,
 
@@ -96,7 +107,9 @@ export default defineConfig({
 
     lib: {
       entry: {
-        index: 'src/index.build.ts',
+        index: path.resolve(__dirname, 'src/index.build.ts'),
+        'utils/index': path.resolve(__dirname, 'src/utils/index.ts'),
+        ...componentEntries,
       },
       name: 'nui',
       cssFileName: 'styles',

@@ -20,16 +20,34 @@
     },
     "./styles.css": "./dist/styles.css",
     "./components/*": {
-      "types": "./dist/types/components/*.d.ts",
-      "import": "./dist/components/*.js",
-      "require": "./dist/components/*.cjs",
-      "default": "./dist/components/*.js"
+      "types": "./dist/types/components/*/index.d.ts",
+      "import": "./dist/components/*/index.js",
+      "require": "./dist/components/*/index.cjs",
+      "default": "./dist/components/*/index.js"
+    },
+    "./components/*/*": {
+      "types": "./dist/types/components/*/*.d.ts",
+      "import": "./dist/components/*/*.js",
+      "require": "./dist/components/*/*.cjs",
+      "default": "./dist/components/*/*.js"
+    },
+    "./utils": {
+      "types": "./dist/types/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs",
+      "default": "./dist/utils/index.js"
     },
     "./utils/*": {
       "types": "./dist/types/utils/*.d.ts",
       "import": "./dist/utils/*.js",
       "require": "./dist/utils/*.cjs",
       "default": "./dist/utils/*.js"
+    },
+    "./utils/*/*": {
+      "types": "./dist/types/utils/*/*.d.ts",
+      "import": "./dist/utils/*/*.js",
+      "require": "./dist/utils/*/*.cjs",
+      "default": "./dist/utils/*/*.js"
     },
     "./package.json": "./package.json"
   },

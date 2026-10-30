@@ -2,10 +2,55 @@
 
 const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 const { globSync } = require('glob');
 
 const args = process.argv.slice(2);
 const command = args[0];
+
+function resolveCompilerCli() {
+  // 1. Direct sibling in monorepo development
+  const monorepoCli = path.resolve(__dirname, '../../nuicss-cli/dist/index.js');
+  if (fs.existsSync(monorepoCli)) {
+    return monorepoCli;
+  }
+  // 2. Local node_modules relative to current working directory
+  const cwdCli = path.resolve(
+    process.cwd(),
+    'node_modules/nuicss/dist/index.js'
+  );
+  if (fs.existsSync(cwdCli)) {
+    return cwdCli;
+  }
+  // 3. require.resolve in parent or hoisted node_modules
+  try {
+    const pkgName = 'nui' + 'css';
+    return require.resolve(`${pkgName}/dist/index.js`, {
+      paths: [process.cwd(), __dirname],
+    });
+  } catch (_) {
+    // not found
+  }
+  return null;
+}
+
+function delegateToCompilerCli() {
+  const cliPath = resolveCompilerCli();
+  if (cliPath) {
+    import(pathToFileURL(cliPath).href)
+      .then((m) => {
+        if (m && typeof m.runCli === 'function') {
+          return m.runCli(process.argv);
+        }
+      })
+      .catch((err) => {
+        console.error(`\n[NUICSS] ✖ Error: ${err?.message || err}\n`);
+        process.exit(1);
+      });
+    return true;
+  }
+  return false;
+}
 
 if (!command || command === '--help' || command === '-h') {
   console.log(`
@@ -17,6 +62,11 @@ Usage:
 Commands:
   init              Initialize NUICSS configuration and VS Code / Cursor IntelliSense
   migrate [path]    Migrate legacy Tailwind/utility markup to NUICSS superclasses
+  compile [options] Compile CSS stylesheets using NUICSS compiler
+  check             Validate markup against NUICSS design tokens
+  tokens            Inspect design tokens and color scales
+  add <component>   Add pre-built component template
+  list              List all available superclasses and tokens
 
 Options:
   --dry-run         Preview changes without modifying files
@@ -167,7 +217,15 @@ if (command === 'migrate') {
   process.exit(0);
 }
 
-console.error(
-  `Unknown command: ${command}. Run "npx @nofinite/nuicss --help" for available commands.`
-);
-process.exit(1);
+// If command is not init or migrate, delegate to standalone compiler CLI if available
+if (!delegateToCompilerCli()) {
+  console.error(
+    `\nUnknown command: "${command}".\n\n` +
+      `If you are trying to use the NUICSS compiler (compile, build, tokens, check, add, list), please install the standalone compiler CLI:\n\n` +
+      `  npm install -D nuicss\n\n` +
+      `or run it directly:\n\n` +
+      `  npx nuicss ${command}\n\n` +
+      `Run "npx @nofinite/nuicss --help" for available commands.\n`
+  );
+  process.exit(1);
+}

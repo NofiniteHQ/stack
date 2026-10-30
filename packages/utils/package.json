@@ -47,9 +47,14 @@
       "default": "./dist/env/index.js"
     },
     "./email": {
-      "types": "./dist/types/email/index.d.ts",
-      "import": "./dist/email/index.js",
-      "default": "./dist/email/index.js"
+      "types": "./dist/types/zeptomail/index.d.ts",
+      "import": "./dist/zeptomail/index.js",
+      "default": "./dist/zeptomail/index.js"
+    },
+    "./zeptomail": {
+      "types": "./dist/types/zeptomail/index.d.ts",
+      "import": "./dist/zeptomail/index.js",
+      "default": "./dist/zeptomail/index.js"
     },
     "./types/*": {
       "types": "./dist/types/*.d.ts",
@@ -58,6 +63,8 @@
   },
   "files": [
     "dist",
+    "!dist/node_modules",
+    "!dist/**/*.tsbuildinfo",
     "README.md",
     "LICENSE",
     "package.json"

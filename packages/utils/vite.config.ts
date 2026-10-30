@@ -22,7 +22,15 @@ export default defineConfig({
     reportCompressedSize: true,
 
     lib: {
-      entry: 'src/index.ts',
+      entry: {
+        index: 'src/index.ts',
+        'env/index': 'src/env/index.ts',
+        'jwt/index': 'src/jwt/index.ts',
+        'otp/index': 'src/otp/index.ts',
+        'password/index': 'src/password/index.ts',
+        'uuid/index': 'src/uuid/index.ts',
+        'zeptomail/index': 'src/zeptomail/index.ts',
+      },
       name: '@nofinite/utils',
     },
 

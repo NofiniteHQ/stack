@@ -47,7 +47,7 @@ PHASE 3: Release Readiness & Product Adoption [UPCOMING]
 
 _Execution note: The 5 batches below are continuous implementation groups within Phase 2. The Main Agent executes continuously through the approved roadmap without requiring separate approval gates between batches, unless a breaking API change or material scope expansion arises._
 
-### Batch A: Security & Functional Correctness (Priority: P0)
+### Batch A: Security & Functional Correctness (Priority: P0) — [STATUS: ✅ COMPLETE & VERIFIED]
 
 Focus: Remediate all confirmed injection and execution vulnerabilities.
 
@@ -59,7 +59,7 @@ Focus: Remediate all confirmed injection and execution vulnerabilities.
 
 ---
 
-### Batch B: Package & Build Reliability (Priority: P0)
+### Batch B: Package & Build Reliability (Priority: P0) — [STATUS: ✅ COMPLETE & VERIFIED]
 
 Focus: Resolve broken subpath exports, binary collisions, and failing workspace build/test scripts.
 
