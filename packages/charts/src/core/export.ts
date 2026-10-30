@@ -62,14 +62,94 @@ export function exportToSVG(
   svgElement: SVGElement,
   filename = 'chart.svg'
 ): string {
+  let targetSvg: SVGElement = svgElement;
+
+  if (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined' &&
+    typeof svgElement.cloneNode === 'function'
+  ) {
+    const clone = svgElement.cloneNode(true) as SVGElement;
+
+    if (typeof window.getComputedStyle === 'function') {
+      const origEls = [
+        svgElement,
+        ...Array.from(svgElement.querySelectorAll('*')),
+      ];
+      const cloneEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
+      const propsToInline = [
+        'fill',
+        'stroke',
+        'stroke-width',
+        'stroke-dasharray',
+        'stroke-linecap',
+        'stroke-linejoin',
+        'opacity',
+        'font-family',
+        'font-size',
+        'font-weight',
+        'text-anchor',
+        'dominant-baseline',
+      ];
+
+      for (let i = 0; i < origEls.length; i++) {
+        const orig = origEls[i];
+        const dest = cloneEls[i];
+        if (
+          !orig ||
+          !dest ||
+          !(orig instanceof Element) ||
+          !(dest instanceof SVGElement)
+        )
+          continue;
+        try {
+          const computed = window.getComputedStyle(orig);
+          for (const prop of propsToInline) {
+            const val = computed.getPropertyValue(prop);
+            if (val && val !== 'normal' && val !== 'auto') {
+              dest.style.setProperty(prop, val);
+            }
+          }
+        } catch {
+          // Ignore DOM exceptions during computed style reading in mocked environments
+        }
+      }
+    }
+
+    const bbox =
+      typeof svgElement.getBoundingClientRect === 'function'
+        ? svgElement.getBoundingClientRect()
+        : { width: 600, height: 300 };
+    const w = bbox.width || 600;
+    const h = bbox.height || 300;
+
+    if (!clone.getAttribute('width')) {
+      clone.setAttribute('width', String(w));
+    }
+    if (!clone.getAttribute('height')) {
+      clone.setAttribute('height', String(h));
+    }
+    if (!clone.getAttribute('xmlns')) {
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    }
+    if (!clone.getAttribute('viewBox')) {
+      clone.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    }
+
+    targetSvg = clone;
+  }
+
   const serializer = new XMLSerializer();
-  let source = serializer.serializeToString(svgElement);
+  let source = serializer.serializeToString(targetSvg);
 
   if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
     source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
   }
 
-  const bbox = svgElement.getBoundingClientRect();
+  const bbox =
+    typeof svgElement.getBoundingClientRect === 'function'
+      ? svgElement.getBoundingClientRect()
+      : { width: 600, height: 300 };
   const w = bbox.width || 600;
   const h = bbox.height || 300;
   if (!source.includes('width=')) {
@@ -117,10 +197,15 @@ export function exportToPNG(
 
     const image = new Image();
     image.onload = () => {
-      const bbox = svgElement.getBoundingClientRect();
+      const bbox =
+        typeof svgElement.getBoundingClientRect === 'function'
+          ? svgElement.getBoundingClientRect()
+          : { width: 600, height: 300 };
+      const w = bbox.width || 600;
+      const h = bbox.height || 300;
       const canvas = document.createElement('canvas');
-      canvas.width = (bbox.width || 600) * scale;
-      canvas.height = (bbox.height || 300) * scale;
+      canvas.width = w * scale;
+      canvas.height = h * scale;
 
       const ctx = canvas.getContext('2d');
       if (ctx) {

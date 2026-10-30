@@ -8,6 +8,8 @@ import {
   renderChart,
   Chart,
   defaultMargin,
+  exportToSVG,
+  renderTooltipHtml,
 } from './index';
 
 describe('@nofinite/charts math engine', () => {
@@ -210,5 +212,48 @@ describe('@nofinite/charts LTTB downsampling algorithm', () => {
     );
 
     expect(result.points.length).toBe(25);
+  });
+});
+
+describe('@nofinite/charts export & tooltip enhancements', () => {
+  it('generates valid color-mix box-shadow in tooltip swatches without invalid hex alpha concatenation', () => {
+    const html = renderTooltipHtml({
+      title: 'Metrics',
+      items: [
+        {
+          color: 'var(--chart-1, var(--color-primary))',
+          label: 'Revenue',
+          value: '$50k',
+        },
+      ],
+    });
+
+    expect(html).toContain(
+      'color-mix(in srgb, var(--chart-1, var(--color-primary)) 35%, transparent)'
+    );
+    expect(html).not.toContain('55;');
+  });
+
+  it('exportToSVG embeds xmlns, viewBox, and inlines computed presentation styles into SVG clone', () => {
+    const svg = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg'
+    ) as SVGElement;
+    const path = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'path'
+    ) as SVGElement;
+    path.style.fill = 'rgb(59, 130, 246)';
+    path.style.stroke = 'rgb(30, 64, 175)';
+    svg.appendChild(path);
+    document.body.appendChild(svg);
+
+    const serialized = exportToSVG(svg, '');
+    document.body.removeChild(svg);
+
+    expect(serialized).toContain('xmlns="http://www.w3.org/2000/svg"');
+    expect(serialized).toContain('viewBox=');
+    expect(serialized).toContain('fill: rgb(59, 130, 246)');
+    expect(serialized).toContain('stroke: rgb(30, 64, 175)');
   });
 });

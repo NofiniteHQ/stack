@@ -132,11 +132,14 @@ export function DateRangePicker({
     return cleanup;
   }, [open, refs.floating, range]);
 
+  const prevOpenRef = useRef(open);
   useEffect(() => {
-    if (!open) {
+    if (prevOpenRef.current && !open) {
       restoreFocus(triggerRef.current);
-      return;
     }
+    prevOpenRef.current = open;
+
+    if (!open) return;
     const timeoutId = setTimeout(() => {
       if (calendarRef.current) {
         const selectedBtn =
