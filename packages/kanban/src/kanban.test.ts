@@ -11,12 +11,11 @@ import {
   createKanbanStore,
   renderKanbanHTML,
   type KanbanColumn,
-  Kanban,
-  type KanbanHandle,
   matchCardFilter,
   hasActiveFilter,
   type KanbanFilterOptions,
 } from './index';
+import { Kanban, type KanbanHandle } from './react';
 
 describe('@nofinite/kanban reordering engine', () => {
   it('reorders array elements immutably', () => {

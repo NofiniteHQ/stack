@@ -58,14 +58,11 @@ export default defineConfig({
     sourcemap: true,
     reportCompressedSize: true,
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'NofiniteLocale',
-      formats: ['es', 'cjs', 'iife'],
-      fileName: (format) => {
-        if (format === 'es') return 'index.js';
-        if (format === 'cjs') return 'index.cjs';
-        return 'index.global.js';
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        'react/index': path.resolve(__dirname, 'src/react/index.ts'),
       },
+      name: 'NofiniteLocale',
     },
 
     rollupOptions: {
@@ -74,25 +71,16 @@ export default defineConfig({
       output: [
         {
           format: 'es',
-          entryFileNames: 'index.js',
+          entryFileNames: '[name].js',
+          chunkFileNames: 'chunks/[name]-[hash].js',
           assetFileNames: sharedAssetFileNames,
         },
         {
           format: 'cjs',
-          entryFileNames: 'index.cjs',
+          entryFileNames: '[name].cjs',
+          chunkFileNames: 'chunks/[name]-[hash].cjs',
           exports: 'named',
           assetFileNames: sharedAssetFileNames,
-        },
-        {
-          format: 'iife',
-          name: 'NofiniteLocale',
-          entryFileNames: 'index.global.js',
-          assetFileNames: sharedAssetFileNames,
-          globals: {
-            react: 'React',
-            'react-dom': 'ReactDOM',
-            'react/jsx-runtime': 'ReactJSXRuntime',
-          },
         },
       ],
     },
@@ -102,6 +90,6 @@ export default defineConfig({
     watch: false,
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
   },
 });

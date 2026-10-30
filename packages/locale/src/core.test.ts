@@ -9,6 +9,7 @@ import {
   formatCurrency,
   formatRelativeTime,
   formatNumber,
+  getDirection,
 } from './core';
 import { LocaleProvider, useLocale } from './react';
 
@@ -150,6 +151,31 @@ describe('Locale Core Logic & Native Intl Engine', () => {
     it('formats compact notation', () => {
       const formatted = formatNumber(1500000, { notation: 'compact' });
       expect(formatted).toBe('1.5M');
+    });
+  });
+
+  describe('getDirection', () => {
+    it('returns ltr for English and French', () => {
+      expect(getDirection('en-US')).toBe('ltr');
+      expect(getDirection('fr-FR')).toBe('ltr');
+    });
+
+    it('returns rtl for Arabic, Hebrew, and Persian', () => {
+      expect(getDirection('ar-EG')).toBe('rtl');
+      expect(getDirection('he')).toBe('rtl');
+      expect(getDirection('fa-IR')).toBe('rtl');
+    });
+
+    it('returns ltr for empty string', () => {
+      expect(getDirection('')).toBe('ltr');
+    });
+
+    it('handles known RTL locales through fallback', () => {
+      expect(getDirection('ur')).toBe('rtl');
+      expect(getDirection('ps')).toBe('rtl');
+      expect(getDirection('sd')).toBe('rtl');
+      expect(getDirection('ug')).toBe('rtl');
+      expect(getDirection('yi')).toBe('rtl');
     });
   });
 

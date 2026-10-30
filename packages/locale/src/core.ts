@@ -129,3 +129,52 @@ export function formatNumber(
 ): string {
   return new Intl.NumberFormat(locale, options).format(value);
 }
+
+const RTL_LANGUAGES = new Set(['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'ug', 'yi']);
+
+/**
+ * Determines text direction ('ltr' or 'rtl') for a given BCP 47 locale tag.
+ *
+ * Uses native Intl.Locale (with textInfo) when available, falling back
+ * to a standardized set of known right-to-left language codes:
+ * Arabic (ar), Hebrew (he), Persian/Farsi (fa), Urdu (ur), Pashto (ps),
+ * Sindhi (sd), Uyghur (ug), and Yiddish (yi).
+ *
+ * @param locale - BCP 47 language tag (e.g., 'en-US', 'ar-EG', 'he')
+ * @returns 'ltr' | 'rtl'
+ */
+export function getDirection(locale: string): 'ltr' | 'rtl' {
+  if (!locale || typeof locale !== 'string') {
+    return 'ltr';
+  }
+
+  const trimmed = locale.trim();
+  if (!trimmed) {
+    return 'ltr';
+  }
+
+  // Extract base language subtag (e.g., 'ar-EG' -> 'ar') for fallback
+  const langSubtag = trimmed.split(/[-_]/)[0]?.toLowerCase() || '';
+
+  // 1. Try native Intl.Locale if available
+  try {
+    if (typeof Intl !== 'undefined' && 'Locale' in Intl) {
+      const loc = new Intl.Locale(trimmed) as any;
+      const textInfo =
+        loc.textInfo ??
+        (typeof loc.getTextInfo === 'function' ? loc.getTextInfo() : undefined);
+      if (textInfo?.direction === 'rtl' || textInfo?.direction === 'ltr') {
+        return textInfo.direction;
+      }
+    }
+  } catch {
+    // If Intl.Locale constructor throws (e.g., invalid/malformed tag), fall through
+  }
+
+  // 2. Fallback for known RTL locales
+  if (RTL_LANGUAGES.has(langSubtag)) {
+    return 'rtl';
+  }
+
+  return 'ltr';
+}

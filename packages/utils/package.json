@@ -66,6 +66,10 @@
       "default": "./dist/types/*.d.ts"
     }
   },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
+  },
   "files": [
     "dist",
     "!dist/**/*.tsbuildinfo",
