@@ -87,3 +87,11 @@ Once the GitHub Pull Request is reviewed and merged into `dev`:
 3. **Ecosystem Product Adoption:**
    - Execute `nofinite.com` dependency upgrades to `@nofinite/nui@^3.2.0` and `@nofinite/nuicss@^3.2.0`.
    - Run cross-repo documentation sync with `oss-docs` and validate interactive component sandboxes.
+
+---
+
+## 6. Unified Quality Platform Initiative: Nofinite UI Quality Lab
+
+- **Repository:** `d:\ui-quality-lab` (`NofiniteHQ/ui-quality-lab.git`)
+- **Relationship:** Dedicated testing and verification platform consuming `@nofinite/*` and `nuix`.
+- **Roadmap:** See authoritative execution roadmap in `d:\ui-quality-lab\implementation_plan.md`.

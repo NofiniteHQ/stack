@@ -40,12 +40,13 @@ Maintain, harden, and elevate the **Nofinite Stack** as a production-grade engin
 
 ## 2. Discovered Repository Topology & Boundaries
 
-| Repository Directory | Remote URL                                       | Branch     | Local HEAD | Remote HEAD | Sync Status                                        |
-| :------------------- | :----------------------------------------------- | :--------- | :--------- | :---------- | :------------------------------------------------- |
-| `d:\stack`           | `https://github.com/NofiniteHQ/stack.git`        | `dev`      | `f24a360`  | `f24a360`   | **Synchronized** (`origin/phase-2-implementation`) |
-| `d:\nuix`            | `https://github.com/NofiniteHQ/nuix.git`         | `dev`      | `78b42dc`  | `78b42dc`   | **Synchronized** (`origin/dev`)                    |
-| `d:\oss-docs`        | `https://github.com/NofiniteHQ/oss-docs.git`     | `dev`      | `9046358`  | `9046358`   | **Clean** (No push needed)                         |
-| `d:\nofinite.com`    | `https://github.com/NofiniteHQ/nofinite.com.git` | `refactor` | `feb96b2`  | —           | **Preserved** (User changes intact)                |
+| Repository Directory | Remote URL                                         | Branch     | Local HEAD | Remote HEAD | Sync Status                                        |
+| :------------------- | :------------------------------------------------- | :--------- | :--------- | :---------- | :------------------------------------------------- |
+| `d:\stack`           | `https://github.com/NofiniteHQ/stack.git`          | `dev`      | `f24a360`  | `f24a360`   | **Synchronized** (`origin/phase-2-implementation`) |
+| `d:\nuix`            | `https://github.com/NofiniteHQ/nuix.git`           | `dev`      | `78b42dc`  | `78b42dc`   | **Synchronized** (`origin/dev`)                    |
+| `d:\oss-docs`        | `https://github.com/NofiniteHQ/oss-docs.git`       | `dev`      | `9046358`  | `9046358`   | **Clean** (No push needed)                         |
+| `d:\nofinite.com`    | `https://github.com/NofiniteHQ/nofinite.com.git`   | `refactor` | `feb96b2`  | —           | **Preserved** (User changes intact)                |
+| `d:\ui-quality-lab`  | `https://github.com/NofiniteHQ/ui-quality-lab.git` | `dev`      | —          | —           | **Initialized** (Unified Quality Platform)         |
 
 ---
 
@@ -77,7 +78,17 @@ A comprehensive browser-based visual audit was executed using Playwright Chromiu
 
 ---
 
-## 5. Current Blockers & Next Actions
+## 5. Ecosystem Testing Platform — Nofinite UI Quality Lab (`ui-quality-lab`)
+
+- **Repository:** `d:\ui-quality-lab` (`https://github.com/NofiniteHQ/ui-quality-lab.git`)
+- **Mission:** Build a permanent, unified UI engineering and quality platform across Nofinite's public open-source stack and proprietary internal technology.
+- **Direction of Dependency:** The Quality Lab consumes and tests ecosystem libraries. Public Stack packages never depend on the Quality Lab.
+- **Architecture:** One Dashboard, Multiple Runtimes (React 19 Shell, Runtime A: React Sandbox, Runtime B: HTML/HTMX NUIX Sandbox, Runtime C: Framework-Agnostic Sandbox).
+- **Authoritative Plan:** See `d:\ui-quality-lab\docs\architecture.md` and `d:\ui-quality-lab\implementation_plan.md`.
+
+---
+
+## 6. Current Blockers & Next Actions
 
 - **Current Blocker:** None. Codebases are safely synchronized on GitHub and visually verified.
 - **Strict Execution Boundaries Active:** No npm publishing, no product deployment, no unapproved redesigns.
