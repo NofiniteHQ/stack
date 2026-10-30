@@ -11,6 +11,7 @@
 import katex from 'katex';
 import { lowlight, SUPPORTED_LANGUAGES, normalizeLanguage } from './codeBlock';
 import { markdownToHtml, stripHtmlTags } from './markdown';
+import { sanitizeUrl, sanitizeHtml } from './security';
 
 export interface MarkonAuthor {
   name: string;
@@ -910,7 +911,7 @@ export function jsonToHtml(
             text = `<sup>${text}</sup>`;
             break;
           case 'link': {
-            const href = escapeHtml(attrs.href || '#');
+            const href = escapeHtml(sanitizeUrl(attrs.href || '#'));
             const target = escapeHtml(attrs.target || '_blank');
             text = `<a href="${href}" target="${target}" rel="noopener noreferrer" class="link">${text}</a>`;
             break;
@@ -1146,7 +1147,7 @@ export function jsonToHtml(
       )}</td>`;
 
     case 'image': {
-      const src = escapeHtml(attrs.src || '');
+      const src = escapeHtml(sanitizeUrl(attrs.src || ''));
       const alt = escapeHtml(attrs.alt || '');
       const title = escapeHtml(attrs.title || '');
       const width = attrs.width || '100%';
@@ -1647,7 +1648,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
   }
 
   return {
-    html: finalHtml,
+    html: sanitizeHtml(finalHtml),
     toc,
     readingTimeMinutes,
     wordCount,

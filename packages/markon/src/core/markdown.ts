@@ -4,6 +4,8 @@
  * supporting headings, lists, tables, code blocks, math formulas, and details.
  */
 
+import { sanitizeUrl } from './security';
+
 export function stripHtmlTags(input: string): string {
   if (!input) return '';
   let output = '';
@@ -391,10 +393,17 @@ export function markdownToHtml(md: string): string {
         // Images
         .replace(
           /!\[(.*?)\]\((.*?)\)/g,
-          '<img src="$2" alt="$1" class="rounded-xl border border-default shadow-sm max-w-full my-2" />'
+          (_match, alt, url) =>
+            `<img src="${sanitizeUrl(
+              url
+            )}" alt="${alt}" class="rounded-xl border border-default shadow-sm max-w-full my-2" />`
         )
         // Links
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="link">$1</a>')
+        .replace(
+          /\[(.*?)\]\((.*?)\)/g,
+          (_match, text, url) =>
+            `<a href="${sanitizeUrl(url)}" class="link">${text}</a>`
+        )
     );
   };
 

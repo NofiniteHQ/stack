@@ -1222,4 +1222,23 @@ describe('@nofinite/kanban Phase 6: Search & Filter Suite', () => {
     });
     container.remove();
   });
+
+  it('escapes raw HTML in fallback card content in renderKanbanHTML', () => {
+    const columns: KanbanColumn[] = [
+      {
+        id: 'col-sec',
+        title: 'Security',
+        items: [
+          {
+            id: 'xss-card',
+            content: '<img src=x onerror=alert(1)>Malicious Task',
+          },
+        ],
+      },
+    ];
+
+    const html = renderKanbanHTML({ columns });
+    expect(html).not.toContain('<img src=x onerror=alert(1)>');
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;Malicious Task');
+  });
 });

@@ -57,7 +57,9 @@ export function renderCardHTML(
         item.title
       )}</div>`
     : item.content != null
-    ? String(item.content)
+    ? `<div class="kanban-card-title font-semibold text-sm leading-snug text-default group-hover:text-primary transition-colors break-words">${escapeHtml(
+        String(item.content)
+      )}</div>`
     : '';
 
   return `

@@ -80,4 +80,55 @@ describe('Markon Security & ReDoS Invariants', () => {
       expect(duration).toBeLessThan(50);
     }
   });
+
+  it('neutralizes javascript: and data: links in markdownToHtml', () => {
+    const malicious = '[Attack](javascript:alert(document.cookie))';
+    const html = markdownToHtml(malicious);
+    expect(html).not.toContain('href="javascript:');
+    expect(html).toContain('href="#"');
+
+    const dataUri = '[Data Link](data:text/html,<script>alert(1)</script>)';
+    const htmlData = markdownToHtml(dataUri);
+    expect(htmlData).not.toContain('href="data:');
+    expect(htmlData).toContain('href="#"');
+
+    const safe = '[Safe](https://nofinite.com)';
+    const safeHtml = markdownToHtml(safe);
+    expect(safeHtml).toContain('href="https://nofinite.com"');
+  });
+
+  it('renderMarkon strips script tags and event handlers from rendered HTML', () => {
+    const xssPayload =
+      '<script>alert("xss")</script><img src="x" onerror="alert(1)" /><p>Normal text</p>';
+    const result = renderMarkon({ content: xssPayload });
+    expect(result.html).not.toContain('<script>');
+    expect(result.html).not.toContain('onerror=');
+    expect(result.html).toContain('Normal text');
+  });
+
+  it('renderMarkon neutralizes malicious link attributes in AST format', () => {
+    const jsonAst = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Injected Link',
+              marks: [
+                {
+                  type: 'link',
+                  attrs: { href: 'javascript:alert(1)' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const result = renderMarkon({ content: jsonAst });
+    expect(result.html).not.toContain('href="javascript:');
+    expect(result.html).toContain('href="#"');
+  });
 });
