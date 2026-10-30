@@ -10,12 +10,18 @@
   "types": "./dist/index.d.ts",
   "files": [
     "bin/nuicss.js",
-    "dist/"
+    "dist",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/package.json",
+    "!dist/node_modules",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "powershell -ExecutionPolicy Bypass -File ./build.ps1",
     "build:ts": "tsc && node --input-type=module -e \"import fs from 'node:fs'; for(const f of ['nuicss.html-data.json', 'nuicss.css-data.json', 'styles.css']) fs.copyFileSync('src/embedded/' + f, 'dist/embedded/' + f);\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@nofinite/nuicss": "workspace:*",
@@ -43,7 +49,7 @@
     "unocss"
   ],
   "author": "NofiniteHQ",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/NofiniteHQ/stack.git",

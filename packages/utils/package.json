@@ -68,11 +68,11 @@
   },
   "files": [
     "dist",
-    "!dist/node_modules",
     "!dist/**/*.tsbuildinfo",
+    "!dist/package.json",
+    "!dist/node_modules",
     "README.md",
-    "LICENSE",
-    "package.json"
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public",

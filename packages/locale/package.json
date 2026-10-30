@@ -33,8 +33,11 @@
   ],
   "files": [
     "dist",
-    "LICENSE",
-    "README.md"
+    "!dist/**/*.tsbuildinfo",
+    "!dist/package.json",
+    "!dist/node_modules",
+    "README.md",
+    "LICENSE"
   ],
   "peerDependencies": {
     "react": ">=18.0.0",

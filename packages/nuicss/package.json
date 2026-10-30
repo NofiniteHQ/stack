@@ -104,11 +104,13 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/package.json",
+    "!dist/node_modules",
     "bin",
     "postcss.js",
     "README.md",
     "LICENSE",
-    "AGENTS.md",
     "llms-full.txt",
     "llms-components.json"
   ],

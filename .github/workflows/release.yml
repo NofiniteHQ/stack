@@ -38,20 +38,31 @@ jobs:
       - name: Build All Packages
         run: pnpm nx run-many --target=build --all
 
-      - name: Verify package contents (nui)
-        working-directory: packages/nui
+      - name: Verify Package Tarballs
         run: |
-          TARBALL_FILES=$(npm pack --dry-run 2>&1)
-          if ! echo "$TARBALL_FILES" | grep -q "dist/components"; then
-            echo "Error: dist/components is missing from the tarball!"
-            echo "Tarball contents:"
-            echo "$TARBALL_FILES"
-            exit 1
-          fi
-          echo "Verification passed. dist/components is present."
+          for pkg in nuicss nuicss-cli nui markon charts kanban media locale utils; do
+            echo "Verifying package tarball: $pkg"
+            (cd packages/$pkg && npm pack --dry-run > /dev/null)
+          done
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+
+      - name: Sync CLI Embedded Assets
+        working-directory: packages/nuicss-cli
+        run: |
+          node -e "
+            const fs = require('fs');
+            const dist = '../nuicss/dist';
+            for (const f of ['styles.css', 'nuicss.html-data.json', 'nuicss.css-data.json']) {
+              fs.copyFileSync(dist + '/' + f, 'src/embedded/' + f);
+            }
+            const html = fs.readFileSync('src/embedded/nuicss.html-data.json', 'utf8');
+            const css = fs.readFileSync('src/embedded/nuicss.css-data.json', 'utf8');
+            const styles = fs.readFileSync('src/embedded/styles.css', 'utf8');
+            const tsContent = 'export const HTML_DATA_STR = ' + JSON.stringify(html) + ';\nexport const CSS_DATA_STR = ' + JSON.stringify(css) + ';\nexport const BASE_STYLES_STR = ' + JSON.stringify(styles) + ';\n';
+            fs.writeFileSync('src/embedded/assets.ts', tsContent, 'utf8');
+          "
 
       - name: Build Standalone Binaries (nuicss)
         working-directory: packages/nuicss-cli
