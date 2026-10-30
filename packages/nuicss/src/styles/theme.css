@@ -846,6 +846,7 @@ input[type='number'] {
     overflow-x: auto;
     font-family: var(--font-mono);
     font-size: var(--text-sm, 0.875rem);
+    line-height: 1.6;
     margin-top: 1rem;
     margin-bottom: 1rem;
   }

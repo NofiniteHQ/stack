@@ -22,7 +22,7 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'btn-outline',
-    'bg-transparent border border-solid border-strong text-default hover:bg-subtle',
+    'bg-transparent border border-solid border-strong text-default hover:bg-subtle focus-visible:border-focus',
   ],
   [
     'btn-ghost',
@@ -171,7 +171,15 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'glow-brand',
-    'shadow-[0_0_20px_var(--color-primary-subtle)] transition-shadow duration-300',
+    'shadow-[0_0_20px_var(--brand-primary-hover)] transition-shadow duration-300',
+  ],
+  [
+    'glow-success',
+    'shadow-[0_0_20px_var(--color-success)] transition-shadow duration-300',
+  ],
+  [
+    'glow-danger',
+    'shadow-[0_0_20px_var(--color-danger)] transition-shadow duration-300',
   ],
 
   // ==========================================
@@ -321,23 +329,4 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   ['nui-provider', 'contents font-sans text-default bg-page'],
   ['provider', 'contents font-sans text-default bg-page'],
-
-  // ==========================================
-  // 19. Micro-Interactions & Physics Utilities
-  // ==========================================
-  [
-    'press-scale',
-    'active:scale-[0.97] transition-transform duration-150 ease-spring',
-  ],
-  [
-    'hover-lift',
-    'hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 ease-smooth',
-  ],
-  ['glow-brand', 'shadow-[0_0_20px_var(--brand-primary-hover)]'],
-  ['glow-success', 'shadow-[0_0_20px_var(--color-success)]'],
-  ['glow-danger', 'shadow-[0_0_20px_var(--color-danger)]'],
-  [
-    'skeleton-shimmer',
-    'animate-shimmer bg-[linear-gradient(110deg,var(--bg-subtle)_8%,var(--bg-muted)_18%,var(--bg-subtle)_33%)] bg-[length:200%_100%]',
-  ],
 ];

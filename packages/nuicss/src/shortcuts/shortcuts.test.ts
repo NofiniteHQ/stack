@@ -131,4 +131,26 @@ describe('nuicss shortcuts', () => {
     expect(css).toContain('var(--brand-primary-hover)');
     expect(css).toContain('var(--color-success)');
   });
+
+  it('should generate focus-visible:border-focus for btn-outline', async () => {
+    const uno = await createGenerator(nuicssPreset());
+    const { css } = await uno.generate('btn-outline');
+
+    expect(css).toContain('var(--border-focus)');
+  });
+
+  it('should have zero duplicate shortcut definitions across all shortcuts', () => {
+    const names = (rawShortcuts as any[])
+      .filter((s) => Array.isArray(s))
+      .map(([name]) => name);
+    const seen = new Set<string>();
+    const duplicates: string[] = [];
+    for (const name of names) {
+      if (seen.has(name)) {
+        duplicates.push(name);
+      }
+      seen.add(name);
+    }
+    expect(duplicates).toEqual([]);
+  });
 });

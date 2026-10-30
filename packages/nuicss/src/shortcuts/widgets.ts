@@ -292,10 +292,18 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'text-[10px] font-medium select-none pointer-events-none',
   ],
   ['sparkline', 'inline-block align-middle overflow-visible'],
-  ['sparkline-container', 'flex items-end gap-1 h-8 w-24 overflow-hidden'],
+  ['sparkline-container', 'inline-flex items-end gap-1 h-6 px-1'],
   [
     'sparkline-bar',
-    'flex-1 bg-primary/40 hover:bg-primary rounded-t-sm transition-all duration-150 min-h-[2px]',
+    'w-1 bg-primary/30 rounded-t hover:bg-primary transition-all duration-150 min-h-[2px]',
+  ],
+  [
+    'sparkline-bar-success',
+    'w-1 bg-success/30 rounded-t hover:bg-success transition-all duration-150 min-h-[2px]',
+  ],
+  [
+    'sparkline-bar-danger',
+    'w-1 bg-danger/30 rounded-t hover:bg-danger transition-all duration-150 min-h-[2px]',
   ],
   [
     'chart-bar-horizontal',
@@ -332,19 +340,6 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   [
     'progress-ring',
     'transform -rotate-90 origin-center transition-all duration-500 ease-out',
-  ],
-  ['sparkline-container', 'inline-flex items-end gap-1 h-6 px-1'],
-  [
-    'sparkline-bar',
-    'w-1 bg-primary/30 rounded-t hover:bg-primary transition-all duration-150 min-h-[2px]',
-  ],
-  [
-    'sparkline-bar-success',
-    'w-1 bg-success/30 rounded-t hover:bg-success transition-all duration-150 min-h-[2px]',
-  ],
-  [
-    'sparkline-bar-danger',
-    'w-1 bg-danger/30 rounded-t hover:bg-danger transition-all duration-150 min-h-[2px]',
   ],
   [
     'metric-card',
