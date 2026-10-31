@@ -1,7 +1,9 @@
 import '../styles/index.css';
 
 export { nuicssPreset } from './preset';
-export { nuicssVitePlugin } from './vite';
+export { nuicss, nuicssVitePlugin } from './vite';
+export type { NuicssViteOptions } from './vite';
+export type { NuicssPresetOptions } from './preset';
 export { default as postcssPlugin } from './postcss';
 export { defineConfig } from './config';
 export type { NuicssConfig } from './config';

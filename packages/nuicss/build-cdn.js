@@ -13,7 +13,7 @@ const {
 
 async function build() {
   console.log('Generating browser config and static stylesheets...');
-  const config = nuicssPreset();
+  const config = nuicssPreset({ preflights: false });
 
   // Read the compiled base CSS (Reset + Design Tokens)
   const baseCss = fs.readFileSync('dist/index.css', 'utf8');
@@ -46,7 +46,7 @@ async function build() {
     const tokens = shortcuts
       .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
       .join(' ');
-    const { css } = await uno.generate(tokens);
+    const { css } = await uno.generate(tokens, { preflights: false });
     const layeredCss = `@layer components {\n${css}\n}`;
     fs.writeFileSync(`dist/${name}.css`, layeredCss, 'utf8');
     const minCss = minifyCss(`${name}.min.css`, layeredCss);

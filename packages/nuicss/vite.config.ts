@@ -17,6 +17,8 @@ export default defineConfig(() => ({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/plugin/index.ts'),
+        vite: path.resolve(__dirname, 'src/plugin/vite.ts'),
+        postcss: path.resolve(__dirname, 'src/plugin/postcss.ts'),
         components: path.resolve(__dirname, 'src/shortcuts/index.ts'),
         next: path.resolve(__dirname, 'src/plugin/next.ts'),
         ssr: path.resolve(__dirname, 'src/helpers/ssr.ts'),

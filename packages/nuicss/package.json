@@ -24,6 +24,30 @@
       },
       "default": "./dist/index.js"
     },
+    "./vite": {
+      "types": "./dist/plugin/vite.d.ts",
+      "import": {
+        "types": "./dist/plugin/vite.d.ts",
+        "default": "./dist/vite.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin/vite.d.ts",
+        "default": "./dist/vite.js"
+      },
+      "default": "./dist/vite.js"
+    },
+    "./postcss": {
+      "types": "./dist/plugin/postcss.d.ts",
+      "import": {
+        "types": "./dist/plugin/postcss.d.ts",
+        "default": "./dist/postcss.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin/postcss.d.ts",
+        "default": "./dist/postcss.js"
+      },
+      "default": "./dist/postcss.js"
+    },
     "./components": {
       "types": "./dist/shortcuts/index.d.ts",
       "import": {
@@ -96,8 +120,7 @@
     "./cdn": "./dist/index.global.js",
     "./html-data.json": "./dist/nuicss.html-data.json",
     "./css-data.json": "./dist/nuicss.css-data.json",
-    "./package.json": "./package.json",
-    "./postcss": "./postcss.js"
+    "./package.json": "./package.json"
   },
   "bin": {
     "nuicss": "./bin/nuicss.js"

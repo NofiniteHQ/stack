@@ -2,6 +2,37 @@ import type { NuicssConfig } from './config';
 import * as presetWind4Module from '@unocss/preset-wind4';
 import processorLightningCSSRaw from '@unocss/processor-lightningcss';
 import { componentShortcuts } from '../shortcuts';
+import resetCssRaw from '../styles/reset.css?raw';
+import themeCssRaw from '../styles/theme.css?raw';
+import fs from 'node:fs';
+import path from 'node:path';
+
+let resetCss =
+  typeof resetCssRaw === 'string' && resetCssRaw.length > 0 ? resetCssRaw : '';
+let themeCss =
+  typeof themeCssRaw === 'string' && themeCssRaw.length > 0 ? themeCssRaw : '';
+
+if (!resetCss || !themeCss) {
+  try {
+    const stylesDir = path.resolve(__dirname, '../styles');
+    if (!resetCss && fs.existsSync(path.join(stylesDir, 'reset.css'))) {
+      resetCss = fs.readFileSync(path.join(stylesDir, 'reset.css'), 'utf8');
+    }
+    if (!themeCss && fs.existsSync(path.join(stylesDir, 'theme.css'))) {
+      themeCss = fs.readFileSync(path.join(stylesDir, 'theme.css'), 'utf8');
+    }
+  } catch {
+    // Browser or bundler environment
+  }
+}
+
+export interface NuicssPresetOptions {
+  /**
+   * Whether to inject base resets and design tokens as preflights.
+   * Defaults to true.
+   */
+  preflights?: boolean;
+}
 
 const resolveFunction = (mod: any, fallbackKey?: string) => {
   if (typeof mod === 'function') return mod;
@@ -34,7 +65,9 @@ const protectedShortcutPrefixes = [
   'file-item',
 ];
 
-export function nuicssPreset(): NuicssConfig {
+export type NuicssPreset = NuicssConfig & { name?: string };
+
+export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
   const wind = getPresetWind4();
   for (const v of (wind as any).variants || []) {
     if (v && (v as any).name === 'pseudo') {
@@ -48,9 +81,22 @@ export function nuicssPreset(): NuicssConfig {
     }
   }
 
+  const preflights =
+    options.preflights !== false
+      ? [
+          {
+            layer: 'base',
+            getCSS: () =>
+              `@layer base, components, utilities;\n\n${themeCss}\n\n${resetCss}`,
+          },
+        ]
+      : [];
+
   return {
+    name: 'nuicss-preset',
     presets: [wind],
     processors: [getProcessorLightningCSS()],
+    preflights,
     rules: [
       // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card, bg-selected)
       [
