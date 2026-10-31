@@ -4,6 +4,8 @@ NUICSS includes an automated migration codemod that scans your HTML, JSX, TSX, V
 
 ---
 
+> 💡 **Looking for the complete cheat sheet?** Check out the exhaustive [**Tailwind-to-NUICSS Migration Guide & Cheat Sheet**](/nuicss/guides/tailwind-migration) with component before-and-after comparisons, OKLCH design token mapping, and phased zero-downtime adoption strategies.
+
 ## Why Migrate to NUICSS Superclasses?
 
 In standard utility-first CSS frameworks like Tailwind, components often suffer from **class name soup**:

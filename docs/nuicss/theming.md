@@ -72,17 +72,24 @@ NUICSS standardizes curvature using geometric radius tokens:
 
 ## Dark Mode Implementation
 
-NUICSS applies dark mode styles by toggling the `.dark` class on the root `<html>` element:
+NUICSS supports dynamic theming via the `data-theme` attribute (recommended for multi-theme setups) or standard `.dark` class on the root `<html>` element:
 
 ```html
-<!-- Light Mode -->
-<html class="light">
+<!-- Light Mode (Default) -->
+<html data-theme="light">
   <body class="bg-page text-default">
     ...
   </body>
 </html>
 
-<!-- Dark Mode -->
+<!-- Dark Mode via data-theme (Recommended) -->
+<html data-theme="dark">
+  <body class="bg-page text-default">
+    ...
+  </body>
+</html>
+
+<!-- Backward-Compatible .dark Class -->
 <html class="dark">
   <body class="bg-page text-default">
     ...

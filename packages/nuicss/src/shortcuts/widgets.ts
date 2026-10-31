@@ -111,7 +111,7 @@ export const widgetShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'table-container',
-    'w-full overflow-x-auto rounded-xl border border-default bg-surface shadow-sm',
+    'w-full overflow-x-auto rounded-xl border border-default bg-surface shadow-sm __table-styles',
   ],
   ['table', 'w-full text-left border-collapse text-sm font-sans'],
   ['table-head', 'border-b border-default bg-subtle/50'],

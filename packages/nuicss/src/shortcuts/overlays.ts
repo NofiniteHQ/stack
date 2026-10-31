@@ -8,6 +8,10 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'modal',
     'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-lg w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden',
   ],
+  [
+    'modal-backdrop',
+    'fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity',
+  ],
   ['modal-sm', 'max-w-sm'],
   ['modal-md', 'max-w-lg'],
   ['modal-lg', 'max-w-2xl'],
@@ -40,6 +44,10 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   [
     'dialog',
     'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-md w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden',
+  ],
+  [
+    'dialog-backdrop',
+    'fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity',
   ],
   [
     'dialog-box',

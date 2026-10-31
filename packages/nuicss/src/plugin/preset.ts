@@ -3,6 +3,11 @@ import * as presetWind4Module from '@unocss/preset-wind4';
 import { componentShortcuts } from '../shortcuts';
 import resetCssRaw from '../styles/reset.css?raw';
 import themeCssRaw from '../styles/theme.css?raw';
+import markonCssRaw from '../styles/components/markon.css?raw';
+import chartsCssRaw from '../styles/components/charts.css?raw';
+import kanbanCssRaw from '../styles/components/kanban.css?raw';
+import mediaBridgeCssRaw from '../styles/components/media-bridge.css?raw';
+import tableCssRaw from '../styles/components/table.css?raw';
 import fs from 'node:fs';
 import path from 'node:path';
 let processorLightningCSSRaw: any = null;
@@ -19,15 +24,63 @@ let resetCss =
   typeof resetCssRaw === 'string' && resetCssRaw.length > 0 ? resetCssRaw : '';
 let themeCss =
   typeof themeCssRaw === 'string' && themeCssRaw.length > 0 ? themeCssRaw : '';
+let markonCss =
+  typeof markonCssRaw === 'string' && markonCssRaw.length > 0
+    ? markonCssRaw
+    : '';
+let chartsCss =
+  typeof chartsCssRaw === 'string' && chartsCssRaw.length > 0
+    ? chartsCssRaw
+    : '';
+let kanbanCss =
+  typeof kanbanCssRaw === 'string' && kanbanCssRaw.length > 0
+    ? kanbanCssRaw
+    : '';
+let mediaBridgeCss =
+  typeof mediaBridgeCssRaw === 'string' && mediaBridgeCssRaw.length > 0
+    ? mediaBridgeCssRaw
+    : '';
+let tableCss =
+  typeof tableCssRaw === 'string' && tableCssRaw.length > 0 ? tableCssRaw : '';
 
-if (!resetCss || !themeCss) {
+if (
+  !resetCss ||
+  !themeCss ||
+  !markonCss ||
+  !chartsCss ||
+  !kanbanCss ||
+  !mediaBridgeCss ||
+  !tableCss
+) {
   try {
     const stylesDir = path.resolve(__dirname, '../styles');
+    const compDir = path.join(stylesDir, 'components');
     if (!resetCss && fs.existsSync(path.join(stylesDir, 'reset.css'))) {
       resetCss = fs.readFileSync(path.join(stylesDir, 'reset.css'), 'utf8');
     }
     if (!themeCss && fs.existsSync(path.join(stylesDir, 'theme.css'))) {
       themeCss = fs.readFileSync(path.join(stylesDir, 'theme.css'), 'utf8');
+    }
+    if (!markonCss && fs.existsSync(path.join(compDir, 'markon.css'))) {
+      markonCss = fs.readFileSync(path.join(compDir, 'markon.css'), 'utf8');
+    }
+    if (!chartsCss && fs.existsSync(path.join(compDir, 'charts.css'))) {
+      chartsCss = fs.readFileSync(path.join(compDir, 'charts.css'), 'utf8');
+    }
+    if (!kanbanCss && fs.existsSync(path.join(compDir, 'kanban.css'))) {
+      kanbanCss = fs.readFileSync(path.join(compDir, 'kanban.css'), 'utf8');
+    }
+    if (
+      !mediaBridgeCss &&
+      fs.existsSync(path.join(compDir, 'media-bridge.css'))
+    ) {
+      mediaBridgeCss = fs.readFileSync(
+        path.join(compDir, 'media-bridge.css'),
+        'utf8'
+      );
+    }
+    if (!tableCss && fs.existsSync(path.join(compDir, 'table.css'))) {
+      tableCss = fs.readFileSync(path.join(compDir, 'table.css'), 'utf8');
     }
   } catch {
     // Browser or bundler environment
@@ -216,6 +269,32 @@ export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
           return { stroke: `var(${varName})` };
         },
       ],
+      // On-demand Domain Component Rules (Emitted into layer: 'components' only when referenced)
+      [
+        /^__table-styles$|^(?:nui-)?table-container$/,
+        () => tableCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?kanban(?:-[a-z0-9-]+)?$/,
+        () => kanbanCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?markon(?:-[a-z0-9-]+)?$|^tiptap-wrapper$|^editor-content$|^prose-markon$/,
+        () => markonCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?chart(?:-[a-z0-9-]+)?$|^(?:nui-)?charts?$/,
+        () => chartsCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?(?:vidstack-player|vidstack-audio-player|media-container|media-player)$/,
+        () => mediaBridgeCss,
+        { layer: 'components' },
+      ],
     ],
     shortcuts: [
       ...(Array.isArray(componentShortcuts) ? componentShortcuts : []),
@@ -253,7 +332,7 @@ export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
       pipeline: {
         include: [
           /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
-          'src/**/*.{js,ts,jsx,tsx}',
+          'src/**/*.{html,js,ts,jsx,tsx,vue,svelte}',
           '**/node_modules/@nofinite/nui/**/*.{js,mjs,cjs,jsx,tsx}',
         ],
       },

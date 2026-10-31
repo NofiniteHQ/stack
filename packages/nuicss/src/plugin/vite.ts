@@ -40,12 +40,64 @@ export function nuicss(options: NuicssViteOptions = {}): PluginOption {
   const cwd = options.cwd || process.cwd();
   const detectedConfig = findNuicssConfig(cwd, options.configFile);
 
-  // If a config file was found, use it. Otherwise, disable file lookup and provide nuicssPreset().
-  const finalOptions: any = {
-    ...options,
-    configFile: detectedConfig !== undefined ? detectedConfig : false,
-    ...(detectedConfig ? {} : { presets: [nuicssPreset()] }),
-  };
+  let finalOptions: any;
+
+  if (detectedConfig) {
+    finalOptions = {
+      ...options,
+      configFile: detectedConfig,
+    };
+  } else {
+    // Zero-Config Vite Integration Defaults:
+    // When no nuicss.config.(ts|js|mjs|cjs|mts) exists at project root, automatically provide
+    // default nuicssPreset() and content scanning ('src/**/*.{html,js,ts,jsx,tsx,vue,svelte}').
+    const userPresets = (options.presets as any[]) || [];
+    const hasNuicssPreset = userPresets.some(
+      (p: any) => p && (p.name === 'nuicss-preset' || p._isNuicss)
+    );
+    const presets = hasNuicssPreset
+      ? userPresets
+      : [nuicssPreset(), ...userPresets];
+
+    const defaultContentPatterns = ['src/**/*.{html,js,ts,jsx,tsx,vue,svelte}'];
+    const userContent = options.content;
+
+    let content: any;
+    if (userContent) {
+      content = {
+        ...userContent,
+        filesystem: userContent.filesystem || defaultContentPatterns,
+        pipeline:
+          userContent.pipeline !== undefined
+            ? userContent.pipeline
+            : {
+                include: [
+                  /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
+                  ...defaultContentPatterns,
+                  '**/node_modules/@nofinite/nui/**/*.{js,mjs,cjs,jsx,tsx}',
+                ],
+              },
+      };
+    } else {
+      content = {
+        filesystem: defaultContentPatterns,
+        pipeline: {
+          include: [
+            /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
+            ...defaultContentPatterns,
+            '**/node_modules/@nofinite/nui/**/*.{js,mjs,cjs,jsx,tsx}',
+          ],
+        },
+      };
+    }
+
+    finalOptions = {
+      ...options,
+      configFile: false,
+      presets,
+      content,
+    };
+  }
 
   const getUnoPlugin =
     typeof unocssVitePlugin === 'function'

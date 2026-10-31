@@ -91,4 +91,19 @@ describe('NUICSS Vite Plugin & Configuration Standardization', () => {
     expect(preset.preflights).toBeDefined();
     expect(preset.preflights.length).toBe(0);
   });
+
+  it('nuicss() should provide zero-config integration defaults when no config file exists', () => {
+    const plugins = nuicss({
+      cwd: 'C:/fake-nonexistent-zero-config-dir',
+    }) as any[];
+    expect(Array.isArray(plugins)).toBe(true);
+    expect(plugins.length).toBeGreaterThan(1);
+
+    const shieldPlugin = plugins.find((p) => p.name === 'nuicss:entry-shield');
+    expect(shieldPlugin).toBeDefined();
+    expect(shieldPlugin.enforce).toBe('pre');
+
+    const unoPlugin = plugins.find((p) => p.name === 'unocss:api');
+    expect(unoPlugin).toBeDefined();
+  });
 });

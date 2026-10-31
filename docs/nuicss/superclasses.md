@@ -9,14 +9,14 @@ A comprehensive guide and reference to all pre-compiled component superclasses, 
 In modern web development, styling components with dozens of raw utility classes creates maintenance friction, inconsistency, and code bloat:
 
 ```html
-<!-- âŒ Fragile Utility Cluster (14 classes to keep in sync everywhere) -->
+<!-- ❌ Fragile Utility Cluster (14 classes to keep in sync everywhere) -->
 <button
   class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:pointer-events-none shadow-sm"
 >
   Submit
 </button>
 
-<!-- âœ… NUICSS Component Superclass (Semantic, accessible, and token-driven) -->
+<!-- ✅ NUICSS Component Superclass (Semantic, accessible, and token-driven) -->
 <button class="btn btn-primary">Submit</button>
 ```
 
@@ -38,7 +38,7 @@ Interactive action elements with built-in active scaling, focus rings, and token
 
 | Superclass    | Description                                            | Token Accent                                 |
 | :------------ | :----------------------------------------------------- | :------------------------------------------- |
-| `btn`         | Base button structure, transitions, flex alignment     | â€”                                          |
+| `btn`         | Base button structure, transitions, flex alignment     | —                                            |
 | `btn-primary` | High-emphasis primary call-to-action                   | `var(--color-primary)`                       |
 | `btn-default` | Standard secondary action with surface fill and border | `var(--bg-surface)`, `var(--border-default)` |
 | `btn-outline` | Bordered button with transparent background            | `var(--border-default)`                      |
@@ -142,7 +142,7 @@ Keyboard shortcut key indicators with subtle bottom shadow and border:
 ```html
 <div class="flex items-center gap-1.5 text-sm text-muted">
   <span>Quick search:</span>
-  <kbd class="kbd">âŒ˜</kbd>
+  <kbd class="kbd">⌘</kbd>
   <kbd class="kbd">K</kbd>
 </div>
 ```
