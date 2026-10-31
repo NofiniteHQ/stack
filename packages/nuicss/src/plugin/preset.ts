@@ -1,11 +1,19 @@
 import type { NuicssConfig } from './config';
 import * as presetWind4Module from '@unocss/preset-wind4';
-import processorLightningCSSRaw from '@unocss/processor-lightningcss';
 import { componentShortcuts } from '../shortcuts';
 import resetCssRaw from '../styles/reset.css?raw';
 import themeCssRaw from '../styles/theme.css?raw';
 import fs from 'node:fs';
 import path from 'node:path';
+let processorLightningCSSRaw: any = null;
+try {
+  const req = typeof require !== 'undefined' ? require : null;
+  if (req) {
+    processorLightningCSSRaw = req('@unocss/processor-lightningcss');
+  }
+} catch {
+  // Gracefully fallback when running in standalone binary or browser
+}
 
 let resetCss =
   typeof resetCssRaw === 'string' && resetCssRaw.length > 0 ? resetCssRaw : '';
@@ -92,10 +100,19 @@ export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
         ]
       : [];
 
+  let processor: any = null;
+  try {
+    if (typeof getProcessorLightningCSS === 'function') {
+      processor = getProcessorLightningCSS();
+    }
+  } catch {
+    // Graceful fallback when native addon is missing
+  }
+
   return {
     name: 'nuicss-preset',
     presets: [wind],
-    processors: [getProcessorLightningCSS()],
+    processors: processor ? [processor] : [],
     preflights,
     rules: [
       // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card, bg-selected)
