@@ -47,7 +47,11 @@ export function nuicss(options: NuicssViteOptions = {}): PluginOption {
     ...(detectedConfig ? {} : { presets: [nuicssPreset()] }),
   };
 
-  const unoPlugin = unocssVitePlugin(finalOptions);
+  const getUnoPlugin =
+    typeof unocssVitePlugin === 'function'
+      ? unocssVitePlugin
+      : (unocssVitePlugin as any)?.default || unocssVitePlugin;
+  const unoPlugin = getUnoPlugin(finalOptions);
 
   const shieldPlugin: any = {
     name: 'nuicss:entry-shield',
