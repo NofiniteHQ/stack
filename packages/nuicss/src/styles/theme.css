@@ -457,9 +457,9 @@
   --border-disabled: var(--slate-800);
 
   /* Brand Adjustments for Dark Mode */
-  --brand-primary: var(--brand-500);
-  --brand-primary-hover: var(--brand-400);
-  --brand-primary-active: var(--brand-600);
+  --brand-primary: var(--brand-600);
+  --brand-primary-hover: var(--brand-500);
+  --brand-primary-active: var(--brand-700);
   --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, white);
   --color-primary-active: color-mix(in oklch, var(--color-primary) 76%, white);
   --color-primary-subtle: color-mix(
@@ -519,7 +519,7 @@
   }
 
   :where([data-theme='dark'], .dark) {
-    --brand-primary: oklch(0.623 0.255 259.815);
+    --brand-primary: oklch(0.546 0.285 262.881);
     --color-danger: oklch(0.704 0.22 22.216);
     --color-success: oklch(0.792 0.21 162.48);
     --color-warning: oklch(0.828 0.22 84.429);
