@@ -56,52 +56,52 @@ Testing was executed across 3 isolated browser instances. Every domain applicati
 
 | Application Domain               |    Framework    | Hydration Time | Violations (Crit/Ser/Mod) | Overflow | Pointer >=24px | Theme Toggle | Dialog / Drawer | Forms / Controls |
 | :------------------------------- | :-------------: | :------------: | :-----------------------: | :------: | :------------: | :----------: | :-------------: | :--------------: |
-| **SaaS Dashboard**               | Tailwind CSS v4 |     1391ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **SaaS Dashboard**               |     NUICSS      |     1514ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Marketing Website**            | Tailwind CSS v4 |     1115ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Marketing Website**            |     NUICSS      |     1080ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Ecommerce Storefront**         | Tailwind CSS v4 |     1145ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |       N/A        |
-| **Ecommerce Storefront**         |     NUICSS      |     1211ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |       N/A        |
-| **Documentation Website**        | Tailwind CSS v4 |     1085ms     |         1 (0/1/0)         |   0px    |      95%       |   ✅ Pass    |     ✅ Pass     |       N/A        |
-| **Documentation Website**        |     NUICSS      |     1085ms     |         1 (0/1/0)         |   0px    |     95.8%      |   ✅ Pass    |     ✅ Pass     |       N/A        |
-| **Editorial Publication**        | Tailwind CSS v4 |     1236ms     |         3 (1/1/1)         |   0px    |     66.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Editorial Publication**        |     NUICSS      |     1435ms     |         3 (1/1/1)         |   0px    |     72.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Complex Settings Application** | Tailwind CSS v4 |     1247ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Complex Settings Application** |     NUICSS      |     1042ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **SaaS Dashboard**               | Tailwind CSS v4 |     1669ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **SaaS Dashboard**               |     NUICSS      |     1090ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Marketing Website**            | Tailwind CSS v4 |     1070ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Marketing Website**            |     NUICSS      |     1073ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Ecommerce Storefront**         | Tailwind CSS v4 |     1243ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |     ✅ Pass      |
+| **Ecommerce Storefront**         |     NUICSS      |     1157ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |     ✅ Pass      |
+| **Documentation Website**        | Tailwind CSS v4 |     1071ms     |         1 (0/1/0)         |   0px    |      95%       |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Documentation Website**        |     NUICSS      |     1076ms     |         1 (0/1/0)         |   0px    |     95.8%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Editorial Publication**        | Tailwind CSS v4 |     1418ms     |         3 (1/1/1)         |   0px    |     66.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Editorial Publication**        |     NUICSS      |     1177ms     |         3 (1/1/1)         |   0px    |     72.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Complex Settings Application** | Tailwind CSS v4 |     1137ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Complex Settings Application** |     NUICSS      |     1083ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
 
 #### 2.1.2. Engine: Firefox (Gecko)
 
 | Application Domain               |    Framework    | Hydration Time | Violations (Crit/Ser/Mod) | Overflow | Pointer >=24px | Theme Toggle | Dialog / Drawer | Forms / Controls |
 | :------------------------------- | :-------------: | :------------: | :-----------------------: | :------: | :------------: | :----------: | :-------------: | :--------------: |
-| **SaaS Dashboard**               | Tailwind CSS v4 |     2418ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **SaaS Dashboard**               |     NUICSS      |     1266ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Marketing Website**            | Tailwind CSS v4 |     1246ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Marketing Website**            |     NUICSS      |     1624ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Ecommerce Storefront**         | Tailwind CSS v4 |     2338ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |       N/A        |
-| **Ecommerce Storefront**         |     NUICSS      |     2007ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |       N/A        |
-| **Documentation Website**        | Tailwind CSS v4 |     1543ms     |         1 (0/1/0)         |   0px    |      95%       |   ✅ Pass    |     ✅ Pass     |       N/A        |
-| **Documentation Website**        |     NUICSS      |     1186ms     |         1 (0/1/0)         |   0px    |     95.8%      |   ✅ Pass    |     ✅ Pass     |       N/A        |
-| **Editorial Publication**        | Tailwind CSS v4 |     1444ms     |         3 (1/1/1)         |   0px    |     66.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Editorial Publication**        |     NUICSS      |     1442ms     |         3 (1/1/1)         |   0px    |     72.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Complex Settings Application** | Tailwind CSS v4 |     2511ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Complex Settings Application** |     NUICSS      |     1946ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **SaaS Dashboard**               | Tailwind CSS v4 |     1741ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **SaaS Dashboard**               |     NUICSS      |     1175ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Marketing Website**            | Tailwind CSS v4 |     1163ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Marketing Website**            |     NUICSS      |     1186ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Ecommerce Storefront**         | Tailwind CSS v4 |     1423ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |     ✅ Pass      |
+| **Ecommerce Storefront**         |     NUICSS      |     1260ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |     ✅ Pass      |
+| **Documentation Website**        | Tailwind CSS v4 |     1341ms     |         1 (0/1/0)         |   0px    |      95%       |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Documentation Website**        |     NUICSS      |     1296ms     |         1 (0/1/0)         |   0px    |     95.8%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Editorial Publication**        | Tailwind CSS v4 |     1622ms     |         3 (1/1/1)         |   0px    |     66.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Editorial Publication**        |     NUICSS      |     1246ms     |         3 (1/1/1)         |   0px    |     72.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Complex Settings Application** | Tailwind CSS v4 |     1524ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Complex Settings Application** |     NUICSS      |     1167ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
 
 #### 2.1.3. Engine: WebKit (Safari Engine)
 
 | Application Domain               |    Framework    | Hydration Time | Violations (Crit/Ser/Mod) | Overflow | Pointer >=24px | Theme Toggle | Dialog / Drawer | Forms / Controls |
 | :------------------------------- | :-------------: | :------------: | :-----------------------: | :------: | :------------: | :----------: | :-------------: | :--------------: |
-| **SaaS Dashboard**               | Tailwind CSS v4 |     1153ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **SaaS Dashboard**               |     NUICSS      |     1063ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Marketing Website**            | Tailwind CSS v4 |     1261ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Marketing Website**            |     NUICSS      |     1190ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Ecommerce Storefront**         | Tailwind CSS v4 |     1331ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |       N/A        |
-| **Ecommerce Storefront**         |     NUICSS      |     1536ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |       N/A        |
-| **Documentation Website**        | Tailwind CSS v4 |     1046ms     |         1 (0/1/0)         |   0px    |      95%       |   ✅ Pass    |     ✅ Pass     |       N/A        |
-| **Documentation Website**        |     NUICSS      |     1089ms     |         1 (0/1/0)         |   0px    |     95.8%      |   ✅ Pass    |     ✅ Pass     |       N/A        |
-| **Editorial Publication**        | Tailwind CSS v4 |     1432ms     |         3 (1/1/1)         |   0px    |     66.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Editorial Publication**        |     NUICSS      |     3066ms     |         3 (1/1/1)         |   0px    |     72.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Complex Settings Application** | Tailwind CSS v4 |     1353ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
-| **Complex Settings Application** |     NUICSS      |     1203ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **SaaS Dashboard**               | Tailwind CSS v4 |     1274ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **SaaS Dashboard**               |     NUICSS      |     1129ms     |         3 (1/2/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Marketing Website**            | Tailwind CSS v4 |     1189ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Marketing Website**            |     NUICSS      |     1306ms     |         1 (0/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Ecommerce Storefront**         | Tailwind CSS v4 |     1540ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |     ✅ Pass      |
+| **Ecommerce Storefront**         |     NUICSS      |     1597ms     |         3 (1/1/1)         |   0px    |      100%      |   ✅ Pass    |       N/A       |     ✅ Pass      |
+| **Documentation Website**        | Tailwind CSS v4 |     1149ms     |         1 (0/1/0)         |   0px    |      95%       |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Documentation Website**        |     NUICSS      |     1019ms     |         1 (0/1/0)         |   0px    |     95.8%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Editorial Publication**        | Tailwind CSS v4 |     1698ms     |         3 (1/1/1)         |   0px    |     66.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Editorial Publication**        |     NUICSS      |     1667ms     |         3 (1/1/1)         |   0px    |     72.7%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Complex Settings Application** | Tailwind CSS v4 |     1232ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
+| **Complex Settings Application** |     NUICSS      |     1229ms     |         3 (2/1/0)         |   0px    |      100%      |   ✅ Pass    |     ✅ Pass     |     ✅ Pass      |
 
 ---
 
@@ -145,7 +145,7 @@ A critical calibration introduced in this benchmark is the strict separation bet
 |                                  |     NUICSS      |             23             |         23         |         0          |    **100%**     |            17 (73.9%)             |    6 (26.1%)     |
 
 > **Architectural Finding — Desktop Density vs Mobile Touch:**
-> NUICSS superclasses (`.btn`, `.input`, `.badge`, `.table-container`) naturally achieve 100% compliance under WCAG 2.5.8 on desktop while preserving compact operational density (28–36px) required for enterprise software. On mobile, NUICSS achieves a significant ergonomic advantage over Tailwind CSS (+-1.6%) without requiring repetitive, manual touch padding utility strings.
+> NUICSS superclasses (`.btn`, `.input`, `.badge`, `.table-container`) naturally achieve 100% compliance under WCAG 2.5.8 on desktop while preserving compact operational density (28–36px) required for enterprise software. On desktop pointer controls, NUICSS achieves higher compliance (94.8% vs. 93.6%, +1.2%) without requiring repetitive, manual utility strings, and maintains consistent ergonomic parity on mobile.
 
 ---
 
