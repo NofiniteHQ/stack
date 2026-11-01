@@ -28,6 +28,9 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const require = createRequire(import.meta.url);
 
 function resolvePlaywrightAndAxe() {
@@ -77,8 +80,6 @@ function resolvePlaywrightAndAxe() {
 
 const { chromium, firefox, webkit, AxeBuilder } = resolvePlaywrightAndAxe();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const BENCHMARK_ROOT = path.resolve(__dirname, '..');
 const REPORTS_DIR = path.join(BENCHMARK_ROOT, 'reports');
 const METRICS_DIR = path.join(REPORTS_DIR, 'metrics');
@@ -120,7 +121,7 @@ export const APPS = [
 function getDistDir(appId) {
   const primary = path.join(BENCHMARK_ROOT, appId + '-app', 'dist');
   if (fs.existsSync(primary)) return primary;
-  const tempAlt = path.resolve(__dirname, '../../../temp/general-purpose-benchmark', appId + '-app', 'dist');
+  const tempAlt = path.resolve(BENCHMARK_ROOT, '../../../temp/general-purpose-benchmark', appId + '-app', 'dist');
   if (fs.existsSync(tempAlt)) return tempAlt;
   return primary;
 }
