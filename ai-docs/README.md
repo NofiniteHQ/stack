@@ -34,10 +34,12 @@ D:\stack\ai-docs/
 ├── nuicss/                        <-- Dedicated engineering knowledge base for NUICSS
 │   ├── README.md                  <-- Index of NUICSS benchmarks, audits, and engineering reports
 │   ├── audits/
+│   │   ├── QUALITY_HARDENING_REPORT.md
 │   │   ├── ENGINEERING_AUDIT_REPORT.md
 │   │   ├── NUICSS_ACCEPTANCE_REMEDIATION_REPORT.md
 │   │   └── NUICSS_FINAL_ACCEPTANCE_REPORT.md
 │   ├── benchmarks/
+│   │   ├── MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md
 │   │   ├── NUICSS_FINAL_GENERAL_PURPOSE_BENCHMARK.md
 │   │   ├── NUICSS_DX_BENCHMARK.md
 │   │   ├── NUICSS_GENERAL_PURPOSE_BASELINE.md
@@ -45,6 +47,10 @@ D:\stack\ai-docs/
 │   │   ├── NUICSS_TAILWIND_VISUAL_BENCHMARK.md
 │   │   └── DX_ANALYSIS_REPORT.md
 │   ├── engineering/
+│   │   ├── CONSOLIDATED_ENGINEERING_EVIDENCE.md
+│   │   ├── CLI_RELIABILITY_REPORT.md
+│   │   ├── CONSUMER_INTEGRATION_VERIFICATION.md
+│   │   ├── NATIVE_ADDON_EXTRACTION_INVESTIGATION.md
 │   │   ├── COMPILER_IMPROVEMENT_REPORT.md
 │   │   ├── INTEGRATION_VERIFICATION_REPORT.md
 │   │   ├── NUICSS_ENGINEERING_CHANGELOG.md

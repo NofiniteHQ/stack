@@ -58,3 +58,8 @@ storybook-static
 /temp/
 .bun-cache/
 
+
+# Benchmark Ephemeral Outputs
+/tests/benchmarks/**/reports/
+/tests/benchmarks/**/dist/
+/tests/benchmarks/**/.vite-temp/

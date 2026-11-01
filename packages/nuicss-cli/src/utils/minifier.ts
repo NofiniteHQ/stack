@@ -70,8 +70,6 @@ const MATH_FUNCTIONS = new Set([
   'sign',
 ]);
 
-const QUERY_KEYWORDS = new Set(['and', 'or', 'not', 'only']);
-
 let cachedLightningCssTransform:
   | ((options: Record<string, unknown>) => { code: Buffer })
   | null
@@ -697,6 +695,12 @@ export function cssAwareMinify(css: string): string {
         if (prevIsWord && currIsWord) {
           spaceNeeded = true;
         } else if (
+          prev.type === 'symbol' &&
+          (prev.value === ')' || prev.value === ']') &&
+          currIsWord
+        ) {
+          spaceNeeded = true;
+        } else if (
           prev.type === 'at-keyword' &&
           (curr.type === 'ident' ||
             curr.type === 'string' ||
@@ -705,16 +709,8 @@ export function cssAwareMinify(css: string): string {
           spaceNeeded = true;
         } else if (
           prev.type === 'ident' &&
-          QUERY_KEYWORDS.has(prev.value.toLowerCase()) &&
           curr.type === 'symbol' &&
           curr.value === '('
-        ) {
-          spaceNeeded = true;
-        } else if (
-          prev.type === 'symbol' &&
-          prev.value === ')' &&
-          curr.type === 'ident' &&
-          QUERY_KEYWORDS.has(curr.value.toLowerCase())
         ) {
           spaceNeeded = true;
         } else if (
