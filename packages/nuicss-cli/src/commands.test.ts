@@ -5,7 +5,7 @@ import path from 'node:path';
 import { resolve } from 'node:path';
 import { tokensCommand } from './commands/tokens.js';
 import { checkCommand } from './commands/check.js';
-import { compileCommand } from './commands/compile.js';
+import { compileCommand, isPathInside } from './commands/compile.js';
 import { initCommand } from './commands/init.js';
 import { listCommand } from './commands/list.js';
 import { addCommand } from './commands/add.js';
@@ -491,40 +491,157 @@ describe('NUICSS CLI Commands Integration Suite', () => {
 
   describe('Path Traversal & Boundary Safety', () => {
     const testDir = path.join(tempBase, 'cli-test-boundary');
+    const outsideDir = path.join(tempBase, 'cli-test-outside');
 
     beforeEach(() => {
       if (fs.existsSync(testDir)) {
         fs.rmSync(testDir, { recursive: true, force: true });
       }
+      if (fs.existsSync(outsideDir)) {
+        fs.rmSync(outsideDir, { recursive: true, force: true });
+      }
       fs.mkdirSync(testDir, { recursive: true });
+      fs.mkdirSync(outsideDir, { recursive: true });
     });
 
     afterEach(() => {
       if (fs.existsSync(testDir)) {
         fs.rmSync(testDir, { recursive: true, force: true });
       }
+      if (fs.existsSync(outsideDir)) {
+        fs.rmSync(outsideDir, { recursive: true, force: true });
+      }
     });
 
-    it('rejects path traversal in --output pointing outside project boundaries', async () => {
+    it('rejects relative traversal in --output (../../outside.css) and does not write file', async () => {
+      const outsideTarget = path.resolve(testDir, '../../outside.css');
+      if (fs.existsSync(outsideTarget)) fs.unlinkSync(outsideTarget);
+
       await compileCommand([], {
         cwd: testDir,
-        output: '../../../etc/malicious.css',
+        output: '../../outside.css',
       });
 
       expect(process.exitCode).toBe(1);
+      expect(fs.existsSync(outsideTarget)).toBe(false);
+    });
+
+    it('rejects deeper relative traversal in --output (../../../outside.css)', async () => {
+      const outsideTarget = path.resolve(testDir, '../../../outside.css');
+      if (fs.existsSync(outsideTarget)) fs.unlinkSync(outsideTarget);
+
+      await compileCommand([], {
+        cwd: testDir,
+        output: '../../../outside.css',
+      });
+
+      expect(process.exitCode).toBe(1);
+      expect(fs.existsSync(outsideTarget)).toBe(false);
     });
 
     it('rejects path traversal in --output via CLI child_process', () => {
-      const res = runCliCmd('compile -o "../../../etc/malicious.css"', testDir);
+      const res = runCliCmd('compile -o "../../../outside.css"', testDir);
       expect(res.status).toBe(1);
       const combined = res.stdout + res.stderr;
       expect(combined).toMatch(/Path traversal detected|unsafe output path/i);
     });
 
-    it('rejects unsafe input path traversal attempts', async () => {
+    it('rejects absolute paths pointing outside project boundaries', async () => {
+      const outsideAbsPath = path.join(outsideDir, 'forbidden.css');
+
       await compileCommand([], {
         cwd: testDir,
-        input: '../../../etc/malicious.css',
+        output: outsideAbsPath,
+      });
+
+      expect(process.exitCode).toBe(1);
+      expect(fs.existsSync(outsideAbsPath)).toBe(false);
+    });
+
+    it('accepts valid absolute paths that reside strictly inside project root', async () => {
+      const validAbsOutput = path.join(testDir, 'dist/valid-abs.css');
+      fs.writeFileSync(
+        path.join(testDir, 'index.html'),
+        '<div class="btn"></div>',
+        'utf8'
+      );
+
+      await compileCommand([], {
+        cwd: testDir,
+        output: validAbsOutput,
+      });
+
+      expect(process.exitCode).toBeUndefined();
+      expect(fs.existsSync(validAbsOutput)).toBe(true);
+    });
+
+    it('accepts valid paths with mixed separators and normalized subpaths inside root', async () => {
+      const validMixedOutput = 'dist/../dist/nested\\output.css';
+      fs.writeFileSync(
+        path.join(testDir, 'index.html'),
+        '<div class="card"></div>',
+        'utf8'
+      );
+
+      await compileCommand([], {
+        cwd: testDir,
+        output: validMixedOutput,
+      });
+
+      expect(process.exitCode).toBeUndefined();
+      expect(fs.existsSync(path.join(testDir, 'dist/nested/output.css'))).toBe(
+        true
+      );
+    });
+
+    it('rejects input and output paths escaping through symlinks/junctions', () => {
+      const linkPath = path.join(testDir, 'link-to-outside');
+      try {
+        const symlinkType = process.platform === 'win32' ? 'junction' : 'dir';
+        fs.symlinkSync(outsideDir, linkPath, symlinkType);
+      } catch {
+        // If symlinks cannot be created in environment, skip gracefully
+        return;
+      }
+
+      // 1. Output escaping through symlink
+      expect(isPathInside(testDir, 'link-to-outside/leak.css')).toBe(false);
+
+      // 2. Input escaping through symlink
+      fs.writeFileSync(
+        path.join(outsideDir, 'secret.css'),
+        '/* secret */',
+        'utf8'
+      );
+      expect(isPathInside(testDir, 'link-to-outside/secret.css')).toBe(false);
+
+      // 3. Compile command rejection
+      compileCommand([], {
+        cwd: testDir,
+        output: 'link-to-outside/leak.css',
+      });
+      expect(process.exitCode).toBe(1);
+      expect(fs.existsSync(path.join(outsideDir, 'leak.css'))).toBe(false);
+    });
+
+    it('unit: isPathInside correctly verifies containment across POSIX and Windows path semantics', () => {
+      expect(isPathInside(testDir, 'dist/output.css')).toBe(true);
+      expect(isPathInside(testDir, './valid.css')).toBe(true);
+      expect(isPathInside(testDir, 'sub/../sub/valid.css')).toBe(true);
+      expect(isPathInside(testDir, '../../outside.css')).toBe(false);
+      expect(isPathInside(testDir, '../../../outside.css')).toBe(false);
+
+      // Test POSIX root
+      expect(isPathInside('/app', '/app/src/style.css')).toBe(true);
+      expect(isPathInside('/app', '/etc/passwd')).toBe(false);
+      expect(isPathInside('/app', '../../etc/passwd')).toBe(false);
+      expect(isPathInside('/app', '/app/../outside.css')).toBe(false);
+    });
+
+    it('rejects unsafe input path traversal attempts and does not read external files', async () => {
+      await compileCommand([], {
+        cwd: testDir,
+        input: '../../../secret-outside.css',
       });
 
       expect(process.exitCode).toBe(1);

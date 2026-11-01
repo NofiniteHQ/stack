@@ -21,6 +21,93 @@ export interface CompileOptions {
   cwd?: string;
 }
 
+/**
+ * Verifies that a target path resides strictly within the allowed root directory.
+ * Enforces both lexical boundary checks and canonical (realpath) symlink checks.
+ * Handles Windows drive letters, cross-drive traversal, POSIX separators, and
+ * non-existent output paths by verifying the closest existing ancestor directory.
+ */
+export function isPathInside(root: string, targetPath: string): boolean {
+  if (!root || !targetPath) return false;
+
+  const resolvedRoot = path.resolve(root);
+  const resolvedTarget = path.resolve(resolvedRoot, targetPath);
+
+  const isWindows = process.platform === 'win32';
+  const normRoot = isWindows ? resolvedRoot.toLowerCase() : resolvedRoot;
+  const normTarget = isWindows ? resolvedTarget.toLowerCase() : resolvedTarget;
+
+  // 1. Lexical boundary check
+  const rel = path.relative(normRoot, normTarget);
+  if (
+    rel === '..' ||
+    rel.startsWith('..' + path.sep) ||
+    rel.startsWith('../') ||
+    path.isAbsolute(rel)
+  ) {
+    return false;
+  }
+
+  // 2. Canonical realpath / symlink resolution check
+  if (fs.existsSync(resolvedRoot)) {
+    let realRoot = resolvedRoot;
+    try {
+      realRoot = fs.realpathSync(resolvedRoot);
+    } catch {
+      // Keep resolvedRoot if realpathSync fails
+    }
+    const normRealRoot = isWindows ? realRoot.toLowerCase() : realRoot;
+
+    if (fs.existsSync(resolvedTarget)) {
+      try {
+        const realTarget = fs.realpathSync(resolvedTarget);
+        const normRealTarget = isWindows
+          ? realTarget.toLowerCase()
+          : realTarget;
+        const relReal = path.relative(normRealRoot, normRealTarget);
+        if (
+          relReal === '..' ||
+          relReal.startsWith('..' + path.sep) ||
+          relReal.startsWith('../') ||
+          path.isAbsolute(relReal)
+        ) {
+          return false;
+        }
+      } catch {
+        return false;
+      }
+    } else {
+      // Target does not exist yet. Verify closest existing ancestor directory
+      let curr = path.dirname(resolvedTarget);
+      while (curr && !fs.existsSync(curr)) {
+        const parent = path.dirname(curr);
+        if (parent === curr) break;
+        curr = parent;
+      }
+
+      if (fs.existsSync(curr)) {
+        try {
+          const realCurr = fs.realpathSync(curr);
+          const normRealCurr = isWindows ? realCurr.toLowerCase() : realCurr;
+          const relReal = path.relative(normRealRoot, normRealCurr);
+          if (
+            relReal === '..' ||
+            relReal.startsWith('..' + path.sep) ||
+            relReal.startsWith('../') ||
+            path.isAbsolute(relReal)
+          ) {
+            return false;
+          }
+        } catch {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
 function getDirectiveRegex(): RegExp {
   return /@(?:nuicss(?:\s+([a-zA-Z0-9_-]+))?|import\s+["'](?:@nofinite\/)?nuicss(?:\/([a-zA-Z0-9_-]+))?["'])\s*;?/g;
 }
@@ -264,12 +351,7 @@ export async function compileCommand(
 
   let inputPath: string | null = null;
   if (options.input && !isStdin) {
-    if (
-      options.input.includes('..') &&
-      (options.input.includes('etc') ||
-        options.input.includes('malicious') ||
-        /^\.\.[/\\]\.\.[/\\]\.\./.test(options.input))
-    ) {
+    if (!isPathInside(cwd, options.input)) {
       logger.error(
         `Path traversal detected: unsafe input path rejected (${cyan(
           options.input
@@ -293,12 +375,7 @@ export async function compileCommand(
 
   let outputPath: string | null = null;
   if (options.output && !isStdout) {
-    if (
-      options.output.includes('..') &&
-      (options.output.includes('etc') ||
-        options.output.includes('malicious') ||
-        /^\.\.[/\\]\.\.[/\\]\.\./.test(options.output))
-    ) {
+    if (!isPathInside(cwd, options.output)) {
       logger.error(
         `Path traversal detected: unsafe output path rejected (${cyan(
           options.output
@@ -450,6 +527,11 @@ export async function compileCommand(
     if (isStdout) {
       process.stdout.write(finalCss);
     } else if (outputPath) {
+      if (!isPathInside(cwd, outputPath)) {
+        throw new Error(
+          `Path traversal detected: unsafe output path rejected (${outputPath})`
+        );
+      }
       const outDir = path.dirname(outputPath);
       if (!fs.existsSync(outDir)) {
         fs.mkdirSync(outDir, { recursive: true });

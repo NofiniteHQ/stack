@@ -109,24 +109,98 @@ describe('Adversarial Security & Robustness Suite', () => {
         expect(css).not.toContain('body{color:red}');
       }
     });
+
+    describe('Legitimate CSS Non-Regression Verifications', () => {
+      it('should preserve legitimate custom properties in arbitrary syntax', async () => {
+        const uno = await createGenerator({
+          presets: [nuicssPreset({ preflights: false })],
+        });
+
+        const legitimateProperties = [
+          '[--brand-color:oklch(0.6_0.2_250)]',
+          "[--bg-image:url('/assets/hero.png')]",
+          "[--font:'Inter',sans-serif]",
+          '[--calc-val:calc(100%-2rem)]',
+        ];
+
+        for (const prop of legitimateProperties) {
+          const { css, matched } = await uno.generate(prop, {
+            preflights: false,
+          });
+          expect(css).not.toBe('');
+          expect(matched.has(prop)).toBe(true);
+        }
+      });
+
+      it('should preserve legitimate image, SVG, and data URLs', async () => {
+        const uno = await createGenerator({
+          presets: [nuicssPreset({ preflights: false })],
+        });
+
+        const legitimateUrls = [
+          "bg-[url('/images/photo.jpg')]",
+          "bg-[url('https://cdn.example.com/logo.svg')]",
+          'bg-[url("data:image/svg+xml;utf8,<svg></svg>")]',
+        ];
+
+        for (const urlToken of legitimateUrls) {
+          const { css, matched } = await uno.generate(urlToken, {
+            preflights: false,
+          });
+          expect(css).not.toBe('');
+          expect(matched.has(urlToken)).toBe(true);
+          expect(css).toContain('url(');
+        }
+      });
+
+      it('should preserve valid arbitrary values (calc, clamp, grid-cols, shadows, content)', async () => {
+        const uno = await createGenerator({
+          presets: [nuicssPreset({ preflights: false })],
+        });
+
+        const arbitraryTokens = [
+          'w-[calc(100%-30px)]',
+          'grid-cols-[200px_repeat(auto-fill,1fr)]',
+          'text-[clamp(1rem,2.5vw,2rem)]',
+          'shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]',
+          "content-['hello_world']",
+        ];
+
+        for (const token of arbitraryTokens) {
+          const { css, matched } = await uno.generate(token, {
+            preflights: false,
+          });
+          expect(css).not.toBe('');
+          expect(matched.has(token)).toBe(true);
+        }
+      });
+    });
   });
 
   describe('2. Prototype Pollution in Configuration', () => {
     beforeEach(() => {
       delete (Object.prototype as any).polluted;
       delete (Object.prototype as any).isAdmin;
+      delete (Object.prototype as any).maliciousKey;
     });
 
     afterEach(() => {
       delete (Object.prototype as any).polluted;
       delete (Object.prototype as any).isAdmin;
+      delete (Object.prototype as any).maliciousKey;
     });
 
-    it('should not pollute Object.prototype via nuicssPreset options', () => {
+    it('should not pollute Object.prototype via own __proto__ property from JSON.parse', () => {
+      // In ECMAScript, JSON.parse creates an object with an OWN property named '__proto__'
       const maliciousPayload = JSON.parse(
         '{"__proto__": {"polluted": "yes", "isAdmin": true}}'
       );
-      nuicssPreset(maliciousPayload);
+      expect(
+        Object.prototype.hasOwnProperty.call(maliciousPayload, '__proto__')
+      ).toBe(true);
+
+      defineConfig(maliciousPayload);
+      defineNuicssConfig(maliciousPayload);
 
       expect(({} as any).polluted).toBeUndefined();
       expect(({} as any).isAdmin).toBeUndefined();
@@ -135,11 +209,64 @@ describe('Adversarial Security & Robustness Suite', () => {
       ).toBe(false);
     });
 
-    it('should not pollute Object.prototype via constructor.prototype in nuicssPreset', () => {
+    it('should not pollute Object.prototype via own __proto__ created via Object.defineProperty', () => {
+      const payload: Record<string, unknown> = {};
+      Object.defineProperty(payload, '__proto__', {
+        value: { polluted: 'yes', maliciousKey: 'active' },
+        enumerable: true,
+        configurable: true,
+        writable: true,
+      });
+
+      expect(Object.prototype.hasOwnProperty.call(payload, '__proto__')).toBe(
+        true
+      );
+
+      const safe = defineConfig(payload);
+
+      expect(({} as any).polluted).toBeUndefined();
+      expect(({} as any).maliciousKey).toBeUndefined();
+      expect(
+        Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted')
+      ).toBe(false);
+      expect((safe as any).polluted).toBeUndefined();
+    });
+
+    it('should guard against deeply nested prototype-pollution payloads without mutating input', () => {
+      const nestedPayload: Record<string, any> = {
+        theme: {
+          extend: {
+            colors: {},
+          },
+        },
+      };
+
+      Object.defineProperty(nestedPayload.theme.extend.colors, '__proto__', {
+        value: { polluted: 'nested-leak' },
+        enumerable: true,
+        configurable: true,
+      });
+
+      // Verify caller input is not mutated
+      const safe = defineConfig(nestedPayload);
+
+      expect(({} as any).polluted).toBeUndefined();
+      expect(
+        Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted')
+      ).toBe(false);
+
+      // Caller input preserved
+      expect(nestedPayload.theme.extend.colors).toBeDefined();
+      expect(safe).toBeDefined();
+    });
+
+    it('should not pollute Object.prototype via constructor.prototype in nuicssPreset or defineConfig', () => {
       const maliciousPayload = JSON.parse(
         '{"constructor": {"prototype": {"polluted": "yes"}}}'
       );
       nuicssPreset(maliciousPayload);
+      defineConfig(maliciousPayload);
+      defineNuicssConfig(maliciousPayload);
 
       expect(({} as any).polluted).toBeUndefined();
       expect(
@@ -147,34 +274,47 @@ describe('Adversarial Security & Robustness Suite', () => {
       ).toBe(false);
     });
 
-    it('should not pollute Object.prototype via defineNuicssConfig and defineConfig', () => {
-      const maliciousPayload1 = JSON.parse(
-        '{"__proto__": {"polluted": "yes"}}'
-      );
-      defineConfig(maliciousPayload1);
-      expect(({} as any).polluted).toBeUndefined();
+    it('should preserve legitimate configuration semantics (functions, regex, arrays, nested objects)', () => {
+      const customRuleFn = () => ({ 'letter-spacing': '0.1em' });
+      const customRegex = /^custom-(.+)$/;
 
-      const maliciousPayload2 = JSON.parse(
-        '{"__proto__": {"polluted": "yes"}}'
-      );
-      defineNuicssConfig(maliciousPayload2);
-      expect(({} as any).polluted).toBeUndefined();
+      const callerConfig = {
+        theme: {
+          colors: {
+            brand: 'oklch(0.546 0.245 262.881)',
+          },
+        },
+        rules: [[customRegex, customRuleFn]],
+        shortcuts: {
+          'custom-btn': 'btn btn-primary',
+        },
+      };
 
-      const maliciousPayload3 = JSON.parse(
-        '{"constructor": {"prototype": {"polluted": "yes"}}}'
+      const safe = defineConfig(callerConfig as any);
+
+      // Verify legitimate values are preserved intact
+      expect((safe.theme as any).colors.brand).toBe(
+        'oklch(0.546 0.245 262.881)'
       );
-      defineNuicssConfig(maliciousPayload3);
-      expect(({} as any).polluted).toBeUndefined();
+      expect((safe.shortcuts as any)['custom-btn']).toBe('btn btn-primary');
+      expect(safe.rules?.[0]?.[0]).toBe(customRegex);
+      expect(safe.rules?.[0]?.[1]).toBe(customRuleFn);
+
+      // Verify caller input was NOT mutated
+      expect((callerConfig.theme.colors as any).brand).toBe(
+        'oklch(0.546 0.245 262.881)'
+      );
     });
 
-    it('should not pollute Object.prototype via loadNuicssConfig', async () => {
+    it('should safely process loadNuicssConfig with malicious and valid payloads', async () => {
       const maliciousPayload = JSON.parse('{"__proto__": {"polluted": "yes"}}');
-      await loadNuicssConfig(process.cwd(), maliciousPayload);
+      const loaded = await loadNuicssConfig(process.cwd(), maliciousPayload);
 
       expect(({} as any).polluted).toBeUndefined();
       expect(
         Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted')
       ).toBe(false);
+      expect(loaded).toBeDefined();
     });
   });
 
