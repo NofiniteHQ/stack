@@ -126,6 +126,21 @@ const protectedShortcutPrefixes = [
   'file-item',
 ];
 
+const DANGEROUS_CSS_PATTERNS = [
+  /expression\s*\(/i,
+  /javascript\s*:/i,
+  /vbscript\s*:/i,
+  /-moz-binding\s*:/i,
+  /behavior\s*:/i,
+  /;\s*}/,
+  /}\s*[^{;]+\s*\{/,
+];
+
+function isDangerousCss(value: unknown): boolean {
+  if (typeof value !== 'string') return false;
+  return DANGEROUS_CSS_PATTERNS.some((pat) => pat.test(value));
+}
+
 export type NuicssPreset = NuicssConfig & { name?: string };
 
 export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
@@ -167,6 +182,20 @@ export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
     presets: [wind],
     processors: processor ? [processor] : [],
     preflights,
+    postprocess: [
+      (util: any) => {
+        if (!util || !Array.isArray(util.entries)) return;
+        const hasDangerousEntry = util.entries.some(
+          ([prop, val]: [any, any]) =>
+            (typeof prop === 'string' &&
+              (/^behavior$/i.test(prop) || isDangerousCss(prop))) ||
+            isDangerousCss(val)
+        );
+        if (hasDangerousEntry) {
+          util.entries = [];
+        }
+      },
+    ],
     rules: [
       // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card, bg-selected)
       [

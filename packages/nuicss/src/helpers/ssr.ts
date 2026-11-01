@@ -71,18 +71,28 @@ export async function getNuicssGenerator(
 }
 
 const CLASS_ATTR_REGEX = /(?:class|className)\s*=\s*["']([^"']+)["']/g;
+const SCRIPT_BLOCK_REGEX = /<script\b[\s\S]*?(?:<\/script>|$)/gi;
+const STYLE_BLOCK_REGEX = /<style\b[\s\S]*?(?:<\/style>|$)/gi;
 
 /**
  * Extracts class names and tokens from an HTML markup string.
+ * Automatically sanitizes <script> and <style> blocks to prevent
+ * executable code or embedded styles from leaking into critical CSS.
  */
 export function extractClassTokens(html: string): string[] {
+  if (!html) return [];
   const tokens = new Set<string>();
   let match: RegExpExecArray | null;
+
+  // Strip script and style blocks non-destructively for token scanning
+  const cleanHtml = html
+    .replace(SCRIPT_BLOCK_REGEX, '')
+    .replace(STYLE_BLOCK_REGEX, '');
 
   // Reset regex state
   CLASS_ATTR_REGEX.lastIndex = 0;
 
-  while ((match = CLASS_ATTR_REGEX.exec(html)) !== null) {
+  while ((match = CLASS_ATTR_REGEX.exec(cleanHtml)) !== null) {
     const classStr = match[1];
     if (classStr) {
       const parts = classStr.split(/\s+/);

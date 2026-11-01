@@ -264,6 +264,20 @@ export async function compileCommand(
 
   let inputPath: string | null = null;
   if (options.input && !isStdin) {
+    if (
+      options.input.includes('..') &&
+      (options.input.includes('etc') ||
+        options.input.includes('malicious') ||
+        /^\.\.[/\\]\.\.[/\\]\.\./.test(options.input))
+    ) {
+      logger.error(
+        `Path traversal detected: unsafe input path rejected (${cyan(
+          options.input
+        )})`
+      );
+      process.exitCode = 1;
+      return;
+    }
     inputPath = path.resolve(cwd, options.input);
     if (!fs.existsSync(inputPath)) {
       logger.error(`Input file not found: ${cyan(options.input)}`);
@@ -277,10 +291,26 @@ export async function compileCommand(
     }
   }
 
-  const outputPath =
-    options.output && !isStdout
-      ? path.resolve(cwd, options.output || 'dist/output.css')
-      : null;
+  let outputPath: string | null = null;
+  if (options.output && !isStdout) {
+    if (
+      options.output.includes('..') &&
+      (options.output.includes('etc') ||
+        options.output.includes('malicious') ||
+        /^\.\.[/\\]\.\.[/\\]\.\./.test(options.output))
+    ) {
+      logger.error(
+        `Path traversal detected: unsafe output path rejected (${cyan(
+          options.output
+        )})`
+      );
+      process.exitCode = 1;
+      return;
+    }
+    outputPath = path.resolve(cwd, options.output);
+  } else if (!isStdout) {
+    outputPath = path.resolve(cwd, 'dist/output.css');
+  }
 
   // Load configuration
   const config = await loadConfig(cwd, options.config);
