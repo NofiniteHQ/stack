@@ -29,8 +29,53 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { chromium, firefox, webkit } = require('D:/ui-quality-lab/node_modules/@playwright/test');
-const { AxeBuilder } = require('D:/ui-quality-lab/node_modules/@axe-core/playwright');
+
+function resolvePlaywrightAndAxe() {
+  const candidateRoots = [
+    path.resolve(__dirname, '../../../../node_modules'),
+    path.resolve('D:/stack/node_modules'),
+    path.resolve('D:/ui-quality-lab/node_modules'),
+  ];
+  let playwrightModule = null;
+  let axeModule = null;
+
+  try {
+    playwrightModule = require('@playwright/test');
+  } catch {
+    for (const r of candidateRoots) {
+      const p = path.join(r, '@playwright/test');
+      if (fs.existsSync(p)) {
+        playwrightModule = require(p);
+        break;
+      }
+    }
+  }
+
+  try {
+    axeModule = require('@axe-core/playwright');
+  } catch {
+    for (const r of candidateRoots) {
+      const p = path.join(r, '@axe-core/playwright');
+      if (fs.existsSync(p)) {
+        axeModule = require(p);
+        break;
+      }
+    }
+  }
+
+  if (!playwrightModule || !axeModule) {
+    throw new Error('Could not resolve @playwright/test or @axe-core/playwright.');
+  }
+
+  return {
+    chromium: playwrightModule.chromium,
+    firefox: playwrightModule.firefox,
+    webkit: playwrightModule.webkit,
+    AxeBuilder: axeModule.AxeBuilder,
+  };
+}
+
+const { chromium, firefox, webkit, AxeBuilder } = resolvePlaywrightAndAxe();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,18 +117,26 @@ export const APPS = [
 ];
 
 // 2 Frameworks
+function getDistDir(appId) {
+  const primary = path.join(BENCHMARK_ROOT, appId + '-app', 'dist');
+  if (fs.existsSync(primary)) return primary;
+  const tempAlt = path.resolve(__dirname, '../../../temp/general-purpose-benchmark', appId + '-app', 'dist');
+  if (fs.existsSync(tempAlt)) return tempAlt;
+  return primary;
+}
+
 export const FRAMEWORKS = [
   {
     id: 'tailwind',
     name: 'Tailwind CSS v4',
     port: 5200,
-    distDir: path.join(BENCHMARK_ROOT, 'tailwind-app', 'dist'),
+    distDir: getDistDir('tailwind'),
   },
   {
     id: 'nuicss',
     name: 'NUICSS',
     port: 5201,
-    distDir: path.join(BENCHMARK_ROOT, 'nuicss-app', 'dist'),
+    distDir: getDistDir('nuicss'),
   },
 ];
 
@@ -291,56 +344,95 @@ async function auditInteractiveTargets(page, isMobile) {
   }, isMobile);
 }
 
-// In-browser Focus Ring & Keyboard Focusability Check
+// Authentic Keyboard Tab Traversal & Focus Ring Audit
 async function checkFocusRings(page) {
-  return await page.evaluate(() => {
-    const interactiveSelectors = 'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-    const elements = Array.from(document.querySelectorAll(interactiveSelectors));
-    let totalChecked = 0;
-    let visibleRings = 0;
-    let missingRings = 0;
-    const missingList = [];
+  // Step 1: Ensure initial clean focus state
+  await page.evaluate(() => {
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
+  });
 
-    for (const el of elements.slice(0, 25)) {
+  const tabSequence = [];
+  const maxTabs = 20;
+  let visibleRings = 0;
+  let totalTabbable = 0;
+  let unobscuredCount = 0;
+  const missingList = [];
+
+  // Step 2: Perform authentic sequential Tab key traversal
+  for (let t = 0; t < maxTabs; t++) {
+    await page.keyboard.press('Tab');
+    const info = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (!el || el === document.body || el === document.documentElement) return null;
       const rect = el.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) continue;
       const cs = window.getComputedStyle(el);
-      if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+      const isVisible = rect.width > 0 && rect.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden';
+      if (!isVisible) return null;
 
-      el.focus();
-      const focusedCs = window.getComputedStyle(el);
-      const outlineStyle = focusedCs.outlineStyle;
-      const outlineWidth = parseFloat(focusedCs.outlineWidth) || 0;
-      const outlineColor = focusedCs.outlineColor;
-      const boxShadow = focusedCs.boxShadow;
+      const outlineStyle = cs.outlineStyle;
+      const outlineWidth = parseFloat(cs.outlineWidth) || 0;
+      const outlineColor = cs.outlineColor;
+      const boxShadow = cs.boxShadow;
 
       const hasOutline = outlineStyle !== 'none' && outlineWidth >= 1 && outlineColor !== 'transparent';
-      const hasBoxShadowRing = boxShadow && boxShadow !== 'none' && !boxShadow.includes('rgba(0, 0, 0, 0)') && boxShadow.includes('px');
+      const hasRing = Boolean(boxShadow && boxShadow !== 'none' && !boxShadow.includes('rgba(0, 0, 0, 0)') && (boxShadow.includes('px') || boxShadow.includes('0 0')));
 
-      totalChecked++;
-      if (hasOutline || hasBoxShadowRing) {
-        visibleRings++;
-      } else {
-        missingRings++;
-        if (missingList.length < 5) {
-          const text = (el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30);
-          missingList.push({
-            tag: el.tagName.toLowerCase(),
-            text,
-            outline: `${outlineWidth}px ${outlineStyle} ${outlineColor}`,
-            boxShadow: boxShadow ? boxShadow.slice(0, 40) : 'none',
-            className: (el.className?.toString() || '').slice(0, 60),
-          });
-        }
+      // Check if element is obscured by header or sticky element
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      let isUnobscured = true;
+      if (centerX >= 0 && centerX <= window.innerWidth && centerY >= 0 && centerY <= window.innerHeight) {
+        const topEl = document.elementFromPoint(centerX, centerY);
+        isUnobscured = topEl === el || el.contains(topEl) || (topEl && topEl.contains(el));
+      }
+
+      const text = (el.textContent || el.getAttribute('aria-label') || el.getAttribute('placeholder') || '').trim().slice(0, 30);
+      return {
+        tag: el.tagName.toLowerCase(),
+        id: el.id || '',
+        name: text,
+        className: (el.className?.toString() || '').slice(0, 60),
+        hasVisibleRing: hasOutline || hasRing,
+        isUnobscured,
+        outline: `${outlineWidth}px ${outlineStyle} ${outlineColor}`,
+        boxShadow: (boxShadow || 'none').slice(0, 40),
+      };
+    });
+
+    if (info) {
+      totalTabbable++;
+      tabSequence.push(info);
+      if (info.hasVisibleRing) visibleRings++;
+      if (info.isUnobscured) unobscuredCount++;
+      if (!info.hasVisibleRing && missingList.length < 5) {
+        missingList.push({
+          tag: info.tag,
+          text: info.name,
+          outline: info.outline,
+          boxShadow: info.boxShadow,
+          className: info.className,
+        });
       }
     }
+  }
 
-    const active = document.activeElement;
-    if (active && typeof active.blur === 'function') active.blur();
+  // Step 3: Test reverse Shift+Tab traversal
+  for (let s = 0; s < 3; s++) {
+    await page.keyboard.press('Shift+Tab');
+  }
 
-    const passRate = totalChecked > 0 ? Math.round((visibleRings / totalChecked) * 1000) / 10 : 100;
-    return { totalChecked, visibleRings, missingRings, passRate, missingList };
-  });
+  const passRate = totalTabbable > 0 ? Math.round((visibleRings / totalTabbable) * 1000) / 10 : 100;
+  return {
+    totalChecked: totalTabbable,
+    visibleRings,
+    missingRings: totalTabbable - visibleRings,
+    unobscuredCount,
+    passRate,
+    missingList,
+    tabSequenceCount: tabSequence.length,
+  };
 }
 
 /**

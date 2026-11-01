@@ -1,0 +1,51 @@
+[
+  {
+    "target": "Windows AMD64",
+    "filename": "nuicss-windows-amd64.exe",
+    "fileSizeBytes": 87656448,
+    "boundary": "Executed Natively on Windows 11 host",
+    "executed": true,
+    "exitCode": 0,
+    "versionString": "nuicss/0.1.0 win32-x64 bun-v26.3.0",
+    "durationMs": 153,
+    "compileMinifyVerified": true
+  },
+  {
+    "target": "Linux AMD64",
+    "filename": "nuicss-linux-amd64",
+    "fileSizeBytes": 82884064,
+    "boundary": "Executed Natively in WSL2 Ubuntu (Linux x86_64 kernel)",
+    "executed": true,
+    "exitCode": 0,
+    "versionString": "nuicss/0.1.0 linux-x64 bun-v26.3.0",
+    "durationMs": 8274,
+    "compileMinifyVerified": true
+  },
+  {
+    "target": "Linux ARM64",
+    "filename": "nuicss-linux-arm64",
+    "fileSizeBytes": 82823464,
+    "boundary": "Cross-compiled ELF 64-bit ARM aarch64 binary structure verified (Host is x86_64; physical ARM64 hardware execution required for runtime certification)",
+    "executed": false,
+    "elfVerified": true,
+    "fileHeader": "/mnt/d/stack/packages/nuicss-cli/bin/nuicss-linux-arm64: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=ea562b973ecaa5f42a519deff871009a25e6b7d7, not stripped"
+  },
+  {
+    "target": "macOS AMD64 (x86_64)",
+    "filename": "nuicss-darwin-amd64",
+    "fileSizeBytes": 70889744,
+    "boundary": "Cross-compiled Mach-O 64-bit x86_64 binary structure verified (Host is Windows/Linux; physical Apple hardware required for runtime certification)",
+    "executed": false,
+    "machoVerified": true,
+    "fileHeader": "/mnt/d/stack/packages/nuicss-cli/bin/nuicss-darwin-amd64: Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|BINDS_TO_WEAK|PIE|HAS_TLV_DESCRIPTORS>"
+  },
+  {
+    "target": "macOS ARM64 (Apple Silicon)",
+    "filename": "nuicss-darwin-arm64",
+    "fileSizeBytes": 63795570,
+    "boundary": "Cross-compiled Mach-O 64-bit arm64 binary structure verified (Host is Windows/Linux; physical Apple Silicon hardware required for runtime certification)",
+    "executed": false,
+    "machoVerified": true,
+    "fileHeader": "/mnt/d/stack/packages/nuicss-cli/bin/nuicss-darwin-arm64: Mach-O 64-bit arm64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|BINDS_TO_WEAK|PIE|HAS_TLV_DESCRIPTORS>"
+  }
+]

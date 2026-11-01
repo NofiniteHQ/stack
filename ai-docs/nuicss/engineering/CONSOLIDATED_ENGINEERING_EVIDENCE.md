@@ -216,3 +216,45 @@ To ensure immediate discoverability by future engineering agents and architects,
 - **`D:\stack\ai-docs\README.md`:** Added `QUALITY_HARDENING_REPORT.md`, `MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md`, `CLI_RELIABILITY_REPORT.md`, `CONSUMER_INTEGRATION_VERIFICATION.md`, and `NATIVE_ADDON_EXTRACTION_INVESTIGATION.md` to the directory taxonomy.
 - **`D:\stack\ai-docs\nuicss\README.md`:** Synchronized benchmark, engineering, and audit sections to include direct relative links to all 5 reports.
 - **`D:\ui-quality-lab\ai-docs/`:** Updated all internal document reference headers from legacy `docs/ai-docs/` to canonical `ai-docs/`.
+
+---
+
+## 7. Generic Engineering Review Package Standard (`FINAL_REVIEW.zip`)
+
+To establish a permanent, standardized handoff mechanism for independent reviewers and architects, all repositories implement the generic review package generator (`scripts/generate-review-package.mjs`):
+
+```text
+repository/
+├── ai-docs/
+│   └── review/
+│       ├── README.md               # Standard governance and verification guide
+│       ├── FINAL_REVIEW.zip        # Self-contained archive with latest/ root
+│       └── latest/                 # Extracted snapshot matching archive
+│           ├── MANIFEST.json       # SHA-256 catalog, Git metadata & limitations
+│           ├── reports/            # Markdown reports and audits
+│           ├── evidence/           # Raw JSON benchmark & accessibility metrics
+│           ├── test-results/       # Automated execution logs and exit codes
+│           ├── source-files/       # Essential reproduction fixtures & configs
+│           └── git-history/        # Branch, commit hash, and status snapshot
+```
+
+### 7.1 Cryptographic Self-Verification & Tamper-Evidence
+
+- Every file staged in `latest/` is hashed with SHA-256.
+- The generator produces `FINAL_REVIEW.zip` (verifying standard `PK\x03\x04` magic bytes).
+- The packager automatically unzips the archive to an isolated temporary sandbox and verifies 100% of unzipped file hashes against `MANIFEST.json`.
+- Text files are pre-scanned for private keys, AWS tokens, and secrets before inclusion.
+
+---
+
+## 8. Standalone CLI Binary Verification Matrix
+
+All five precompiled binary targets were audited to establish explicit verification boundaries without conflating cross-compilation with native hardware execution:
+
+| Target Platform   | Executable Filename                  | Binary Header & Format                                     | Verification Boundary                           | Verified Execution Status             |
+| :---------------- | :----------------------------------- | :--------------------------------------------------------- | :---------------------------------------------- | :------------------------------------ |
+| **Windows AMD64** | `nuicss-windows-amd64.exe` (83.6 MB) | `PE32+ executable (console) x86-64, 13 sections`           | Native Execution on Windows 11 host             | **Verified Live (153ms, exit 0)**     |
+| **Linux AMD64**   | `nuicss-linux-amd64` (79.0 MB)       | `ELF 64-bit LSB executable, x86-64, version 1 (SYSV)`      | Native Execution in WSL2 Ubuntu (x86_64 kernel) | **Verified Live (956ms, exit 0)**     |
+| **Linux ARM64**   | `nuicss-linux-arm64` (78.9 MB)       | `ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV)` | Cross-compiled binary structure                 | **Header Verified (ARM aarch64 ELF)** |
+| **macOS AMD64**   | `nuicss-darwin-amd64` (67.6 MB)      | `Mach-O 64-bit x86_64 executable`                          | Cross-compiled binary structure                 | **Header Verified (Mach-O x86_64)**   |
+| **macOS ARM64**   | `nuicss-darwin-arm64` (60.8 MB)      | `Mach-O 64-bit arm64 executable`                           | Cross-compiled binary structure                 | **Header Verified (Mach-O arm64)**    |

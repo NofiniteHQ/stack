@@ -45,14 +45,16 @@ function tier2Minify(css: string): string {
 
 describe('NUICSS Two-Tier Engine Differential & Reliability Suite', () => {
   describe('Tier 1 (LightningCSS) vs Tier 2 (W3C Syntax Level 3 Fallback)', () => {
-    it('verifies both engines are operational or gracefully fall back', () => {
+    it('verifies native LightningCSS and Tier 2 engines are both available for differential comparisons', () => {
       expect(typeof tier2Minify).toBe('function');
-      if (lightningCss) {
-        expect(typeof lightningCss.transform).toBe('function');
-      }
+      expect(lightningCss).not.toBeNull();
+      if (lightningCss) expect(typeof lightningCss.transform).toBe('function');
+      expect(postcss).not.toBeNull();
+      expect(typeof postcss.parse).toBe('function');
     });
 
     it('produces functionally equivalent minification on standard rule sets', () => {
+      expect(lightningCss).not.toBeNull();
       const input = `
         /* Reset header */
         .container {
@@ -66,19 +68,26 @@ describe('NUICSS Two-Tier Engine Differential & Reliability Suite', () => {
       `;
 
       const t2 = tier2Minify(input);
+      const t1 = tier1Minify(input);
+
       expect(t2).toBe(
         '.container{box-sizing:border-box;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem;max-width:1200px}'
       );
 
-      if (lightningCss) {
-        const t1 = tier1Minify(input);
-        expect(t1).toContain('.container{');
-        expect(t1).toContain('max-width:1200px');
-        expect(t1).toContain('box-sizing:border-box');
-      }
+      // Semantic AST verification: both outputs parse to identical CSS rules & properties
+      const ast1 = postcss.parse(t1);
+      const ast2 = postcss.parse(t2);
+      expect(ast2.nodes.length).toBe(ast1.nodes.length);
+      expect(ast2.nodes[0].selector).toBe(ast1.nodes[0].selector);
+      expect(
+        ast2.nodes[0].nodes.map((n: { prop: string }) => n.prop).sort()
+      ).toEqual(
+        ast1.nodes[0].nodes.map((n: { prop: string }) => n.prop).sort()
+      );
     });
 
     it('verifies both engines preserve critical math operator spacing in calc()', () => {
+      expect(lightningCss).not.toBeNull();
       const inputs = [
         '.box { width: calc(100% - 32px); }',
         '.box { height: calc(100vh + 2.5rem); }',
@@ -88,17 +97,20 @@ describe('NUICSS Two-Tier Engine Differential & Reliability Suite', () => {
 
       for (const input of inputs) {
         const t2 = tier2Minify(input);
-        // Tier 2 MUST preserve spaces around binary + and -
-        expect(t2).toMatch(/calc\(.*[\s][+-][\s].*\)/);
+        const t1 = tier1Minify(input);
 
-        if (lightningCss) {
-          const t1 = tier1Minify(input);
-          expect(t1).toMatch(/calc\(.*[\s][+-][\s].*\)/);
-        }
+        // Both engines MUST preserve spaces around binary + and -
+        expect(t2).toMatch(/calc\(.*[\s][+-][\s].*\)/);
+        expect(t1).toMatch(/calc\(.*[\s][+-][\s].*\)/);
+
+        // Parse both with PostCSS to ensure valid syntax
+        expect(() => postcss.parse(t2)).not.toThrow();
+        expect(() => postcss.parse(t1)).not.toThrow();
       }
     });
 
     it('verifies both engines preserve string contents without punctuation corruption', () => {
+      expect(lightningCss).not.toBeNull();
       const input = `
         .badge::after {
           content: " (Status: [Active], Count: 5; Note: \\"OK\\") ";
@@ -109,21 +121,25 @@ describe('NUICSS Two-Tier Engine Differential & Reliability Suite', () => {
       `;
 
       const t2 = tier2Minify(input);
+      const t1 = tier1Minify(input);
+
       expect(t2).toContain(
         'content:" (Status: [Active], Count: 5; Note: \\"OK\\") "'
       );
       expect(t2).toContain('content:"/* not a comment */"');
+      expect(t1).toContain(
+        'content:" (Status: [Active], Count: 5; Note: \\"OK\\") "'
+      );
+      expect(t1).toContain('content:"/* not a comment */"');
 
-      if (lightningCss) {
-        const t1 = tier1Minify(input);
-        expect(t1).toContain(
-          'content:" (Status: [Active], Count: 5; Note: \\"OK\\") "'
-        );
-        expect(t1).toContain('content:"/* not a comment */"');
-      }
+      // Both parse identically
+      const ast1 = postcss.parse(t1);
+      const ast2 = postcss.parse(t2);
+      expect(ast2.nodes.length).toBe(ast1.nodes.length);
     });
 
     it('verifies both engines preserve data URLs and escaped characters', () => {
+      expect(lightningCss).not.toBeNull();
       const input = `
         .avatar {
           background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><path d='M0 0h10v10H0z'/></svg>");
@@ -131,17 +147,19 @@ describe('NUICSS Two-Tier Engine Differential & Reliability Suite', () => {
       `;
 
       const t2 = tier2Minify(input);
+      const t1 = tier1Minify(input);
+
       expect(t2).toContain(
         "background-image:url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><path d='M0 0h10v10H0z'/></svg>\")"
       );
+      expect(t1).toContain('data:image/svg+xml;utf8');
 
-      if (lightningCss) {
-        const t1 = tier1Minify(input);
-        expect(t1).toContain('data:image/svg+xml;utf8');
-      }
+      expect(() => postcss.parse(t2)).not.toThrow();
+      expect(() => postcss.parse(t1)).not.toThrow();
     });
 
     it('verifies both engines handle OKLCH color spaces and modern color-mix', () => {
+      expect(lightningCss).not.toBeNull();
       const input = `
         :root {
           --color-primary: oklch(0.546 0.245 262.881);
@@ -151,16 +169,17 @@ describe('NUICSS Two-Tier Engine Differential & Reliability Suite', () => {
       `;
 
       const t2 = tier2Minify(input);
+      const t1 = tier1Minify(input);
+
       expect(t2).toBe(
         ':root{--color-primary:oklch(0.546 0.245 262.881);--color-surface:oklch(0.985 0.002 260);--bg-subtle:color-mix(in oklch,var(--color-primary) 12%,transparent)}'
       );
+      expect(t1).toContain('--color-primary:oklch(');
+      expect(t1).toContain('color-mix(in oklch');
 
-      if (lightningCss) {
-        const t1 = tier1Minify(input);
-        expect(t1).toContain('--color-primary:oklch(');
-        expect(t1).toContain('.245 262.881');
-        expect(t1).toContain('color-mix(in oklch');
-      }
+      const ast1 = postcss.parse(t1);
+      const ast2 = postcss.parse(t2);
+      expect(ast2.nodes[0].nodes.length).toBe(ast1.nodes[0].nodes.length);
     });
   });
 

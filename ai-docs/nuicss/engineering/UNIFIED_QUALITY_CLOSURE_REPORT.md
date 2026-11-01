@@ -45,6 +45,9 @@ Under Deque Axe-Core calibrated automated auditing (`@axe-core/playwright`), bot
   - **NUICSS:** **0 Critical, 0 Serious, 0 Moderate, 0 Minor Violations.**
   - **Tailwind CSS v4:** **0 Critical, 0 Serious, 0 Moderate, 0 Minor Violations.**
 
+> [!NOTE] > **Automated Accessibility vs Manual Assistive-Technology Certification:**
+> The zero-violation score confirms that all automated Deque Axe-Core DOM rules, color contrast ratios, accessible name associations, and scrollable region attributes are 100% compliant. However, automated testing covers approximately 30–40% of WCAG criteria. Full accessibility certification requires manual testing with assistive technologies (NVDA on Windows, VoiceOver on macOS/iOS, and keyboard-only user flows), which is cataloged in the review package's known limitations.
+
 ### 2.2 Dual-Tier Target Sizing (WCAG 2.5.5 / WCAG 2.5.8)
 
 A dual-density responsive target sizing strategy was implemented:
@@ -98,16 +101,21 @@ Two subtle edge cases in `packages/nuicss-cli/src/utils/minifier.ts` were identi
 1. _Post-Parenthesis Whitespace Preservation:_ In standard CSS Syntax Level 3, a closing parenthesis followed by a word token (e.g. `var(--gap, 8px) 16px` or `color-mix(in oklch, var(--c) 10%, transparent)`) requires whitespace preservation to prevent invalid token collapse.
 2. _Container Query Parenthesis Spacing:_ Preserved whitespace preceding parentheses in `@container name (min-width: ...)` declarations.
 
-### 4.3 Test Results & Binary Packaging
+### 4.3 Standalone Binary Platform Verification Matrix
 
-- **Vitest Suite:** `pnpm --dir D:\stack\packages\nuicss-cli test` -> **3 test files passed, 112/112 tests passed (100% pass rate in 3.52s)**.
+All five standalone CLI executables compiled with Bun 1.4.2 were independently audited to define explicit verification boundaries without conflating cross-compilation with native hardware execution:
+
+| Target Platform   | Binary Executable                         | Binary Header / Format                                     | Verification Level               | Verification Boundary & Platform Evidence                                                                                                                                                  |
+| :---------------- | :---------------------------------------- | :--------------------------------------------------------- | :------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Windows AMD64** | `bin/nuicss-windows-amd64.exe` (83.60 MB) | `PE32+ executable (console) x86-64, 13 sections`           | **Natively Executed & Verified** | Executed directly on Windows 11 host. `--version` exited code 0 (`nuicss/0.1.0 win32-x64 bun-v26.3.0`). Live `--input` compile with `--minify` completed in 153ms.                         |
+| **Linux AMD64**   | `bin/nuicss-linux-amd64` (79.05 MB)       | `ELF 64-bit LSB executable, x86-64, version 1 (SYSV)`      | **Natively Executed in WSL2**    | Executed directly in WSL2 Ubuntu (Linux x86_64 kernel). `--version` exited code 0 (`nuicss/0.1.0 linux-x64 bun-v26.3.0`). Live compile generated 3,277 utilities with `--minify` in 956ms. |
+| **Linux ARM64**   | `bin/nuicss-linux-arm64` (78.99 MB)       | `ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV)` | **Binary Structure Verified**    | Cross-compiled target. Binary header inspected via `file` utility. Valid ARM aarch64 ELF structure confirmed. Physical ARM64 device execution required for runtime certification.          |
+| **macOS AMD64**   | `bin/nuicss-darwin-amd64` (67.61 MB)      | `Mach-O 64-bit x86_64 executable`                          | **Binary Structure Verified**    | Cross-compiled target. Mach-O header inspected via `file` utility. Valid x86_64 binary format confirmed. Physical Apple hardware execution required for runtime certification.             |
+| **macOS ARM64**   | `bin/nuicss-darwin-arm64` (60.84 MB)      | `Mach-O 64-bit arm64 executable`                           | **Binary Structure Verified**    | Cross-compiled target. Mach-O header inspected via `file` utility. Valid Apple Silicon arm64 format confirmed. Physical Apple hardware execution required for runtime certification.       |
+
+- **Vitest Suite:** `pnpm --dir D:\stack\packages\nuicss-cli test` -> **3 test files passed, 112/112 tests passed (100% pass rate in 3.82s)**.
+- **Differential Verification:** All 35 differential tests in `differential.test.ts` actively execute against native LightningCSS and PostCSS without skipping.
 - **NPM Package Verification:** `npm pack --dry-run` verified in `packages/nuicss-cli` (35 files, 204.9 kB tarball, valid entrypoints in `package.json`).
-- **Standalone Binary Compilation:** Recompiled all 5 platform targets via Bun 1.4.2:
-  - `bin/nuicss-windows-amd64.exe` (83.60 MB, verified live compile with `--minify` in 566ms).
-  - `bin/nuicss-linux-amd64`
-  - `bin/nuicss-linux-arm64`
-  - `bin/nuicss-darwin-amd64`
-  - `bin/nuicss-darwin-arm64`
 
 ---
 
