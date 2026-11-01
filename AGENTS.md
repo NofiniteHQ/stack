@@ -428,3 +428,16 @@ Raw `@nofinite/*` strings are reserved strictly for code imports and CLI package
 - **Central Markdown Ground Truth:** All canonical Markdown documentation lives in the central `docs/` directory in `d:\stack` (`docs/nuicss/`, `docs/kanban/`, `docs/charts/`, etc.).
 - **Lean Package READMEs:** Inside `packages/<pkg>/README.md`, keep documentation focused on npm installation, zero-config quickstart, and direct links to full documentation.
 - **Consumption by `oss-docs`:** `d:\oss-docs` consumes this canonical Markdown and enriches it with interactive Next.js client components (`<ComponentPreview />`), live sandboxes, and Theme Studio pickers.
+
+---
+
+## 17. Organization-Wide Documentation Standard (`docs/` vs `ai-docs/` vs `temp/`)
+
+Every active Nofinite repository maintains two independent, non-nested documentation directories at its root:
+
+- **`docs/` (Public & Developer-Facing Documentation):** Public user guides, package API references, quickstarts, and contributor guides. This directory is consumed by external documentation generators and `oss-docs`.
+- **`ai-docs/` (Internal Engineering Knowledge & AI Agent Context):** Architectural specifications, internal benchmarks, compiler optimization reports, quality audits, decision records (`decisions/`), and multi-phase roadmaps (`plans/`).
+- **`temp/` (Scratch Scripts & Task Plans — Gitignored):** Ephemeral execution scripts and task-specific implementation plans (`temp/<project>_implementation_plan.md`).
+
+**The Sibling Invariant:**
+`docs/` and `ai-docs/` MUST ALWAYS remain sibling directories at the repository root and NEVER be nested inside one another. Scratch scripts, test fixtures, and ephemeral files belong strictly in `temp/` and must never pollute repository root, `docs/`, or `ai-docs/`.

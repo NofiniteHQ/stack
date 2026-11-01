@@ -468,7 +468,7 @@
           "name": "btn-outline",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`bg-transparent border border-solid border-strong text-default hover:bg-subtle`"
+            "value": "**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`bg-transparent border border-solid border-strong text-default hover:bg-subtle focus-visible:border-focus`"
           }
         },
         {
@@ -1207,6 +1207,13 @@
           }
         },
         {
+          "name": "dialog-backdrop",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity`"
+          }
+        },
+        {
           "name": "dialog-box",
           "description": {
             "kind": "markdown",
@@ -1581,21 +1588,21 @@
           "name": "glow-brand",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-primary-subtle)] transition-shadow duration-300`"
+            "value": "**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--brand-primary-hover)] transition-shadow duration-300`"
           }
         },
         {
           "name": "glow-danger",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-danger)]`"
+            "value": "**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-danger)] transition-shadow duration-300`"
           }
         },
         {
           "name": "glow-success",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-success)]`"
+            "value": "**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-success)] transition-shadow duration-300`"
           }
         },
         {
@@ -1904,6 +1911,13 @@
           "description": {
             "kind": "markdown",
             "value": "**NUICSS Modal & Dialog** (overlays)\n\nAccessible dialog overlays with backdrop dimming and declarative aria-hidden state support.\n\n**Example:**\n```html\n<div class=\"modal\" aria-hidden=\"false\">\n  <div class=\"modal-backdrop\"></div>\n  <div class=\"modal-panel\">\n    <div class=\"modal-title\">Confirm Action</div>\n  </div>\n</div>\n```\n\n**Expanded utilities:**\n`fixed inset-0 m-auto p-0 bg-transparent border-none max-w-lg w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden`"
+          }
+        },
+        {
+          "name": "modal-backdrop",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Modal & Dialog** (overlays)\n\nAccessible dialog overlays with backdrop dimming and declarative aria-hidden state support.\n\n**Example:**\n```html\n<div class=\"modal\" aria-hidden=\"false\">\n  <div class=\"modal-backdrop\"></div>\n  <div class=\"modal-panel\">\n    <div class=\"modal-title\">Confirm Action</div>\n  </div>\n</div>\n```\n\n**Expanded utilities:**\n`fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity`"
           }
         },
         {
@@ -2477,7 +2491,7 @@
           "name": "nui-btn-outline",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `btn-outline`)\n\n**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`bg-transparent border border-solid border-strong text-default hover:bg-subtle`"
+            "value": "**NUICSS Isolated Superclass** (alias for `btn-outline`)\n\n**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`bg-transparent border border-solid border-strong text-default hover:bg-subtle focus-visible:border-focus`"
           }
         },
         {
@@ -3216,6 +3230,13 @@
           }
         },
         {
+          "name": "nui-dialog-backdrop",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `dialog-backdrop`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity`"
+          }
+        },
+        {
           "name": "nui-dialog-box",
           "description": {
             "kind": "markdown",
@@ -3590,21 +3611,21 @@
           "name": "nui-glow-brand",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `glow-brand`)\n\n**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-primary-subtle)] transition-shadow duration-300`"
+            "value": "**NUICSS Isolated Superclass** (alias for `glow-brand`)\n\n**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--brand-primary-hover)] transition-shadow duration-300`"
           }
         },
         {
           "name": "nui-glow-danger",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `glow-danger`)\n\n**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-danger)]`"
+            "value": "**NUICSS Isolated Superclass** (alias for `glow-danger`)\n\n**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-danger)] transition-shadow duration-300`"
           }
         },
         {
           "name": "nui-glow-success",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `glow-success`)\n\n**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-success)]`"
+            "value": "**NUICSS Isolated Superclass** (alias for `glow-success`)\n\n**NUICSS Micro-Interactions & Physics** (interactions)\n\nPhysics-based micro-interactions, spring easings, ambient glow shadows, and skeleton shimmers.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale hover-lift glow-brand\">Launch</button>\n```\n\n**Expanded utilities:**\n`shadow-[0_0_20px_var(--color-success)] transition-shadow duration-300`"
           }
         },
         {
@@ -3913,6 +3934,13 @@
           "description": {
             "kind": "markdown",
             "value": "**NUICSS Isolated Superclass** (alias for `modal`)\n\n**NUICSS Modal & Dialog** (overlays)\n\nAccessible dialog overlays with backdrop dimming and declarative aria-hidden state support.\n\n**Example:**\n```html\n<div class=\"modal\" aria-hidden=\"false\">\n  <div class=\"modal-backdrop\"></div>\n  <div class=\"modal-panel\">\n    <div class=\"modal-title\">Confirm Action</div>\n  </div>\n</div>\n```\n\n**Expanded utilities:**\n`fixed inset-0 m-auto p-0 bg-transparent border-none max-w-lg w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden`"
+          }
+        },
+        {
+          "name": "nui-modal-backdrop",
+          "description": {
+            "kind": "markdown",
+            "value": "**NUICSS Isolated Superclass** (alias for `modal-backdrop`)\n\n**NUICSS Modal & Dialog** (overlays)\n\nAccessible dialog overlays with backdrop dimming and declarative aria-hidden state support.\n\n**Example:**\n```html\n<div class=\"modal\" aria-hidden=\"false\">\n  <div class=\"modal-backdrop\"></div>\n  <div class=\"modal-panel\">\n    <div class=\"modal-title\">Confirm Action</div>\n  </div>\n</div>\n```\n\n**Expanded utilities:**\n`fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity`"
           }
         },
         {
@@ -4472,7 +4500,7 @@
           "name": "nui-sparkline-bar",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `sparkline-bar`)\n\n**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`flex-1 bg-primary/40 hover:bg-primary rounded-t-sm transition-all duration-150 min-h-[2px]`"
+            "value": "**NUICSS Isolated Superclass** (alias for `sparkline-bar`)\n\n**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`w-1 bg-primary/30 rounded-t hover:bg-primary transition-all duration-150 min-h-[2px]`"
           }
         },
         {
@@ -4493,7 +4521,7 @@
           "name": "nui-sparkline-container",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `sparkline-container`)\n\n**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`flex items-end gap-1 h-8 w-24 overflow-hidden`"
+            "value": "**NUICSS Isolated Superclass** (alias for `sparkline-container`)\n\n**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`inline-flex items-end gap-1 h-6 px-1`"
           }
         },
         {
@@ -4724,7 +4752,7 @@
           "name": "nui-table-container",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `table-container`)\n\n**NUICSS Table Container** (primitives)\n\nPure CSS responsive table container with border containment, rounded corners, and overflow horizontal scrolling.\n\n**Example:**\n```html\n<div class=\"table-container\">\n  <table>\n    <thead><tr><th>Name</th><th>Status</th></tr></thead>\n    <tbody><tr><td>Project Alpha</td><td>Active</td></tr></tbody>\n  </table>\n</div>\n```\n\n**Expanded utilities:**\n`w-full overflow-x-auto rounded-xl border border-default bg-surface shadow-sm`"
+            "value": "**NUICSS Isolated Superclass** (alias for `table-container`)\n\n**NUICSS Table Container** (primitives)\n\nPure CSS responsive table container with border containment, rounded corners, and overflow horizontal scrolling.\n\n**Example:**\n```html\n<div class=\"table-container\">\n  <table>\n    <thead><tr><th>Name</th><th>Status</th></tr></thead>\n    <tbody><tr><td>Project Alpha</td><td>Active</td></tr></tbody>\n  </table>\n</div>\n```\n\n**Expanded utilities:**\n`w-full overflow-x-auto rounded-xl border border-default bg-surface shadow-sm __table-styles`"
           }
         },
         {
@@ -5501,7 +5529,7 @@
           "name": "sparkline-bar",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`flex-1 bg-primary/40 hover:bg-primary rounded-t-sm transition-all duration-150 min-h-[2px]`"
+            "value": "**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`w-1 bg-primary/30 rounded-t hover:bg-primary transition-all duration-150 min-h-[2px]`"
           }
         },
         {
@@ -5522,7 +5550,7 @@
           "name": "sparkline-container",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`flex items-end gap-1 h-8 w-24 overflow-hidden`"
+            "value": "**NUICSS Sparklines & Circular Progress** (charts)\n\nPure CSS zero-JS inline sparklines, progress rings, and metric trend badges.\n\n**Example:**\n```html\n<div class=\"sparkline-container h-8 w-24\">\n  <div class=\"sparkline-bar\" style=\"height: 40%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 70%\"></div>\n  <div class=\"sparkline-bar\" style=\"height: 100%\"></div>\n</div>\n```\n\n**Expanded utilities:**\n`inline-flex items-end gap-1 h-6 px-1`"
           }
         },
         {
@@ -5753,7 +5781,7 @@
           "name": "table-container",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Table Container** (primitives)\n\nPure CSS responsive table container with border containment, rounded corners, and overflow horizontal scrolling.\n\n**Example:**\n```html\n<div class=\"table-container\">\n  <table>\n    <thead><tr><th>Name</th><th>Status</th></tr></thead>\n    <tbody><tr><td>Project Alpha</td><td>Active</td></tr></tbody>\n  </table>\n</div>\n```\n\n**Expanded utilities:**\n`w-full overflow-x-auto rounded-xl border border-default bg-surface shadow-sm`"
+            "value": "**NUICSS Table Container** (primitives)\n\nPure CSS responsive table container with border containment, rounded corners, and overflow horizontal scrolling.\n\n**Example:**\n```html\n<div class=\"table-container\">\n  <table>\n    <thead><tr><th>Name</th><th>Status</th></tr></thead>\n    <tbody><tr><td>Project Alpha</td><td>Active</td></tr></tbody>\n  </table>\n</div>\n```\n\n**Expanded utilities:**\n`w-full overflow-x-auto rounded-xl border border-default bg-surface shadow-sm __table-styles`"
           }
         },
         {

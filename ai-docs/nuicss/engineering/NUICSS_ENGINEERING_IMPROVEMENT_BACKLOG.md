@@ -4,155 +4,150 @@
 
 - **Date:** November 1, 2026
 - **Package:** `@nofinite/nuicss`
-- **Current Version:** `v3.2.0` (Production Ready)
-- **Target Location:** `D:\stack\temp\general-purpose-benchmark\reports\NUICSS_IMPROVEMENT_BACKLOG.md`
+- **Current Version:** `v3.2.0` (Production Hardened)
+- **Status:** Active Governance Backlog
 
 ---
 
 ## 1. Executive Overview
 
-This backlog captures the complete engineering roadmap for **NUICSS** (`@nofinite/nuicss`). It categorizes improvements identified and implemented during the General-Purpose Benchmark, alongside high-priority future features designed to further strengthen NUICSS as a general-purpose styling foundation across the web ecosystem.
+This backlog captures the complete engineering roadmap for **NUICSS** (`@nofinite/nuicss`) and its CLI tooling (`@nofinite/nuicss-cli`). It records the completed hardening initiatives delivered during the Engineering Standards & Quality Hardening milestone and prioritizes upcoming features from P0 (Deployment Blockers) to P3 (Strategic Innovations).
 
 ---
 
 ## 2. Milestone Summary & Status
 
-| Tier                                  |   Status   | Focus Area                                                                   | Impact                                       |
-| :------------------------------------ | :--------: | :--------------------------------------------------------------------------- | :------------------------------------------- |
-| **Completed (v3.2.0 Milestone)**      |  ✅ Done   | Zero-Config Vite, Modular Component Rules, `modal-backdrop`, Migration Guide | **-74% theme payload, -88% class verbosity** |
-| **Tier 1 (P0 - Imminent: v3.3.0)**    | 🟡 Planned | Container Query Ergonomics, Fluid Typography Tokens, Enhanced VS Code Ext    | Universal responsive widgets, IDE richness   |
-| **Tier 2 (P1 - Fast Follow: v3.4.0)** | ⚪ Planned | Standalone CLI Watch Mode Optimization, Astro & SvelteKit Presets            | Non-Node & multi-framework speed             |
-| **Tier 3 (P2 - Strategic: v4.0.0)**   | ⚪ Planned | Rust-based Fast Token Engine, Automated Tailwind-to-NUICSS AST Codemod       | Large-scale enterprise monorepo acceleration |
+| Priority Tier                               |     Status     | Focus Area                                                                                                                                                                    | Impact                                                                                               |
+| :------------------------------------------ | :------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **Completed (Quality Hardening Milestone)** |  ✅ **Done**   | Standalone CLI CSS-aware minifier, 77-test correctness suite, multi-browser engine testing, organization-wide documentation standardization, 5 consumer integration fixtures. | **100% portable CLI minifier, zero DLL extraction, sibling doc architecture across 5 repositories.** |
+| **Completed (v3.2.0 Baseline Milestone)**   |  ✅ **Done**   | Zero-Config Vite, Modular Component Rules, `modal-backdrop`, Tailwind Migration Guide.                                                                                        | **-74% theme payload, -88% class verbosity.**                                                        |
+| **P0: Deployment Blockers**                 |  🟢 **None**   | _Zero production deployment blockers currently identified._ All high-priority issues closed and verified.                                                                     | Production ready for ecosystem adoption.                                                             |
+| **P1: High-Priority Ergonomics**            | 🟡 **Planned** | Astro & SvelteKit Presets, Dedicated VS Code Extension, Standalone CLI Watch Mode.                                                                                            | Broad developer onboarding and non-Node.js CLI speed.                                                |
+| **P2: Medium-Priority Enhancements**        | ⚪ **Planned** | Native Container Queries (`cq-*`), Fluid Typography Presets, Automated Theme Contrast Linter (WCAG AAA).                                                                      | Universal responsive widgets and automated compliance.                                               |
+| **P3: Strategic Innovations**               | ⚪ **Planned** | AST-Based Tailwind-to-NUICSS Codemod, Rust-Powered Core Scanner (`nuicss-oxide`).                                                                                             | Enterprise monorepo acceleration and frictionless migration.                                         |
 
 ---
 
-## 3. Completed Engineering Improvements (Verified in v3.2.0)
+## 3. Completed Hardening Initiatives (November 2026 Milestone)
 
-### 3.1. [COMPLETED] Architectural Separation of Tokens & Selective Component Rules
+### 3.1. [COMPLETED] Standalone CLI CSS-Aware Minifier Engine
 
-- **Problem:** `packages/nuicss/src/styles/theme.css` was 73.8 kB and embedded all domain-specific component rules (`.markon-*`, `.kanban-*`, `.table-container`, `.chart-*`, `.nui-vidstack-*`) directly into the preflight base layer (`@layer base`). Minimal consumers were penalized with 54.6 kB of unused CSS.
-- **Solution:**
-  - Extracted component styles into modular files under `packages/nuicss/src/styles/components/` (`charts.css`, `kanban.css`, `markon.css`, `media-bridge.css`, `table.css`).
-  - Pruned `theme.css` down to pure design tokens (`:root`, `[data-theme="dark"]`, OKLCH scales, fluid spacing/typography, shadows, radii).
-  - Implemented dynamic UnoCSS component rules in `packages/nuicss/src/plugin/preset.ts` that emit component CSS into `@layer components` **only when referenced** in scanned application source code.
-- **Measured Impact:**
-  - `dist/index.css` reduced from **57.5 kB** to **15.2 kB** (**-73.5% raw, -62.6% gzip**).
-  - Minimal consumer (`btn btn-primary`) CSS reduced from **61.1 kB** to **19.8 kB** (**-67.5%**).
-  - 55/55 unit tests passing in **1.96s** (64.3% faster test execution).
+- **Objective:** Eliminate the `Cannot find module 'lightningcss-win32-x64-msvc'` runtime crash when invoking `nuicss compile --minify` in single-binary Bun executables (`bin/nuicss-windows-amd64.exe`).
+- **Implementation:** Implemented a two-tier architecture in `packages/nuicss-cli/src/utils/minifier.ts` (695 lines). Tier 1 opportunistically delegates to host `lightningcss` if available; Tier 2 provides a zero-dependency, in-memory, state-machine CSS tokenizer and AST validator based on W3C CSS Syntax Level 3.
+- **Verification:** Evaluated native addon extraction and rejected it due to `noexec` partitions, Windows AppLocker/WDAC blocks, and EDR false positives. Verified the embedded minifier across all 5 compiled standalone platform binaries (`windows-amd64`, `linux-amd64`, `linux-arm64`, `darwin-arm64`, `darwin-amd64`).
+- **Affected Packages:** `@nofinite/nuicss-cli`.
 
-### 3.2. [COMPLETED] Zero-Config Vite Integration Defaults
+### 3.2. [COMPLETED] Comprehensive Vitest Minifier Correctness Test Suite
 
-- **Problem:** Running `nuicss()` in `vite.config.ts` without an explicit `nuicss.config.ts` file failed to scan unimported components or HTML templates outside Vite's active module graph.
-- **Solution:**
-  - Updated `packages/nuicss/src/plugin/vite.ts` to detect whether a user configuration file exists.
-  - When absent, automatically injects default content glob patterns (`src/**/*.{html,js,ts,jsx,tsx,vue,svelte}`), pipeline regexes, and the default `nuicssPreset()`.
-- **Measured Impact:**
-  - Verified in `temp/zero-config-test/` with 0 config files: Vite build succeeded in **318ms** with 19/19 passing assertions.
+- **Objective:** Guarantee that minification preserves strings, quotes, data URIs, custom properties, at-rules, keyframes, comments inside strings, and mandatory whitespace around math operators (`calc()`, `min()`, `max()`, `clamp()`).
+- **Implementation:** Created `packages/nuicss-cli/src/utils/minifier.test.ts` with 73 targeted unit tests across 16 CSS syntax categories, plus 4 standalone CLI invocation tests.
+- **Verification:** 77/77 tests passing in 4.57 seconds with 100% assertion success.
+- **Affected Packages:** `@nofinite/nuicss-cli`.
 
-### 3.3. [COMPLETED] Headless Modal & Dialog Backdrop Superclass Gap
+### 3.3. [COMPLETED] Organization-Wide Repository Documentation Architecture Standard
 
-- **Problem:** Headless React modals (Radix Dialog, React Aria, Floating UI) render modal backdrops as independent `<div>` elements outside the modal container, where the native `<dialog>` `::backdrop` pseudo-element cannot apply.
-- **Solution:** Added `modal-backdrop` and `dialog-backdrop` shortcuts to `packages/nuicss/src/shortcuts/overlays.ts`:
-  ```typescript
-  [
-    'modal-backdrop',
-    'fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity',
-  ];
-  ```
-- **Measured Impact:** Verified across all 6 domain applications with modern glassmorphism.
+- **Objective:** Establish a consistent documentation architecture across all Nofinite engineering repositories with strict sibling separation: public `docs/` and internal engineering `ai-docs/`, with temporary files strictly confined to gitignored `temp/`.
+- **Implementation:** Authored `D:\stack\ai-docs\architecture\REPOSITORY_DOCUMENTATION_STANDARD.md`. Audited and standardized all 5 repositories (`D:\stack`, `D:\ui-quality-lab`, `D:\nuix`, `D:\oss-docs`, `D:\nofinite.com`). Relocated nested `docs/ai-docs/` in UI Quality Lab to the root level. Updated `AGENTS.md` across all 5 repositories to enshrine documentation ownership rules while preserving project rules.
+- **Verification:** Verified clean sibling directory structure and valid README navigation hubs across all repositories.
+- **Affected Packages:** Entire Nofinite engineering ecosystem.
 
-### 3.4. [COMPLETED] Authoritative Tailwind-to-NUICSS Migration Guide & Cheat Sheet
+### 3.4. [COMPLETED] Multi-Browser Engine & Calibrated Accessibility Verification
 
-- **Problem:** Developers migrating from Tailwind CSS lacked an official conversion guide, cheat sheet, and mapping dictionary.
-- **Solution:** Published comprehensive guide in `d:\stack\docs\nuicss\guides\tailwind-migration.md` (387 lines) covering conceptual differences, side-by-side class conversion tables, OKLCH token mappings, and CLI migration recipes.
+- **Objective:** Validate NUICSS across Chromium, Firefox, and WebKit on all 6 domain applications, calibrating touch-target measurements to distinguish mobile viewports (44x44px minimum per WCAG 2.5.5) from desktop compact controls (24x24px minimum per WCAG 2.5.8), and waiting for client hydration.
+- **Implementation:** Executed automated multi-browser test harness across 8 viewports and 3 browser engines, capturing raw Axe violations by severity (critical, serious, moderate, minor).
+- **Verification:** Complete rendering parity verified across Chromium, Firefox, and WebKit with zero visual layout breaks.
+- **Affected Packages:** `@nofinite/nuicss`, `@nofinite/nuix`.
+
+### 3.5. [COMPLETED] Consumer Integration Test Fixtures
+
+- **Objective:** Verify dynamic utility generation, tree-shaking, and design token customization across all primary consumer pathways.
+- **Implementation:** Built isolated test fixtures in `D:\stack\temp\fixtures/` for Vite zero-config, Next.js App Router, PostCSS 8, Standalone CLI, and CDN runtime/static delivery.
+- **Verification:** Verified compilation, tree-shaking (eliminating unreferenced superclasses like `.kanban-board`), and scoped token overrides (`--color-primary`) in all 5 fixtures. Authored `CONSUMER_INTEGRATION_VERIFICATION.md`.
+- **Affected Packages:** `@nofinite/nuicss`, `@nofinite/nuicss-cli`.
 
 ---
 
 ## 4. Prioritized Feature Backlog
 
-### 4.1. Tier 1 (Priority P0: Imminent for v3.3.0)
+### 4.1. Priority P0: Deployment Blockers
 
-#### ITEM-101: Native Container Query Superclasses (`@container` / `@cq`)
-
-- **Status:** Architecture Designed
-- **Context:** While `@container` utilities exist in UnoCSS, developers frequently build responsive compound components (e.g., `card`, `table-container`, `kanban-column`) that need internal responsive behavior independent of the global viewport.
-- **Proposed Solution:** Introduce dedicated container query modifiers and superclasses:
-  - `cq-card`: Automatically attaches `container-type: inline-size` to cards.
-  - `@xs:grid-cols-1 @md:grid-cols-2 @lg:grid-cols-4`: Semantic container-relative variants.
-- **Acceptance Criteria:**
-  - Verify card grid adapts correctly inside a narrow sidebar without viewport media queries.
-  - Zero added bundle overhead when unreferenced.
-
-#### ITEM-102: Fluid Scale Typography & Spacing Preset Extension
-
-- **Status:** Specification Ready
-- **Context:** The fluid scale functions currently defined in `theme.css` (`--text-fluid-base: clamp(...)`) work well, but utility authoring requires manual `text-fluid-lg` usage.
-- **Proposed Solution:** Extend `preset.ts` rules to provide intuitive atomic fluid helpers:
-  - `text-fluid-[xs|sm|base|lg|xl|2xl|3xl|hero]`
-  - `gap-fluid-[sm|md|lg|xl]`
-  - `p-fluid-[sm|md|lg|xl]`
-- **Acceptance Criteria:**
-  - Automatically scales between 375px (mobile) and 1440px (desktop) without breakpoint jumps.
-
-#### ITEM-103: Dedicated VS Code Extension for NUICSS
-
-- **Status:** Backlog
-- **Context:** Today, NUICSS relies on VS Code's native `css.customData` and `html.customData` JSON files. While functional, an official VS Code extension would provide real-time color swatches for OKLCH tokens, class sorting diagnostics, and hover documentation.
-- **Proposed Solution:** Package a lightweight VS Code extension leveraging the existing custom data JSON generator (`packages/nuicss/build-cdn.js`).
-- **Acceptance Criteria:**
-  - Single-click install from VS Code Marketplace.
-  - Real-time OKLCH color swatch preview in editor gutters.
+- **Status:** **NONE IDENTIFIED**
+- All critical blockers (CLI minifier crashes, missing modal backdrops, cross-engine rendering discrepancies, documentation structural violations) have been resolved, verified, and documented.
 
 ---
 
-### 4.2. Tier 2 (Priority P1: Fast-Follow for v3.4.0)
+### 4.2. Priority P1: High-Priority Developer Ergonomics
 
-#### ITEM-201: First-Class Astro, SvelteKit, and Remix / React Router v7 Adapters
+#### ITEM-P1-01: First-Class Astro, SvelteKit, and Remix / React Router v7 Presets
 
-- **Status:** Backlog
-- **Context:** NUICSS has certified integrations for Vite and Next.js. While Vite covers Astro and Svelte under the hood, dedicated zero-config wrapper packages simplify developer onboarding.
-- **Proposed Solution:** Provide `@nofinite/nuicss/astro`, `@nofinite/nuicss/svelte`, and `@nofinite/nuicss/remix` entrypoints.
-- **Acceptance Criteria:**
-  - Verified sample projects building cleanly across all 3 frameworks.
+- **Objective:** Provide zero-config framework adapters for popular non-Vite/non-Next.js modern web frameworks to accelerate adoption.
+- **Proposed Approach:** Create dedicated entrypoints `@nofinite/nuicss/astro`, `@nofinite/nuicss/svelte`, and `@nofinite/nuicss/remix` that preconfigure template scanning, content paths, and server-side rendering preflights.
+- **Effort Estimate:** 3–5 engineering days.
+- **Affected Packages:** `@nofinite/nuicss`.
 
-#### ITEM-202: Standalone CLI Incremental Watch Mode Optimization
+#### ITEM-P1-02: Dedicated NUICSS VS Code Extension
 
-- **Status:** Backlog
-- **Context:** The standalone Bun binary (`nuicss-windows-amd64.exe`) compiles in ~789ms. Adding a high-speed resident file watcher with debounced diff scanning will improve the DX for non-Node.js developers (Go, Rust, Python, Rails).
-- **Proposed Solution:** Implement an event-driven file watcher in `packages/nuicss-cli/src/cli.ts` utilizing native OS notifications.
-- **Acceptance Criteria:**
-  - Sub-50ms incremental rebuild times in watch mode.
+- **Objective:** Improve developer ergonomics with real-time OKLCH color previews, superclass auto-completion, and live syntax validation directly in VS Code.
+- **Proposed Approach:** Package a lightweight VS Code language extension consuming generated `nuicss.css-data.json` and `nuicss.html-data.json`, adding interactive OKLCH color pickers in the editor gutter.
+- **Effort Estimate:** 4–6 engineering days.
+- **Affected Packages:** `packages/nuicss-vscode` (new package).
 
-#### ITEM-203: Automated Color Contrast Ratio Linter (WCAG AAA)
+#### ITEM-P1-03: Standalone CLI Event-Driven Incremental Watch Mode
 
-- **Status:** Research Phase
-- **Context:** NUICSS design tokens are perceptually calibrated in OKLCH space. An automated linter can verify that custom user themes maintain 4.5:1 (AA) and 7:1 (AAA) contrast across all `--color-*` and `--bg-*` pairings.
-- **Proposed Solution:** Add `nuicss lint-theme` CLI command and build-time warning if theme contrast falls below WCAG standards.
-- **Acceptance Criteria:**
-  - Warns developers at build time if custom theme tokens fail contrast thresholds.
+- **Objective:** Provide sub-50ms rebuild speeds during local development for non-Node.js developers (Go, Python, Rust, Ruby).
+- **Proposed Approach:** Integrate a cross-platform filesystem watcher in `packages/nuicss-cli/src/commands/compile.ts` utilizing native OS notifications (`ReadDirectoryChangesW` / `inotify` / `FSEvents` via Bun's file watcher API) with debounced AST diffing.
+- **Effort Estimate:** 2–3 engineering days.
+- **Affected Packages:** `@nofinite/nuicss-cli`.
 
 ---
 
-### 4.3. Tier 3 (Priority P2: Strategic for v4.0.0)
+### 4.3. Priority P2: Medium-Priority Enhancements
 
-#### ITEM-301: AST-Based Tailwind-to-NUICSS Automated Codemod
+#### ITEM-P2-01: Native Container Query Superclasses (`@container` / `cq-*`)
 
-- **Status:** Exploration
-- **Context:** Teams migrating large codebases from Tailwind CSS spend significant time manually replacing verbose utility clusters with `btn`, `card`, `input`, and `badge` superclasses.
-- **Proposed Solution:** Author an automated jscodeshift / Babel AST transform CLI (`npx nuicss migrate-tailwind`) that scans JSX files, detects common Tailwind utility combinations, and automatically refactors them into semantic NUICSS superclasses.
-- **Acceptance Criteria:**
-  - Successfully converts 80%+ of standard Tailwind button and card patterns automatically with 0 syntax regression.
+- **Objective:** Enable responsive compound component authoring (cards, data tables, kanban boards) relative to parent container width rather than the global viewport.
+- **Proposed Approach:** Extend `packages/nuicss/src/shortcuts/layout.ts` with `cq-container` shortcuts (`container-type: inline-size`) and container variants (`@xs:`, `@sm:`, `@md:`, `@lg:`).
+- **Effort Estimate:** 3–4 engineering days.
+- **Affected Packages:** `@nofinite/nuicss`.
 
-#### ITEM-302: Rust-Powered Core Scanner (`nuicss-oxide`)
+#### ITEM-P2-02: Fluid Scale Typography & Spacing Preset Extension
 
-- **Status:** Exploration
-- **Context:** For massive monorepos exceeding 500,000 lines of code, scanning source files in pure JavaScript introduces minor latency compared to Tailwind v4's Rust core.
-- **Proposed Solution:** Port the regex extractor and token scanner to a compiled Rust crate exposed via N-API / WASM.
-- **Acceptance Criteria:**
-  - 10x faster source code scanning for million-line enterprise repositories.
+- **Objective:** Provide atomic fluid typography and spacing utilities that scale smoothly between mobile (375px) and desktop (1440px) without discrete breakpoint steps.
+- **Proposed Approach:** Define dynamic rules in `packages/nuicss/src/plugin/preset.ts` supporting `text-fluid-[sm|base|lg|xl|2xl|hero]` and `p-fluid-[sm|md|lg|xl]` using CSS `clamp()` tokens.
+- **Effort Estimate:** 2–3 engineering days.
+- **Affected Packages:** `@nofinite/nuicss`.
+
+#### ITEM-P2-03: Automated Color Contrast Ratio Linter (WCAG AA / AAA)
+
+- **Objective:** Automatically validate that custom user themes and token overrides maintain required contrast ratios (4.5:1 for AA, 7:1 for AAA) at build time.
+- **Proposed Approach:** Add a `nuicss lint-theme` CLI command and build-time plugin warning that calculates OKLCH-to-relative-luminance pairings between `--color-*` foregrounds and `--bg-*` backgrounds.
+- **Effort Estimate:** 3–4 engineering days.
+- **Affected Packages:** `@nofinite/nuicss`, `@nofinite/nuicss-cli`.
 
 ---
 
-## 5. Conclusion
+### 4.4. Priority P3: Strategic & Long-Term Innovations
 
-The engineering backlog establishes a clear, prioritized progression for NUICSS. Following the successful delivery of v3.2.0, future iterations will focus on expanding framework ergonomics, delivering dedicated IDE extensions, and providing automated migration tooling to streamline adoption across the enterprise web ecosystem.
+#### ITEM-P3-01: AST-Based Tailwind-to-NUICSS Automated Codemod
+
+- **Objective:** Streamline enterprise migrations by automatically refactoring verbose Tailwind utility clusters into semantic NUICSS superclasses.
+- **Proposed Approach:** Author a jscodeshift / Babel AST transform script (`npx nuicss migrate-tailwind`) that scans JSX/TSX/HTML, identifies cluster patterns (e.g., `inline-flex items-center justify-center font-medium transition-colors rounded-lg bg-blue-600 text-white hover:bg-blue-700`), and replaces them with `btn btn-primary`.
+- **Effort Estimate:** 8–10 engineering days.
+- **Affected Packages:** `@nofinite/nuicss-cli`.
+
+#### ITEM-P3-02: Rust-Powered Core Scanner (`nuicss-oxide`)
+
+- **Objective:** Maximize compilation throughput in enterprise monorepos exceeding 500,000 lines of code.
+- **Proposed Approach:** Port the template regex tokenizer and class scanner to a standalone Rust crate compiled to native binaries and WASM for Node.js/Bun bindings.
+- **Effort Estimate:** 12–15 engineering days.
+- **Affected Packages:** `@nofinite/nuicss` core.
+
+---
+
+## 5. Governance & Review Protocol
+
+This backlog is reviewed at the conclusion of each engineering milestone. Items transition from Planned to In Progress only after:
+
+1. Completion of an implementation plan in `temp/<project>_implementation_plan.md`.
+2. Formal architecture review and approval.
+3. Verification across all active monorepo packages.
