@@ -8,6 +8,30 @@
   --black: #000000;
   --transparent: transparent;
 
+  /* Neutral Scale (Zinc / Neutral) - Modern Achromatic Neutral Foundation */
+  --color-neutral-50: #f9fafb;
+  --color-neutral-50: oklch(0.985 0.002 260);
+  --color-neutral-100: #f2f3f5;
+  --color-neutral-100: oklch(0.965 0.003 260);
+  --color-neutral-200: #e5e6e9;
+  --color-neutral-200: oklch(0.925 0.004 260);
+  --color-neutral-300: #d2d4d7;
+  --color-neutral-300: oklch(0.87 0.005 260);
+  --color-neutral-400: #9da0a4;
+  --color-neutral-400: oklch(0.705 0.007 260);
+  --color-neutral-500: #6f7276;
+  --color-neutral-500: oklch(0.55 0.008 260);
+  --color-neutral-600: #505357;
+  --color-neutral-600: oklch(0.44 0.008 260);
+  --color-neutral-700: #3e4044;
+  --color-neutral-700: oklch(0.37 0.007 260);
+  --color-neutral-800: #252729;
+  --color-neutral-800: oklch(0.27 0.006 260);
+  --color-neutral-900: #16171a;
+  --color-neutral-900: oklch(0.205 0.006 260);
+  --color-neutral-950: #07080a;
+  --color-neutral-950: oklch(0.135 0.005 260);
+
   /* Neutral Scale (Slate) - Dual fallback & OKLCH */
   --slate-50: #f8fafc;
   --slate-50: oklch(0.984 0.006 247.858);
@@ -86,18 +110,18 @@
   ------------------------------------------------------------ */
 
   /* Backgrounds */
-  --bg-page: var(--slate-50);
-  --bg-canvas: var(--slate-50);
+  --bg-page: var(--color-neutral-50);
+  --bg-canvas: var(--color-neutral-50);
   --bg-surface: var(--white);
-  --bg-surface-raised: var(--slate-50);
+  --bg-surface-raised: var(--white);
   --bg-surface-overlay: var(--white);
-  --bg-subtle: var(--slate-100);
-  --bg-muted: var(--slate-200);
-  --bg-inset: var(--slate-100);
+  --bg-subtle: var(--color-neutral-100);
+  --bg-muted: var(--color-neutral-200);
+  --bg-inset: var(--color-neutral-100);
   --bg-card: var(--white);
-  --bg-accent: var(--slate-100);
-  --bg-overlay: rgba(0, 0, 0, 0.4);
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --bg-accent: var(--color-neutral-100);
+  --bg-overlay: rgba(0, 0, 0, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.75);
   --glass-border: rgba(0, 0, 0, 0.08);
 
   /* Selected */
@@ -109,13 +133,13 @@
   );
 
   /* Foreground */
-  --fg-default: var(--slate-900);
-  --fg-card: var(--slate-900);
-  --fg-subtle: var(--slate-600);
-  --fg-muted: var(--slate-500);
-  --fg-accent: var(--slate-900);
+  --fg-default: var(--color-neutral-900);
+  --fg-card: var(--color-neutral-900);
+  --fg-subtle: var(--color-neutral-600);
+  --fg-muted: var(--color-neutral-500);
+  --fg-accent: var(--color-neutral-900);
   --fg-inverse: var(--white);
-  --fg-disabled: var(--slate-400);
+  --fg-disabled: var(--color-neutral-400);
 
   /* NUI Focus & State Aliases */
   --nui-fg-default: var(--fg-default);
@@ -124,24 +148,24 @@
   --nui-color-danger: var(--color-danger);
 
   /* Borders */
-  --border-default: var(--slate-200);
-  --border-strong: var(--slate-300);
-  --border-subtle: var(--slate-100);
-  --border-hover: var(--slate-300);
+  --border-default: var(--color-neutral-200);
+  --border-strong: var(--color-neutral-300);
+  --border-subtle: var(--color-neutral-100);
+  --border-hover: var(--color-neutral-300);
   --border-focus: var(--color-primary);
-  --border-disabled: var(--slate-200);
+  --border-disabled: var(--color-neutral-200);
 
-  /* Primary Action */
-  --color-primary: var(--brand-primary);
-  --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, black);
-  --color-primary-active: color-mix(in oklch, var(--color-primary) 76%, black);
-  --color-primary-fg: var(--brand-primary-fg);
+  /* Primary Action (Universal High-Contrast Neutral Default) */
+  --color-primary: var(--color-neutral-900);
+  --color-primary-hover: var(--color-neutral-800);
+  --color-primary-active: var(--color-neutral-700);
+  --color-primary-fg: var(--white);
 
   /* Secondary Action (Minimalist / Subtle Action) */
-  --color-secondary: var(--slate-100);
-  --color-secondary-hover: var(--slate-200);
-  --color-secondary-active: var(--slate-300);
-  --color-secondary-fg: var(--slate-900);
+  --color-secondary: var(--color-neutral-100);
+  --color-secondary-hover: var(--color-neutral-200);
+  --color-secondary-active: var(--color-neutral-300);
+  --color-secondary-fg: var(--color-neutral-900);
   --color-secondary-subtle: color-mix(
     in oklch,
     var(--color-secondary) 15%,
@@ -169,7 +193,7 @@
     var(--color-warning) 10%,
     transparent
   );
-  --color-warning-fg: var(--white);
+  --color-warning-fg: var(--color-neutral-950);
   --color-info: var(--blue-500);
   --color-info-subtle: color-mix(in oklch, var(--color-info) 10%, transparent);
   --color-info-fg: var(--white);
@@ -407,19 +431,19 @@
 
 :where([data-theme='dark'], .dark) {
   /* Backgrounds */
-  --bg-page: var(--slate-950);
-  --bg-canvas: var(--slate-950);
-  --bg-surface: var(--slate-900);
-  --bg-surface-raised: var(--slate-800);
-  --bg-surface-overlay: var(--slate-900);
-  --bg-subtle: var(--slate-800);
-  --bg-muted: var(--slate-800);
-  --bg-inset: #090d16;
-  --bg-card: var(--slate-900);
-  --bg-accent: var(--slate-800);
-  --bg-overlay: rgba(0, 0, 0, 0.7);
-  --glass-bg: rgba(15, 23, 42, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --bg-page: var(--color-neutral-950);
+  --bg-canvas: var(--color-neutral-950);
+  --bg-surface: var(--color-neutral-900);
+  --bg-surface-raised: var(--color-neutral-800);
+  --bg-surface-overlay: var(--color-neutral-900);
+  --bg-subtle: var(--color-neutral-800);
+  --bg-muted: var(--color-neutral-800);
+  --bg-inset: oklch(0.105 0.004 260);
+  --bg-card: var(--color-neutral-900);
+  --bg-accent: var(--color-neutral-800);
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+  --glass-bg: rgba(22, 23, 26, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
   /* Selected */
   --bg-selected: color-mix(in oklch, var(--color-primary) 18%, transparent);
@@ -430,10 +454,10 @@
   );
 
   /* Secondary Action */
-  --color-secondary: var(--slate-800);
-  --color-secondary-hover: var(--slate-700);
-  --color-secondary-active: var(--slate-600);
-  --color-secondary-fg: var(--slate-50);
+  --color-secondary: var(--color-neutral-800);
+  --color-secondary-hover: var(--color-neutral-700);
+  --color-secondary-active: var(--color-neutral-600);
+  --color-secondary-fg: var(--color-neutral-50);
   --color-secondary-subtle: color-mix(
     in oklch,
     var(--color-secondary) 25%,
@@ -441,27 +465,31 @@
   );
 
   /* Foreground */
-  --fg-default: var(--slate-50);
-  --fg-card: var(--slate-50);
-  --fg-subtle: var(--slate-300);
-  --fg-muted: var(--slate-400);
-  --fg-accent: var(--slate-50);
-  --fg-inverse: var(--slate-900);
-  --fg-disabled: var(--slate-600);
+  --fg-default: var(--color-neutral-50);
+  --fg-card: var(--color-neutral-50);
+  --fg-subtle: var(--color-neutral-300);
+  --fg-muted: var(--color-neutral-400);
+  --fg-accent: var(--color-neutral-50);
+  --fg-inverse: var(--color-neutral-900);
+  --fg-disabled: var(--color-neutral-600);
 
   /* Borders */
-  --border-default: var(--slate-800);
-  --border-strong: var(--slate-700);
-  --border-subtle: var(--slate-900);
-  --border-hover: var(--slate-700);
-  --border-disabled: var(--slate-800);
+  --border-default: var(--color-neutral-800);
+  --border-strong: var(--color-neutral-700);
+  --border-subtle: var(--color-neutral-900);
+  --border-hover: var(--color-neutral-700);
+  --border-disabled: var(--color-neutral-800);
 
   /* Brand Adjustments for Dark Mode */
   --brand-primary: var(--brand-600);
   --brand-primary-hover: var(--brand-500);
   --brand-primary-active: var(--brand-700);
-  --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, white);
-  --color-primary-active: color-mix(in oklch, var(--color-primary) 76%, white);
+
+  /* Primary Action for Dark Mode (Inverted High-Contrast Neutral) */
+  --color-primary: var(--color-neutral-50);
+  --color-primary-hover: var(--color-neutral-200);
+  --color-primary-active: var(--color-neutral-300);
+  --color-primary-fg: var(--color-neutral-950);
   --color-primary-subtle: color-mix(
     in oklch,
     var(--color-primary) 18%,
@@ -490,6 +518,7 @@
     var(--color-warning) 18%,
     transparent
   );
+  --color-warning-fg: var(--color-neutral-950);
   --color-info: #38bdf8;
   --color-info-hover: #0ea5e9;
   --color-info-subtle: color-mix(in oklch, var(--color-info) 18%, transparent);

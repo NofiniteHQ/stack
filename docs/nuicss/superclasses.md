@@ -1,4 +1,4 @@
-﻿# Component Superclasses
+# Component Superclasses
 
 A comprehensive guide and reference to all pre-compiled component superclasses, semantic modifiers, and slot classes in **NUICSS**.
 
@@ -196,6 +196,26 @@ Selection controls built with accessible contrast and native interaction:
 - **Radio:** `radio`, `radio-group`, `radio-group-horizontal`, `radio-label`
 - **Switch:** `switch`, `switch-thumb`, `switch-label`
 
+### Alert Banners (`alert`)
+
+Feedback and contextual status callouts:
+
+- `alert`: Base container with rounded corners and border
+- Variants: `alert-success`, `alert-danger`, `alert-warning`, `alert-info`
+- Slots: `alert-icon`, `alert-title`, `alert-description`, `alert-close`
+
+```html
+<div class="alert alert-info">
+  <div class="alert-icon">ℹ</div>
+  <div>
+    <h4 class="alert-title">System Update</h4>
+    <p class="alert-description">
+      Scheduled maintenance will begin at 02:00 UTC.
+    </p>
+  </div>
+</div>
+```
+
 ---
 
 ## 3. Overlay Superclasses
@@ -204,7 +224,7 @@ Selection controls built with accessible contrast and native interaction:
 
 Backdrop overlays, centered boxes, and animated dialogs:
 
-- Modal Base: `modal` (backdrop overlay with blur)
+- Modal Base: `modal` (backdrop overlay with blur), `modal-backdrop`
 - Content Box: `modal-box`, `modal-sm`, `modal-md`, `modal-lg`, `modal-xl`, `modal-full`
 - Slots: `modal-header`, `modal-title`, `modal-description`, `modal-body`, `modal-footer`, `modal-close`
 - Dialog Variants: `dialog`, `dialog-box`, `dialog-icon`, `dialog-icon-danger`, `dialog-icon-warning`, `dialog-icon-success`
@@ -269,8 +289,23 @@ Responsive data table wrapper with zebra striping and sticky headers:
 
 ### Tabs & Stepper
 
+Accessible navigation tabs and multi-step indicators:
+
 - **Tabs:** `tabs`, `tab-list`, `tab-list-pills`, `tab`, `tab-pill`, `tab-panel`
 - **Stepper:** `stepper`, `step`, `step-indicator`, `step-content`, `step-title`, `step-connector`
+
+```html
+<div class="tabs">
+  <div class="tab-list" role="tablist">
+    <button class="tab" role="tab" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" aria-selected="false">Analytics</button>
+    <button class="tab" role="tab" aria-selected="false">Settings</button>
+  </div>
+  <div class="tab-panel" role="tabpanel">
+    <!-- Active tab content -->
+  </div>
+</div>
+```
 
 ---
 

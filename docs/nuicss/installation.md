@@ -242,7 +242,7 @@ my-backend-app/
 
 ```bash
 # Start watcher during development
-nuicss -i input.css -o static/styles.css -c "templates/**/*.html" --watch
+nuicss -i input.css -o static/styles.css --watch-files "templates/**/*.html" --watch
 ```
 
 Whenever you modify an HTML template, the watcher debounces and rebuilds `static/styles.css` in under 35ms.
