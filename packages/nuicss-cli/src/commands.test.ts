@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -636,6 +636,19 @@ describe('NUICSS CLI Commands Integration Suite', () => {
       expect(isPathInside('/app', '/etc/passwd')).toBe(false);
       expect(isPathInside('/app', '../../etc/passwd')).toBe(false);
       expect(isPathInside('/app', '/app/../outside.css')).toBe(false);
+    });
+
+    it('fails closed and rejects paths if canonical root resolution fails', () => {
+      const realpathSpy = vi
+        .spyOn(fs, 'realpathSync')
+        .mockImplementationOnce(() => {
+          throw new Error('EACCES: permission denied');
+        });
+      try {
+        expect(isPathInside(testDir, 'dist/output.css')).toBe(false);
+      } finally {
+        realpathSpy.mockRestore();
+      }
     });
 
     it('rejects unsafe input path traversal attempts and does not read external files', async () => {

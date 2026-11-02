@@ -50,11 +50,12 @@ export function isPathInside(root: string, targetPath: string): boolean {
 
   // 2. Canonical realpath / symlink resolution check
   if (fs.existsSync(resolvedRoot)) {
-    let realRoot = resolvedRoot;
+    let realRoot: string;
     try {
       realRoot = fs.realpathSync(resolvedRoot);
     } catch {
-      // Keep resolvedRoot if realpathSync fails
+      // Fail-closed: reject access if canonical root cannot be resolved
+      return false;
     }
     const normRealRoot = isWindows ? realRoot.toLowerCase() : realRoot;
 

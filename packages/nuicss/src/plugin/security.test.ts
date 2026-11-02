@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 import { createGenerator } from 'unocss';
 import { nuicssPreset } from './preset';
 import { defineConfig, defineNuicssConfig, loadNuicssConfig } from './config';
@@ -316,6 +318,68 @@ describe('Adversarial Security & Robustness Suite', () => {
       ).toBe(false);
       expect(loaded).toBeDefined();
     });
+
+    it('should safely load actual configuration file from disk containing prototype pollution payloads', async () => {
+      const tempDir = path.resolve(
+        __dirname,
+        '../../../../temp/test-malicious-config'
+      );
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      const configFile = path.join(tempDir, 'uno.config.mjs');
+      fs.writeFileSync(
+        configFile,
+        `export default {
+  ['__proto__']: { pollutedProto: 'danger-proto' },
+  constructor: {
+    prototype: {
+      pollutedConstructor: 'danger-constructor'
+    }
+  },
+  theme: {
+    colors: {
+      brand: '#3b82f6'
+    }
+  },
+  shortcuts: {
+    'custom-btn': 'btn btn-primary'
+  }
+};`,
+        'utf8'
+      );
+
+      try {
+        const loaded = await loadNuicssConfig(tempDir, configFile);
+
+        // Verify prototype pollution was blocked
+        expect(
+          Object.prototype.hasOwnProperty.call(
+            Object.prototype,
+            'pollutedProto'
+          )
+        ).toBe(false);
+        expect(
+          Object.prototype.hasOwnProperty.call(
+            Object.prototype,
+            'pollutedConstructor'
+          )
+        ).toBe(false);
+        expect(({} as any).pollutedProto).toBeUndefined();
+        expect(({} as any).pollutedConstructor).toBeUndefined();
+
+        // Verify legitimate config values were loaded and preserved
+        expect((loaded.shortcuts as any)['custom-btn']).toBe('btn btn-primary');
+        expect((loaded.theme as any).colors.brand).toBe('#3b82f6');
+      } finally {
+        if (fs.existsSync(configFile)) {
+          fs.unlinkSync(configFile);
+        }
+        if (fs.existsSync(tempDir)) {
+          fs.rmdirSync(tempDir);
+        }
+      }
+    });
   });
 
   describe('3. Pathological & Malformed Inputs (Resource Exhaustion / DoS)', () => {
@@ -340,9 +404,9 @@ describe('Adversarial Security & Robustness Suite', () => {
 
       const tokens = ['btn\0primary', '\0text-muted', 'card\0'];
       for (const token of tokens) {
-        expect(async () => {
-          await uno.generate(token, { preflights: false });
-        }).not.toThrow();
+        await expect(
+          uno.generate(token, { preflights: false })
+        ).resolves.toBeDefined();
       }
     });
 
