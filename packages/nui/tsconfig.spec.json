@@ -1,22 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "outDir": "./out-tsc/vitest",
     "jsx": "react-jsx",
-    "types": [
-      "vitest/globals", 
-      "vitest",
-      "node", 
-      "@testing-library/jest-dom"
-    ],
+    "types": ["vitest/globals", "vitest", "node", "@testing-library/jest-dom"],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "lib": [
-      "es2022",
-      "dom",
-      "dom.iterable"
-    ]
+    "lib": ["es2022", "dom", "dom.iterable"]
   },
   "include": [
     "vite.config.ts",

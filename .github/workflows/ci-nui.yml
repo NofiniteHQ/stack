@@ -38,6 +38,10 @@ jobs:
       - name: Run Tests
         run: pnpm nx run nui:test
 
+      - name: Typecheck
+        working-directory: packages/nui
+        run: npx tsc -p tsconfig.lib.json --noEmit
+
       - name: Build
         run: pnpm nx run nui:build
 
@@ -52,4 +56,3 @@ jobs:
             exit 1
           fi
           echo "Verification passed. dist/components is present."
-
