@@ -7,23 +7,74 @@ import type { ChartSeries } from './math';
 import { normalizeData } from './normalize';
 
 /**
- * Sanitizes a CSV cell to neutralize CSV Formula Injection / DDE Injection (CWE-1236)
- * and conforms to RFC 4180 double-quote escaping.
+ * Sanitizes a CSV cell to neutralize CSV Formula Injection (CWE-1236)
+ * while preserving valid numeric and text data per RFC 4180.
  *
- * Formula trigger characters (=, +, -, @, \t, \r, |) are prefixed with a single quote (')
- * so that spreadsheet programs (Excel, LibreOffice, Google Sheets) interpret them
- * strictly as string literals rather than executable expressions or DDE commands.
+ * Formula injection occurs when a spreadsheet application (Excel, LibreOffice, Google Sheets)
+ * interprets leading characters (=, +, -, @, |, %) as active formulas or expressions.
+ * When formula trigger characters appear at the start of a cell—or immediately following
+ * leading whitespace/control characters—they are neutralized by prepending a single quote (').
+ *
+ * Genuine numeric values (e.g., negative numbers like -50 or floats) are preserved as numbers
+ * and not neutralized with a quote.
  */
 function sanitizeCSVCell(value: unknown): string {
-  if (value === null || value === undefined) return '""';
-  let str = String(value);
-
-  // Neutralize formula trigger characters
-  if (/^[=+\-@\t\r|]/.test(str)) {
-    str = "'" + str;
+  // 1. Handle empty / null / undefined
+  if (value === null || value === undefined) {
+    return '""';
   }
 
-  // RFC 4180: escape internal double quotes by doubling them
+  // 2. Handle genuine numbers: preserve unquoted numeric literals
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return '""';
+    return String(value);
+  }
+
+  // 3. Handle boolean values
+  if (typeof value === 'boolean') {
+    return String(value);
+  }
+
+  // 4. Convert all other types to string
+  let str = String(value);
+
+  // Empty string
+  if (str.length === 0) {
+    return '""';
+  }
+
+  // 5. Distinguish pure numeric strings from formula triggers:
+  // e.g. "-50", "+12.5", "100" are pure numbers and do not execute formulas.
+  const trimmed = str.trim();
+  const isPureNumber =
+    /^[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?$/.test(trimmed) &&
+    !Number.isNaN(Number(trimmed));
+
+  // If it is NOT a pure number, check for formula triggers:
+  // Check if string starts with formula triggers (=, +, -, @, |, %)
+  // OR if after stripping leading whitespace and control characters (0x00-0x1F, 0x7F),
+  // it starts with a formula trigger (=, +, -, @, |, %).
+  if (!(isPureNumber && trimmed === str)) {
+    let startIdx = 0;
+    while (startIdx < str.length) {
+      const code = str.charCodeAt(startIdx);
+      if ((code >= 0 && code <= 32) || code === 127) {
+        startIdx++;
+      } else {
+        break;
+      }
+    }
+    const trimmedControl = str.slice(startIdx);
+    const hasLeadingTrigger = /^[=+\-@|%]/.test(str);
+    const hasTriggerAfterWhitespace =
+      trimmedControl.length > 0 && /^[=+\-@|%]/.test(trimmedControl);
+
+    if (hasLeadingTrigger || hasTriggerAfterWhitespace) {
+      str = "'" + str;
+    }
+  }
+
+  // 6. RFC 4180: escape internal double quotes by doubling them
   str = str.replace(/"/g, '""');
 
   return `"${str}"`;
@@ -85,6 +136,125 @@ export function exportToCSV(
   }
 
   return csvContent;
+}
+
+/**
+ * Comprehensive DOM-based SVG sanitizer (CHARTS-M3-02).
+ * Uses DOM traversal as the primary security boundary:
+ * 1. Removes all executable or active elements: script, foreignObject, iframe,
+ *    object, embed, audio, video, animate, set, animateTransform, animateMotion.
+ * 2. Neutralizes <style> elements containing @import, expression(), or external url() references.
+ * 3. Strips all inline event handlers (on* attributes in any case/namespace).
+ * 4. Sanitizes href / xlink:href attributes against javascript:, vbscript:,
+ *    data:text/*, data:image/svg+xml, and non-local <use> targets.
+ * 5. Sanitizes inline style attributes against external url() and expression().
+ * 6. Validates both root <svg> element and all descendants while preserving
+ *    legitimate chart presentation attributes and local fragment gradient fills.
+ */
+function sanitizeSVGElement(svg: SVGElement): void {
+  // 1. Remove dangerous active elements (case-insensitive via querySelectorAll)
+  const dangerousSelectors = [
+    'script',
+    'foreignObject',
+    'iframe',
+    'object',
+    'embed',
+    'audio',
+    'video',
+    'animate',
+    'set',
+    'animateTransform',
+    'animateMotion',
+  ].join(', ');
+
+  const dangerousEls = svg.querySelectorAll(dangerousSelectors);
+  for (let i = 0; i < dangerousEls.length; i++) {
+    dangerousEls[i]?.remove();
+  }
+
+  // 2. Sanitize <style> elements
+  const styleEls = svg.querySelectorAll('style');
+  for (let i = 0; i < styleEls.length; i++) {
+    const styleEl = styleEls[i];
+    const cssText = styleEl.textContent || '';
+    if (
+      /@import\b/i.test(cssText) ||
+      /url\s*\(\s*['"]?(?!#)(?:https?:|\/\/|data:)/i.test(cssText) ||
+      /expression\s*\(/i.test(cssText) ||
+      /-moz-binding\b/i.test(cssText)
+    ) {
+      styleEl.remove();
+    }
+  }
+
+  // 3. Inspect root element and all descendants
+  const allElements = [svg, ...Array.from(svg.querySelectorAll('*'))];
+  for (const el of allElements) {
+    if (!(el instanceof Element)) continue;
+
+    const attrNames =
+      typeof el.getAttributeNames === 'function' ? el.getAttributeNames() : [];
+
+    for (const attr of attrNames) {
+      const lowerAttr = attr.toLowerCase();
+
+      // Strip event handlers (e.g. onload, onclick, onerror, onmouseover)
+      if (lowerAttr.startsWith('on')) {
+        el.removeAttribute(attr);
+        continue;
+      }
+
+      // Check href and xlink:href (case-insensitive)
+      if (lowerAttr === 'href' || lowerAttr.endsWith(':href')) {
+        const val = el.getAttribute(attr) || '';
+        const trimmedVal = val.trim();
+
+        // Disallow dangerous URI schemes
+        if (
+          /^(?:javascript|vbscript|data:\s*text|data:\s*image\/svg\+xml)/i.test(
+            trimmedVal
+          )
+        ) {
+          el.removeAttribute(attr);
+          continue;
+        }
+
+        // For <use> elements, restrict href to local fragment references (#id)
+        if (el.tagName.toLowerCase() === 'use' && !trimmedVal.startsWith('#')) {
+          el.removeAttribute(attr);
+          continue;
+        }
+
+        // For <image> elements, block SVG data URIs or javascript
+        if (el.tagName.toLowerCase() === 'image') {
+          if (
+            /^(?:javascript|vbscript|data:\s*image\/svg\+xml)/i.test(trimmedVal)
+          ) {
+            el.removeAttribute(attr);
+            continue;
+          }
+        }
+      }
+
+      // Sanitize inline style attribute
+      if (lowerAttr === 'style') {
+        const styleVal = el.getAttribute(attr) || '';
+        if (
+          /url\s*\(\s*['"]?(?!#)(?:https?:|\/\/|data:)/i.test(styleVal) ||
+          /expression\s*\(/i.test(styleVal) ||
+          /@import\b/i.test(styleVal)
+        ) {
+          el.removeAttribute(attr);
+          continue;
+        }
+      }
+
+      // Strip dangerous attributes (e.g. formaction, form)
+      if (lowerAttr === 'formaction' || lowerAttr === 'action') {
+        el.removeAttribute(attr);
+      }
+    }
+  }
 }
 
 export function exportToSVG(
@@ -165,34 +335,8 @@ export function exportToSVG(
       clone.setAttribute('viewBox', `0 0 ${w} ${h}`);
     }
 
-    // Security sanitization (CHARTS-M3-02): Strip dangerous active elements & event handlers
-    const dangerousEls = clone.querySelectorAll(
-      'script, foreignObject, iframe, object, embed, audio, video'
-    );
-    for (let j = 0; j < dangerousEls.length; j++) {
-      dangerousEls[j]?.remove();
-    }
-
-    const allEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
-    for (const el of allEls) {
-      if (el instanceof Element) {
-        const attrNames =
-          typeof el.getAttributeNames === 'function'
-            ? el.getAttributeNames()
-            : [];
-        for (const attr of attrNames) {
-          const lower = attr.toLowerCase();
-          if (lower.startsWith('on')) {
-            el.removeAttribute(attr);
-          } else if (lower === 'href' || lower === 'xlink:href') {
-            const val = el.getAttribute(attr) || '';
-            if (/^\s*(javascript|vbscript|data:text\/html)/i.test(val)) {
-              el.removeAttribute(attr);
-            }
-          }
-        }
-      }
-    }
+    // Comprehensive DOM-based security sanitization (CHARTS-M3-02)
+    sanitizeSVGElement(clone);
 
     targetSvg = clone;
   }
