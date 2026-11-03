@@ -6,6 +6,29 @@
 import type { ChartSeries } from './math';
 import { normalizeData } from './normalize';
 
+/**
+ * Sanitizes a CSV cell to neutralize CSV Formula Injection / DDE Injection (CWE-1236)
+ * and conforms to RFC 4180 double-quote escaping.
+ *
+ * Formula trigger characters (=, +, -, @, \t, \r, |) are prefixed with a single quote (')
+ * so that spreadsheet programs (Excel, LibreOffice, Google Sheets) interpret them
+ * strictly as string literals rather than executable expressions or DDE commands.
+ */
+function sanitizeCSVCell(value: unknown): string {
+  if (value === null || value === undefined) return '""';
+  let str = String(value);
+
+  // Neutralize formula trigger characters
+  if (/^[=+\-@\t\r|]/.test(str)) {
+    str = "'" + str;
+  }
+
+  // RFC 4180: escape internal double quotes by doubling them
+  str = str.replace(/"/g, '""');
+
+  return `"${str}"`;
+}
+
 export function exportToCSV(
   seriesList: ChartSeries[],
   filename = 'chart-data.csv'
@@ -27,15 +50,21 @@ export function exportToCSV(
     }
   }
 
-  const headers = ['Category', ...seriesList.map((s) => `"${s.name}"`)];
+  const headers = [
+    'Category',
+    ...seriesList.map((s) => sanitizeCSVCell(s.name)),
+  ];
   const rows: string[] = [headers.join(',')];
 
   for (const xLabel of xLabels) {
     const rowValues = [
-      `"${xLabel}"`,
+      sanitizeCSVCell(xLabel),
       ...normalizedSeries.map((s) => {
         const pt = s.data.find((d) => d.label === xLabel);
-        return pt ? String(pt.y) : '';
+        if (!pt || pt.y === undefined || pt.y === null || Number.isNaN(pt.y)) {
+          return '';
+        }
+        return typeof pt.y === 'number' ? String(pt.y) : sanitizeCSVCell(pt.y);
       }),
     ];
     rows.push(rowValues.join(','));
@@ -136,11 +165,46 @@ export function exportToSVG(
       clone.setAttribute('viewBox', `0 0 ${w} ${h}`);
     }
 
+    // Security sanitization (CHARTS-M3-02): Strip dangerous active elements & event handlers
+    const dangerousEls = clone.querySelectorAll(
+      'script, foreignObject, iframe, object, embed, audio, video'
+    );
+    for (let j = 0; j < dangerousEls.length; j++) {
+      dangerousEls[j]?.remove();
+    }
+
+    const allEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
+    for (const el of allEls) {
+      if (el instanceof Element) {
+        const attrNames =
+          typeof el.getAttributeNames === 'function'
+            ? el.getAttributeNames()
+            : [];
+        for (const attr of attrNames) {
+          const lower = attr.toLowerCase();
+          if (lower.startsWith('on')) {
+            el.removeAttribute(attr);
+          } else if (lower === 'href' || lower === 'xlink:href') {
+            const val = el.getAttribute(attr) || '';
+            if (/^\s*(javascript|vbscript|data:text\/html)/i.test(val)) {
+              el.removeAttribute(attr);
+            }
+          }
+        }
+      }
+    }
+
     targetSvg = clone;
   }
 
   const serializer = new XMLSerializer();
   let source = serializer.serializeToString(targetSvg);
+
+  // Defense-in-depth string-level filter against script injection
+  source = source.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    ''
+  );
 
   if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
     source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');

@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest';
 import { renderChart } from './core/renderChart';
+import { exportToCSV, exportToSVG } from './core/export';
 import { LineChart, BarChart } from './react';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
@@ -81,5 +82,85 @@ describe('CHARTS Security & Remediation Regression Suite (M2)', () => {
       })
     );
     expect(barHtml).toContain('<svg');
+  });
+
+  describe('M3 Security Deep Dive & Hardening', () => {
+    it('CHARTS-M3-01: neutralizes CSV formula injection and escapes RFC 4180 quotes in exportToCSV', () => {
+      const maliciousSeries = [
+        {
+          name: "=cmd|' /C calc'!A0",
+          data: [
+            { label: '@SUM(1+1)', y: 100 },
+            { label: '+cmd|exploit', y: 200 },
+            { label: '-500', y: 300 },
+            { label: 'Normal "Quoted" Label', y: 400 },
+          ],
+        },
+      ];
+
+      const csv = exportToCSV(maliciousSeries as any, '');
+
+      // Formula triggers must be prefixed with a single quote (') to prevent DDE execution
+      expect(csv).toContain("\"'=cmd|' /C calc'!A0\"");
+      expect(csv).toContain('"\'@SUM(1+1)",100');
+      expect(csv).toContain('"\'+cmd|exploit",200');
+      expect(csv).toContain('"\'-500",300');
+
+      // RFC 4180 double-quote escaping: internal quotes must be doubled
+      expect(csv).toContain('"Normal ""Quoted"" Label",400');
+
+      // Must not contain raw un-neutralized formula headers
+      expect(csv).not.toContain('"=cmd');
+      expect(csv).not.toContain('"@SUM');
+    });
+
+    it('CHARTS-M3-02: sanitizes dangerous script tags, foreignObjects, and event handlers in exportToSVG', () => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '500');
+      svg.setAttribute('height', '300');
+
+      // Inject malicious child elements and event handlers
+      const script = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'script'
+      );
+      script.textContent = 'alert("XSS")';
+      svg.appendChild(script);
+
+      const foreignObject = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'foreignObject'
+      );
+      foreignObject.innerHTML =
+        '<body xmlns="http://www.w3.org/1999/xhtml"><script>alert(1)</script></body>';
+      svg.appendChild(foreignObject);
+
+      const rect = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'rect'
+      );
+      rect.setAttribute('onload', 'alert("onload")');
+      rect.setAttribute('onclick', 'alert("onclick")');
+      rect.setAttribute('fill', 'blue');
+      svg.appendChild(rect);
+
+      const link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+      link.setAttribute('href', 'javascript:alert(1)');
+      svg.appendChild(link);
+
+      const exportedSvg = exportToSVG(svg, '');
+
+      // All active executable payloads must be stripped
+      expect(exportedSvg).not.toContain('<script');
+      expect(exportedSvg).not.toContain('alert("XSS")');
+      expect(exportedSvg).not.toContain('<foreignObject');
+      expect(exportedSvg).not.toContain('onload=');
+      expect(exportedSvg).not.toContain('onclick=');
+      expect(exportedSvg).not.toContain('javascript:');
+
+      // Safe SVG graphic elements must be preserved
+      expect(exportedSvg).toContain('<rect');
+      expect(exportedSvg).toContain('fill');
+    });
   });
 });
