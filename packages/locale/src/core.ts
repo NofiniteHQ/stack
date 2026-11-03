@@ -51,7 +51,58 @@ export const getCountryMetadata = (isoCode: string): Country | undefined => {
 };
 
 /**
+ * Bounded LRU Cache for Intl Formatter instances.
+ * Prevents memory exhaustion attacks via unbounded locale tag creation (LOCALE-M1-04).
+ */
+class LruFormatterCache<K, V> {
+  private readonly max: number;
+  private readonly cache = new Map<K, V>();
+
+  constructor(max = 100) {
+    this.max = max;
+  }
+
+  get(key: K): V | undefined {
+    const item = this.cache.get(key);
+    if (item !== undefined) {
+      this.cache.delete(key);
+      this.cache.set(key, item);
+    }
+    return item;
+  }
+
+  set(key: K, value: V): void {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.max) {
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
+    }
+    this.cache.set(key, value);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+
+  get size(): number {
+    return this.cache.size;
+  }
+}
+
+const dateCache = new LruFormatterCache<string, Intl.DateTimeFormat>(100);
+const currencyCache = new LruFormatterCache<string, Intl.NumberFormat>(100);
+const relativeTimeCache = new LruFormatterCache<
+  string,
+  Intl.RelativeTimeFormat
+>(100);
+const numberCache = new LruFormatterCache<string, Intl.NumberFormat>(100);
+
+/**
  * Formats a date using native Intl.DateTimeFormat with zero runtime dependencies.
+ * Defensively catches RangeError on invalid locale tags and falls back safely (LOCALE-M1-03).
  *
  * @param date - Date object, timestamp number, or ISO date string
  * @param options - Standard Intl.DateTimeFormatOptions
@@ -69,11 +120,35 @@ export function formatDate(
     month: 'short',
     day: 'numeric',
   };
-  return new Intl.DateTimeFormat(locale, opts).format(d);
+
+  const key = `${locale}:${JSON.stringify(opts)}`;
+  let formatter = dateCache.get(key);
+
+  if (!formatter) {
+    try {
+      formatter = new Intl.DateTimeFormat(locale, opts);
+      dateCache.set(key, formatter);
+    } catch {
+      // Safe fallback: try default en-US locale
+      try {
+        formatter = new Intl.DateTimeFormat('en-US', opts);
+        dateCache.set(key, formatter);
+      } catch {
+        return d.toLocaleDateString();
+      }
+    }
+  }
+
+  try {
+    return formatter.format(d);
+  } catch {
+    return d.toLocaleDateString();
+  }
 }
 
 /**
  * Formats a currency amount using native Intl.NumberFormat with zero dependencies.
+ * Defensively catches RangeError on invalid currency codes or locale tags (LOCALE-M1-03).
  *
  * @param amount - Number value to format
  * @param currency - ISO 4217 currency code (e.g. 'USD', 'EUR', 'GBP', 'JPY')
@@ -86,16 +161,45 @@ export function formatCurrency(
   options?: Intl.NumberFormatOptions,
   locale = 'en-US'
 ): string {
+  if (typeof amount !== 'number' || isNaN(amount)) return '';
+  const safeCurrency = (currency || 'USD').toUpperCase().trim();
   const opts: Intl.NumberFormatOptions = {
     style: 'currency',
-    currency,
+    currency: safeCurrency,
     ...options,
   };
-  return new Intl.NumberFormat(locale, opts).format(amount);
+
+  const key = `${locale}:${JSON.stringify(opts)}`;
+  let formatter = currencyCache.get(key);
+
+  if (!formatter) {
+    try {
+      formatter = new Intl.NumberFormat(locale, opts);
+      currencyCache.set(key, formatter);
+    } catch {
+      // Safe fallback: try USD currency with en-US or format as raw text
+      try {
+        formatter = new Intl.NumberFormat('en-US', {
+          ...opts,
+          currency: 'USD',
+        });
+        currencyCache.set(key, formatter);
+      } catch {
+        return `${amount} ${safeCurrency}`;
+      }
+    }
+  }
+
+  try {
+    return formatter.format(amount);
+  } catch {
+    return `${amount} ${safeCurrency}`;
+  }
 }
 
 /**
  * Formats relative time (e.g., "in 3 days", "2 hours ago") using native Intl.RelativeTimeFormat.
+ * Defensively catches RangeError on invalid locale tags (LOCALE-M1-03).
  *
  * @param value - Numeric offset
  * @param unit - Relative time unit ('year' | 'quarter' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second')
@@ -108,15 +212,39 @@ export function formatRelativeTime(
   options?: Intl.RelativeTimeFormatOptions,
   locale = 'en-US'
 ): string {
+  if (typeof value !== 'number' || isNaN(value)) return '';
   const opts: Intl.RelativeTimeFormatOptions = {
     numeric: 'auto',
     ...options,
   };
-  return new Intl.RelativeTimeFormat(locale, opts).format(value, unit);
+
+  const key = `${locale}:${JSON.stringify(opts)}`;
+  let formatter = relativeTimeCache.get(key);
+
+  if (!formatter) {
+    try {
+      formatter = new Intl.RelativeTimeFormat(locale, opts);
+      relativeTimeCache.set(key, formatter);
+    } catch {
+      try {
+        formatter = new Intl.RelativeTimeFormat('en-US', opts);
+        relativeTimeCache.set(key, formatter);
+      } catch {
+        return `${value} ${unit}`;
+      }
+    }
+  }
+
+  try {
+    return formatter.format(value, unit);
+  } catch {
+    return `${value} ${unit}`;
+  }
 }
 
 /**
  * Formats a general number (integers, decimals, percentages, compact notation) using native Intl.NumberFormat.
+ * Defensively catches RangeError on invalid locale tags (LOCALE-M1-03).
  *
  * @param value - Number value to format
  * @param options - Standard Intl.NumberFormatOptions
@@ -127,20 +255,60 @@ export function formatNumber(
   options?: Intl.NumberFormatOptions,
   locale = 'en-US'
 ): string {
-  return new Intl.NumberFormat(locale, options).format(value);
+  if (typeof value !== 'number' || isNaN(value)) return '';
+  const key = `${locale}:${JSON.stringify(options ?? {})}`;
+  let formatter = numberCache.get(key);
+
+  if (!formatter) {
+    try {
+      formatter = new Intl.NumberFormat(locale, options);
+      numberCache.set(key, formatter);
+    } catch {
+      try {
+        formatter = new Intl.NumberFormat('en-US', options);
+        numberCache.set(key, formatter);
+      } catch {
+        return String(value);
+      }
+    }
+  }
+
+  try {
+    return formatter.format(value);
+  } catch {
+    return String(value);
+  }
 }
 
-const RTL_LANGUAGES = new Set(['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'ug', 'yi']);
+// Comprehensive set of known RTL languages (LOCALE-M1-05)
+// Includes Arabic (ar), Hebrew (he), Persian/Farsi (fa), Urdu (ur), Pashto (ps),
+// Sindhi (sd), Uyghur (ug), Yiddish (yi), Dhivehi/Maldivian (dv), Central Kurdish/Sorani (ckb),
+// Kashmiri (ks), and Western Punjabi (pnb).
+const RTL_LANGUAGES = new Set([
+  'ar',
+  'he',
+  'fa',
+  'ur',
+  'ps',
+  'sd',
+  'ug',
+  'yi',
+  'dv',
+  'ckb',
+  'ks',
+  'pnb',
+]);
+
+// Known Right-to-Left ISO 15924 script codes
+const RTL_SCRIPTS = new Set(['arab', 'hebr', 'thaa', 'syrc', 'mand', 'samr']);
 
 /**
  * Determines text direction ('ltr' or 'rtl') for a given BCP 47 locale tag.
  *
  * Uses native Intl.Locale (with textInfo) when available, falling back
- * to a standardized set of known right-to-left language codes:
- * Arabic (ar), Hebrew (he), Persian/Farsi (fa), Urdu (ur), Pashto (ps),
- * Sindhi (sd), Uyghur (ug), and Yiddish (yi).
+ * to a standardized set of known right-to-left language codes and script subtags (LOCALE-M1-05).
  *
- * @param locale - BCP 47 language tag (e.g., 'en-US', 'ar-EG', 'he')
+ * @param locale - BCP 47 language tag (e.g., 'en-US', 'ar-EG', 'fa', 'ckb', 'ur-Arab')
  * @returns 'ltr' | 'rtl'
  */
 export function getDirection(locale: string): 'ltr' | 'rtl' {
@@ -153,8 +321,9 @@ export function getDirection(locale: string): 'ltr' | 'rtl' {
     return 'ltr';
   }
 
-  // Extract base language subtag (e.g., 'ar-EG' -> 'ar') for fallback
-  const langSubtag = trimmed.split(/[-_]/)[0]?.toLowerCase() || '';
+  // Extract subtags (e.g., 'ar-EG' -> ['ar', 'eg'])
+  const subtags = trimmed.split(/[-_]/).map((s) => s.toLowerCase());
+  const langSubtag = subtags[0] || '';
 
   // 1. Try native Intl.Locale if available
   try {
@@ -171,9 +340,16 @@ export function getDirection(locale: string): 'ltr' | 'rtl' {
     // If Intl.Locale constructor throws (e.g., invalid/malformed tag), fall through
   }
 
-  // 2. Fallback for known RTL locales
+  // 2. Fallback for known RTL languages
   if (RTL_LANGUAGES.has(langSubtag)) {
     return 'rtl';
+  }
+
+  // 3. Fallback for known RTL script subtags (e.g., 'ku-Arab', 'az-Arab')
+  for (const subtag of subtags.slice(1)) {
+    if (RTL_SCRIPTS.has(subtag)) {
+      return 'rtl';
+    }
   }
 
   return 'ltr';

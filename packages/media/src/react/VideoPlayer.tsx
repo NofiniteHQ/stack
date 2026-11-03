@@ -12,7 +12,7 @@ import {
   DefaultVideoLayout,
 } from '@vidstack/react/player/layouts/default';
 import clsx from 'clsx';
-import type { MediaTrack, MediaTheme } from '../core';
+import { isValidMediaUrl, type MediaTrack, type MediaTheme } from '../core';
 
 export interface VideoPlayerProps {
   src?: string;
@@ -85,7 +85,12 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
     ref
   ) => {
     const mediaSrc = src || url;
-    if (!mediaSrc) return null;
+    if (!mediaSrc || !isValidMediaUrl(mediaSrc)) return null;
+
+    const safePoster = poster && isValidMediaUrl(poster) ? poster : undefined;
+    const safeThumbnails =
+      thumbnails && isValidMediaUrl(thumbnails) ? thumbnails : undefined;
+    const safeTracks = tracks?.filter((t) => isValidMediaUrl(t.src));
 
     const colorScheme = theme === 'auto' ? undefined : theme;
     const resolvedCrossOrigin =
@@ -107,7 +112,7 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
         <MediaPlayer
           ref={ref}
           src={mediaSrc}
-          poster={poster}
+          poster={safePoster}
           title={title}
           autoplay={autoPlay}
           loop={loop}
@@ -184,7 +189,7 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
           }}
         >
           <MediaProvider>
-            {tracks?.map((track) => (
+            {safeTracks?.map((track) => (
               <Track
                 key={track.src}
                 src={track.src}
@@ -198,7 +203,7 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
           {controls && (
             <DefaultVideoLayout
               icons={defaultLayoutIcons}
-              thumbnails={thumbnails}
+              thumbnails={safeThumbnails}
               playbackRates={playbackRates}
               seekStep={seekStep}
               slots={slots}

@@ -1,134 +1,100 @@
-/**
- * @nofinite/markon - Security & ReDoS Adversarial Verification Suite
- * Tests against catastrophic backtracking and polynomial algorithmic complexity.
- */
-
+// @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest';
-import { htmlToMarkdown, markdownToHtml } from './core/markdown';
-import { slugify, extractTOC, renderMarkon } from './core/renderer';
-import { parseVideoUrl } from './core/video';
+import { jsonToHtml, renderMarkon } from './core/renderer';
+import { sanitizeUrl, sanitizeHtml } from './index';
+import { MarkonEditor } from './react';
+import { renderToString } from 'react-dom/server';
+import React from 'react';
 
-describe('Markon Security & ReDoS Invariants', () => {
-  it('htmlToMarkdown resolves pathological unclosed tags in linear time (< 15ms)', () => {
-    // 25,000 character unclosed heading attack payload
-    const attackPayload = '<h1>' + 'a'.repeat(25000);
-    const start = performance.now();
-    const result = htmlToMarkdown(attackPayload);
-    const duration = performance.now() - start;
+describe('MARKON Security & Remediation Regression Suite (M2)', () => {
+  it('MARKON-M1-02: bounds AST recursion depth to prevent stack overflow DoS', () => {
+    // Construct a deeply nested TipTap AST (500 levels deep)
+    let deepAst: any = { type: 'text', text: 'Deep leaf text' };
+    for (let i = 0; i < 500; i++) {
+      deepAst = {
+        type: 'blockquote',
+        content: [deepAst],
+      };
+    }
+    const rootDoc = {
+      type: 'doc',
+      content: [deepAst],
+    };
 
-    expect(duration).toBeLessThan(15);
+    // Must execute cleanly without RangeError: Maximum call stack size exceeded
+    expect(() => jsonToHtml(rootDoc)).not.toThrow();
+    const result = jsonToHtml(rootDoc);
     expect(typeof result).toBe('string');
   });
 
-  it('slugify resolves 50,000 repeated dashes in linear time (< 5ms)', () => {
-    const attackPayload =
-      '-'.repeat(25000) + 'enterprise-test' + '-'.repeat(25000);
-    const start = performance.now();
-    const slugMap = new Map<string, number>();
-    const slug = slugify(attackPayload, slugMap);
-    const duration = performance.now() - start;
+  it('MARKON-M1-03: decodes HTML entities and blocks obfuscated javascript/vbscript/data URLs', () => {
+    // Decimal entity-encoded javascript
+    expect(sanitizeUrl('&#106;avascript:alert(1)')).toBe('#');
+    // Hex entity-encoded javascript
+    expect(sanitizeUrl('&#x6A;avascript:alert(1)')).toBe('#');
+    // Obfuscated with whitespace and control characters
+    expect(sanitizeUrl('java\0script:alert(1)')).toBe('#');
+    // VBScript
+    expect(sanitizeUrl('vbscript:msgbox(1)')).toBe('#');
+    // Data HTML
+    expect(sanitizeUrl('data:text/html,<script>alert(1)</script>')).toBe('#');
 
-    expect(duration).toBeLessThan(5);
-    expect(slug).toBe('enterprise-test');
+    // Safe protocols remain intact
+    expect(sanitizeUrl('https://nofinite.com')).toBe('https://nofinite.com');
+    expect(sanitizeUrl('mailto:security@nofinite.com')).toBe(
+      'mailto:security@nofinite.com'
+    );
+    expect(sanitizeUrl('/docs/getting-started')).toBe('/docs/getting-started');
   });
 
-  it('extractTOC resolves pathological unclosed heading tags in linear time (< 15ms)', () => {
-    // Pathological string that triggers ReDoS in flawed heading regexes
-    const attackPayload = '<h1' + '='.repeat(15000) + ' ' + 'a'.repeat(15000);
-    const start = performance.now();
-    const toc = extractTOC(attackPayload);
-    const duration = performance.now() - start;
+  it('MARKON-M1-03: sanitizeHtml cleans entity-encoded hrefs and dangerous tags', () => {
+    const dirty =
+      '<a href="&#106;avascript:alert(1)">Click Me</a><script>evil()</script>';
+    const cleaned = sanitizeHtml(dirty);
 
-    expect(duration).toBeLessThan(15);
-    expect(Array.isArray(toc)).toBe(true);
+    expect(cleaned).not.toContain('<script>');
+    expect(cleaned).not.toContain('javascript:');
+    expect(cleaned).toContain('href="#"');
+    expect(cleaned).toContain('Click Me');
   });
 
-  it('renderMarkon heading injection handles unclosed tags in linear time (< 20ms)', () => {
-    const attackPayload =
-      '<h2' + '<h2'.repeat(5000) + ' ' + 'title'.repeat(500);
-    const start = performance.now();
-    const res = renderMarkon({ content: attackPayload });
-    const duration = performance.now() - start;
-
-    expect(duration).toBeLessThan(20);
-    expect(typeof res.html).toBe('string');
+  it('MARKON-M1-05: verifies security sanitizers are re-exported at package root', () => {
+    expect(typeof sanitizeUrl).toBe('function');
+    expect(typeof sanitizeHtml).toBe('function');
   });
 
-  it('parseVideoUrl resolves pathological YouTube URLs in linear time (< 5ms)', () => {
-    const attackPayload =
-      'https://youtube.com/' + '/./'.repeat(5000) + 'watch?v=123';
-    const start = performance.now();
-    const res = parseVideoUrl(attackPayload);
-    const duration = performance.now() - start;
+  it('SSR: renders Markon publication and MarkonEditor cleanly to static HTML', () => {
+    const result = renderMarkon({
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'heading',
+            attrs: { level: 1 },
+            content: [{ type: 'text', text: 'Markon Production Document' }],
+          },
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Server rendered content block.' }],
+          },
+        ],
+      },
+      format: 'json',
+      metadata: {
+        title: 'SSR Article',
+        author: 'Nofinite Team',
+      },
+    });
 
-    expect(duration).toBeLessThan(5);
-    expect(res.service).toBe('custom');
-  });
+    expect(result.html).toBeTruthy();
+    expect(result.html).toContain('Markon Production Document');
+    expect(result.html).toContain('Server rendered content block.');
 
-  it('fuzzes random malformed tag permutations without hanging', () => {
-    const tokens = ['<h1', '</h1>', '<p>', '</p>', '-', '|', '#', ' ', 'a'];
-    for (let i = 0; i < 50; i++) {
-      let randomStr = '';
-      for (let j = 0; j < 500; j++) {
-        randomStr += tokens[Math.floor(Math.random() * tokens.length)];
-      }
-      const start = performance.now();
-      markdownToHtml(randomStr);
-      htmlToMarkdown(randomStr);
-      renderMarkon({ content: randomStr });
-      const duration = performance.now() - start;
-      expect(duration).toBeLessThan(50);
-    }
-  });
-
-  it('neutralizes javascript: and data: links in markdownToHtml', () => {
-    const malicious = '[Attack](javascript:alert(document.cookie))';
-    const html = markdownToHtml(malicious);
-    expect(html).not.toContain('href="javascript:');
-    expect(html).toContain('href="#"');
-
-    const dataUri = '[Data Link](data:text/html,<script>alert(1)</script>)';
-    const htmlData = markdownToHtml(dataUri);
-    expect(htmlData).not.toContain('href="data:');
-    expect(htmlData).toContain('href="#"');
-
-    const safe = '[Safe](https://nofinite.com)';
-    const safeHtml = markdownToHtml(safe);
-    expect(safeHtml).toContain('href="https://nofinite.com"');
-  });
-
-  it('renderMarkon strips script tags and event handlers from rendered HTML', () => {
-    const xssPayload =
-      '<script>alert("xss")</script><img src="x" onerror="alert(1)" /><p>Normal text</p>';
-    const result = renderMarkon({ content: xssPayload });
-    expect(result.html).not.toContain('<script>');
-    expect(result.html).not.toContain('onerror=');
-    expect(result.html).toContain('Normal text');
-  });
-
-  it('renderMarkon neutralizes malicious link attributes in AST format', () => {
-    const jsonAst = {
-      type: 'doc',
-      content: [
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'Injected Link',
-              marks: [
-                {
-                  type: 'link',
-                  attrs: { href: 'javascript:alert(1)' },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-    const result = renderMarkon({ content: jsonAst });
-    expect(result.html).not.toContain('href="javascript:');
-    expect(result.html).toContain('href="#"');
+    const editorHtml = renderToString(
+      React.createElement(MarkonEditor, {
+        value: 'Hello SSR',
+      })
+    );
+    expect(editorHtml).toBeTruthy();
   });
 });

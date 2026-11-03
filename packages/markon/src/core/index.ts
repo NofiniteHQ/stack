@@ -22,3 +22,4 @@ export * from './styleInjector';
 export * from './colorPicker';
 export * from './linkPopover';
 export * from './uploadPlaceholder';
+export * from './security';

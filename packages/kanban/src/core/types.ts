@@ -40,15 +40,15 @@ export interface KanbanItem {
   [key: string]: unknown;
 }
 
-export interface KanbanColumn {
+export interface KanbanColumn<THeader = any, TFooter = any> {
   id: string;
   title?: string;
   items: KanbanItem[];
   allowAdd?: boolean;
   headerActions?: boolean;
   wipLimit?: number;
-  header?: unknown;
-  footer?: unknown;
+  header?: THeader;
+  footer?: TFooter;
   [key: string]: unknown;
 }
 
@@ -141,20 +141,20 @@ export interface KanbanBoardInstance {
   destroy: () => void;
   update: (columns: KanbanColumn[]) => void;
   getColumns: () => KanbanColumn[];
-  setColumns?: (columns: KanbanColumn[]) => void;
+  setColumns: (columns: KanbanColumn[]) => void;
   moveCard: (event: CardMoveEvent) => boolean;
   moveColumn: (event: ColumnMoveEvent) => void;
   addCard: (columnId: string, item: KanbanItem) => void;
   removeCard: (columnId: string, cardId: string) => void;
-  updateCard?: (
+  updateCard: (
     columnId: string,
     cardId: string,
     partial: Partial<KanbanItem>
   ) => void;
-  addColumn?: (column: KanbanColumn) => void;
-  removeColumn?: (columnId: string) => void;
-  clearColumn?: (columnId: string) => void;
-  focusCard?: (cardId: string) => void;
-  setFilter?: (filter: KanbanFilterOptions) => void;
-  getFilter?: () => KanbanFilterOptions;
+  addColumn: (column: KanbanColumn) => void;
+  removeColumn: (columnId: string) => void;
+  clearColumn: (columnId: string) => void;
+  focusCard: (cardId: string) => void;
+  setFilter: (filter: KanbanFilterOptions) => void;
+  getFilter: () => KanbanFilterOptions;
 }

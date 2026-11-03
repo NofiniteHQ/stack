@@ -40,13 +40,7 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        '@nofinite/nuicss',
-        /^@atlaskit(\/.*)?$/,
-      ],
+      external: ['react', 'react-dom', 'react/jsx-runtime', '@nofinite/nuicss'],
       output: [
         {
           format: 'es',

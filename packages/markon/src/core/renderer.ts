@@ -867,9 +867,17 @@ export function jsonToHtml(
     slugMap?: Map<string, number>;
     toc?: TOCItem[];
     plainTextBuffer?: string[];
+    maxDepth?: number;
+    currentDepth?: number;
   } = {}
 ): string {
   if (!node) return '';
+
+  const maxDepth = options.maxDepth ?? 64;
+  const currentDepth = options.currentDepth ?? 0;
+  if (currentDepth > maxDepth) {
+    return ''; // Guard against deep AST recursion DoS (MARKON-M1-02)
+  }
 
   const slugMap = options.slugMap || new Map<string, number>();
   const toc = options.toc || [];
@@ -953,16 +961,19 @@ export function jsonToHtml(
           slugMap,
           toc,
           plainTextBuffer: textBuf,
+          maxDepth,
+          currentDepth: currentDepth + 1,
         })
       )
       .join('');
   };
 
   // Helper to extract raw text content of a node
-  const getRawText = (n: any): string => {
-    if (!n) return '';
+  const getRawText = (n: any, depth = 0): string => {
+    if (!n || depth > maxDepth) return '';
     if (n.type === 'text') return n.text || '';
-    if (Array.isArray(n.content)) return n.content.map(getRawText).join('');
+    if (Array.isArray(n.content))
+      return n.content.map((c: any) => getRawText(c, depth + 1)).join('');
     return '';
   };
 

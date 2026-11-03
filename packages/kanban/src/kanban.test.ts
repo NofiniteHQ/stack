@@ -13,7 +13,6 @@ import {
   type KanbanColumn,
   matchCardFilter,
   hasActiveFilter,
-  type KanbanFilterOptions,
 } from './index';
 import { Kanban, type KanbanHandle } from './react';
 
@@ -162,7 +161,6 @@ describe('@nofinite/kanban DOM renderer and binder', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
 
-    let cardMoved = false;
     let taskAdded = false;
 
     const board = createKanbanBoard({
@@ -180,7 +178,7 @@ describe('@nofinite/kanban DOM renderer and binder', () => {
         },
       ],
       onCardMove: () => {
-        cardMoved = true;
+        /* no-op for test */
       },
       onCardAdd: () => {
         taskAdded = true;

@@ -18,7 +18,7 @@ export function generateUuidBuffer(): Buffer {
 }
 
 /**
- * Converts a UUID string into a binary buffer.
+ * Converts a UUID string into a binary buffer with strict 16-byte validation.
  *
  * Useful when:
  * - Accepting UUIDs from APIs
@@ -26,18 +26,50 @@ export function generateUuidBuffer(): Buffer {
  *
  * @param uuid - UUID string (with or without hyphens)
  * @returns A 16-byte Buffer
+ * @throws {TypeError} If the string is not a valid 16-byte (32 hex digit) UUID
  */
 export function uuidToBuffer(uuid: string): Buffer {
-  return Buffer.from(uuid.replace(/-/g, ''), 'hex');
+  if (typeof uuid !== 'string') {
+    throw new TypeError('Invalid UUID: argument must be a string');
+  }
+
+  const hex = uuid.replace(/-/g, '').trim();
+  if (hex.length !== 32 || !/^[0-9a-fA-F]{32}$/.test(hex)) {
+    throw new TypeError(
+      `Invalid UUID string: expected 32 hexadecimal characters (16 bytes), received ${hex.length}`
+    );
+  }
+
+  const buffer = Buffer.from(hex, 'hex');
+  if (buffer.length !== 16) {
+    throw new TypeError(
+      `Invalid UUID buffer length: expected exactly 16 bytes, received ${buffer.length}`
+    );
+  }
+
+  return buffer;
 }
 
 /**
- * Converts a binary UUID buffer back into a standard UUID string.
+ * Converts a binary UUID buffer back into a standard UUID string with strict 16-byte validation.
  *
  * @param buffer - A 16-byte UUID buffer
  * @returns UUID string in canonical format
+ * @throws {TypeError} If the buffer is not a valid 16-byte Buffer
  */
 export function bufferToUuid(buffer: Buffer): string {
+  if (!Buffer.isBuffer(buffer)) {
+    throw new TypeError(
+      'Invalid UUID buffer: argument must be a Buffer instance'
+    );
+  }
+
+  if (buffer.length !== 16) {
+    throw new TypeError(
+      `Invalid UUID buffer length: expected exactly 16 bytes, received ${buffer.length}`
+    );
+  }
+
   const hex = buffer.toString('hex');
 
   return [

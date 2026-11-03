@@ -20,7 +20,6 @@ import {
   CALLOUT_THEMES,
   formatDisplayUrl,
   renderLinkPopoverHtml,
-  UploadPlaceholder,
   MarkonDragHandle,
 } from './index';
 
