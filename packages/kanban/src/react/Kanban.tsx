@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  useId,
+} from 'react';
 import {
   draggable,
   dropTargetForElements,
@@ -1029,13 +1035,11 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
     const [announcement, setAnnouncement] = useState<string>('');
     const boardRef = useRef<HTMLDivElement | null>(null);
     const dataRef = useRef<KanbanColumnProps[]>(columns);
-    const generatedBoardId = useRef<string | null>(null);
-    if (!generatedBoardId.current) {
-      generatedBoardId.current =
-        (props.id as string) ||
-        `kanban-board-${Math.random().toString(36).slice(2, 9)}`;
-    }
-    const boardId = generatedBoardId.current;
+    const defaultId = useId();
+    const boardId =
+      (props.id as string) ||
+      (props as any).boardId ||
+      `kanban-board-${defaultId.replace(/:/g, '')}`;
 
     const [filterState, setFilterState] = useState<KanbanFilterOptions>({
       filterQuery,
