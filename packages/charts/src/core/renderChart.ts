@@ -16,6 +16,7 @@ import {
 import { generateAxisSvg } from './axis';
 import { renderLegendHtml } from './legend';
 import { generateA11yTableHtml, escapeHtml } from './a11y';
+import { parseSafeColor, parseSafeStrokeDasharray } from './color';
 import type { TooltipFormatter } from './tooltip';
 
 export type ChartVariant =
@@ -72,8 +73,11 @@ function renderReferenceLinesSvg(
       const yPos = yScale(ref.y);
       if (yPos === undefined || isNaN(yPos)) return '';
 
-      const strokeColor = ref.color || 'var(--color-danger, #ef4444)';
-      const dash = ref.strokeDasharray || '4,4';
+      const strokeColor = parseSafeColor(
+        ref.color,
+        'var(--color-danger, #ef4444)'
+      );
+      const dash = parseSafeStrokeDasharray(ref.strokeDasharray, '4,4');
       const labelText = ref.label
         ? `<text x="${innerWidth - 6}" y="${
             yPos - 6
@@ -97,7 +101,10 @@ export function renderChart(options: ChartOptions): string {
   const height = options.height || 300;
   const margin = options.margin || defaultMargin;
   const variant = options.variant;
-  const color = options.color || 'var(--chart-1, var(--color-primary))';
+  const color = parseSafeColor(
+    options.color,
+    'var(--chart-1, var(--color-primary))'
+  );
   const showGrid = options.showGrid !== false;
   const showAxes = options.showAxes !== false;
   const showTooltip = options.showTooltip !== false;
@@ -110,7 +117,13 @@ export function renderChart(options: ChartOptions): string {
   // Standardize series list
   const rawSeriesList: ChartSeries[] =
     options.series && options.series.length > 0
-      ? options.series
+      ? options.series.map((s, idx) => ({
+          ...s,
+          color: parseSafeColor(
+            s.color,
+            `var(--chart-${(idx % 8) + 1}, var(--color-primary))`
+          ),
+        }))
       : [
           {
             name: 'Series 1',
@@ -190,7 +203,7 @@ export function renderChart(options: ChartOptions): string {
         .map((s, idx) => {
           if (s.hidden) return '';
           return `
-          <g class="chart-series" data-series="${s.name}">
+          <g class="chart-series" data-series="${escapeHtml(s.name)}">
             ${
               variant === 'area'
                 ? `<path d="${s.areaPath}" fill="url(#${baseGradId}-${idx})" />`
@@ -360,9 +373,10 @@ export function renderChart(options: ChartOptions): string {
           <rect x="${b.x}" y="${b.y}" width="${b.width}" height="${
               b.height
             }" rx="4"
-                fill="${
-                  b.color
-                }" class="chart-bar transition-opacity hover:opacity-85" data-label="${escapeHtml(
+                fill="${parseSafeColor(
+                  b.color,
+                  color
+                )}" class="chart-bar transition-opacity hover:opacity-85" data-label="${escapeHtml(
               b.data.label
             )}" data-value="${b.data.y}" data-series="${escapeHtml(
               b.seriesName
@@ -388,10 +402,10 @@ export function renderChart(options: ChartOptions): string {
         ${segments
           .map(
             (s, i) => `
-          <path d="${s.path}" fill="${
-              s.data.color ||
+          <path d="${s.path}" fill="${parseSafeColor(
+              s.data.color,
               `var(--chart-${(i % 8) + 1}, var(--color-primary))`
-            }"
+            )}"
                 stroke="var(--bg-surface)" stroke-width="2" class="chart-segment transition-transform hover:scale-105" data-label="${escapeHtml(
                   s.data.label
                 )}" data-value="${s.data.y}" />
@@ -452,9 +466,10 @@ export function renderChart(options: ChartOptions): string {
             pt.seriesName
           )}">
             <circle cx="${pt.x}" cy="${pt.y}" r="4"
-                    fill="${
-                      pt.color
-                    }" stroke="var(--bg-surface)" stroke-width="2"
+                    fill="${parseSafeColor(
+                      pt.color,
+                      color
+                    )}" stroke="var(--bg-surface)" stroke-width="2"
                     class="chart-point pointer-events-none transition-all duration-150" />
           </g>
         `
@@ -477,8 +492,10 @@ export function renderChart(options: ChartOptions): string {
       ? renderLegendHtml(
           seriesList.map((s, idx) => ({
             name: s.name,
-            color:
-              s.color || `var(--chart-${(idx % 8) + 1}, var(--color-primary))`,
+            color: parseSafeColor(
+              s.color,
+              `var(--chart-${(idx % 8) + 1}, var(--color-primary))`
+            ),
             hidden: s.hidden,
           }))
         )

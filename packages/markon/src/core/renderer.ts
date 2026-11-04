@@ -11,7 +11,8 @@
 import katex from 'katex';
 import { lowlight, SUPPORTED_LANGUAGES, normalizeLanguage } from './codeBlock';
 import { markdownToHtml, stripHtmlTags } from './markdown';
-import { sanitizeUrl, sanitizeHtml } from './security';
+import { sanitizeUrl, sanitizeHtml, escapeHtml } from './security';
+import { isAllowedVideoEmbedUrl } from './video';
 
 export interface MarkonAuthor {
   name: string;
@@ -772,16 +773,6 @@ h6.markon-heading { font-size: 0.875rem; text-transform: uppercase; letter-spaci
 }
 `;
 
-export function escapeHtml(str: string): string {
-  if (!str) return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 function hastToHtml(node: any): string {
   if (!node) return '';
   if (node.type === 'text') {
@@ -869,6 +860,7 @@ export function jsonToHtml(
     plainTextBuffer?: string[];
     maxDepth?: number;
     currentDepth?: number;
+    visited?: WeakSet<object>;
   } = {}
 ): string {
   if (!node) return '';
@@ -877,6 +869,12 @@ export function jsonToHtml(
   const currentDepth = options.currentDepth ?? 0;
   if (currentDepth > maxDepth) {
     return ''; // Guard against deep AST recursion DoS (MARKON-M1-02)
+  }
+
+  const visited = options.visited || new WeakSet<object>();
+  if (typeof node === 'object' && node !== null) {
+    if (visited.has(node)) return '';
+    visited.add(node);
   }
 
   const slugMap = options.slugMap || new Map<string, number>();
@@ -963,6 +961,7 @@ export function jsonToHtml(
           plainTextBuffer: textBuf,
           maxDepth,
           currentDepth: currentDepth + 1,
+          visited,
         })
       )
       .join('');
@@ -1179,7 +1178,7 @@ export function jsonToHtml(
     }
 
     case 'videoBlock': {
-      const src = escapeHtml(attrs.src || '');
+      const rawSrc = attrs.src || '';
       const service = attrs.service || 'custom';
       const alignment = attrs.alignment || 'center';
       const width = attrs.width || '100%';
@@ -1192,16 +1191,22 @@ export function jsonToHtml(
 
       let mediaTag = '';
       if (service === 'custom') {
-        mediaTag = `<video src="${src}" controls playsinline class="w-full aspect-video rounded-xl border border-default bg-subtle object-cover shadow-sm"></video>`;
+        const safeSrc = escapeHtml(sanitizeUrl(rawSrc));
+        mediaTag = `<video src="${safeSrc}" controls playsinline class="w-full aspect-video rounded-xl border border-default bg-subtle object-cover shadow-sm"></video>`;
+      } else if (isAllowedVideoEmbedUrl(rawSrc)) {
+        const safeSrc = escapeHtml(rawSrc);
+        mediaTag = `<iframe src="${safeSrc}" class="w-full aspect-video rounded-xl border border-default shadow-sm" frameborder="0" sandbox="allow-scripts allow-same-origin allow-presentation allow-popups" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
       } else {
-        mediaTag = `<iframe src="${src}" class="w-full aspect-video rounded-xl border border-default shadow-sm" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        mediaTag = `<div class="w-full aspect-video rounded-xl border border-default bg-subtle flex items-center justify-center text-muted text-sm">Invalid video source</div>`;
       }
 
-      return `<div class="markon-video-block my-4 ${videoAlignClass}" style="width: ${width}; max-width: 100%;"><div class="relative aspect-video w-full rounded-xl overflow-hidden border border-default bg-subtle shadow-sm">${mediaTag}</div></div>`;
+      return `<div class="markon-video-block my-4 ${videoAlignClass}" style="width: ${escapeHtml(
+        width
+      )}; max-width: 100%;"><div class="relative aspect-video w-full rounded-xl overflow-hidden border border-default bg-subtle shadow-sm">${mediaTag}</div></div>`;
     }
 
     case 'fileAttachment': {
-      const src = escapeHtml(attrs.src || '');
+      const src = escapeHtml(sanitizeUrl(attrs.src || ''));
       const name = escapeHtml(attrs.name || 'Attachment');
       const size = escapeHtml(attrs.size || '');
 
@@ -1224,16 +1229,25 @@ export function jsonToHtml(
 /**
  * Extracts Table of Contents from TipTap JSON, HTML, or Markdown.
  */
-export function extractTOC(content: any): TOCItem[] {
+export function extractTOC(
+  content: any,
+  options: { maxDepth?: number } = {}
+): TOCItem[] {
   if (!content) return [];
 
   // TipTap JSON content
   if (typeof content === 'object') {
     const toc: TOCItem[] = [];
     const slugMap = new Map<string, number>();
+    const maxDepth = options.maxDepth ?? 6;
+    const visited = new WeakSet<object>();
 
-    const traverse = (node: any) => {
-      if (!node) return;
+    const traverse = (node: any, depth = 0) => {
+      if (!node || depth > maxDepth) return;
+      if (typeof node === 'object' && node !== null) {
+        if (visited.has(node)) return;
+        visited.add(node);
+      }
       if (node.type === 'heading') {
         const level = Math.min(6, Math.max(1, node.attrs?.level || 1));
         const text =
@@ -1244,11 +1258,11 @@ export function extractTOC(content: any): TOCItem[] {
         toc.push({ id: slug, text, level });
       }
       if (Array.isArray(node.content)) {
-        node.content.forEach(traverse);
+        node.content.forEach((child: any) => traverse(child, depth + 1));
       }
     };
 
-    traverse(content);
+    traverse(content, 0);
     return toc;
   }
 
@@ -1561,7 +1575,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
       </div>`;
     }
 
-    finalHtml = `${styleTag}<article class="markon-render markon-article text-default ${safeClassName}">
+    finalHtml = `<article class="markon-render markon-article text-default ${safeClassName}">
       <header class="markon-header">
         ${badgeHtml}
         ${titleHtml}
@@ -1644,7 +1658,7 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
           )}</div>`
         : '';
 
-    finalHtml = `${styleTag}<article class="markon-render markon-newsroom text-default ${safeClassName}">
+    finalHtml = `<article class="markon-render markon-newsroom text-default ${safeClassName}">
       <header>
         <div class="markon-newsroom-kicker">${escapeHtml(kicker)}</div>
         ${titleHtml}
@@ -1659,7 +1673,9 @@ export function renderMarkon(options: MarkonRenderOptions): RenderResult {
   }
 
   return {
-    html: sanitizeHtml(finalHtml),
+    html: styleTag
+      ? `${styleTag}${sanitizeHtml(finalHtml)}`
+      : sanitizeHtml(finalHtml),
     toc,
     readingTimeMinutes,
     wordCount,

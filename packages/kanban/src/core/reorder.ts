@@ -8,15 +8,36 @@ import type {
 
 /**
  * Pure immutability helper to reorder an item within a single array
+ * Includes boundary guards against negative or out-of-bounds indices (KANBAN-M3-04, KANBAN-M3-05).
  */
 export function reorderArray<T>(
   list: T[],
   startIndex: number,
   endIndex: number
 ): T[] {
+  if (!Array.isArray(list) || list.length === 0) {
+    return [];
+  }
+  if (
+    startIndex < 0 ||
+    startIndex >= list.length ||
+    !Number.isFinite(startIndex)
+  ) {
+    return Array.from(list);
+  }
+
+  const safeEndIndex = Number.isFinite(endIndex) ? endIndex : 0;
+  const clampedEndIndex = Math.max(0, Math.min(safeEndIndex, list.length - 1));
+
+  if (startIndex === clampedEndIndex) {
+    return Array.from(list);
+  }
+
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
+  if (removed !== undefined) {
+    result.splice(clampedEndIndex, 0, removed);
+  }
   return result;
 }
 
@@ -86,6 +107,15 @@ export function moveCardBetweenColumns(
   const sourceCol = columns[sourceColIndex];
   const targetCol = columns[targetColIndex];
 
+  // Boundary check on sourceIndex
+  if (
+    sourceIndex < 0 ||
+    sourceIndex >= sourceCol.items.length ||
+    !Number.isFinite(sourceIndex)
+  ) {
+    return columns;
+  }
+
   // Check custom validation hook if provided
   if (options?.canMoveCard && !options.canMoveCard(event)) {
     return columns;
@@ -93,10 +123,13 @@ export function moveCardBetweenColumns(
 
   // Moving within the same column
   if (sourceColumnId === targetColumnId) {
+    const safeTargetIndex = Number.isFinite(targetIndex)
+      ? Math.max(0, Math.min(targetIndex, sourceCol.items.length - 1))
+      : 0;
     const newItems = reorderWithEdge({
       list: sourceCol.items,
       startIndex: sourceIndex,
-      indexOfTarget: targetIndex,
+      indexOfTarget: safeTargetIndex,
       closestEdgeOfTarget: edge,
       axis: 'vertical',
     });
@@ -123,11 +156,13 @@ export function moveCardBetweenColumns(
   const [removedCard] = sourceItems.splice(sourceIndex, 1);
   if (!removedCard) return columns;
 
-  let insertIndex = targetIndex;
+  let insertIndex = Number.isFinite(targetIndex)
+    ? targetIndex
+    : targetItems.length;
   if (edge === 'bottom') {
-    insertIndex = targetIndex + 1;
+    insertIndex = insertIndex + 1;
   } else if (edge === 'top') {
-    insertIndex = targetIndex;
+    // No-op for top edge: targetIndex is already the insert position
   }
 
   const clampedTargetIndex = Math.max(
@@ -152,10 +187,22 @@ export function reorderColumns(
 ): KanbanColumn[] {
   const { sourceIndex, targetIndex, edge = null } = event;
 
+  if (
+    sourceIndex < 0 ||
+    sourceIndex >= columns.length ||
+    !Number.isFinite(sourceIndex)
+  ) {
+    return columns;
+  }
+
+  const safeTargetIndex = Number.isFinite(targetIndex)
+    ? Math.max(0, Math.min(targetIndex, columns.length - 1))
+    : 0;
+
   return reorderWithEdge({
     list: columns,
     startIndex: sourceIndex,
-    indexOfTarget: targetIndex,
+    indexOfTarget: safeTargetIndex,
     closestEdgeOfTarget: edge,
     axis: 'horizontal',
   });

@@ -6,6 +6,7 @@
 
 import { mergeAttributes, Node } from '@tiptap/core';
 import { openMarkonModal } from './dialog';
+import { sanitizeUrl } from './security';
 
 export interface VideoOptions {
   HTMLAttributes: Record<string, any>;
@@ -19,6 +20,28 @@ declare module '@tiptap/core' {
         alignment?: 'left' | 'center' | 'right';
       }) => ReturnType;
     };
+  }
+}
+
+export function isAllowedVideoEmbedUrl(url: string): boolean {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url.startsWith('http') ? url : `https://${url}`);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:')
+      return false;
+    const host = parsed.hostname.toLowerCase();
+    return (
+      host === 'www.youtube-nocookie.com' ||
+      host === 'youtube-nocookie.com' ||
+      host === 'www.youtube.com' ||
+      host === 'youtube.com' ||
+      host === 'youtu.be' ||
+      host === 'player.vimeo.com' ||
+      host === 'www.vimeo.com' ||
+      host === 'vimeo.com'
+    );
+  } catch {
+    return false;
   }
 }
 
@@ -82,7 +105,7 @@ export function parseVideoUrl(url: string): {
   // Custom direct video (mp4, webm, etc.) or raw video link
   return {
     service: 'custom',
-    embedUrl: trimmed,
+    embedUrl: sanitizeUrl(trimmed),
   };
 }
 
@@ -159,24 +182,35 @@ export const VideoBlock = Node.create<VideoOptions>({
         ? [
             'video',
             {
-              src,
+              src: sanitizeUrl(src),
               controls: 'true',
               playsinline: 'true',
               class:
                 'w-full aspect-video rounded-xl border border-default bg-subtle object-cover shadow-sm',
             },
           ]
-        : [
+        : isAllowedVideoEmbedUrl(src)
+        ? [
             'iframe',
             {
               src,
               class:
                 'w-full aspect-video rounded-xl border border-default shadow-sm',
               frameborder: '0',
+              sandbox:
+                'allow-scripts allow-same-origin allow-presentation allow-popups',
               allow:
                 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
               allowfullscreen: 'true',
             },
+          ]
+        : [
+            'div',
+            {
+              class:
+                'w-full aspect-video rounded-xl border border-default bg-subtle flex items-center justify-center text-muted text-sm',
+            },
+            'Invalid video source',
           ],
     ];
   },
@@ -229,19 +263,29 @@ export const VideoBlock = Node.create<VideoOptions>({
         mediaWrapper.innerHTML = '';
         if (service === 'custom') {
           const video = document.createElement('video');
-          video.src = src;
+          video.src = sanitizeUrl(src);
           video.controls = true;
           video.playsInline = true;
           video.className = 'w-full h-full object-cover';
           mediaWrapper.appendChild(video);
-        } else {
+        } else if (isAllowedVideoEmbedUrl(src)) {
           const iframe = document.createElement('iframe');
           iframe.src = src;
           iframe.className = 'w-full h-full border-none';
+          iframe.setAttribute(
+            'sandbox',
+            'allow-scripts allow-same-origin allow-presentation allow-popups'
+          );
           iframe.allow =
             'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
           iframe.allowFullscreen = true;
           mediaWrapper.appendChild(iframe);
+        } else {
+          const placeholder = document.createElement('div');
+          placeholder.className =
+            'w-full h-full flex items-center justify-center text-muted text-sm';
+          placeholder.textContent = 'Invalid video source';
+          mediaWrapper.appendChild(placeholder);
         }
       };
 

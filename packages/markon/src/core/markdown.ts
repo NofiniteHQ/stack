@@ -4,7 +4,7 @@
  * supporting headings, lists, tables, code blocks, math formulas, and details.
  */
 
-import { sanitizeUrl } from './security';
+import { sanitizeUrl, escapeHtml } from './security';
 
 export function stripHtmlTags(input: string): string {
   if (!input) return '';
@@ -390,20 +390,31 @@ export function markdownToHtml(md: string): string {
           /`([^`]+)`/g,
           '<code class="bg-subtle px-1 py-0.5 rounded font-mono text-xs">$1</code>'
         )
-        // Images
-        .replace(
-          /!\[(.*?)\]\((.*?)\)/g,
-          (_match, alt, url) =>
-            `<img src="${sanitizeUrl(
-              url
-            )}" alt="${alt}" class="rounded-xl border border-default shadow-sm max-w-full my-2" />`
-        )
-        // Links
-        .replace(
-          /\[(.*?)\]\((.*?)\)/g,
-          (_match, text, url) =>
-            `<a href="${sanitizeUrl(url)}" class="link">${text}</a>`
-        )
+        // Images: ![alt](url) or ![alt](url "title")
+        .replace(/!\[(.*?)\]\((.*?)\)/g, (_match, rawAlt, rawUrl) => {
+          const trimmedUrl = (rawUrl || '').trim();
+          const titleMatch = trimmedUrl.match(/^([^\s]+)(?:\s+["'](.*)["'])?$/);
+          const urlPart = titleMatch ? titleMatch[1] : trimmedUrl;
+          const titlePart =
+            titleMatch && titleMatch[2]
+              ? ` title="${escapeHtml(titleMatch[2])}"`
+              : '';
+          const safeSrc = escapeHtml(sanitizeUrl(urlPart));
+          const safeAlt = escapeHtml(rawAlt || '');
+          return `<img src="${safeSrc}" alt="${safeAlt}"${titlePart} class="rounded-xl border border-default shadow-sm max-w-full my-2" />`;
+        })
+        // Links: [text](url) or [text](url "title")
+        .replace(/\[(.*?)\]\((.*?)\)/g, (_match, text, rawUrl) => {
+          const trimmedUrl = (rawUrl || '').trim();
+          const titleMatch = trimmedUrl.match(/^([^\s]+)(?:\s+["'](.*)["'])?$/);
+          const urlPart = titleMatch ? titleMatch[1] : trimmedUrl;
+          const titlePart =
+            titleMatch && titleMatch[2]
+              ? ` title="${escapeHtml(titleMatch[2])}"`
+              : '';
+          const safeHref = escapeHtml(sanitizeUrl(urlPart));
+          return `<a href="${safeHref}"${titlePart} class="link">${text}</a>`;
+        })
     );
   };
 
@@ -414,9 +425,9 @@ export function markdownToHtml(md: string): string {
     if (line.startsWith('```')) {
       if (inCodeBlock) {
         htmlParts.push(
-          `<pre><code class="language-${
+          `<pre><code class="language-${escapeHtml(
             codeLang || 'plaintext'
-          }">${codeBuffer.join('\n')}</code></pre>`
+          )}">${codeBuffer.join('\n')}</code></pre>`
         );
         codeBuffer = [];
         inCodeBlock = false;
@@ -462,7 +473,11 @@ export function markdownToHtml(md: string): string {
       flushList();
       const eq = singleLineMath[1].trim();
       htmlParts.push(
-        `<div data-math-block="" data-equation="${eq}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${eq}</div>`
+        `<div data-math-block="" data-equation="${escapeHtml(
+          eq
+        )}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${escapeHtml(
+          eq
+        )}</div>`
       );
       continue;
     }
@@ -476,8 +491,9 @@ export function markdownToHtml(md: string): string {
         eqBuffer += lines[i] + '\n';
         i++;
       }
+      const safeEq = escapeHtml(eqBuffer.trim());
       htmlParts.push(
-        `<div data-math-block="" data-equation="${eqBuffer.trim()}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${eqBuffer.trim()}</div>`
+        `<div data-math-block="" data-equation="${safeEq}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${safeEq}</div>`
       );
       continue;
     }

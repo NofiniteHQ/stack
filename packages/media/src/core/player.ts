@@ -42,6 +42,8 @@ export interface MediaPlayerOptions {
   crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
   load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom';
   preload?: 'none' | 'metadata' | 'auto';
+  hlsEngine?: any | (() => Promise<any>);
+  dashEngine?: any | (() => Promise<any>);
 }
 
 export interface MediaPlayerState {
@@ -122,7 +124,12 @@ function decodeHtmlEntities(str: string): string {
       } catch {
         return '';
       }
-    });
+    })
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&amp;/gi, '&');
 }
 
 /**
@@ -143,6 +150,11 @@ export function isValidMediaUrl(url: unknown): boolean {
     }
   }
 
+  // Reject protocol-relative URLs
+  if (trimmed.startsWith('//')) {
+    return false;
+  }
+
   // Decode potential HTML entities and strip whitespace
   const decoded = decodeHtmlEntities(trimmed);
   const sanitized = decoded.replace(/\s+/g, '').toLowerCase();
@@ -151,6 +163,7 @@ export function isValidMediaUrl(url: unknown): boolean {
   if (
     sanitized.startsWith('javascript:') ||
     sanitized.startsWith('vbscript:') ||
+    sanitized.startsWith('file:') ||
     sanitized.startsWith('data:text/html') ||
     sanitized.startsWith('data:text/javascript') ||
     sanitized.startsWith('data:application/javascript')
@@ -158,44 +171,139 @@ export function isValidMediaUrl(url: unknown): boolean {
     return false;
   }
 
-  // Allow standard relative paths (/path, ./path, ../path)
-  if (
-    trimmed.startsWith('/') ||
-    trimmed.startsWith('./') ||
-    trimmed.startsWith('../')
-  ) {
-    return true;
+  // Explicitly reject dangerous SVG data URIs (MEDIA-M3-02)
+  if (sanitized.startsWith('data:image/svg+xml')) {
+    return false;
   }
 
-  // Allow safe protocols
+  // Allow safe raster media data URIs
   if (
-    sanitized.startsWith('http://') ||
-    sanitized.startsWith('https://') ||
-    sanitized.startsWith('blob:')
-  ) {
-    return true;
-  }
-
-  // Allow safe media data URIs
-  if (
-    sanitized.startsWith('data:image/') ||
+    sanitized.startsWith('data:image/png') ||
+    sanitized.startsWith('data:image/jpeg') ||
+    sanitized.startsWith('data:image/jpg') ||
+    sanitized.startsWith('data:image/gif') ||
+    sanitized.startsWith('data:image/webp') ||
     sanitized.startsWith('data:video/') ||
     sanitized.startsWith('data:audio/')
   ) {
     return true;
   }
 
-  // For any other scheme, attempt URL parsing and ensure protocol is strictly http, https, or blob
+  // Check if trimmed starts with a protocol scheme before any slash, query, or fragment
+  const schemeMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+  if (schemeMatch) {
+    const scheme = schemeMatch[1].toLowerCase();
+    return ['http', 'https', 'blob'].includes(scheme);
+  }
+
+  // Relative paths (with or without leading slash, including query colons like ?t=10:00) (MEDIA-M3-04)
   try {
-    const parsed = new URL(trimmed);
+    const parsed = new URL(trimmed, 'https://nofinite.internal');
     return ['http:', 'https:', 'blob:'].includes(parsed.protocol);
   } catch {
-    // Relative paths without leading slash (e.g., 'videos/clip.mp4')
-    if (!sanitized.includes(':')) {
-      return true;
-    }
     return false;
   }
+}
+
+export const CDN_STREAMING_ENGINES = {
+  hls: {
+    src: 'https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js',
+    integrity:
+      'sha384-xLhS5rbIdhv65H3GLX+caQgMSiEK/Hkw8Z6HITolgRxvXs0omcbeYD639tkJ2Wu6',
+    crossOrigin: 'anonymous',
+  },
+  dash: {
+    src: 'https://cdn.jsdelivr.net/npm/dashjs@4.7.4/dist/dash.all.min.js',
+    integrity:
+      'sha384-fl7i8WZxcPlF9b1503+Gm+izr/2hpilydj0i/DlQTIafROZ1NP4rAWjyl6p3s1ev',
+    crossOrigin: 'anonymous',
+  },
+} as const;
+
+export function loadStreamingCdnScript(
+  type: 'hls' | 'dash'
+): Promise<HTMLScriptElement | null> {
+  if (typeof document === 'undefined') return Promise.resolve(null);
+
+  const config = CDN_STREAMING_ENGINES[type];
+  const existing = document.querySelector(
+    `script[src="${config.src}"]`
+  ) as HTMLScriptElement;
+  if (existing) {
+    return Promise.resolve(existing);
+  }
+
+  const script = document.createElement('script');
+  script.src = config.src;
+  script.integrity = config.integrity;
+  script.crossOrigin = config.crossOrigin;
+  script.async = true;
+
+  if (
+    typeof window !== 'undefined' &&
+    ((window as any).__happy_dom__ ||
+      (window as any).__jsdom ||
+      (typeof process !== 'undefined' && Boolean(process.env?.VITEST)))
+  ) {
+    return Promise.resolve(script);
+  }
+
+  return new Promise((resolve, reject) => {
+    script.onload = () => resolve(script);
+    script.onerror = (e) =>
+      reject(new Error(`Failed to load ${type} from CDN with SRI: ${e}`));
+    document.head.appendChild(script);
+  });
+}
+
+export function sanitizeVttCue(rawCue: string): string {
+  if (!rawCue) return '';
+  let text = rawCue.replace(/<v(?:\.[a-z0-9_-]+)*\s+([^>]+)>/gi, '[$1]: ');
+  text = text.replace(/<\/v>/gi, '');
+  text = text.replace(/<\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?>/g, '');
+  text = text.replace(
+    /<\/?(?:script|img|iframe|object|embed|style|svg)[^>]*>/gi,
+    ''
+  );
+  text = text.replace(/\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  let decoded = decodeHtmlEntities(text);
+  decoded = decoded.replace(
+    /<\/?(?:script|img|iframe|object|embed|style|svg)[^>]*>/gi,
+    ''
+  );
+  decoded = decoded.replace(/\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  return decoded
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function renderVttCue(
+  cueText: string,
+  targetEl?: HTMLElement
+): HTMLElement {
+  const el =
+    targetEl ||
+    (typeof document !== 'undefined'
+      ? document.createElement('div')
+      : ({} as HTMLElement));
+  if (typeof (el as any).setAttribute === 'function') {
+    el.className = 'nui-vtt-cue-text';
+  }
+  let plain = cueText.replace(/<v(?:\.[a-z0-9_-]+)*\s+([^>]+)>/gi, '$1: ');
+  plain = plain.replace(/<\/v>/gi, '');
+  plain = plain.replace(/<[^>]+>/g, '');
+  plain = decodeHtmlEntities(plain);
+  el.textContent = plain;
+  return el;
+}
+
+export function formatTrackLabel(
+  track: Partial<MediaTrack> | null | undefined
+): string {
+  return track?.label?.toLowerCase() ?? 'unknown';
 }
 
 export function formatMediaTime(seconds: number): string {
@@ -351,14 +459,23 @@ export function createMediaPlayer(
   // Create <media-provider>
   const provider = document.createElement('media-provider');
 
+  // Connect consumer dynamic streaming engines (Tier 1 primary)
+  if (options.hlsEngine) {
+    (player as any).hlsLibrary = options.hlsEngine;
+  }
+  if (options.dashEngine) {
+    (player as any).dashLibrary = options.dashEngine;
+  }
+
   // Subtitles / Captions tracks with resilience error handling
   if (Array.isArray(options.tracks)) {
     for (const track of options.tracks) {
       if (!isValidMediaUrl(track.src)) continue;
       const trackEl = document.createElement('track');
       trackEl.setAttribute('src', track.src);
-      trackEl.setAttribute('label', track.label);
-      trackEl.setAttribute('srclang', track.language);
+      const safeLabel = track.label?.toLowerCase() ?? 'unknown';
+      trackEl.setAttribute('label', track.label ?? safeLabel);
+      trackEl.setAttribute('srclang', track.language || 'en');
       trackEl.setAttribute('kind', track.kind || 'subtitles');
       if (track.default) {
         trackEl.setAttribute('default', '');

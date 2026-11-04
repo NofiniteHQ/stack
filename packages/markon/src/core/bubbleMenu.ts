@@ -8,6 +8,7 @@ import {
   offset,
 } from '@floating-ui/dom';
 import { openMarkonModal } from './dialog';
+import { sanitizeUrl, escapeHtml } from './security';
 import { MarkonColorPicker } from './colorPicker';
 
 type BubbleContext = 'none' | 'text' | 'image' | 'video' | 'table' | 'link';
@@ -265,11 +266,14 @@ export function createBubbleMenuExtension() {
                   </button>
                 `;
               } else if (context === 'link') {
-                const href = editor.getAttributes('link').href || '';
-                const displayUrl = href.replace(/^https?:\/\//, '');
+                const rawHref = editor.getAttributes('link').href || '';
+                const safeHref = escapeHtml(sanitizeUrl(rawHref));
+                const displayUrl = escapeHtml(
+                  rawHref.replace(/^https?:\/\//, '') || rawHref
+                );
                 menuEl.innerHTML = `
-                  <a href="${href}" target="_blank" rel="noopener noreferrer" class="link text-primary font-medium flex items-center gap-1.5 px-2 py-0.5 max-w-[240px] truncate hover:underline text-xs" title="${href}">
-                    <span class="truncate">${displayUrl || href}</span>
+                  <a href="${safeHref}" target="_blank" rel="noopener noreferrer" class="link text-primary font-medium flex items-center gap-1.5 px-2 py-0.5 max-w-[240px] truncate hover:underline text-xs" title="${safeHref}">
+                    <span class="truncate">${displayUrl}</span>
                     <svg width="12" height="12" class="w-3 h-3 shrink-0 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                       <polyline points="15 3 21 3 21 9"/>
@@ -461,7 +465,9 @@ export function createBubbleMenuExtension() {
                           chain.setTextSelection({ from: selFrom, to: selTo });
                         }
                         if (url && url.trim())
-                          chain.setLink({ href: url.trim() }).run();
+                          chain
+                            .setLink({ href: sanitizeUrl(url.trim()) })
+                            .run();
                         else chain.unsetLink().run();
                       },
                       onCancel: () => {
@@ -649,7 +655,9 @@ export function createBubbleMenuExtension() {
                           chain.setTextSelection({ from, to });
                         }
                         if (url && url.trim()) {
-                          chain.setLink({ href: url.trim() }).run();
+                          chain
+                            .setLink({ href: sanitizeUrl(url.trim()) })
+                            .run();
                         } else {
                           chain.unsetLink().run();
                         }
@@ -884,10 +892,11 @@ export function createBubbleMenuExtension() {
                   }
                 } else if (context === 'link') {
                   const currentHref = editor.getAttributes('link').href || '';
+                  const safeHref = sanitizeUrl(currentHref);
                   const anchor = menuEl?.querySelector('a.link');
                   if (anchor) {
-                    anchor.setAttribute('href', currentHref);
-                    anchor.setAttribute('title', currentHref);
+                    anchor.setAttribute('href', safeHref);
+                    anchor.setAttribute('title', safeHref);
                     const span = anchor.querySelector('span');
                     if (span) {
                       span.textContent =

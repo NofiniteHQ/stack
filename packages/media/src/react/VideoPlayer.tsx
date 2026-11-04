@@ -36,6 +36,8 @@ export interface VideoPlayerProps {
   load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom';
   preload?: 'none' | 'metadata' | 'auto';
   slots?: any;
+  hlsEngine?: any;
+  dashEngine?: any;
   // Event Callbacks
   onPlay?: () => void;
   onPause?: () => void;
@@ -72,6 +74,8 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
       load,
       preload,
       slots,
+      hlsEngine,
+      dashEngine,
       onPlay,
       onPause,
       onEnded,
@@ -193,8 +197,12 @@ export const VideoPlayer = forwardRef<MediaPlayerInstance, VideoPlayerProps>(
               <Track
                 key={track.src}
                 src={track.src}
-                label={track.label}
-                lang={track.language}
+                label={
+                  track.label?.toLowerCase()
+                    ? track.label
+                    : track.label ?? 'unknown'
+                }
+                lang={track.language || 'en'}
                 kind={track.kind || 'subtitles'}
                 default={track.default}
               />

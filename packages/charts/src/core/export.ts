@@ -7,18 +7,20 @@ import type { ChartSeries } from './math';
 import { normalizeData } from './normalize';
 
 /**
- * Sanitizes a CSV cell to neutralize CSV Formula Injection (CWE-1236)
+ * Sanitizes a CSV cell to neutralize CSV Formula Injection (CWE-1236, CHARTS-M3-04)
  * while preserving valid numeric and text data per RFC 4180.
  *
  * Formula injection occurs when a spreadsheet application (Excel, LibreOffice, Google Sheets)
- * interprets leading characters (=, +, -, @, |, %) as active formulas or expressions.
+ * interprets leading characters (=, +, -, @, |, %, and Unicode fullwidth variants ＝, ＋, －, ＠)
+ * as active formulas or expressions.
  * When formula trigger characters appear at the start of a cell—or immediately following
- * leading whitespace/control characters—they are neutralized by prepending a single quote (').
+ * leading whitespace, tabs, carriage returns, or non-breaking spaces (\u00A0)—they are
+ * neutralized by prepending a single quote (').
  *
  * Genuine numeric values (e.g., negative numbers like -50 or floats) are preserved as numbers
  * and not neutralized with a quote.
  */
-function sanitizeCSVCell(value: unknown): string {
+export function sanitizeCSVCell(value: unknown): string {
   // 1. Handle empty / null / undefined
   if (value === null || value === undefined) {
     return '""';
@@ -51,23 +53,20 @@ function sanitizeCSVCell(value: unknown): string {
     !Number.isNaN(Number(trimmed));
 
   // If it is NOT a pure number, check for formula triggers:
-  // Check if string starts with formula triggers (=, +, -, @, |, %)
-  // OR if after stripping leading whitespace and control characters (0x00-0x1F, 0x7F),
-  // it starts with a formula trigger (=, +, -, @, |, %).
+  // Neutralize ASCII (=, +, -, @, |, %) and Unicode fullwidth triggers (＝ \uFF1D, ＋ \uFF0B, － \uFF0D, ＠ \uFF20)
+  // as well as triggers preceded by whitespace, tabs, carriage returns, or non-breaking spaces (\u00A0) (CHARTS-M3-04).
   if (!(isPureNumber && trimmed === str)) {
-    let startIdx = 0;
-    while (startIdx < str.length) {
-      const code = str.charCodeAt(startIdx);
-      if ((code >= 0 && code <= 32) || code === 127) {
-        startIdx++;
-      } else {
-        break;
-      }
-    }
-    const trimmedControl = str.slice(startIdx);
-    const hasLeadingTrigger = /^[=+\-@|%]/.test(str);
+    const triggerRegex = /^[=+\-@|%\uFF1D\uFF0B\uFF0D\uFF20]/;
+    // Strip leading ASCII/Unicode whitespace, control characters (0x00-0x1F, 0x7F-0x9F), and NBSP (\u00A0)
+
+    const trimmedControl = str.replace(
+      // eslint-disable-next-line no-control-regex
+      /^[\s\u0000-\u0020\u007F-\u009F\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+/,
+      ''
+    );
+    const hasLeadingTrigger = triggerRegex.test(str);
     const hasTriggerAfterWhitespace =
-      trimmedControl.length > 0 && /^[=+\-@|%]/.test(trimmedControl);
+      trimmedControl.length > 0 && triggerRegex.test(trimmedControl);
 
     if (hasLeadingTrigger || hasTriggerAfterWhitespace) {
       str = "'" + str;
@@ -139,19 +138,19 @@ export function exportToCSV(
 }
 
 /**
- * Comprehensive DOM-based SVG sanitizer (CHARTS-M3-02).
+ * Comprehensive DOM-based SVG sanitizer (CHARTS-M3-02, CHARTS-M3-05).
  * Uses DOM traversal as the primary security boundary:
  * 1. Removes all executable or active elements: script, foreignObject, iframe,
  *    object, embed, audio, video, animate, set, animateTransform, animateMotion.
  * 2. Neutralizes <style> elements containing @import, expression(), or external url() references.
  * 3. Strips all inline event handlers (on* attributes in any case/namespace).
  * 4. Sanitizes href / xlink:href attributes against javascript:, vbscript:,
- *    data:text/*, data:image/svg+xml, and non-local <use> targets.
+ *    data:text/*, data:image/svg+xml, foreign resource links, and non-local <use> targets.
  * 5. Sanitizes inline style attributes against external url() and expression().
  * 6. Validates both root <svg> element and all descendants while preserving
  *    legitimate chart presentation attributes and local fragment gradient fills.
  */
-function sanitizeSVGElement(svg: SVGElement): void {
+export function sanitizeSVGElement(svg: SVGElement): void {
   // 1. Remove dangerous active elements (case-insensitive via querySelectorAll)
   const dangerousSelectors = [
     'script',
@@ -219,10 +218,21 @@ function sanitizeSVGElement(svg: SVGElement): void {
           continue;
         }
 
-        // For <use> elements, restrict href to local fragment references (#id)
+        // For <use> elements, restrict href strictly to local fragment references (#id)
         if (el.tagName.toLowerCase() === 'use' && !trimmedVal.startsWith('#')) {
           el.removeAttribute(attr);
           continue;
+        }
+
+        // For <a> elements, forbid dangerous schemes and foreign resource links (CHARTS-M3-05)
+        if (el.tagName.toLowerCase() === 'a') {
+          if (
+            /^(?:javascript|vbscript|data:|file:)/i.test(trimmedVal) ||
+            /^(?:https?:|\/\/)/i.test(trimmedVal)
+          ) {
+            el.removeAttribute(attr);
+            continue;
+          }
         }
 
         // For <image> elements, block SVG data URIs or javascript
@@ -257,23 +267,90 @@ function sanitizeSVGElement(svg: SVGElement): void {
   }
 }
 
+/**
+ * Isomorphic string-level SVG sanitizer for SSR / headless mode (CHARTS-M3-06).
+ */
+export function sanitizeSVGString(source: string): string {
+  if (!source || typeof source !== 'string') return '';
+  let result = source;
+
+  // 1. Remove dangerous active elements
+  result = result.replace(
+    /<(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)\b[^<]*(?:(?!<\/(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)>)<[^<]*)*<\/(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)>/gi,
+    ''
+  );
+  result = result.replace(
+    /<(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)\b[^>]*\/?>/gi,
+    ''
+  );
+
+  // 2. Strip event handlers (onload=, onclick=, etc.)
+  result = result.replace(
+    /\s+on[a-zA-Z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi,
+    ''
+  );
+
+  // 3. For <use> elements, restrict href to local fragment references (#id)
+  result = result.replace(
+    /(<use\b[^>]*?\s(?:xlink:)?href\s*=\s*["'])(?!#)[^"']*(["'])/gi,
+    '$1#sanitized$2'
+  );
+
+  // 4. For <a> elements, strip dangerous or foreign resource hrefs
+  result = result.replace(
+    /(<a\b[^>]*?\s)(?:xlink:)?href\s*=\s*["']\s*(?:javascript:|vbscript:|data:|https?:|\/\/)[^"']*["']/gi,
+    '$1'
+  );
+
+  // 5. For <image> elements, strip dangerous data URIs or javascript
+  result = result.replace(
+    /(<image\b[^>]*?\s)(?:xlink:)?href\s*=\s*["']\s*(?:javascript:|vbscript:|data:\s*image\/svg\+xml)[^"']*["']/gi,
+    '$1'
+  );
+
+  // 6. Neutralize dangerous <style> blocks
+  result = result.replace(
+    /<style\b[^>]*>([\s\S]*?)<\/style>/gi,
+    (match, css) => {
+      if (
+        /@import\b/i.test(css) ||
+        /url\s*\(\s*['"]?(?!#)(?:https?:|\/\/|data:)/i.test(css) ||
+        /expression\s*\(/i.test(css) ||
+        /-moz-binding\b/i.test(css)
+      ) {
+        return '';
+      }
+      return match;
+    }
+  );
+
+  // 7. Neutralize inline style attributes containing external url(), expression(), or @import
+  result = result.replace(
+    /\sstyle\s*=\s*["'][^"']*(?:url\s*\(\s*['"]?(?!#)(?:https?:|\/\/|data:)|expression\s*\(|@import|-moz-binding)[^"']*["']/gi,
+    ''
+  );
+
+  return result;
+}
+
 export function exportToSVG(
-  svgElement: SVGElement,
+  svgElement: SVGElement | string,
   filename = 'chart.svg'
 ): string {
-  let targetSvg: SVGElement = svgElement;
+  let source = '';
 
   if (
     typeof window !== 'undefined' &&
     typeof document !== 'undefined' &&
-    typeof svgElement.cloneNode === 'function'
+    typeof (svgElement as any)?.cloneNode === 'function'
   ) {
-    const clone = svgElement.cloneNode(true) as SVGElement;
+    const origElement = svgElement as SVGElement;
+    const clone = origElement.cloneNode(true) as SVGElement;
 
     if (typeof window.getComputedStyle === 'function') {
       const origEls = [
-        svgElement,
-        ...Array.from(svgElement.querySelectorAll('*')),
+        origElement,
+        ...Array.from(origElement.querySelectorAll('*')),
       ];
       const cloneEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
       const propsToInline = [
@@ -316,8 +393,8 @@ export function exportToSVG(
     }
 
     const bbox =
-      typeof svgElement.getBoundingClientRect === 'function'
-        ? svgElement.getBoundingClientRect()
+      typeof origElement.getBoundingClientRect === 'function'
+        ? origElement.getBoundingClientRect()
         : { width: 600, height: 300 };
     const w = bbox.width || 600;
     const h = bbox.height || 300;
@@ -335,28 +412,35 @@ export function exportToSVG(
       clone.setAttribute('viewBox', `0 0 ${w} ${h}`);
     }
 
-    // Comprehensive DOM-based security sanitization (CHARTS-M3-02)
+    // Comprehensive DOM-based security sanitization (CHARTS-M3-02, CHARTS-M3-05)
     sanitizeSVGElement(clone);
 
-    targetSvg = clone;
+    const serializer = new XMLSerializer();
+    source = serializer.serializeToString(clone);
+  } else if (typeof svgElement === 'string') {
+    source = svgElement;
+  } else if (svgElement && typeof (svgElement as any).outerHTML === 'string') {
+    source = (svgElement as any).outerHTML;
+  } else if (typeof XMLSerializer !== 'undefined' && svgElement) {
+    try {
+      source = new XMLSerializer().serializeToString(svgElement as any);
+    } catch {
+      source = String(svgElement);
+    }
+  } else {
+    source = String(svgElement || '');
   }
 
-  const serializer = new XMLSerializer();
-  let source = serializer.serializeToString(targetSvg);
-
-  // Defense-in-depth string-level filter against script injection
-  source = source.replace(
-    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-    ''
-  );
+  // Universal defense-in-depth string sanitization (isomorphic fallback) (CHARTS-M3-06)
+  source = sanitizeSVGString(source);
 
   if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
     source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
   }
 
   const bbox =
-    typeof svgElement.getBoundingClientRect === 'function'
-      ? svgElement.getBoundingClientRect()
+    typeof (svgElement as any)?.getBoundingClientRect === 'function'
+      ? (svgElement as SVGElement).getBoundingClientRect()
       : { width: 600, height: 300 };
   const w = bbox.width || 600;
   const h = bbox.height || 300;
@@ -397,6 +481,14 @@ export function exportToPNG(
       return;
     }
 
+    // Bound export resolution multiplier and maximum dimension to prevent DoS (CHARTS-M3-08)
+    const MAX_SCALE = 4;
+    const MAX_DIMENSION = 8192;
+    const safeScale = Math.max(
+      0.1,
+      Math.min(Number.isFinite(scale) ? scale : 2, MAX_SCALE)
+    );
+
     const svgString = exportToSVG(svgElement, '');
     const svgBlob = new Blob([svgString], {
       type: 'image/svg+xml;charset=utf-8',
@@ -409,16 +501,30 @@ export function exportToPNG(
         typeof svgElement.getBoundingClientRect === 'function'
           ? svgElement.getBoundingClientRect()
           : { width: 600, height: 300 };
-      const w = bbox.width || 600;
-      const h = bbox.height || 300;
+      const rawW = Math.max(1, bbox.width || 600);
+      const rawH = Math.max(1, bbox.height || 300);
+
+      let targetW = Math.round(rawW * safeScale);
+      let targetH = Math.round(rawH * safeScale);
+
+      if (targetW > MAX_DIMENSION || targetH > MAX_DIMENSION) {
+        const aspect = targetW / targetH;
+        if (targetW >= targetH) {
+          targetW = MAX_DIMENSION;
+          targetH = Math.max(1, Math.round(MAX_DIMENSION / aspect));
+        } else {
+          targetH = MAX_DIMENSION;
+          targetW = Math.max(1, Math.round(MAX_DIMENSION * aspect));
+        }
+      }
+
       const canvas = document.createElement('canvas');
-      canvas.width = w * scale;
-      canvas.height = h * scale;
+      canvas.width = targetW;
+      canvas.height = targetH;
 
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.scale(scale, scale);
-        ctx.drawImage(image, 0, 0);
+        ctx.drawImage(image, 0, 0, targetW, targetH);
         canvas.toBlob((blob) => {
           if (blob && filename) {
             const pngUrl = URL.createObjectURL(blob);

