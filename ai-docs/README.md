@@ -80,11 +80,15 @@ D:\stack\ai-docs/
 
 ---
 
-## 4. Where AI Agents Should Look Before Starting Work
+## 5. Phase 5: Shared Foundations (Locale & Utils) Planning Hub
 
-1. **Constitutional Rules:** Read [`AGENTS.md`](file:///D:/stack/AGENTS.md) at the repository root.
-2. **Engineering Standards:** Read [`REPOSITORY_DOCUMENTATION_STANDARD.md`](file:///D:/stack/ai-docs/architecture/REPOSITORY_DOCUMENTATION_STANDARD.md).
-3. **Package-Specific Context:**
-   - NUICSS styling engine: Inspect [`ai-docs/nuicss/README.md`](file:///D:/stack/ai-docs/nuicss/README.md) and [`ENGINEERING_AUDIT_REPORT.md`](file:///D:/stack/ai-docs/nuicss/audits/ENGINEERING_AUDIT_REPORT.md).
-   - Component logic: Inspect `packages/<pkg>/src/` and `docs/<pkg>/`.
-4. **Task Planning:** Always author feature-specific plans in `D:\stack\temp/<project>_implementation_plan.md` before writing code.
+Authoritative architecture specifications, risk audits, and roadmaps for Phase 5:
+
+- [PHASE5_SCOPE_AND_DISCOVERY_REPORT.md](file:///D:/stack/ai-docs/PHASE5_SCOPE_AND_DISCOVERY_REPORT.md)
+- [PHASE5_LOCALE_ARCHITECTURE.md](file:///D:/stack/ai-docs/PHASE5_LOCALE_ARCHITECTURE.md)
+- [PHASE5_UTILS_ARCHITECTURE.md](file:///D:/stack/ai-docs/PHASE5_UTILS_ARCHITECTURE.md)
+- [PHASE5_SECURITY_AND_DEPENDENCY_AUDIT.md](file:///D:/stack/ai-docs/PHASE5_SECURITY_AND_DEPENDENCY_AUDIT.md)
+- [PHASE5_ECOSYSTEM_COMPATIBILITY.md](file:///D:/stack/ai-docs/PHASE5_ECOSYSTEM_COMPATIBILITY.md)
+- [PHASE5_QUALITY_AND_ACCEPTANCE_CRITERIA.md](file:///D:/stack/ai-docs/PHASE5_QUALITY_AND_ACCEPTANCE_CRITERIA.md)
+- [PHASE5_IMPLEMENTATION_ROADMAP.md](file:///D:/stack/ai-docs/PHASE5_IMPLEMENTATION_ROADMAP.md)
+- [PHASE5_EXECUTION_PROMPT.md](file:///D:/stack/ai-docs/PHASE5_EXECUTION_PROMPT.md)
