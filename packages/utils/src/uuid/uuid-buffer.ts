@@ -51,16 +51,20 @@ export function uuidToBuffer(uuid: string): Buffer {
 }
 
 /**
- * Converts a binary UUID buffer back into a standard UUID string with strict 16-byte validation.
+ * Converts a binary UUID buffer or Uint8Array back into a standard UUID string with strict 16-byte validation.
+ * Supports universal Uint8Array for browser/worker isomorphism (UTILS-SEC-04).
  *
- * @param buffer - A 16-byte UUID buffer
+ * @param buffer - A 16-byte UUID Buffer or Uint8Array
  * @returns UUID string in canonical format
- * @throws {TypeError} If the buffer is not a valid 16-byte Buffer
+ * @throws {TypeError} If the buffer is not a valid 16-byte Buffer or Uint8Array
  */
-export function bufferToUuid(buffer: Buffer): string {
-  if (!Buffer.isBuffer(buffer)) {
+export function bufferToUuid(buffer: Uint8Array | Buffer): string {
+  if (
+    !buffer ||
+    (!(buffer instanceof Uint8Array) && !Buffer.isBuffer(buffer))
+  ) {
     throw new TypeError(
-      'Invalid UUID buffer: argument must be a Buffer instance'
+      'Invalid UUID buffer: argument must be a Buffer or Uint8Array instance'
     );
   }
 
@@ -70,7 +74,10 @@ export function bufferToUuid(buffer: Buffer): string {
     );
   }
 
-  const hex = buffer.toString('hex');
+  let hex = '';
+  for (let i = 0; i < 16; i++) {
+    hex += buffer[i].toString(16).padStart(2, '0');
+  }
 
   return [
     hex.substring(0, 8),

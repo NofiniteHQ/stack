@@ -8,26 +8,11 @@ import type { PreRenderedAsset } from 'rollup';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Shared asset logic to perfectly recreate your folders and clear the CSS
+// Shared asset logic to name the CSS shim cleanly
 const sharedAssetFileNames = (assetInfo: PreRenderedAsset) => {
   const name = assetInfo.names?.[0] ?? '';
-
-  // Force the CSS file to be cleanly named
   if (name.endsWith('.css')) return 'style.css';
-
-  // Catch the SVGs before they get hashed
-  if (name.endsWith('.svg')) {
-    const originalPath = assetInfo.originalFileNames?.[0] || '';
-
-    // Rollup 4 tracks the original path, allowing us to drop them
-    // perfectly back into their 1x1 and 4x3 folders!
-    if (originalPath.includes('1x1')) return 'flags/1x1/[name][extname]';
-    if (originalPath.includes('4x3')) return 'flags/4x3/[name][extname]';
-
-    return 'flags/[name][extname]';
-  }
-
-  return '[name]-[hash][extname]'; // Default fallback
+  return '[name]-[hash][extname]';
 };
 
 export default defineConfig({
@@ -60,6 +45,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
+        'data/countries': path.resolve(__dirname, 'src/data/countries.ts'),
         'react/index': path.resolve(__dirname, 'src/react/index.ts'),
       },
       name: 'NofiniteLocale',

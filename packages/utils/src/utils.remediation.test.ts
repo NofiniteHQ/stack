@@ -99,9 +99,9 @@ describe('Utils Security & Robustness Remediation (M2)', () => {
     });
   });
 
-  describe('ZeptoMail Supply Chain Integration & Client Compatibility (UTILS-M1-01)', () => {
-    it('initializes SendMailClient successfully with resolved axios 1.21.0 dependency', async () => {
-      const { SendMailClient } = await import('zeptomail');
+  describe('ZeptoMail Supply Chain Remediation & Native Client Compatibility (UTILS-M1-01)', () => {
+    it('initializes SendMailClient successfully with zero-dependency native fetch implementation', async () => {
+      const { SendMailClient } = await import('./zeptomail');
       expect(typeof SendMailClient).toBe('function');
 
       const client = new SendMailClient({

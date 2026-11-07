@@ -1,6 +1,6 @@
 {
   "name": "@nofinite/utils",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "A secure, lightweight, and production-ready utility library for modern Node.js and web applications.",
   "license": "Apache-2.0",
   "private": false,
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/NofiniteHQ/stack.git",
     "directory": "packages/utils"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
@@ -19,46 +19,55 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
     "./otp": {
       "types": "./dist/types/otp/index.d.ts",
       "import": "./dist/otp/index.js",
+      "require": "./dist/otp/index.cjs",
       "default": "./dist/otp/index.js"
     },
     "./server": {
       "types": "./dist/types/server/index.d.ts",
       "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs",
       "default": "./dist/server/index.js"
     },
     "./password": {
       "types": "./dist/types/password/index.d.ts",
       "import": "./dist/password/index.js",
+      "require": "./dist/password/index.cjs",
       "default": "./dist/password/index.js"
     },
     "./jwt": {
       "types": "./dist/types/jwt/index.d.ts",
       "import": "./dist/jwt/index.js",
+      "require": "./dist/jwt/index.cjs",
       "default": "./dist/jwt/index.js"
     },
     "./uuid": {
       "types": "./dist/types/uuid/index.d.ts",
       "import": "./dist/uuid/index.js",
+      "require": "./dist/uuid/index.cjs",
       "default": "./dist/uuid/index.js"
     },
     "./env": {
       "types": "./dist/types/env/index.d.ts",
       "import": "./dist/env/index.js",
+      "require": "./dist/env/index.cjs",
       "default": "./dist/env/index.js"
     },
     "./email": {
       "types": "./dist/types/zeptomail/index.d.ts",
       "import": "./dist/zeptomail/index.js",
+      "require": "./dist/zeptomail/index.cjs",
       "default": "./dist/zeptomail/index.js"
     },
     "./zeptomail": {
       "types": "./dist/types/zeptomail/index.d.ts",
       "import": "./dist/zeptomail/index.js",
+      "require": "./dist/zeptomail/index.cjs",
       "default": "./dist/zeptomail/index.js"
     },
     "./types/*": {
@@ -82,10 +91,16 @@
     "access": "public",
     "provenance": true
   },
+  "peerDependencies": {
+    "argon2": "^0.45.1"
+  },
+  "peerDependenciesMeta": {
+    "argon2": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "argon2": "^0.45.1",
     "jose": "^6.2.12",
-    "uuid": "^14.0.2",
-    "zeptomail": "^8.0.1"
+    "uuid": "^14.0.2"
   }
 }

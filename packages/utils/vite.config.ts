@@ -67,21 +67,19 @@ export default defineConfig({
         'argon2',
         'jose',
         'uuid',
-        'zeptomail',
-        'node-fetch',
       ],
 
       output: [
         {
           format: 'es',
-          dir: './packages/utils/dist',
+          dir: './dist',
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].js',
         },
         {
           format: 'cjs',
-          dir: './packages/utils/dist',
+          dir: './dist',
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].cjs',
