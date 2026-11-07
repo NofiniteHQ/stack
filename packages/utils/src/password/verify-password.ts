@@ -1,4 +1,16 @@
-import argon2 from 'argon2';
+let argon2Instance: typeof import('argon2') | null = null;
+
+async function getArgon2(): Promise<typeof import('argon2')> {
+  if (!argon2Instance) {
+    try {
+      const mod = await import('argon2');
+      argon2Instance = (mod.default || mod) as typeof import('argon2');
+    } catch (err: any) {
+      throw new Error(`argon2 is not installed or available: ${err.message}`);
+    }
+  }
+  return argon2Instance;
+}
 
 // Pre-computed valid Argon2id hash used to perform dummy verification on invalid inputs,
 // equalizing response latency and mitigating user enumeration timing attacks (UTILS-SEC-02).
@@ -21,6 +33,7 @@ export async function verifyPassword(
   password: string,
   hash: string
 ): Promise<boolean> {
+  const argon2 = await getArgon2();
   if (
     typeof password !== 'string' ||
     password.length === 0 ||

@@ -1,4 +1,16 @@
-import argon2 from 'argon2';
+let argon2Instance: typeof import('argon2') | null = null;
+
+async function getArgon2(): Promise<typeof import('argon2')> {
+  if (!argon2Instance) {
+    try {
+      const mod = await import('argon2');
+      argon2Instance = (mod.default || mod) as typeof import('argon2');
+    } catch (err: any) {
+      throw new Error(`argon2 is not installed or available: ${err.message}`);
+    }
+  }
+  return argon2Instance;
+}
 import { PasswordHashOptions } from './password.types';
 
 export const MAX_PASSWORD_LENGTH = 128;
@@ -35,6 +47,7 @@ export async function hashPassword(
     );
   }
 
+  const argon2 = await getArgon2();
   return argon2.hash(password, {
     type: argon2.argon2id,
 
