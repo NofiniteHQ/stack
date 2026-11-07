@@ -6,7 +6,7 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'btn',
-    'inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none aria-busy:opacity-70 aria-busy:cursor-wait aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none rounded-md cursor-pointer select-none',
+    'inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none aria-busy:opacity-70 aria-busy:cursor-wait aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none rounded-md cursor-pointer select-none [&>svg]:shrink-0',
   ],
   [
     'btn-default',
@@ -36,9 +36,18 @@ export const primitiveShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'btn-link',
     'text-primary border border-solid border-transparent underline-offset-4 hover:underline',
   ],
-  ['btn-sm', 'h-8 px-3 text-xs'],
-  ['btn-md', 'h-9 px-4 text-sm'],
-  ['btn-lg', 'h-11 px-8 text-sm font-semibold'],
+  [
+    'btn-sm',
+    'h-8 px-3 text-xs gap-1.5 leading-none [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:shrink-0',
+  ],
+  [
+    'btn-md',
+    'h-9 px-4 text-sm gap-2 leading-none [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0',
+  ],
+  [
+    'btn-lg',
+    'h-11 px-8 text-sm font-semibold gap-2.5 leading-none [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0',
+  ],
   ['btn-icon', 'h-9 w-9 p-0'],
   ['btn-active', 'bg-primary/10 text-primary border-primary/30 shadow-xs'],
   [

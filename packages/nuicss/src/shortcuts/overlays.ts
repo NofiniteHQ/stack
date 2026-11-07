@@ -22,7 +22,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'modal-box',
-    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto',
+    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10',
   ],
   [
     'modal-header',
@@ -51,7 +51,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'dialog-box',
-    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col',
+    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10',
   ],
   [
     'dialog-icon',
@@ -168,7 +168,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['tooltip-right', 'left-full top-1/2 -translate-y-1/2 ml-2'],
   [
     'tooltip-arrow',
-    'absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45',
+    'absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45 pointer-events-none transform-gpu',
   ],
 
   // ==========================================
