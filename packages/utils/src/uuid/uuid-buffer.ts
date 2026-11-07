@@ -1,4 +1,4 @@
-import { v7 as uuidv7 } from 'uuid';
+import { generateUuidV7 } from './generate-uuid';
 
 /**
  * Generates a UUID v7 and returns it as a raw binary buffer.
@@ -14,7 +14,7 @@ import { v7 as uuidv7 } from 'uuid';
  * @returns A 16-byte Buffer representing the UUID
  */
 export function generateUuidBuffer(): Buffer {
-  return Buffer.from(uuidv7().replace(/-/g, ''), 'hex');
+  return Buffer.from(generateUuidV7().replace(/-/g, ''), 'hex');
 }
 
 /**

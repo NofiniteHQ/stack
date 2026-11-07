@@ -22,6 +22,60 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
+    "./string": {
+      "types": "./dist/types/string/index.d.ts",
+      "import": "./dist/string/index.js",
+      "require": "./dist/string/index.cjs",
+      "default": "./dist/string/index.js"
+    },
+    "./object": {
+      "types": "./dist/types/object/index.d.ts",
+      "import": "./dist/object/index.js",
+      "require": "./dist/object/index.cjs",
+      "default": "./dist/object/index.js"
+    },
+    "./array": {
+      "types": "./dist/types/array/index.d.ts",
+      "import": "./dist/array/index.js",
+      "require": "./dist/array/index.cjs",
+      "default": "./dist/array/index.js"
+    },
+    "./math": {
+      "types": "./dist/types/math/index.d.ts",
+      "import": "./dist/math/index.js",
+      "require": "./dist/math/index.cjs",
+      "default": "./dist/math/index.js"
+    },
+    "./async": {
+      "types": "./dist/types/async/index.d.ts",
+      "import": "./dist/async/index.js",
+      "require": "./dist/async/index.cjs",
+      "default": "./dist/async/index.js"
+    },
+    "./validation": {
+      "types": "./dist/types/validation/index.d.ts",
+      "import": "./dist/validation/index.js",
+      "require": "./dist/validation/index.cjs",
+      "default": "./dist/validation/index.js"
+    },
+    "./date": {
+      "types": "./dist/types/date/index.d.ts",
+      "import": "./dist/date/index.js",
+      "require": "./dist/date/index.cjs",
+      "default": "./dist/date/index.js"
+    },
+    "./dom": {
+      "types": "./dist/types/dom/index.d.ts",
+      "import": "./dist/dom/index.js",
+      "require": "./dist/dom/index.cjs",
+      "default": "./dist/dom/index.js"
+    },
+    "./cn": {
+      "types": "./dist/types/cn/index.d.ts",
+      "import": "./dist/cn/index.js",
+      "require": "./dist/cn/index.cjs",
+      "default": "./dist/cn/index.js"
+    },
     "./otp": {
       "types": "./dist/types/otp/index.d.ts",
       "import": "./dist/otp/index.js",
@@ -100,7 +154,6 @@
     }
   },
   "dependencies": {
-    "jose": "^6.2.12",
-    "uuid": "^14.0.2"
+    "jose": "^6.2.12"
   }
 }

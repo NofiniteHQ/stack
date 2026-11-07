@@ -24,6 +24,15 @@ export default defineConfig({
     lib: {
       entry: {
         index: 'src/index.ts',
+        'string/index': 'src/string/index.ts',
+        'object/index': 'src/object/index.ts',
+        'array/index': 'src/array/index.ts',
+        'math/index': 'src/math/index.ts',
+        'async/index': 'src/async/index.ts',
+        'validation/index': 'src/validation/index.ts',
+        'date/index': 'src/date/index.ts',
+        'dom/index': 'src/dom/index.ts',
+        'cn/index': 'src/cn/index.ts',
         'env/index': 'src/env/index.ts',
         'jwt/index': 'src/jwt/index.ts',
         'otp/index': 'src/otp/index.ts',
@@ -66,7 +75,6 @@ export default defineConfig({
         // Runtime deps
         'argon2',
         'jose',
-        'uuid',
       ],
 
       output: [
