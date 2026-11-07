@@ -18,6 +18,12 @@
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/types/index.d.ts",
+      "browser": {
+        "types": "./dist/types/browser.d.ts",
+        "import": "./dist/browser/index.js",
+        "require": "./dist/browser/index.cjs",
+        "default": "./dist/browser/index.js"
+      },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
@@ -127,6 +133,12 @@
     "./types/*": {
       "types": "./dist/types/*.d.ts",
       "default": "./dist/types/*.d.ts"
+    },
+    "./browser": {
+      "types": "./dist/types/browser.d.ts",
+      "import": "./dist/browser/index.js",
+      "require": "./dist/browser/index.cjs",
+      "default": "./dist/browser/index.js"
     }
   },
   "scripts": {
@@ -155,5 +167,6 @@
   },
   "dependencies": {
     "jose": "^6.2.12"
-  }
+  },
+  "browser": "./dist/browser/index.js"
 }

@@ -24,6 +24,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: 'src/index.ts',
+        'browser/index': 'src/browser.ts',
         'string/index': 'src/string/index.ts',
         'object/index': 'src/object/index.ts',
         'array/index': 'src/array/index.ts',

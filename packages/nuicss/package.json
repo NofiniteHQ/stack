@@ -168,7 +168,7 @@
     "@unocss/preset-wind4": "^66.10.5",
     "@unocss/processor-lightningcss": "^66.10.5",
     "@unocss/vite": "^66.10.5",
-    "glob": "^13.0.6",
+    "glob": "^14.0.2",
     "unocss": "^66.10.5",
     "valibot": "^1.5.0"
   },
