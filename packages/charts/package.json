@@ -78,6 +78,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.6.13",
+    "@nofinite/utils": "workspace:*",
     "clsx": "^2.1.1",
     "d3-array": "^3.2.4",
     "d3-axis": "^3.0.0",

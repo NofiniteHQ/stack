@@ -5,6 +5,7 @@
  */
 
 import DOMPurify from 'dompurify';
+import { escapeHtml as utilsEscapeHtml } from '@nofinite/utils';
 
 export const MARKON_DOMPURIFY_CONFIG = {
   // 1. Authoritative Element Allowlist (36 permitted elements)
@@ -94,12 +95,7 @@ export const MARKON_DOMPURIFY_CONFIG = {
 
 export function escapeHtml(str: string | null | undefined): string {
   if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return utilsEscapeHtml(String(str));
 }
 
 export function decodeEntities(str: string): string {

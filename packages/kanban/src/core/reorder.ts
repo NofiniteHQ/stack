@@ -1,3 +1,4 @@
+import { clamp } from '@nofinite/utils';
 import type {
   KanbanColumn,
   CardMoveEvent,
@@ -27,7 +28,7 @@ export function reorderArray<T>(
   }
 
   const safeEndIndex = Number.isFinite(endIndex) ? endIndex : 0;
-  const clampedEndIndex = Math.max(0, Math.min(safeEndIndex, list.length - 1));
+  const clampedEndIndex = clamp(safeEndIndex, 0, list.length - 1);
 
   if (startIndex === clampedEndIndex) {
     return Array.from(list);
@@ -124,7 +125,7 @@ export function moveCardBetweenColumns(
   // Moving within the same column
   if (sourceColumnId === targetColumnId) {
     const safeTargetIndex = Number.isFinite(targetIndex)
-      ? Math.max(0, Math.min(targetIndex, sourceCol.items.length - 1))
+      ? clamp(targetIndex, 0, sourceCol.items.length - 1)
       : 0;
     const newItems = reorderWithEdge({
       list: sourceCol.items,
@@ -165,10 +166,7 @@ export function moveCardBetweenColumns(
     // No-op for top edge: targetIndex is already the insert position
   }
 
-  const clampedTargetIndex = Math.max(
-    0,
-    Math.min(insertIndex, targetItems.length)
-  );
+  const clampedTargetIndex = clamp(insertIndex, 0, targetItems.length);
   targetItems.splice(clampedTargetIndex, 0, removedCard);
 
   const newColumns = Array.from(columns);
@@ -196,7 +194,7 @@ export function reorderColumns(
   }
 
   const safeTargetIndex = Number.isFinite(targetIndex)
-    ? Math.max(0, Math.min(targetIndex, columns.length - 1))
+    ? clamp(targetIndex, 0, columns.length - 1)
     : 0;
 
   return reorderWithEdge({

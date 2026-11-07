@@ -4,6 +4,8 @@
  * Fully collision-proof and dead-center aligned with glassmorphic backdrop blur.
  */
 
+import { escapeHtml } from './security';
+
 export interface MarkonModalOptions {
   title: string;
   label?: string;
@@ -139,13 +141,4 @@ export function openMarkonModal(options: MarkonModalOptions): void {
       input.select();
     }
   });
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
 }

@@ -55,7 +55,9 @@ export default defineConfig({
             'react-dom',
             'react/jsx-runtime',
             '@nofinite/nuicss',
-          ].includes(id)
+            '@nofinite/utils',
+          ].includes(id) ||
+          id.startsWith('@nofinite/utils/')
         ) {
           return true;
         }
