@@ -22,9 +22,24 @@
       "require": "./dist/index.cjs"
     },
     "./countries": {
-      "types": "./dist/data/countries.d.ts",
-      "import": "./dist/data/countries.js",
-      "require": "./dist/data/countries.cjs"
+      "types": "./dist/countries/index.d.ts",
+      "import": "./dist/countries/index.js",
+      "require": "./dist/countries/index.cjs"
+    },
+    "./bcp47": {
+      "types": "./dist/bcp47/index.d.ts",
+      "import": "./dist/bcp47/index.js",
+      "require": "./dist/bcp47/index.cjs"
+    },
+    "./format": {
+      "types": "./dist/format/index.d.ts",
+      "import": "./dist/format/index.js",
+      "require": "./dist/format/index.cjs"
+    },
+    "./i18n": {
+      "types": "./dist/i18n/index.d.ts",
+      "import": "./dist/i18n/index.js",
+      "require": "./dist/i18n/index.cjs"
     },
     "./react": {
       "types": "./dist/react/index.d.ts",

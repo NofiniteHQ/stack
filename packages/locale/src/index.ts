@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2025 Nofinite
+ * Copyright (C) 2026 Nofinite
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,3 +18,4 @@
 export type { Country } from './data/countries';
 export { countries } from './data/countries';
 export * from './core';
+export * from './i18n';

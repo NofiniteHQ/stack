@@ -45,8 +45,12 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
-        'data/countries': path.resolve(__dirname, 'src/data/countries.ts'),
+        'countries/index': path.resolve(__dirname, 'src/countries/index.ts'),
+        'bcp47/index': path.resolve(__dirname, 'src/bcp47/index.ts'),
+        'format/index': path.resolve(__dirname, 'src/format/index.ts'),
+        'i18n/index': path.resolve(__dirname, 'src/i18n/index.ts'),
         'react/index': path.resolve(__dirname, 'src/react/index.ts'),
+        'data/countries': path.resolve(__dirname, 'src/data/countries.ts'),
       },
       name: 'NofiniteLocale',
     },
@@ -76,6 +80,6 @@ export default defineConfig({
     watch: false,
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'tests/**/*.test.ts'],
   },
 });

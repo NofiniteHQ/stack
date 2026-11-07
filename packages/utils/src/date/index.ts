@@ -15,20 +15,22 @@
  * limitations under the License.
  */
 
-export type DateInput = Date | string | number;
+export type DateInput = Date | number | string;
 
 /**
- * Validates if a value is a valid non-NaN Date instance.
+ * Checks whether an input is a valid Date instance.
  */
-export function isValidDate(val: unknown): val is Date {
-  return val instanceof Date && !isNaN(val.getTime());
+export function isValidDate(input: unknown): input is Date {
+  return input instanceof Date && !isNaN(input.getTime());
 }
 
 /**
- * Safely coerces a Date, ISO timestamp string, or epoch millisecond number into a Date instance.
+ * Converts a Date, timestamp number, or ISO string into a Date instance.
  */
 export function toDate(input: DateInput): Date {
-  if (input instanceof Date) return new Date(input.getTime());
+  if (input instanceof Date) {
+    return new Date(input.getTime());
+  }
   const d = new Date(input);
   if (isNaN(d.getTime())) {
     throw new TypeError(`Invalid date input: ${String(input)}`);
@@ -53,12 +55,15 @@ export function subDays(input: DateInput, n: number): Date {
 }
 
 /**
- * Adds n months to a date, preserving day of month when possible.
+ * Adds n months to a date, clamping to the last day of shorter target months.
  */
 export function addMonths(input: DateInput, n: number): Date {
   const d = toDate(input);
-  const targetMonth = d.getMonth() + n;
-  d.setMonth(targetMonth);
+  const desiredDay = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + n);
+  const maxDays = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(desiredDay, maxDays));
   return d;
 }
 
@@ -70,7 +75,7 @@ export function subMonths(input: DateInput, n: number): Date {
 }
 
 /**
- * Returns the start of the day (00:00:00.000) for the given date.
+ * Returns a new Date set to the start of the day (00:00:00.000).
  */
 export function startOfDay(input: DateInput): Date {
   const d = toDate(input);
@@ -79,7 +84,7 @@ export function startOfDay(input: DateInput): Date {
 }
 
 /**
- * Returns the end of the day (23:59:59.999) for the given date.
+ * Returns a new Date set to the end of the day (23:59:59.999).
  */
 export function endOfDay(input: DateInput): Date {
   const d = toDate(input);
@@ -88,7 +93,9 @@ export function endOfDay(input: DateInput): Date {
 }
 
 /**
- * Returns the start of the week for the given date (default weekStartsOn = 0, Sunday).
+ * Returns a new Date set to the start of the week.
+ *
+ * @param weekStartsOn - 0 for Sunday, 1 for Monday (default: 0)
  */
 export function startOfWeek(input: DateInput, weekStartsOn = 0): Date {
   const d = startOfDay(input);
@@ -99,7 +106,9 @@ export function startOfWeek(input: DateInput, weekStartsOn = 0): Date {
 }
 
 /**
- * Returns the end of the week for the given date.
+ * Returns a new Date set to the end of the week.
+ *
+ * @param weekStartsOn - 0 for Sunday, 1 for Monday (default: 0)
  */
 export function endOfWeek(input: DateInput, weekStartsOn = 0): Date {
   const d = startOfWeek(input, weekStartsOn);
@@ -109,27 +118,26 @@ export function endOfWeek(input: DateInput, weekStartsOn = 0): Date {
 }
 
 /**
- * Returns the start of the month (1st day at 00:00:00.000).
+ * Returns a new Date set to the start of the month (1st, 00:00:00.000).
  */
 export function startOfMonth(input: DateInput): Date {
-  const d = toDate(input);
+  const d = startOfDay(input);
   d.setDate(1);
-  d.setHours(0, 0, 0, 0);
   return d;
 }
 
 /**
- * Returns the end of the month (last day at 23:59:59.999).
+ * Returns a new Date set to the end of the month (last day, 23:59:59.999).
  */
 export function endOfMonth(input: DateInput): Date {
-  const d = toDate(input);
+  const d = startOfDay(input);
   d.setMonth(d.getMonth() + 1, 0);
   d.setHours(23, 59, 59, 999);
   return d;
 }
 
 /**
- * Checks if two dates fall on the exact same calendar day.
+ * Compares whether two dates fall on the exact same calendar day.
  */
 export function isSameDay(a: DateInput, b: DateInput): boolean {
   const da = toDate(a);
@@ -142,62 +150,69 @@ export function isSameDay(a: DateInput, b: DateInput): boolean {
 }
 
 /**
- * Checks if date a is strictly before date b.
+ * Checks if date a is chronologically before date b.
  */
 export function isBefore(a: DateInput, b: DateInput): boolean {
   return toDate(a).getTime() < toDate(b).getTime();
 }
 
 /**
- * Checks if date a is strictly after date b.
+ * Checks if date a is chronologically after date b.
  */
 export function isAfter(a: DateInput, b: DateInput): boolean {
   return toDate(a).getTime() > toDate(b).getTime();
 }
 
-const MS_PER_MINUTE = 60 * 1000;
-const MS_PER_HOUR = 60 * MS_PER_MINUTE;
-const MS_PER_DAY = 24 * MS_PER_HOUR;
-
 /**
  * Computes difference between two dates in full calendar days.
  */
 export function diffInDays(a: DateInput, b: DateInput): number {
-  return Math.trunc((toDate(a).getTime() - toDate(b).getTime()) / MS_PER_DAY);
+  const msA = toDate(a).getTime();
+  const msB = toDate(b).getTime();
+  const diffMs = msA - msB;
+  return Math.trunc(diffMs / (1000 * 60 * 60 * 24));
 }
 
 /**
  * Computes difference between two dates in full hours.
  */
 export function diffInHours(a: DateInput, b: DateInput): number {
-  return Math.trunc((toDate(a).getTime() - toDate(b).getTime()) / MS_PER_HOUR);
+  const msA = toDate(a).getTime();
+  const msB = toDate(b).getTime();
+  return Math.trunc((msA - msB) / (1000 * 60 * 60));
 }
 
 /**
  * Computes difference between two dates in full minutes.
  */
 export function diffInMinutes(a: DateInput, b: DateInput): number {
-  return Math.trunc(
-    (toDate(a).getTime() - toDate(b).getTime()) / MS_PER_MINUTE
-  );
+  const msA = toDate(a).getTime();
+  const msB = toDate(b).getTime();
+  return Math.trunc((msA - msB) / (1000 * 60));
 }
 
 /**
- * Formats a date into ISO 8601 string subsets ('date', 'time', or full 'datetime').
+ * Formats a Date instance into standard ISO-like date, time, or datetime strings.
  */
 export function formatDateIso(
   input: DateInput,
-  mode: 'date' | 'time' | 'datetime' = 'date'
+  mode: 'date' | 'time' | 'datetime' = 'datetime'
 ): string {
   const d = toDate(input);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  const seconds = String(d.getSeconds()).padStart(2, '0');
+  const pad = (n: number) => String(n).padStart(2, '0');
 
-  if (mode === 'date') return `${year}-${month}-${day}`;
-  if (mode === 'time') return `${hours}:${minutes}:${seconds}`;
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  const seconds = pad(d.getSeconds());
+
+  if (mode === 'date') {
+    return `${year}-${month}-${day}`;
+  }
+  if (mode === 'time') {
+    return `${hours}:${minutes}:${seconds}`;
+  }
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
