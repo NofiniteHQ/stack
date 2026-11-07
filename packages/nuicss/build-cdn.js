@@ -12,6 +12,13 @@ const {
 } = require('./dist/index.js');
 
 async function build() {
+  // Ensure flags.css is freshly generated from src/flags/
+  try {
+    require('./scripts/generate-flags-css.js');
+  } catch (err) {
+    console.warn('[build-cdn] generate-flags-css notice:', err.message);
+  }
+
   console.log('Generating browser config and static stylesheets...');
   const config = nuicssPreset({ preflights: false });
 
@@ -152,6 +159,29 @@ async function build() {
       'utf8'
     )} bytes, minified: ${Buffer.byteLength(minCharts, 'utf8')} bytes)`
   );
+
+  // 1k. Flags Subpath (flags.css & flags.min.css - Optional country flags)
+  const flagsComponentCssPath = path.join(compStylesDir, 'flags.css');
+  if (fs.existsSync(flagsComponentCssPath)) {
+    const flagsComponentCss = fs.readFileSync(flagsComponentCssPath, 'utf8');
+    fs.writeFileSync('dist/flags.css', flagsComponentCss, 'utf8');
+    const minFlags = minifyCss('flags.min.css', flagsComponentCss);
+    fs.writeFileSync('dist/flags.min.css', minFlags, 'utf8');
+    console.log(
+      `Generated dist/flags.css (${Buffer.byteLength(
+        flagsComponentCss,
+        'utf8'
+      )} bytes, minified: ${Buffer.byteLength(minFlags, 'utf8')} bytes)`
+    );
+
+    // Copy SVG assets into dist/flags/
+    const flagsSrcDir = path.join(__dirname, 'src/flags');
+    const flagsDistDir = path.join(__dirname, 'dist/flags');
+    if (fs.existsSync(flagsSrcDir)) {
+      fs.cpSync(flagsSrcDir, flagsDistDir, { recursive: true });
+      console.log(`Copied flag assets to dist/flags/`);
+    }
+  }
 
   // ========================================================
   // 2. Generate One-Link Browser Runtime (dist/index.global.js)

@@ -31,7 +31,7 @@ bun add @nofinite/locale
 If your application renders SVG country flags, import the lightweight flag stylesheet:
 
 ```ts
-import '@nofinite/locale/style';
+import '@nofinite/nuicss/flags.css'; // or legacy '@nofinite/locale/style'
 ```
 
 Or in your HTML via CDN:
@@ -39,7 +39,7 @@ Or in your HTML via CDN:
 ```html
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@nofinite/locale/dist/style.css"
+  href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss/dist/flags.css"
 />
 ```
 

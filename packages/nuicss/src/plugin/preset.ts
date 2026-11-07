@@ -8,6 +8,7 @@ import chartsCssRaw from '../styles/components/charts.css?raw';
 import kanbanCssRaw from '../styles/components/kanban.css?raw';
 import mediaBridgeCssRaw from '../styles/components/media-bridge.css?raw';
 import tableCssRaw from '../styles/components/table.css?raw';
+import flagsCssRaw from '../styles/components/flags.css?raw';
 import fs from 'node:fs';
 import path from 'node:path';
 let processorLightningCSSRaw: any = null;
@@ -42,6 +43,8 @@ let mediaBridgeCss =
     : '';
 let tableCss =
   typeof tableCssRaw === 'string' && tableCssRaw.length > 0 ? tableCssRaw : '';
+let flagsCss =
+  typeof flagsCssRaw === 'string' && flagsCssRaw.length > 0 ? flagsCssRaw : '';
 
 if (
   !resetCss ||
@@ -50,7 +53,8 @@ if (
   !chartsCss ||
   !kanbanCss ||
   !mediaBridgeCss ||
-  !tableCss
+  !tableCss ||
+  !flagsCss
 ) {
   try {
     const stylesDir = path.resolve(__dirname, '../styles');
@@ -81,6 +85,9 @@ if (
     }
     if (!tableCss && fs.existsSync(path.join(compDir, 'table.css'))) {
       tableCss = fs.readFileSync(path.join(compDir, 'table.css'), 'utf8');
+    }
+    if (!flagsCss && fs.existsSync(path.join(compDir, 'flags.css'))) {
+      flagsCss = fs.readFileSync(path.join(compDir, 'flags.css'), 'utf8');
     }
   } catch {
     // Browser or bundler environment
@@ -322,6 +329,11 @@ export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
       [
         /^(?:nui-)?(?:vidstack-player|vidstack-audio-player|media-container|media-player)$/,
         () => mediaBridgeCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-|nf-)?flag(?:-[a-z0-9-]+)?$/,
+        () => flagsCss,
         { layer: 'components' },
       ],
     ],

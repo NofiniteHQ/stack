@@ -31,7 +31,7 @@ export default defineConfig({
         this.emitFile({
           type: 'asset',
           fileName: 'style.css',
-          source: `/**\n * @nofinite/locale - Stylesheet Compatibility Shim\n * Canonical flag and component styling is provided by @nofinite/nuicss.\n */\n@import '@nofinite/nuicss/styles.css';\n`,
+          source: `/**\n * @nofinite/locale - Stylesheet Compatibility Shim\n * Canonical flag and component styling is provided by @nofinite/nuicss.\n */\n@import '@nofinite/nuicss/flags.css';\n`,
         });
       },
     },

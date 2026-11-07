@@ -114,6 +114,11 @@
     "./kanban.min.css": "./dist/kanban.min.css",
     "./markon.css": "./dist/markon.css",
     "./markon.min.css": "./dist/markon.min.css",
+    "./flags.css": "./dist/flags.css",
+    "./flags.min.css": "./dist/flags.min.css",
+    "./flags/*": "./dist/flags/*",
+    "./flags/4x3/*": "./dist/flags/4x3/*",
+    "./flags/1x1/*": "./dist/flags/1x1/*",
     "./dist/index.css": "./dist/index.css",
     "./styles.css": "./dist/styles.css",
     "./styles.min.css": "./dist/styles.min.css",
@@ -173,7 +178,7 @@
     "postcss": "^8.5.28"
   },
   "scripts": {
-    "build": "nx run nuicss:build && npm run build:cdn",
+    "build": "vite build --config vite.config.ts && tsc -p tsconfig.lib.json && node build-cdn.js",
     "build:cdn": "node build-cdn.js"
   },
   "jsdelivr": "./dist/index.global.js",
