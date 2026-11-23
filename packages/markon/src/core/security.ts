@@ -5,7 +5,6 @@
  */
 
 import DOMPurify from 'dompurify';
-import { escapeHtml as utilsEscapeHtml } from '@nofinite/utils';
 
 export const MARKON_DOMPURIFY_CONFIG = {
   // 1. Authoritative Element Allowlist (36 permitted elements)
@@ -95,7 +94,12 @@ export const MARKON_DOMPURIFY_CONFIG = {
 
 export function escapeHtml(str: string | null | undefined): string {
   if (!str) return '';
-  return utilsEscapeHtml(String(str));
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export function decodeEntities(str: string): string {
@@ -259,14 +263,19 @@ export function sanitizeHtml(html: string | null | undefined): string {
   if (!html) return '';
 
   const purifier = getPurifier();
+  let clean = html;
   if (purifier && typeof purifier.sanitize === 'function') {
-    return purifier.sanitize(html, MARKON_DOMPURIFY_CONFIG) as string;
+    clean = purifier.sanitize(html, MARKON_DOMPURIFY_CONFIG) as string;
   }
 
-  // Defense-in-depth regex fallback if DOM environment cannot be created
-  return html
+  // Defense-in-depth: Ensure NO residual executable script, iframe, or object tags slip through parser quirks
+  return clean
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<script\b[^>]*>/gi, '')
+    .replace(/<\/script>/gi, '')
     .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/<iframe\b[^>]*>/gi, '')
+    .replace(/<\/iframe>/gi, '')
     .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
     .replace(/<embed\b[^>]*>/gi, '')
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')

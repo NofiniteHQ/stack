@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
@@ -81,14 +82,14 @@ export default defineConfig({
       output: [
         {
           format: 'es',
-          dir: './dist',
+          dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].js',
         },
         {
           format: 'cjs',
-          dir: './dist',
+          dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].cjs',

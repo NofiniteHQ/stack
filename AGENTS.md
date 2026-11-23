@@ -444,11 +444,12 @@ Every active Nofinite repository maintains two independent, non-nested documenta
 
 ---
 
-## 18. Permanent Single-ZIP Reporting Invariant (`report.zip`)
+## 18. Permanent Single-Folder Reporting Invariant (`report/`)
 
-- **Single Permanent Path:** All review packages, task handoffs, and audit deliverables across all tasks MUST be delivered at exactly:
-  `D:\ui-quality-lab\ai-docs\report.zip`
-- **Mandatory Regeneration:** Regenerate `report.zip` at the conclusion of EVERY Antigravity task regardless of task size, scope, or whether files were modified. Never wait for the user to request it.
-- **Rolling Replacement:** `report.zip` is a rolling review snapshot (always replacing the previous ZIP upon successful generation and verification). No dated or multi-ZIP collections are permitted.
-- **Authoritative Specification:** Governed by [EOR 1.0 Section 8](file:///d:/ui-quality-lab/ai-docs/governance/ENGINEERING_OPERATING_RULES.md#8-permanent-single-zip-reporting-protocol-eor-10---section-8). Mandatory structure: `00_START_HERE.md`, `TASK_PROMPT.md`, `ANTIGRAVITY_EXECUTION_REPORT.md` (matching conversational response), `context/`, `reports/`, `implementation/`, `tests/`, `logs/`, `evidence/`, `findings/`, `MANIFEST.sha256`.
-- **Integrity Verification:** The archive must be tested, extracted in `temp/`, and checksum-verified before final response delivery.
+- **Single Permanent Path:** All review packages, task handoffs, and audit deliverables across all tasks MUST be delivered as an uncompressed directory at exactly:
+  `D:\ui-quality-lab\ai-docs\report\`
+- **Folder Only, No ZIP:** Deliver strictly as an uncompressed folder, NEVER as a `.zip` archive.
+- **Mandatory Updating:** Update `report/` at the conclusion of EVERY Antigravity task regardless of task size, scope, or whether files were modified. Never wait for the user to request it.
+- **Rolling Replacement:** `report/` is a rolling review snapshot folder (always refreshing and synchronizing the directory contents upon successful generation and verification). No dated or multi-folder collections are permitted.
+- **Authoritative Specification:** Governed by [EOR 1.0 Section 8](file:///d:/ui-quality-lab/ai-docs/governance/ENGINEERING_OPERATING_RULES.md#8-permanent-single-folder-reporting-protocol-eor-10---section-8). Mandatory structure: `00_START_HERE.md`, `TASK_PROMPT.md`, `ANTIGRAVITY_EXECUTION_REPORT.md` (matching conversational response), `context/`, `reports/`, `implementation/`, `tests/`, `logs/`, `evidence/`, `findings/`, `MANIFEST.sha256`.
+- **Integrity Verification:** Every file in the folder must be checksum-verified against `MANIFEST.sha256` before final response delivery.

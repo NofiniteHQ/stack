@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "license": "Apache-2.0",
   "scripts": {
+    "build": "nx run-many -t build",
+    "test": "nx run-many -t test --parallel=2",
+    "lint": "nx run-many -t lint",
+    "typecheck": "nx run-many -t typecheck",
     "_nui": "### NUI ###",
     "test:nui": "pnpm nx run nui:test",
     "build:nui": "pnpm nx run nui:build",
