@@ -1,5 +1,5 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import * as path from 'path';
 
 export default defineConfig(() => ({
@@ -30,7 +30,7 @@ export default defineConfig(() => ({
     },
     rollupOptions: {
       output: {
-        exports: 'named',
+        exports: 'named' as const,
       },
       external: [
         'fs',

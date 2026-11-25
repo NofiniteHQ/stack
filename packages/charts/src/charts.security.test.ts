@@ -567,7 +567,7 @@ describe('CHARTS Security & Remediation Regression Suite (M2)', () => {
       // Simulate Image onload
       const originalImage = globalThis.Image;
       globalThis.Image = class MockImage extends originalImage {
-        set src(_val: string) {
+        override set src(_val: string) {
           setTimeout(() => {
             if (this.onload) {
               (this.onload as any)(new Event('load'));

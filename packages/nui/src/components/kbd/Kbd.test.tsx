@@ -1,6 +1,6 @@
-import React, { createRef } from 'react';
+import { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { axe } from 'vitest-axe';
 import { Kbd } from './Kbd';
 

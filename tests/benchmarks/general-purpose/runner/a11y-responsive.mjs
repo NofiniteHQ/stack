@@ -36,8 +36,6 @@ const require = createRequire(import.meta.url);
 function resolvePlaywrightAndAxe() {
   const candidateRoots = [
     path.resolve(__dirname, '../../../../node_modules'),
-    path.resolve('D:/stack/node_modules'),
-    path.resolve('D:/ui-quality-lab/node_modules'),
   ];
   let playwrightModule = null;
   let axeModule = null;
@@ -84,7 +82,7 @@ const BENCHMARK_ROOT = path.resolve(__dirname, '..');
 const REPORTS_DIR = path.join(BENCHMARK_ROOT, 'reports');
 const METRICS_DIR = path.join(REPORTS_DIR, 'metrics');
 const SCREENSHOTS_DIR = path.join(REPORTS_DIR, 'screenshots');
-const CANONICAL_DOCS_REPORT_PATH = path.resolve('D:/stack/ai-docs/nuicss/benchmarks/MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md');
+const CANONICAL_DOCS_REPORT_PATH = path.join(REPORTS_DIR, 'MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md');
 const LOCAL_REPORT_MD_PATH = path.join(REPORTS_DIR, 'NUICSS_GENERAL_PURPOSE_TEST_REPORT.md');
 const METRICS_JSON_PATH = path.join(METRICS_DIR, 'a11y-responsive.json');
 const MULTI_BROWSER_METRICS_PATH = path.join(METRICS_DIR, 'multi-browser-calibrated-a11y.json');
@@ -1149,9 +1147,9 @@ function generateReports(results) {
   - **WCAG 2.5.8 (Target Size - Minimum):** Desktop pointer control threshold \`>= 24x24px\` with 28–36px density reporting
   - **Interactive Lifecycle Verification:** Light/dark theme toggling, hash navigation, dialogs/drawers, and form filters
 - **Primary Artifacts:**
-  - Report: [MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md](file:///D:/stack/ai-docs/nuicss/benchmarks/MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md)
-  - Multi-Browser Raw Metrics: [multi-browser-calibrated-a11y.json](file:///D:/stack/temp/general-purpose-benchmark/reports/metrics/multi-browser-calibrated-a11y.json)
-  - Test Runner: [a11y-responsive.mjs](file:///D:/stack/temp/general-purpose-benchmark/runner/a11y-responsive.mjs)
+  - Report: `reports/MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md`
+  - Multi-Browser Raw Metrics: `reports/metrics/multi-browser-calibrated-a11y.json`
+  - Test Runner: `runner/a11y-responsive.mjs`
 
 ---
 

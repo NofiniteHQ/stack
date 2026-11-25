@@ -1,11 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false,
     "outDir": "./out-tsc/vitest",
+    "lib": ["es2022", "dom", "dom.iterable"],
     "types": [
       "vitest/globals",
       "vitest/importMeta",
@@ -17,6 +14,11 @@
     "module": "esnext",
     "moduleResolution": "bundler"
   },
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ],
   "include": [
     "vite.config.ts",
     "vite.config.mts",

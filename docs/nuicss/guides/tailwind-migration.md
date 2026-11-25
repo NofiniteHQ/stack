@@ -321,13 +321,13 @@ Run the migration codemod directly against your codebase:
 
 ```bash
 # Preview changes without modifying files (Dry Run)
-npx @nofinite/nuicss migrate --dry-run
+npx nuicss migrate --dry-run
 
 # Execute automated migration across source files
-npx @nofinite/nuicss migrate src/
+npx nuicss migrate src/
 
 # Target specific components or directories
-npx @nofinite/nuicss migrate "src/components/**/*.{tsx,jsx,vue,svelte}"
+npx nuicss migrate "src/components/**/*.{tsx,jsx,vue,svelte}"
 ```
 
 The codemod analyzes your JSX/TSX/HTML AST, collapses known utility clusters into superclasses, and preserves your custom spacing and responsive utilities (`mt-4`, `w-full`, `hidden md:block`).

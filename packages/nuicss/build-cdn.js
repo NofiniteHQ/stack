@@ -12,12 +12,7 @@ const {
 } = require('./dist/index.js');
 
 async function build() {
-  // Ensure flags.css is freshly generated from src/flags/
-  try {
-    require('./scripts/generate-flags-css.js');
-  } catch (err) {
-    console.warn('[build-cdn] generate-flags-css notice:', err.message);
-  }
+  const { generateFlagsCss } = require('./scripts/generate-flags-css.js');
 
   console.log('Generating browser config and static stylesheets...');
   const config = nuicssPreset({ preflights: false });
@@ -160,16 +155,15 @@ async function build() {
     )} bytes, minified: ${Buffer.byteLength(minCharts, 'utf8')} bytes)`
   );
 
-  // 1k. Flags Subpath (flags.css & flags.min.css - Optional country flags)
-  const flagsComponentCssPath = path.join(compStylesDir, 'flags.css');
-  if (fs.existsSync(flagsComponentCssPath)) {
-    const flagsComponentCss = fs.readFileSync(flagsComponentCssPath, 'utf8');
-    fs.writeFileSync('dist/flags.css', flagsComponentCss, 'utf8');
-    const minFlags = minifyCss('flags.min.css', flagsComponentCss);
+  // 1k. Flags Subpath (flags.css & flags.min.css - Optional country flags; generated strictly to dist/)
+  const generatedFlagsCss = generateFlagsCss({ writeSrc: false });
+  if (generatedFlagsCss) {
+    fs.writeFileSync('dist/flags.css', generatedFlagsCss, 'utf8');
+    const minFlags = minifyCss('flags.min.css', generatedFlagsCss);
     fs.writeFileSync('dist/flags.min.css', minFlags, 'utf8');
     console.log(
       `Generated dist/flags.css (${Buffer.byteLength(
-        flagsComponentCss,
+        generatedFlagsCss,
         'utf8'
       )} bytes, minified: ${Buffer.byteLength(minFlags, 'utf8')} bytes)`
     );

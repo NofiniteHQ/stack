@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Universal, framework-agnostic vector data visualization suite powered by modular D3 and styled with NUICSS design tokens.",
   "license": "Apache-2.0",
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
+  },
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
@@ -74,7 +78,8 @@
     "donut-chart"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@floating-ui/dom": "^1.6.13",

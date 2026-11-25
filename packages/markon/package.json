@@ -40,6 +40,7 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "!dist/**/*.tsbuildinfo",
     "!dist/package.json",
     "!dist/node_modules",

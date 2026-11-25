@@ -1,4 +1,4 @@
-import React, { createRef } from 'react';
+import { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { axe } from 'vitest-axe';
@@ -190,7 +190,7 @@ describe('Timeline Component', () => {
     });
 
     it('hides line on a specific item when hideLine is true on that item', () => {
-      const { container } = render(
+      render(
         <Timeline>
           <Timeline.Item hideLine data-testid="item-without-line">
             <Timeline.Node />

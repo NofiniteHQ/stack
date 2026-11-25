@@ -2,7 +2,7 @@
 
 > **Version:** 2.0.0-final  
 > **Status:** Version-Controlled Certified Regression Benchmark Suite  
-> **Location:** `D:\stack\tests\benchmarks\general-purpose`  
+> **Location:** `tests/benchmarks/general-purpose`  
 > **Frameworks Evaluated:** NUICSS (`@nofinite/nuicss` v3.2.0) vs. Tailwind CSS v4 (`@tailwindcss/vite` v4.3.3)
 
 ---
@@ -131,7 +131,7 @@ node tests/benchmarks/general-purpose/runner/collect-metrics.mjs
 Per the Nofinite Engineering Standard:
 
 - **All disposable build artifacts and benchmark outputs** (`dist/`, `reports/`, `screenshots/`, `metrics/*.json`) are configured to write exclusively to the gitignored `temp/` directory.
-- `D:\stack\.gitignore` enforces:
+- `.gitignore` enforces:
   ```gitignore
   /tests/benchmarks/**/reports/
   /tests/benchmarks/**/dist/

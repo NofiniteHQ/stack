@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect } from 'storybook/test';
-import { PasswordInput, PasswordInputProps } from './PasswordInput';
+import { PasswordInput } from './PasswordInput';
 
 const meta: Meta<typeof PasswordInput> = {
   title: 'PasswordInput',

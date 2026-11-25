@@ -10,8 +10,8 @@
   },
   "include": [
     "vite.config.ts",
-    "vite.config.ts",
     "vitest.setup.ts",
+    "vitest-axe.d.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.tsx",

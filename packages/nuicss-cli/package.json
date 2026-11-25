@@ -2,6 +2,7 @@
   "name": "nuicss",
   "version": "0.1.0",
   "description": "Lightning-fast standalone compiler and toolkit for the NUICSS design system.",
+  "private": false,
   "type": "module",
   "bin": {
     "nuicss": "./bin/nuicss.js"
@@ -11,6 +12,8 @@
   "files": [
     "bin/nuicss.js",
     "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*",
     "!dist/**/*.tsbuildinfo",
     "!dist/package.json",
     "!dist/node_modules",
@@ -18,10 +21,14 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "powershell -ExecutionPolicy Bypass -File ./build.ps1",
-    "build:ts": "tsc && node --input-type=module -e \"import fs from 'node:fs'; for(const f of ['nuicss.html-data.json', 'nuicss.css-data.json', 'styles.css']) fs.copyFileSync('src/embedded/' + f, 'dist/embedded/' + f);\"",
+    "build": "node scripts/build-cli.mjs",
+    "build:ts": "node scripts/build-cli.mjs",
+    "build:binaries": "node -e \"const fs=require('node:fs'),cp=require('node:child_process');fs.mkdirSync('bin',{recursive:true});for(const [t,o] of [['bun-windows-x64','bin/nuicss-windows-amd64.exe'],['bun-linux-x64','bin/nuicss-linux-amd64'],['bun-linux-arm64','bin/nuicss-linux-arm64'],['bun-darwin-arm64','bin/nuicss-darwin-arm64'],['bun-darwin-x64','bin/nuicss-darwin-amd64']])cp.execFileSync('bun',['build','--compile','--target='+t,'--outfile='+o,'src/index.ts'],{stdio:'inherit'});\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
     "@nofinite/nuicss": "workspace:*",
@@ -50,12 +57,17 @@
   ],
   "author": "NofiniteHQ",
   "license": "Apache-2.0",
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/NofiniteHQ/stack.git",
     "directory": "packages/nuicss-cli"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

@@ -1,59 +1,34 @@
 # Nofinite Utils
 
-> Shared core TypeScript utilities, ref composition, DOM helpers, and runtime type guards for the Nofinite ecosystem.
+> Shared isomorphic utilities, client-safe browser exports, and hardened backend crypto/messaging helpers (`v2.1.0`).
 
 ---
 
 ## Overview
 
-**Nofinite Utils** (`@nofinite/utils`) provides essential, zero-runtime helper functions used across **NUI**, **Nofinite Kanban**, and other domain libraries. It features:
+**Nofinite Utils** (`@nofinite/utils`) provides tree-shakeable TypeScript helpers for both frontend/React applications and Node.js backend services:
 
-- **Ref Composition (`composeRefs`):** Safely combine multiple React refs (forwarded refs, local refs, and hook refs) into a single callback ref.
-- **Event Handler Chaining:** Merge consumer event listeners with internal component behavior without blocking `event.preventDefault()`.
-- **Accessible DOM Helpers:** Focus-trapping calculations, keyboard code normalizations, and scroll lock managers.
-- **Micro-Weight:** Fully tree-shakable with zero external dependencies.
+- **Client-Safe Browser Bundle (`@nofinite/utils/browser`):** Automatically selected by `"browser"` export condition in Vite and Next.js client builds, omitting native `argon2` and server-only email drivers.
+- **Server & Security Helpers (`@nofinite/utils/server`):** Argon2id password hashing, JOSE JWT signing/verification, OTPs, UUID generation, env validation, and ZeptoMail transactional delivery.
+- **Standard Library Subpaths:** `@nofinite/utils/cn`, `@nofinite/utils/dom`, `@nofinite/utils/math`, `@nofinite/utils/date`, `@nofinite/utils/async`, `@nofinite/utils/array`, `@nofinite/utils/object`, `@nofinite/utils/string`, and `@nofinite/utils/validation`.
 
 ---
 
 ## Quickstart
 
-### 1. Installation
-
-```bash
-npm install @nofinite/utils
-# or
-pnpm add @nofinite/utils
-```
-
-### 2. Usage Example
-
-```tsx
-import React, { useRef, forwardRef } from 'react';
-import { composeRefs } from '@nofinite/utils';
-
-export const CustomInput = forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->((props, forwardedRef) => {
-  const internalRef = useRef<HTMLInputElement>(null);
-
-  return (
-    <input
-      ref={composeRefs(forwardedRef, internalRef)}
-      className="input"
-      {...props}
-    />
-  );
-});
-CustomInput.displayName = 'CustomInput';
+```ts
+import { cn, isBrowser, clamp, debounce } from '@nofinite/utils/browser';
 ```
 
 ---
 
 ## Core Utilities Catalog
 
-- `composeRefs(...refs)` — Composes multiple React refs into a unified callback ref.
-- `callHandler(ourHandler, theirHandler)` — Executes an internal event handler unless the caller's event handler calls `event.defaultPrevented`.
-- `clamp(value, min, max)` — Clamps a numeric value between bounds.
-- `isBrowser()` — Safe boolean check for window/document presence in SSR environments.
-- `mergeProps(defaultProps, userProps)` — Deep-merges props while smartly chaining event handlers and combining class names.
+- **`/cn`**: `cn(...inputs)` — conditional class merging.
+- **`/dom`**: `isBrowser()`, `copyToClipboard(text)`, `scrollIntoView(...)`, `trapFocus(...)`.
+- **`/math`**: `clamp`, `round`, `lerp`, `inRange`, `randomInt`, `randomFloat`.
+- **`/date`**: `toDate`, `addDays`, `subDays`, `startOfDay`, `diffInDays`, `formatDateIso`.
+- **`/async`**: `sleep`, `debounce`, `throttle`, `retry`, `timeout`, `concurrencyLimit`.
+- **`/array` & `/object`**: `chunk`, `unique`, `groupBy`, `keyBy`, `deepClone`, `deepMerge`, `pick`, `omit`.
+- **`/string` & `/validation`**: `slugify`, `escapeHtml`, `sanitizeUrl`, `isEmail`, `isUrl`, `isUuid`.
+- **`/password`, `/jwt`, `/otp`, `/uuid`, `/env`, `/email`**: Server authentication, identifiers, env, and mail helpers.

@@ -9,7 +9,7 @@ import {
 } from './index';
 import { markdownToHtml } from './core/markdown';
 import { renderLinkPopoverHtml } from './core/linkPopover';
-import { isAllowedVideoEmbedUrl, VideoBlock } from './core/video';
+import { isAllowedVideoEmbedUrl } from './core/video';
 import { FileAttachment } from './core/fileAttachment';
 import { UploadPlaceholder } from './core/uploadPlaceholder';
 import { MarkonEditor } from './react';
@@ -66,6 +66,55 @@ describe('MARKON Security & Remediation Regression Suite (M2)', () => {
     expect(cleaned).not.toContain('javascript:');
     expect(cleaned).toContain('href="#"');
     expect(cleaned).toContain('Click Me');
+  });
+
+  it('SSR-SANITIZER: enforces zero-dependency allowlist tokenizer when window === undefined', () => {
+    const originalWindow = globalThis.window;
+    const originalDocument = globalThis.document;
+    try {
+      // Simulate strict Node SSR / Edge runtime with no browser DOM
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (globalThis as any).window;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (globalThis as any).document;
+
+      const ssrDirty =
+        '<p style="color:red" data-id="42" onclick="alert(1)">Hello</p>' +
+        '<a href="&#106;avascript:alert(1)">BadLink</a>' +
+        '<a href="https://nofinite.design/docs" target="_blank">GoodLink</a>' +
+        '<img src="x" onerror="alert(1)" alt="pic">' +
+        '<script>evil()</script><style>body{display:none}</style>' +
+        '<iframe src="https://evil.example"></iframe><svg><animate onbegin="alert(1)"/></svg>';
+
+      const ssrClean = sanitizeHtml(ssrDirty);
+
+      expect(ssrClean).toContain('<p data-id="42">Hello</p>');
+      expect(ssrClean).not.toContain('style=');
+      expect(ssrClean).not.toContain('onclick');
+      expect(ssrClean).not.toContain('onerror');
+      expect(ssrClean).not.toContain('alert(1)');
+      expect(ssrClean).not.toContain('javascript:');
+      expect(ssrClean).not.toContain('<script');
+      expect(ssrClean).not.toContain('<style');
+      expect(ssrClean).not.toContain('<iframe');
+      expect(ssrClean).not.toContain('<svg');
+      expect(ssrClean).toContain('<a href="#">BadLink</a>');
+      expect(ssrClean).toContain(
+        '<a href="https://nofinite.design/docs" target="_blank">GoodLink</a>'
+      );
+      expect(ssrClean).toContain('<img src="x" alt="pic">');
+    } finally {
+      Object.defineProperty(globalThis, 'window', {
+        value: originalWindow,
+        configurable: true,
+        writable: true,
+      });
+      Object.defineProperty(globalThis, 'document', {
+        value: originalDocument,
+        configurable: true,
+        writable: true,
+      });
+    }
   });
 
   it('MARKON-M1-05: verifies security sanitizers are re-exported at package root', () => {

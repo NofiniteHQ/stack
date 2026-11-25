@@ -58,20 +58,20 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Test Suites Across All Packages
-        run: pnpm test
-
       - name: Build All Packages
         run: pnpm build
+
+      - name: Run Test Suites Across All Packages
+        run: pnpm test
 
       - name: Tier 2 Consumer Packaging Verification
         shell: bash
         run: |
           echo "Verifying npm pack tarball generation for all published packages..."
-          packages=(nuicss nui charts markon kanban media locale utils)
+          packages=(nuicss nuicss-cli nui charts markon kanban media locale utils)
           for pkg in "${packages[@]}"; do
             echo "Packaging packages/$pkg..."
-            (cd "packages/$pkg" && npm pack --dry-run)
+            (cd "packages/$pkg" && pnpm pack --dry-run)
           done
 
       - name: Changeset Validation Check

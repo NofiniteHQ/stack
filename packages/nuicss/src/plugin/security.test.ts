@@ -6,12 +6,15 @@ import { nuicssPreset } from './preset';
 import { defineConfig, defineNuicssConfig, loadNuicssConfig } from './config';
 import { extractCriticalNuicss, extractClassTokens } from '../helpers/ssr';
 
+const createTestGenerator = () =>
+  createGenerator({
+    presets: [nuicssPreset({ preflights: false }) as never],
+  });
+
 describe('Adversarial Security & Robustness Suite', () => {
   describe('1. CSS Injection & Escaping Breakouts', () => {
     it('should neutralize legacy CSS expression injection', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
       const { css, matched } = await uno.generate(
         '[content:expression(alert(1))]',
         { preflights: false }
@@ -23,9 +26,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should neutralize javascript: pseudo-protocols in URLs', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const vectors = [
         '[background:url(javascript:alert(1))]',
@@ -41,9 +42,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should neutralize IE behavior (.htc) script execution vector', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const { css, matched } = await uno.generate(
         '[behavior:url(malicious.htc)]',
@@ -56,9 +55,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should neutralize Firefox XBL -moz-binding injection', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const { css } = await uno.generate(
         '[content:-moz-binding:url(evil.xml#test)]',
@@ -69,9 +66,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should reject unescaped breakout semicolons and closing brackets', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const breakoutAttempts = [
         `[--payload:');color:red;/*]`,
@@ -91,9 +86,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should neutralize rule breakout attempts in arbitrary values', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const breakoutVectors = [
         `[content:'";\\}body\\{color:red}']`,
@@ -114,9 +107,7 @@ describe('Adversarial Security & Robustness Suite', () => {
 
     describe('Legitimate CSS Non-Regression Verifications', () => {
       it('should preserve legitimate custom properties in arbitrary syntax', async () => {
-        const uno = await createGenerator({
-          presets: [nuicssPreset({ preflights: false })],
-        });
+        const uno = await createTestGenerator();
 
         const legitimateProperties = [
           '[--brand-color:oklch(0.6_0.2_250)]',
@@ -135,9 +126,7 @@ describe('Adversarial Security & Robustness Suite', () => {
       });
 
       it('should preserve legitimate image, SVG, and data URLs', async () => {
-        const uno = await createGenerator({
-          presets: [nuicssPreset({ preflights: false })],
-        });
+        const uno = await createTestGenerator();
 
         const legitimateUrls = [
           "bg-[url('/images/photo.jpg')]",
@@ -156,9 +145,7 @@ describe('Adversarial Security & Robustness Suite', () => {
       });
 
       it('should preserve valid arbitrary values (calc, clamp, grid-cols, shadows, content)', async () => {
-        const uno = await createGenerator({
-          presets: [nuicssPreset({ preflights: false })],
-        });
+        const uno = await createTestGenerator();
 
         const arbitraryTokens = [
           'w-[calc(100%-30px)]',
@@ -384,9 +371,7 @@ describe('Adversarial Security & Robustness Suite', () => {
 
   describe('3. Pathological & Malformed Inputs (Resource Exhaustion / DoS)', () => {
     it('should handle deeply nested brackets without infinite loop or crash', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const nested = '[[[[[['.repeat(10) + 'test' + ']]]]]]'.repeat(10);
       const { css, matched } = await uno.generate(nested, {
@@ -398,9 +383,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should handle null bytes in class tokens gracefully', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const tokens = ['btn\0primary', '\0text-muted', 'card\0'];
       for (const token of tokens) {
@@ -411,9 +394,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should handle pathological class name lengths (10,000+ characters) efficiently', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const hugeClassName = 'btn-' + 'a'.repeat(20000);
       const start = performance.now();
@@ -426,9 +407,7 @@ describe('Adversarial Security & Robustness Suite', () => {
     });
 
     it('should handle high-entropy and special unicode class tokens without unhandled exceptions', async () => {
-      const uno = await createGenerator({
-        presets: [nuicssPreset({ preflights: false })],
-      });
+      const uno = await createTestGenerator();
 
       const chaoticTokens = [
         '🚀🔥💯',

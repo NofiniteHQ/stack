@@ -14,6 +14,18 @@
     },
     {
       "path": "./packages/nui"
+    },
+    {
+      "path": "./packages/charts"
+    },
+    {
+      "path": "./packages/kanban"
+    },
+    {
+      "path": "./packages/markon"
+    },
+    {
+      "path": "./packages/media"
     }
   ]
 }

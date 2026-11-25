@@ -3,6 +3,10 @@
   "version": "3.2.0",
   "description": "A robust, accessible, and lightweight React component library designed for modern web applications.",
   "license": "Apache-2.0",
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
+  },
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
@@ -82,7 +86,8 @@
     "component-library"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "nx run nui:build",

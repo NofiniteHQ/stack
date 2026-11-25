@@ -242,8 +242,9 @@ export function loadStreamingCdnScript(
   if (
     typeof window !== 'undefined' &&
     ((window as any).__happy_dom__ ||
-      (window as any).__jsdom ||
-      (typeof process !== 'undefined' && Boolean(process.env?.VITEST)))
+      (window as any).happyDOM ||
+      (typeof process !== 'undefined' &&
+        (Boolean(process.env?.VITEST) || Boolean(process.versions?.node))))
   ) {
     return Promise.resolve(script);
   }

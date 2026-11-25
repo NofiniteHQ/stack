@@ -63,24 +63,24 @@ describe('NUICSS Vite Plugin & Configuration Standardization', () => {
     });
 
     expect(config.presets).toBeDefined();
-    expect(config.presets.length).toBeGreaterThan(0);
-    const preset = config.presets[0] as any;
+    expect(config.presets!.length).toBeGreaterThan(0);
+    const preset = config.presets![0] as { name?: string };
     expect(preset.name).toBe('nuicss-preset');
   });
 
   it('nuicssPreset should inject base resets and tokens as preflights by default', async () => {
     const preset = nuicssPreset();
     expect(preset.preflights).toBeDefined();
-    expect(preset.preflights.length).toBeGreaterThan(0);
-    expect(preset.preflights[0].layer).toBe('base');
+    expect(preset.preflights!.length).toBeGreaterThan(0);
+    expect(preset.preflights![0].layer).toBe('base');
 
-    const cssContent = preset.preflights[0].getCSS();
+    const cssContent = await preset.preflights![0].getCSS({} as never);
     expect(cssContent).toContain(':where(:root)');
     expect(cssContent).toContain('--color-primary');
     expect(cssContent).toContain('@layer base');
 
     // JIT generator should include preflight tokens
-    const uno = await createGenerator(preset);
+    const uno = await createGenerator(preset as never);
     const { css } = await uno.generate('btn');
     expect(css).toContain('--color-primary');
     expect(css).toContain(':where(:root)');
@@ -89,7 +89,7 @@ describe('NUICSS Vite Plugin & Configuration Standardization', () => {
   it('nuicssPreset should allow disabling preflights when requested', () => {
     const preset = nuicssPreset({ preflights: false });
     expect(preset.preflights).toBeDefined();
-    expect(preset.preflights.length).toBe(0);
+    expect(preset.preflights!.length).toBe(0);
   });
 
   it('nuicss() should provide zero-config integration defaults when no config file exists', () => {

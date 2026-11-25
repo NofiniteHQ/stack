@@ -470,8 +470,13 @@ describe('@nofinite/markon', () => {
       expect(labelEl).toBeTruthy();
       expect(labelEl?.textContent).toBe('Paragraph');
 
-      // Change format to Heading 1
-      editor.tiptap.commands.setHeading({ level: 1 });
+      type MarkonHeadingCommands = {
+        setHeading: (opts: { level: number }) => boolean;
+        toggleBlockquote: () => boolean;
+      };
+      (editor.tiptap.commands as unknown as MarkonHeadingCommands).setHeading({
+        level: 1,
+      });
       editor.updateToolbarState();
       expect(labelEl?.textContent).toBe('Heading 1');
       expect(
@@ -479,7 +484,9 @@ describe('@nofinite/markon', () => {
       ).toBe('H1');
 
       // Change format to Heading 2
-      editor.tiptap.commands.setHeading({ level: 2 });
+      (editor.tiptap.commands as unknown as MarkonHeadingCommands).setHeading({
+        level: 2,
+      });
       editor.updateToolbarState();
       expect(labelEl?.textContent).toBe('Heading 2');
       expect(
@@ -487,7 +494,9 @@ describe('@nofinite/markon', () => {
       ).toBe('H2');
 
       // Change format to Blockquote
-      editor.tiptap.commands.toggleBlockquote();
+      (
+        editor.tiptap.commands as unknown as MarkonHeadingCommands
+      ).toggleBlockquote();
       editor.updateToolbarState();
       expect(labelEl?.textContent).toBe('Quote');
 

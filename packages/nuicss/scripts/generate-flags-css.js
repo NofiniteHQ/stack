@@ -6,19 +6,21 @@ const flags4x3Dir = path.join(srcDir, 'flags/4x3');
 const flags1x1Dir = path.join(srcDir, 'flags/1x1');
 const outputFile = path.join(srcDir, 'styles/components/flags.css');
 
-if (!fs.existsSync(flags4x3Dir)) {
-  console.error(`Error: flags directory not found at ${flags4x3Dir}`);
-  process.exit(1);
-}
+function generateFlagsCss(options = {}) {
+  const { writeSrc = false } = options;
+  if (!fs.existsSync(flags4x3Dir)) {
+    console.error(`Error: flags directory not found at ${flags4x3Dir}`);
+    process.exit(1);
+  }
 
-const files = fs.readdirSync(flags4x3Dir).filter((f) => f.endsWith('.svg'));
-const codes = files.map((f) => path.basename(f, '.svg').toLowerCase()).sort();
+  const files = fs.readdirSync(flags4x3Dir).filter((f) => f.endsWith('.svg'));
+  const codes = files.map((f) => path.basename(f, '.svg').toLowerCase()).sort();
 
-console.log(
-  `Generating flags.css for ${codes.length} country and regional flags...`
-);
+  console.log(
+    `Generating flags.css for ${codes.length} country and regional flags...`
+  );
 
-let css = `/**
+  let css = `/**
  * @license
  * Copyright (C) 2025-2026 Nofinite
  *
@@ -136,18 +138,29 @@ let css = `/**
   /* Country Flag Vector Definitions (On-Demand) */
 `;
 
-for (const code of codes) {
-  css += `  /* ${code} */\n`;
-  css += `  .flag-${code},\n  .nui-flag-${code},\n  .nf-flag-${code} {\n    background-image: url("./flags/4x3/${code}.svg");\n  }\n`;
-  css += `  .flag-${code}.square,\n  .flag-${code}.flag-square,\n  .flag-${code}.flag-1x1,\n  .flag-${code}.circle,\n  .flag-${code}.flag-circle,\n  .nui-flag-${code}.square,\n  .nui-flag-${code}.nui-flag-square,\n  .nui-flag-${code}.nui-flag-1x1,\n  .nui-flag-${code}.circle,\n  .nui-flag-${code}.nui-flag-circle,\n  .nf-flag-${code}.square,\n  .nf-flag-${code}.flag-square,\n  .nf-flag-${code}.circle {\n    background-image: url("./flags/1x1/${code}.svg");\n  }\n\n`;
+  for (const code of codes) {
+    css += `  /* ${code} */\n`;
+    css += `  .flag-${code},\n  .nui-flag-${code},\n  .nf-flag-${code} {\n    background-image: url("./flags/4x3/${code}.svg");\n  }\n`;
+    css += `  .flag-${code}.square,\n  .flag-${code}.flag-square,\n  .flag-${code}.flag-1x1,\n  .flag-${code}.circle,\n  .flag-${code}.flag-circle,\n  .nui-flag-${code}.square,\n  .nui-flag-${code}.nui-flag-square,\n  .nui-flag-${code}.nui-flag-1x1,\n  .nui-flag-${code}.circle,\n  .nui-flag-${code}.nui-flag-circle,\n  .nf-flag-${code}.square,\n  .nf-flag-${code}.flag-square,\n  .nf-flag-${code}.circle {\n    background-image: url("./flags/1x1/${code}.svg");\n  }\n\n`;
+  }
+
+  css += `}\n`;
+
+  if (writeSrc) {
+    fs.writeFileSync(outputFile, css, 'utf8');
+    console.log(
+      `Successfully generated ${outputFile} (${Buffer.byteLength(
+        css,
+        'utf8'
+      )} bytes)`
+    );
+  }
+
+  return css;
 }
 
-css += `}\n`;
+if (require.main === module) {
+  generateFlagsCss({ writeSrc: true });
+}
 
-fs.writeFileSync(outputFile, css, 'utf8');
-console.log(
-  `Successfully generated ${outputFile} (${Buffer.byteLength(
-    css,
-    'utf8'
-  )} bytes)`
-);
+module.exports = { generateFlagsCss };

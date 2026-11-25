@@ -398,7 +398,7 @@
           "name": "btn",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none aria-busy:opacity-70 aria-busy:cursor-wait aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none rounded-md cursor-pointer select-none`"
+            "value": "**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none aria-busy:opacity-70 aria-busy:cursor-wait aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none rounded-md cursor-pointer select-none [&>svg]:shrink-0`"
           }
         },
         {
@@ -440,7 +440,7 @@
           "name": "btn-lg",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`h-11 px-8 text-sm font-semibold`"
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`h-11 px-8 text-sm font-semibold gap-2.5 leading-none [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0`"
           }
         },
         {
@@ -461,7 +461,7 @@
           "name": "btn-md",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`h-9 px-4 text-sm`"
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`h-9 px-4 text-sm gap-2 leading-none [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0`"
           }
         },
         {
@@ -489,7 +489,7 @@
           "name": "btn-sm",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`h-8 px-3 text-xs`"
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`h-8 px-3 text-xs gap-1.5 leading-none [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:shrink-0`"
           }
         },
         {
@@ -1217,7 +1217,7 @@
           "name": "dialog-box",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col`"
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10`"
           }
         },
         {
@@ -1651,7 +1651,7 @@
           "name": "input",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Text Input** (forms)\n\nAccessible form text input supporting native ARIA invalid states.\n\n**Example:**\n```html\n<input type=\"text\" class=\"input\" placeholder=\"Enter full name\" />\n```\n\n**Expanded utilities:**\n`h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans`"
+            "value": "**NUICSS Text Input** (forms)\n\nAccessible form text input supporting native ARIA invalid states.\n\n**Example:**\n```html\n<input type=\"text\" class=\"input\" placeholder=\"Enter full name\" />\n```\n\n**Expanded utilities:**\n`h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans`"
           }
         },
         {
@@ -1931,7 +1931,7 @@
           "name": "modal-box",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto`"
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10`"
           }
         },
         {
@@ -2421,7 +2421,7 @@
           "name": "nui-btn",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `btn`)\n\n**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none aria-busy:opacity-70 aria-busy:cursor-wait aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none rounded-md cursor-pointer select-none`"
+            "value": "**NUICSS Isolated Superclass** (alias for `btn`)\n\n**NUICSS Button** (primitives)\n\nInteractive action button with built-in accessibility focus rings and active press animations.\n\n**Example:**\n```html\n<button class=\"btn btn-primary press-scale\">Save Changes</button>\n```\n\n**Expanded utilities:**\n`inline-flex items-center justify-center whitespace-nowrap gap-2 font-sans font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none aria-busy:opacity-70 aria-busy:cursor-wait aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none rounded-md cursor-pointer select-none [&>svg]:shrink-0`"
           }
         },
         {
@@ -2463,7 +2463,7 @@
           "name": "nui-btn-lg",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `btn-lg`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`h-11 px-8 text-sm font-semibold`"
+            "value": "**NUICSS Isolated Superclass** (alias for `btn-lg`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`h-11 px-8 text-sm font-semibold gap-2.5 leading-none [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0`"
           }
         },
         {
@@ -2484,7 +2484,7 @@
           "name": "nui-btn-md",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `btn-md`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`h-9 px-4 text-sm`"
+            "value": "**NUICSS Isolated Superclass** (alias for `btn-md`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`h-9 px-4 text-sm gap-2 leading-none [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0`"
           }
         },
         {
@@ -2512,7 +2512,7 @@
           "name": "nui-btn-sm",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `btn-sm`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`h-8 px-3 text-xs`"
+            "value": "**NUICSS Isolated Superclass** (alias for `btn-sm`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`h-8 px-3 text-xs gap-1.5 leading-none [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:shrink-0`"
           }
         },
         {
@@ -3240,7 +3240,7 @@
           "name": "nui-dialog-box",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `dialog-box`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col`"
+            "value": "**NUICSS Isolated Superclass** (alias for `dialog-box`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10`"
           }
         },
         {
@@ -3674,7 +3674,7 @@
           "name": "nui-input",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `input`)\n\n**NUICSS Text Input** (forms)\n\nAccessible form text input supporting native ARIA invalid states.\n\n**Example:**\n```html\n<input type=\"text\" class=\"input\" placeholder=\"Enter full name\" />\n```\n\n**Expanded utilities:**\n`h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans`"
+            "value": "**NUICSS Isolated Superclass** (alias for `input`)\n\n**NUICSS Text Input** (forms)\n\nAccessible form text input supporting native ARIA invalid states.\n\n**Example:**\n```html\n<input type=\"text\" class=\"input\" placeholder=\"Enter full name\" />\n```\n\n**Expanded utilities:**\n`h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans`"
           }
         },
         {
@@ -3954,7 +3954,7 @@
           "name": "nui-modal-box",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `modal-box`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto`"
+            "value": "**NUICSS Isolated Superclass** (alias for `modal-box`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10`"
           }
         },
         {
@@ -4801,7 +4801,7 @@
           "name": "nui-textarea",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `textarea`)\n\n**NUICSS Textarea** (forms)\n\nMulti-line text input with auto-styled ARIA invalid state.\n\n**Example:**\n```html\n<textarea class=\"textarea\" placeholder=\"Write your message...\"></textarea>\n```\n\n**Expanded utilities:**\n`w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans min-h-[80px]`"
+            "value": "**NUICSS Isolated Superclass** (alias for `textarea`)\n\n**NUICSS Textarea** (forms)\n\nMulti-line text input with auto-styled ARIA invalid state.\n\n**Example:**\n```html\n<textarea class=\"textarea\" placeholder=\"Write your message...\"></textarea>\n```\n\n**Expanded utilities:**\n`w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans min-h-[80px]`"
           }
         },
         {
@@ -4920,7 +4920,7 @@
           "name": "nui-tooltip-arrow",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Isolated Superclass** (alias for `tooltip-arrow`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45`"
+            "value": "**NUICSS Isolated Superclass** (alias for `tooltip-arrow`)\n\n**NUICSS Superclass**\n\nExpanded utilities:\n`absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45 pointer-events-none transform-gpu`"
           }
         },
         {
@@ -5830,7 +5830,7 @@
           "name": "textarea",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Textarea** (forms)\n\nMulti-line text input with auto-styled ARIA invalid state.\n\n**Example:**\n```html\n<textarea class=\"textarea\" placeholder=\"Write your message...\"></textarea>\n```\n\n**Expanded utilities:**\n`w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans min-h-[80px]`"
+            "value": "**NUICSS Textarea** (forms)\n\nMulti-line text input with auto-styled ARIA invalid state.\n\n**Example:**\n```html\n<textarea class=\"textarea\" placeholder=\"Write your message...\"></textarea>\n```\n\n**Expanded utilities:**\n`w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans min-h-[80px]`"
           }
         },
         {
@@ -5949,7 +5949,7 @@
           "name": "tooltip-arrow",
           "description": {
             "kind": "markdown",
-            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45`"
+            "value": "**NUICSS Superclass**\n\nExpanded utilities:\n`absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45 pointer-events-none transform-gpu`"
           }
         },
         {

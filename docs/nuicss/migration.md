@@ -34,10 +34,10 @@ Run the NUICSS migration codemod directly in any project root using `npx`:
 
 ```bash
 # Run interactive migration across your project
-npx @nofinite/nuicss migrate
+npx nuicss migrate
 
 # Or run in dry-run mode to inspect changes without writing files
-npx @nofinite/nuicss migrate --dry-run
+npx nuicss migrate --dry-run
 ```
 
 The codemod scans your files (`src/**/*.{tsx,jsx,vue,svelte,astro,html}`) and performs pattern-matching replacements:

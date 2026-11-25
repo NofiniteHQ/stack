@@ -352,6 +352,13 @@
       }
     },
     {
+      "name": "--bg-surface-alt",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-100)`"
+      }
+    },
+    {
       "name": "--bg-surface-raised",
       "description": {
         "kind": "markdown",
@@ -765,10 +772,17 @@
       }
     },
     {
+      "name": "--color-primary-ring",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary)`"
+      }
+    },
+    {
       "name": "--focus-ring",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--fg-default)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary-ring, var(--fg-default))`"
       }
     },
     {

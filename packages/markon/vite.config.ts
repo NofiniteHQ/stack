@@ -2,8 +2,35 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
+import { builtinModules } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
+
+const NODE_BUILTINS = new Set([
+  ...builtinModules,
+  ...builtinModules.map((m) => `node:${m}`),
+]);
+
+const packageJson = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8')
+);
+const EXTERNAL_PATTERNS = [
+  ...Object.keys(packageJson.dependencies || {}),
+  ...Object.keys(packageJson.peerDependencies || {}),
+  'react/jsx-runtime',
+  '@nofinite/nuicss',
+  'highlight.js',
+  'prosemirror-state',
+  'prosemirror-view',
+  'prosemirror-model',
+  'prosemirror-transform',
+  'jsdom',
+  'happy-dom',
+  'canvas',
+  'parse5',
+].map(
+  (dep) => new RegExp(`^${dep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:/.*)?$`)
+);
 
 export default defineConfig({
   root: __dirname,
@@ -42,19 +69,10 @@ export default defineConfig({
     rollupOptions: {
       external: (id: string) => {
         if (id.endsWith('.css')) return false;
-        if (
-          [
-            'react',
-            'react-dom',
-            'react/jsx-runtime',
-            '@nofinite/nuicss',
-            '@nofinite/utils',
-          ].includes(id) ||
-          id.startsWith('@nofinite/utils/')
-        ) {
+        if (NODE_BUILTINS.has(id) || id.startsWith('node:')) {
           return true;
         }
-        return false;
+        return EXTERNAL_PATTERNS.some((re) => re.test(id));
       },
       output: [
         {
@@ -75,7 +93,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    pool: 'threads',
+    testTimeout: 30000,
+    hookTimeout: 30000,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 });

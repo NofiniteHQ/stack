@@ -49,14 +49,14 @@ describe('@nofinite/charts math engine', () => {
   it('calculates pie and donut segments with arc paths', () => {
     const segments = calculatePieSegments(sampleData, 100, 0);
     expect(segments.length).toBe(4);
-    segments.forEach((seg) => {
+    segments.forEach((seg: { path: string }) => {
       expect(seg.path).toBeTruthy();
       expect(seg.path.startsWith('M')).toBe(true);
     });
 
     const donutSegments = calculatePieSegments(sampleData, 100, 0.6);
     expect(donutSegments.length).toBe(4);
-    donutSegments.forEach((seg) => {
+    donutSegments.forEach((seg: { path: string }) => {
       expect(seg.path).toBeTruthy();
     });
   });
@@ -167,7 +167,7 @@ describe('@nofinite/charts LTTB downsampling algorithm', () => {
     expect(downsampled[downsampled.length - 1].x).toBe(999);
 
     // The extreme peak (y=9999) must be preserved!
-    const hasPeak = downsampled.some((p) => p.y === 9999);
+    const hasPeak = downsampled.some((p: { y: number }) => p.y === 9999);
     expect(hasPeak).toBe(true);
   });
 

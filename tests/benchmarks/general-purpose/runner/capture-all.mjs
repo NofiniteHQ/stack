@@ -11,7 +11,7 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
-const require = createRequire('D:/nuix/package.json');
+const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 
 const __filename = fileURLToPath(import.meta.url);

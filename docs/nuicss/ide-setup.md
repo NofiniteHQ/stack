@@ -11,7 +11,7 @@ No third-party marketplace extensions are required. Once configured, your editor
 The easiest way to enable IntelliSense in any project is using the NUICSS CLI:
 
 ```bash
-npx @nofinite/nuicss init
+npx nuicss init
 ```
 
 This one command automatically:

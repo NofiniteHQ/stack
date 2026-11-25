@@ -127,15 +127,11 @@
     "./css-data.json": "./dist/nuicss.css-data.json",
     "./package.json": "./package.json"
   },
-  "bin": {
-    "nuicss": "./bin/nuicss.js"
-  },
   "files": [
     "dist",
     "!dist/**/*.tsbuildinfo",
     "!dist/package.json",
     "!dist/node_modules",
-    "bin",
     "postcss.js",
     "README.md",
     "LICENSE",
@@ -144,6 +140,10 @@
   ],
   "engines": {
     "node": ">=18"
+  },
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
   },
   "repository": {
     "type": "git",
@@ -159,7 +159,8 @@
     "styling"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@unocss/config": "^66.10.5",
@@ -179,7 +180,8 @@
   },
   "scripts": {
     "build": "vite build --config vite.config.ts && tsc -p tsconfig.lib.json && node build-cdn.js",
-    "build:cdn": "node build-cdn.js"
+    "build:cdn": "node build-cdn.js",
+    "test": "vitest run"
   },
   "jsdelivr": "./dist/index.global.js",
   "unpkg": "./dist/index.global.js"

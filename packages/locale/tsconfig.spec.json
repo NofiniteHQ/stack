@@ -1,17 +1,18 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false,
     "outDir": "./out-tsc/vitest",
-    "lib": ["es2022", "dom"],
+    "lib": ["es2022", "dom", "dom.iterable"],
     "jsx": "react-jsx",
     "types": ["vitest/globals", "node"],
     "module": "esnext",
     "moduleResolution": "bundler"
   },
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ],
   "include": [
     "src/**/*.test.ts",
     "src/**/*.spec.ts",

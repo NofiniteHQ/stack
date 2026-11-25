@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/locale/src",
+  "tags": ["scope:strings"],
   "targets": {
     "build": {
       "executor": "@nx/vite:build",

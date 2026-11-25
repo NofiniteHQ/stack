@@ -39,40 +39,28 @@ jobs:
         run: pnpm nx run-many --target=build --all
 
       - name: Verify Package Tarballs
+        shell: bash
         run: |
+          TMP_PACK_DIR=$(mktemp -d)
+          trap 'rm -rf "$TMP_PACK_DIR"' EXIT
           for pkg in nuicss nuicss-cli nui markon charts kanban media locale utils; do
             echo "Verifying package tarball: $pkg"
-            (cd packages/$pkg && npm pack --dry-run > /dev/null)
+            TARBALL=$(cd "packages/$pkg" && pnpm pack --pack-destination "$TMP_PACK_DIR" | tail -n 1)
+            echo "  -> Packed $(basename "$TARBALL") ($(wc -c < "$TARBALL") bytes)"
+            tar -tzf "$TARBALL" | grep -E '\.(test|spec)\.' && { echo "ERROR: test file found in $pkg tarball"; exit 1; } || true
+            UNPACK_DIR="$TMP_PACK_DIR/unpack-$pkg"
+            mkdir -p "$UNPACK_DIR"
+            tar -xzf "$TARBALL" -C "$UNPACK_DIR"
+            grep -n '"workspace:' "$UNPACK_DIR/package/package.json" && { echo "ERROR: workspace:* found in $pkg package.json"; exit 1; } || true
+            if [ "$pkg" = "markon" ]; then
+              SIZE_BYTES=$(wc -c < "$TARBALL")
+              if [ "$SIZE_BYTES" -ge 512000 ]; then
+                echo "ERROR: @nofinite/markon tarball exceeds 500 KB budget ($SIZE_BYTES bytes)"
+                exit 1
+              fi
+              grep -rnE 'jsdom|happy-dom|parse5' "$UNPACK_DIR/package/dist" && { echo "ERROR: DOM emulator leaked into markon dist"; exit 1; } || true
+            fi
           done
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Sync CLI Embedded Assets
-        working-directory: packages/nuicss-cli
-        run: |
-          node -e "
-            const fs = require('fs');
-            const dist = '../nuicss/dist';
-            for (const f of ['styles.css', 'nuicss.html-data.json', 'nuicss.css-data.json']) {
-              fs.copyFileSync(dist + '/' + f, 'src/embedded/' + f);
-            }
-            const html = fs.readFileSync('src/embedded/nuicss.html-data.json', 'utf8');
-            const css = fs.readFileSync('src/embedded/nuicss.css-data.json', 'utf8');
-            const styles = fs.readFileSync('src/embedded/styles.css', 'utf8');
-            const tsContent = 'export const HTML_DATA_STR = ' + JSON.stringify(html) + ';\nexport const CSS_DATA_STR = ' + JSON.stringify(css) + ';\nexport const BASE_STYLES_STR = ' + JSON.stringify(styles) + ';\n';
-            fs.writeFileSync('src/embedded/assets.ts', tsContent, 'utf8');
-          "
-
-      - name: Build Standalone Binaries (nuicss)
-        working-directory: packages/nuicss-cli
-        run: |
-          mkdir -p bin
-          bun build --compile --target=bun-windows-x64 --outfile=bin/nuicss-windows-amd64.exe src/index.ts
-          bun build --compile --target=bun-linux-x64 --outfile=bin/nuicss-linux-amd64 src/index.ts
-          bun build --compile --target=bun-linux-arm64 --outfile=bin/nuicss-linux-arm64 src/index.ts
-          bun build --compile --target=bun-darwin-arm64 --outfile=bin/nuicss-darwin-arm64 src/index.ts
-          bun build --compile --target=bun-darwin-x64 --outfile=bin/nuicss-darwin-amd64 src/index.ts
 
       - name: Create Release Pull Request or Publish
         id: changesets
@@ -87,6 +75,13 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build Standalone Binaries (nuicss)
+        working-directory: packages/nuicss-cli
+        run: pnpm run build:binaries
 
       - name: Determine CLI Release Tag
         if: steps.changesets.outputs.published == 'true'
