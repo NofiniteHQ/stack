@@ -81,7 +81,14 @@ describe('Object Utilities', () => {
     const target: Record<string, unknown> = {};
     set(target, '__proto__.polluted', true);
     set(target, 'constructor.prototype.polluted', true);
+    set(target, 'prototype.pollutedProp', true);
+    set(target, 'nested.prototype.pollutedNested', true);
     expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    expect(({} as Record<string, unknown>).pollutedProp).toBeUndefined();
+    expect(({} as Record<string, unknown>).pollutedNested).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(target, 'prototype')).toBe(
+      false
+    );
 
     const payload = JSON.parse('{"__proto__":{"polluted2":true},"safe":1}');
     const merged = deepMerge({ safe: 0 }, payload) as Record<string, unknown>;

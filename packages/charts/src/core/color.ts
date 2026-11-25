@@ -4,6 +4,42 @@
  */
 
 /**
+ * Validates a CSS var(--name[, fallback]) expression in linear O(n) time without
+ * nested backtracking regex quantifiers.
+ */
+function isSafeCssVarExpression(expr: string, depth = 0): boolean {
+  if (depth > 1 || !expr.startsWith('var(') || !expr.endsWith(')')) {
+    return false;
+  }
+
+  const inner = expr.slice(4, -1);
+  const commaIdx = inner.indexOf(',');
+  if (commaIdx === -1) {
+    return /^--[a-zA-Z0-9_-]+$/.test(inner);
+  }
+
+  const varName = inner.slice(0, commaIdx).trimEnd();
+  if (!/^--[a-zA-Z0-9_-]+$/.test(varName)) {
+    return false;
+  }
+
+  const fallbackVal = inner.slice(commaIdx + 1).trim();
+  if (!fallbackVal) {
+    return false;
+  }
+
+  if (depth === 0) {
+    if (fallbackVal.startsWith('var(')) {
+      return isSafeCssVarExpression(fallbackVal, 1);
+    }
+    return /^(?:#[0-9a-fA-F]{3,8}|[a-zA-Z0-9_-]+)$/.test(fallbackVal);
+  }
+
+  // Single non-overlapping character class guarantees linear matching inside nested fallback
+  return /^[^;()<>"']+$/.test(fallbackVal);
+}
+
+/**
  * Validates and sanitizes a CSS color string to neutralize CSS injection and exfiltration vectors.
  *
  * Supported formats:
@@ -74,12 +110,8 @@ export function parseSafeColor(
   }
 
   // 5. CSS variables: var(--name) or var(--name, fallback)
-  // Recursively supports safe nested var() like var(--chart-1, var(--color-primary)) or var(--color-danger, #ef4444)
-  if (
-    /^var\(--[a-zA-Z0-9_-]+(?:\s*,\s*(?:var\(--[a-zA-Z0-9_-]+(?:\s*,\s*[^;()<>"']+)?\)|#[0-9a-fA-F]{3,8}|[a-zA-Z0-9_-]+))?\)$/.test(
-      trimmed
-    )
-  ) {
+  // Supports safe nested var() like var(--chart-1, var(--color-primary)) or var(--color-danger, #ef4444)
+  if (isSafeCssVarExpression(trimmed)) {
     return trimmed;
   }
 

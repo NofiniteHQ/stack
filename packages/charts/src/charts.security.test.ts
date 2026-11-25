@@ -590,5 +590,26 @@ describe('CHARTS Security & Remediation Regression Suite (M2)', () => {
         globalThis.Image = originalImage;
       }
     });
+
+    it('CODEQL-01: parseSafeColor evaluates malformed var(--...) expressions with repeated spaces in linear O(n) time', () => {
+      const stressInput = 'var(--,var(--,' + ' '.repeat(20000);
+      const t0 = performance.now();
+      expect(parseSafeColor(stressInput)).toBe('var(--color-primary)');
+      expect(parseSafeColor('var(--a,var(--a,' + ' '.repeat(20000) + ')')).toBe(
+        'var(--color-primary)'
+      );
+      const elapsed = performance.now() - t0;
+      expect(elapsed).toBeLessThan(50);
+    });
+
+    it('CODEQL-02/03: sanitizeSVGString strips malformed/nested <script> and dangerous <style> blocks linearly', () => {
+      const nested =
+        '<svg><scr<script>ipt>alert(1)</script><style>@import "x";</style><style>.ok{fill:#000}</style><style>rect{behavior:url(x)}</style></svg>';
+      const cleaned = sanitizeSVGString(nested);
+      expect(cleaned.toLowerCase()).not.toContain('<script');
+      expect(cleaned).not.toContain('@import');
+      expect(cleaned).not.toContain('behavior:');
+      expect(cleaned).toContain('<style>.ok{fill:#000}</style>');
+    });
   });
 });

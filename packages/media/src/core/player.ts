@@ -137,6 +137,10 @@ function decodeHtmlEntities(str: string): string {
  * Rejects javascript:, vbscript:, data:text/html, control characters, and dangerous payload vectors.
  * Permits http:, https:, blob:, safe data: image/audio/video schemes, and relative paths.
  */
+const ALLOWED_MEDIA_PROTOCOLS = new Set(['http:', 'https:', 'blob:']);
+const SAFE_MEDIA_DATA_URI_RE =
+  /^data:(?:image\/(?:png|jpe?g|gif|webp)|video\/[a-z0-9.+-]+|audio\/[a-z0-9.+-]+)(?:;|,)/;
+
 export function isValidMediaUrl(url: unknown): boolean {
   if (typeof url !== 'string') return false;
   const trimmed = url.trim();
@@ -150,56 +154,30 @@ export function isValidMediaUrl(url: unknown): boolean {
     }
   }
 
-  // Reject protocol-relative URLs
-  if (trimmed.startsWith('//')) {
-    return false;
-  }
-
-  // Decode potential HTML entities and strip whitespace
+  // Decode potential HTML entities and strip whitespace before allowlist validation
   const decoded = decodeHtmlEntities(trimmed);
   const sanitized = decoded.replace(/\s+/g, '').toLowerCase();
 
-  // Explicitly reject dangerous executable schemes
-  if (
-    sanitized.startsWith('javascript:') ||
-    sanitized.startsWith('vbscript:') ||
-    sanitized.startsWith('file:') ||
-    sanitized.startsWith('data:text/html') ||
-    sanitized.startsWith('data:text/javascript') ||
-    sanitized.startsWith('data:application/javascript')
-  ) {
+  // Reject protocol-relative URLs (check both raw and decoded)
+  if (trimmed.startsWith('//') || sanitized.startsWith('//')) {
     return false;
   }
 
-  // Explicitly reject dangerous SVG data URIs (MEDIA-M3-02)
-  if (sanitized.startsWith('data:image/svg+xml')) {
-    return false;
+  // Strictly allowlist only safe raster image, audio, and video data URIs; reject all other data: schemes
+  if (sanitized.startsWith('data:')) {
+    return SAFE_MEDIA_DATA_URI_RE.test(sanitized);
   }
 
-  // Allow safe raster media data URIs
-  if (
-    sanitized.startsWith('data:image/png') ||
-    sanitized.startsWith('data:image/jpeg') ||
-    sanitized.startsWith('data:image/jpg') ||
-    sanitized.startsWith('data:image/gif') ||
-    sanitized.startsWith('data:image/webp') ||
-    sanitized.startsWith('data:video/') ||
-    sanitized.startsWith('data:audio/')
-  ) {
-    return true;
-  }
-
-  // Check if trimmed starts with a protocol scheme before any slash, query, or fragment
-  const schemeMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+  // Strictly allowlist protocol schemes on entity-decoded input (rejects javascript:, vbscript:, file:, etc.)
+  const schemeMatch = sanitized.match(/^([a-z][a-z0-9+.-]*:)/);
   if (schemeMatch) {
-    const scheme = schemeMatch[1].toLowerCase();
-    return ['http', 'https', 'blob'].includes(scheme);
+    return ALLOWED_MEDIA_PROTOCOLS.has(schemeMatch[1]);
   }
 
   // Relative paths (with or without leading slash, including query colons like ?t=10:00) (MEDIA-M3-04)
   try {
     const parsed = new URL(trimmed, 'https://nofinite.internal');
-    return ['http:', 'https:', 'blob:'].includes(parsed.protocol);
+    return ALLOWED_MEDIA_PROTOCOLS.has(parsed.protocol);
   } catch {
     return false;
   }
@@ -267,9 +245,65 @@ function stripUntilFixedPoint(input: string, pattern: RegExp): string {
   return current;
 }
 
+/**
+ * Linear O(n) parser for WebVTT voice tags (<v[.class] Speaker>...) without
+ * polynomial regex backtracking on repeated whitespace.
+ */
+function formatVttVoiceTags(input: string, bracketed: boolean): string {
+  const lower = input.toLowerCase();
+  let out = '';
+  let cursor = 0;
+
+  while (cursor < input.length) {
+    const start = lower.indexOf('<v', cursor);
+    if (start === -1) {
+      out += input.slice(cursor);
+      break;
+    }
+
+    let pos = start + 2;
+    // Skip optional dotted class annotations (.class1.class2)
+    while (pos < input.length && input[pos] === '.') {
+      pos++;
+      const clsStart = pos;
+      while (pos < input.length && /[a-z0-9_-]/i.test(input[pos])) {
+        pos++;
+      }
+      if (pos === clsStart) {
+        pos = start + 2;
+        break;
+      }
+    }
+
+    // Must have at least one whitespace separator before voice label
+    const wsStart = pos;
+    while (pos < input.length && /\s/.test(input[pos])) {
+      pos++;
+    }
+    if (pos === wsStart) {
+      out += input.slice(cursor, start + 2);
+      cursor = start + 2;
+      continue;
+    }
+
+    const closeIdx = input.indexOf('>', pos);
+    if (closeIdx === -1) {
+      out += input.slice(cursor);
+      break;
+    }
+
+    out += input.slice(cursor, start);
+    const speaker = input.slice(pos, closeIdx);
+    out += bracketed ? `[${speaker}]: ` : `${speaker}: `;
+    cursor = closeIdx + 1;
+  }
+
+  return out;
+}
+
 export function sanitizeVttCue(rawCue: string): string {
   if (!rawCue) return '';
-  let text = rawCue.replace(/<v(?:\.[a-z0-9_-]+)*\s+([^>]+)>/gi, '[$1]: ');
+  let text = formatVttVoiceTags(rawCue, true);
   text = stripUntilFixedPoint(text, /<\/v\s*>/gi);
   text = text.replace(/<\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?>/g, '');
   text = stripUntilFixedPoint(
@@ -309,7 +343,7 @@ export function renderVttCue(
   if (typeof (el as any).setAttribute === 'function') {
     el.className = 'nui-vtt-cue-text';
   }
-  let plain = cueText.replace(/<v(?:\.[a-z0-9_-]+)*\s+([^>]+)>/gi, '$1: ');
+  let plain = formatVttVoiceTags(cueText, false);
   plain = stripUntilFixedPoint(plain, /<\/v\s*>/gi);
   plain = stripUntilFixedPoint(plain, /<[^>]+>/g);
   plain = decodeHtmlEntities(plain);

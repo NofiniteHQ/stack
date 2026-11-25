@@ -354,4 +354,28 @@ describe('Phase 3 Milestone 3 (Specialist S2) Media Security Suite (MEDIA-M3-01 
       }).not.toThrow();
     });
   });
+
+  describe('CODEQL URL & VTT ReDoS Remediation', () => {
+    it('CODEQL-04: rejects data:text/html and data:application/javascript URLs strictly via allowlist', () => {
+      expect(isValidMediaUrl('data:text/html,<script>alert(1)</script>')).toBe(
+        false
+      );
+      expect(
+        isValidMediaUrl('data:application/javascript,alert(document.domain)')
+      ).toBe(false);
+      expect(
+        isValidMediaUrl('  &#100;ata:application/javascript,alert(1) ')
+      ).toBe(false);
+    });
+
+    it('CODEQL-05/06: sanitizeVttCue and renderVttCue resist <v whitespace ReDoS in linear O(n) time', () => {
+      const stressCue = '<v ' + ' '.repeat(20000);
+      const t0 = performance.now();
+      expect(sanitizeVttCue(stressCue)).toBe('&lt;v ' + ' '.repeat(20000));
+      const el = renderVttCue(stressCue);
+      expect(el.textContent).toBe(stressCue);
+      const elapsed = performance.now() - t0;
+      expect(elapsed).toBeLessThan(50);
+    });
+  });
 });

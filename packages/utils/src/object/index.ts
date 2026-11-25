@@ -214,6 +214,9 @@ export function set<T extends object>(
 
   for (let i = 0; i < segments.length - 1; i++) {
     const key = segments[i];
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      return obj;
+    }
     const nextKey = segments[i + 1];
 
     if (
@@ -221,12 +224,30 @@ export function set<T extends object>(
       current[key] === null ||
       typeof current[key] !== 'object'
     ) {
-      current[key] = typeof nextKey === 'number' ? [] : {};
+      Object.defineProperty(current, key, {
+        value: typeof nextKey === 'number' ? [] : {},
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
     }
     current = current[key] as Record<string | number, unknown>;
   }
 
-  current[segments[segments.length - 1]] = value;
+  const lastKey = segments[segments.length - 1];
+  if (
+    lastKey === '__proto__' ||
+    lastKey === 'constructor' ||
+    lastKey === 'prototype'
+  ) {
+    return obj;
+  }
+  Object.defineProperty(current, lastKey, {
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
   return obj;
 }
 
