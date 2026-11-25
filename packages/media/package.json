@@ -1,6 +1,6 @@
 {
   "name": "@nofinite/media",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Universal, framework-agnostic audio and video streaming media player suite powered by Vidstack and styled with NUICSS design tokens.",
   "license": "Apache-2.0",
   "author": "Nofinite HQ",

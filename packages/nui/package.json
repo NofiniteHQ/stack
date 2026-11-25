@@ -1,6 +1,6 @@
 {
   "name": "@nofinite/nui",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "A robust, accessible, and lightweight React component library designed for modern web applications.",
   "license": "Apache-2.0",
   "homepage": "https://nofinite.design",
@@ -64,7 +64,7 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@nofinite/nuicss": ">=3.0.0",
+    "@nofinite/nuicss": ">=3.3.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
