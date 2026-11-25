@@ -377,5 +377,15 @@ describe('Phase 3 Milestone 3 (Specialist S2) Media Security Suite (MEDIA-M3-01 
       const elapsed = performance.now() - t0;
       expect(elapsed).toBeLessThan(50);
     });
+
+    it('CODEQL-09: sanitizeVttCue and renderVttCue resist repeated < ReDoS in linear O(n) time', () => {
+      const stressLt = '<'.repeat(30000);
+      const t0 = performance.now();
+      expect(sanitizeVttCue(stressLt)).toBe('&lt;'.repeat(30000));
+      const el = renderVttCue(stressLt);
+      expect(el.textContent).toBe(stressLt);
+      const elapsed = performance.now() - t0;
+      expect(elapsed).toBeLessThan(50);
+    });
   });
 });

@@ -235,6 +235,120 @@ export function loadStreamingCdnScript(
   });
 }
 
+const DANGEROUS_VTT_TAGS = new Set([
+  'script',
+  'img',
+  'iframe',
+  'object',
+  'embed',
+  'style',
+  'svg',
+]);
+
+/**
+ * Linear O(n) fixed-point stripper for dangerous HTML tags inside VTT cues.
+ * Avoids regex backtracking on repeated '<' characters.
+ */
+function stripDangerousVttTags(input: string): string {
+  let current = input;
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    const lower = current.toLowerCase();
+    let out = '';
+    let cursor = 0;
+
+    while (cursor < current.length) {
+      const lt = current.indexOf('<', cursor);
+      if (lt === -1) {
+        out += current.slice(cursor);
+        break;
+      }
+
+      if (lt > cursor) {
+        out += current.slice(cursor, lt);
+      }
+
+      let pos = lt + 1;
+      if (pos < current.length && current[pos] === '/') {
+        pos++;
+      }
+      const nameStart = pos;
+      while (pos < current.length && /[a-z0-9_-]/i.test(current[pos])) {
+        pos++;
+      }
+      const tagName = lower.slice(nameStart, pos);
+      const nextChar = current[pos];
+      const isBoundary =
+        pos > nameStart &&
+        (nextChar === undefined ||
+          nextChar === '>' ||
+          nextChar === '/' ||
+          /\s/.test(nextChar));
+
+      if (isBoundary && DANGEROUS_VTT_TAGS.has(tagName)) {
+        const gt = current.indexOf('>', pos);
+        changed = true;
+        if (gt === -1) {
+          break;
+        }
+        cursor = gt + 1;
+        continue;
+      }
+
+      out += '<';
+      cursor = lt + 1;
+    }
+
+    current = out;
+  }
+
+  return current;
+}
+
+/**
+ * Linear O(n) fixed-point HTML tag stripper without regex backtracking on repeated '<'.
+ */
+function stripAllVttTags(input: string): string {
+  let current = input;
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    let out = '';
+    let cursor = 0;
+
+    while (cursor < current.length) {
+      const lt = current.indexOf('<', cursor);
+      if (lt === -1) {
+        out += current.slice(cursor);
+        break;
+      }
+
+      const gt = current.indexOf('>', lt + 1);
+      if (gt === -1) {
+        out += current.slice(cursor);
+        break;
+      }
+
+      // Advance to the innermost '<' before gt so '<<<tag>' only strips '<tag>'
+      const nestedLt = current.lastIndexOf('<', gt - 1);
+      const tagStart = nestedLt > lt ? nestedLt : lt;
+      if (tagStart > cursor) {
+        out += current.slice(cursor, tagStart);
+      }
+
+      changed = true;
+      cursor = gt + 1;
+    }
+
+    current = out;
+  }
+
+  return current;
+}
+
 function stripUntilFixedPoint(input: string, pattern: RegExp): string {
   let current = input;
   let prev: string;
@@ -306,22 +420,16 @@ export function sanitizeVttCue(rawCue: string): string {
   let text = formatVttVoiceTags(rawCue, true);
   text = stripUntilFixedPoint(text, /<\/v\s*>/gi);
   text = text.replace(/<\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?>/g, '');
+  text = stripDangerousVttTags(text);
   text = stripUntilFixedPoint(
     text,
-    /<\/?(?:script|img|iframe|object|embed|style|svg)\b[^>]*>/gi
-  );
-  text = stripUntilFixedPoint(
-    text,
-    /\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi
+    /\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s<>]+)/gi
   );
   let decoded = decodeHtmlEntities(text);
+  decoded = stripDangerousVttTags(decoded);
   decoded = stripUntilFixedPoint(
     decoded,
-    /<\/?(?:script|img|iframe|object|embed|style|svg)\b[^>]*>/gi
-  );
-  decoded = stripUntilFixedPoint(
-    decoded,
-    /\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi
+    /\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s<>]+)/gi
   );
   return decoded
     .replace(/&/g, '&amp;')
@@ -345,7 +453,7 @@ export function renderVttCue(
   }
   let plain = formatVttVoiceTags(cueText, false);
   plain = stripUntilFixedPoint(plain, /<\/v\s*>/gi);
-  plain = stripUntilFixedPoint(plain, /<[^>]+>/g);
+  plain = stripAllVttTags(plain);
   plain = decodeHtmlEntities(plain);
   el.textContent = plain;
   return el;

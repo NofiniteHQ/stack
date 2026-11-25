@@ -78,11 +78,26 @@ describe('Async Utilities', () => {
   });
 
   it('times out long-running promises', async () => {
-    const slow = new Promise((resolve) => setTimeout(resolve, 100));
+    let resolveFirst!: () => void;
+    const firstSlow = new Promise<void>((resolve) => {
+      resolveFirst = resolve;
+    });
+    try {
+      await expect(timeout(firstSlow, 20)).rejects.toThrow(/timed out/);
+    } finally {
+      resolveFirst();
+    }
 
-    await expect(timeout(slow, 20)).rejects.toThrow(/timed out/);
-    const fallback = await timeout(slow, 20, 'fallback-value');
-    expect(fallback).toBe('fallback-value');
+    let resolveSecond!: () => void;
+    const secondSlow = new Promise<void>((resolve) => {
+      resolveSecond = resolve;
+    });
+    try {
+      const fallback = await timeout(secondSlow, 20, 'fallback-value');
+      expect(fallback).toBe('fallback-value');
+    } finally {
+      resolveSecond();
+    }
   });
 
   it('limits concurrency among async tasks', async () => {
