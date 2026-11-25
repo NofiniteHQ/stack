@@ -23,7 +23,7 @@
   "scripts": {
     "build": "node scripts/build-cli.mjs",
     "build:ts": "node scripts/build-cli.mjs",
-    "build:binaries": "node -e \"const fs=require('node:fs'),cp=require('node:child_process');fs.mkdirSync('bin',{recursive:true});for(const [t,o] of [['bun-windows-x64','bin/nuicss-windows-amd64.exe'],['bun-linux-x64','bin/nuicss-linux-amd64'],['bun-linux-arm64','bin/nuicss-linux-arm64'],['bun-darwin-arm64','bin/nuicss-darwin-arm64'],['bun-darwin-x64','bin/nuicss-darwin-amd64']])cp.execFileSync('bun',['build','--compile','--target='+t,'--outfile='+o,'src/index.ts'],{stdio:'inherit'});\"",
+    "build:binaries": "node scripts/build-binaries.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
