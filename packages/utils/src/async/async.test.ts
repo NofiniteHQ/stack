@@ -88,15 +88,15 @@ describe('Async Utilities', () => {
       resolveFirst();
     }
 
-    let resolveSecond!: () => void;
-    const secondSlow = new Promise<void>((resolve) => {
+    let resolveSecond!: (value: string) => void;
+    const secondSlow = new Promise<string>((resolve) => {
       resolveSecond = resolve;
     });
     try {
       const fallback = await timeout(secondSlow, 20, 'fallback-value');
       expect(fallback).toBe('fallback-value');
     } finally {
-      resolveSecond();
+      resolveSecond('');
     }
   });
 

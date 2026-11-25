@@ -76,37 +76,39 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Build Standalone Binaries (nuicss)
-        working-directory: packages/nuicss-cli
-        run: pnpm run build:binaries
-
       - name: Determine CLI Release Tag
         if: steps.changesets.outputs.published == 'true'
         id: cli-tag
         env:
-          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.published-packages }}
+          PUBLISHED_PACKAGES_LEGACY: ${{ steps.changesets.outputs.publishedPackages }}
         run: |
           node -e "
-            const raw = process.env.PUBLISHED_PACKAGES || '[]';
+            const fs = require('node:fs');
+            const raw = process.env.PUBLISHED_PACKAGES || process.env.PUBLISHED_PACKAGES_LEGACY || '[]';
             try {
               const pkgs = JSON.parse(raw);
-              const cli = pkgs.find(p => p.name === 'nuicss');
+              const cli = Array.isArray(pkgs) ? pkgs.find((p) => p && p.name === 'nuicss') : null;
               if (cli && cli.version) {
-                const fs = require('fs');
                 fs.appendFileSync(process.env.GITHUB_OUTPUT, 'tag=nuicss@' + cli.version + '\n');
                 fs.appendFileSync(process.env.GITHUB_OUTPUT, 'upload=true\n');
               } else {
-                const fs = require('fs');
                 fs.appendFileSync(process.env.GITHUB_OUTPUT, 'upload=false\n');
               }
             } catch (err) {
-              const fs = require('fs');
+              console.error('Failed to parse published packages:', err);
               fs.appendFileSync(process.env.GITHUB_OUTPUT, 'upload=false\n');
             }
           "
+
+      - name: Setup Bun
+        if: steps.changesets.outputs.published == 'true' && steps.cli-tag.outputs.upload == 'true'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build Standalone Binaries (nuicss)
+        if: steps.changesets.outputs.published == 'true' && steps.cli-tag.outputs.upload == 'true'
+        working-directory: packages/nuicss-cli
+        run: pnpm run build:binaries
 
       - name: Upload Standalone Binaries to GitHub Release
         if: steps.changesets.outputs.published == 'true' && steps.cli-tag.outputs.upload == 'true'
@@ -114,5 +116,48 @@ jobs:
         with:
           tag_name: ${{ steps.cli-tag.outputs.tag }}
           files: packages/nuicss-cli/bin/nuicss-*
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notice Skipped OSS Docs Dispatch
+        if: steps.changesets.outputs.published == 'true' && secrets.OSS_DOCS_DISPATCH_TOKEN == ''
+        shell: bash
+        run: |
+          echo "::notice::OSS_DOCS_DISPATCH_TOKEN secret is not configured; skipping repository_dispatch to NofiniteHQ/oss-docs."
+
+      - name: Dispatch Stack Release to OSS Docs
+        if: steps.changesets.outputs.published == 'true' && secrets.OSS_DOCS_DISPATCH_TOKEN != ''
+        shell: bash
+        env:
+          OSS_DOCS_DISPATCH_TOKEN: ${{ secrets.OSS_DOCS_DISPATCH_TOKEN }}
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.published-packages }}
+          PUBLISHED_PACKAGES_LEGACY: ${{ steps.changesets.outputs.publishedPackages }}
+          DISPATCH_REF: ${{ github.ref }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          PAYLOAD=$(node -e "
+            const raw = process.env.PUBLISHED_PACKAGES || process.env.PUBLISHED_PACKAGES_LEGACY || '[]';
+            let publishedPackages = [];
+            try {
+              const parsed = JSON.parse(raw);
+              publishedPackages = Array.isArray(parsed) ? parsed : [];
+            } catch {
+              publishedPackages = [];
+            }
+            process.stdout.write(JSON.stringify({
+              event_type: 'stack-released',
+              client_payload: {
+                published_packages: publishedPackages,
+                ref: process.env.DISPATCH_REF || '',
+                sha: process.env.DISPATCH_SHA || '',
+              },
+            }));
+          ")
+          curl -fsSL -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${OSS_DOCS_DISPATCH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -d "${PAYLOAD}" \
+            "https://api.github.com/repos/NofiniteHQ/oss-docs/dispatches"
+          echo "Dispatched stack-released event to NofiniteHQ/oss-docs for ${DISPATCH_SHA}."

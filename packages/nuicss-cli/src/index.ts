@@ -1,6 +1,7 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { cac } from 'cac';
 import { bold, cyan } from 'colorette';
+import { CLI_VERSION } from './embedded/assets.js';
 import { compileCommand } from './commands/compile.js';
 import { initCommand } from './commands/init.js';
 import { migrateCommand } from './commands/migrate.js';
@@ -11,7 +12,25 @@ import { addCommand } from './commands/add.js';
 import { upgradeCommand } from './commands/upgrade.js';
 import { installBrandShield } from './utils/shield.js';
 
-export const VERSION = '0.1.0';
+function resolveCliVersion(): string {
+  try {
+    const pkgUrl = new URL('../package.json', import.meta.url);
+    if (existsSync(pkgUrl)) {
+      const parsed = JSON.parse(readFileSync(pkgUrl, 'utf8')) as {
+        name?: unknown;
+        version?: unknown;
+      };
+      if (parsed.name === 'nuicss' && typeof parsed.version === 'string') {
+        return parsed.version;
+      }
+    }
+  } catch {
+    // Standalone compiled binaries embed CLI_VERSION and do not rely on an external package.json.
+  }
+  return CLI_VERSION;
+}
+
+export const VERSION = resolveCliVersion();
 
 const KNOWN_COMMANDS = [
   'compile',
