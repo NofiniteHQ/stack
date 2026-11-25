@@ -69,6 +69,25 @@ function findSimilarCommand(
 export async function runCli(argv = process.argv): Promise<void> {
   installBrandShield();
 
+  // Normalize standalone '-' option values so cac does not treat them as option flags
+  const normalizedArgv: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const cur = argv[i];
+    const next = argv[i + 1];
+    if (
+      (cur === '-o' ||
+        cur === '--output' ||
+        cur === '-i' ||
+        cur === '--input') &&
+      next === '-'
+    ) {
+      normalizedArgv.push(`${cur}=-`);
+      i++;
+    } else {
+      normalizedArgv.push(cur);
+    }
+  }
+
   const cli = cac('nuicss');
 
   // Default command: Compile
@@ -187,8 +206,9 @@ export async function runCli(argv = process.argv): Promise<void> {
   // Tokens command
   cli
     .command('tokens', 'Inspect OKLCH color palettes and semantic tokens')
-    .action(async () => {
-      await tokensCommand();
+    .option('--json', 'Output tokens in JSON format')
+    .action(async (flags) => {
+      await tokensCommand(flags);
     });
 
   // List command
@@ -228,12 +248,12 @@ export async function runCli(argv = process.argv): Promise<void> {
   cli.version(VERSION);
 
   // If no args provided, print help
-  if (argv.length <= 2) {
+  if (normalizedArgv.length <= 2) {
     cli.outputHelp();
     return;
   }
 
-  cli.parse(argv, { run: false });
+  cli.parse(normalizedArgv, { run: false });
   await cli.runMatchedCommand();
 }
 

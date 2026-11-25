@@ -8,7 +8,7 @@ sidebar_position: 3
 Load the Markon bundle directly from the CDN.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@nofinite/markon@1.1.1/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@nofinite/markon@2.1.0/dist/index.js"></script>
 ```
 
 The CDN build exposes a global function named `JSMarkon`.
@@ -27,7 +27,7 @@ The CDN build exposes a global function named `JSMarkon`.
   <body>
     <div id="output"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@nofinite/markon@1.1.1/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@nofinite/markon@2.1.0/dist/index.js"></script>
     <script>
       const content = '#b[Hello]# World';
       const html = JSMarkon(content);

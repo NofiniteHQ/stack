@@ -14,11 +14,12 @@ It is designed to power international phone inputs, registration forms, billing 
 
 ## Core Capabilities
 
-- **Normalized Country Metadata**: 240+ international countries and territories with official common names, ISO-2 alpha codes, and international dialing codes.
-- **Fast In-Memory Lookup APIs**: Instant case-insensitive resolution by ISO-2 code or telephone dial code (`getCountryByCode`, `getCountryByDialCode`).
-- **Optimized CSS Flag Icons**: Pure CSS SVG flags (`@nofinite/locale/style`) avoiding hundreds of heavy raster images or separate HTTP requests.
-- **Strict TypeScript Types**: Fully typed `Country` interface with zero `any` leakage.
-- **100% Framework Agnostic**: Runs everywhere — Node.js, Edge workers, Deno, Bun, Next.js, Vite, Vue, Svelte, or vanilla HTML/JS.
+- **Normalized Country Metadata (`@nofinite/locale`, `/countries`)**: 240+ international countries and territories with official common names, ISO-2 alpha codes, and international dialing codes (`getCountryByCode`, `getCountryByDialCode`).
+- **BCP 47 Parsing & Directionality (`@nofinite/locale/bcp47`)**: `parseLocale`, `getDirection` (`'ltr' | 'rtl'`), and `matchLocale`.
+- **Intl Formatters (`@nofinite/locale/format`)**: Zero-dependency `formatDate`, `formatDateRange`, `formatCurrency`, `formatRelativeTime` (`formatRelative`), `formatNumber`, `formatList`, and `getPluralCategory` with bounded `LruFormatterCache`.
+- **Lightweight Translation Engine (`@nofinite/locale/i18n`)**: `createTranslator` and `Translator` with nested dot-key lookup, `{param}` interpolation, and plural rules.
+- **React Provider & Hooks (`@nofinite/locale/react`)**: `LocaleProvider`, `LocaleContext`, `useLocale`, and `useTranslation`.
+- **Optimized CSS Flag Icons (`@nofinite/locale/style`, `@nofinite/locale/dist/style.css`)**: Pure CSS SVG flags avoiding heavy raster image requests.
 
 ---
 
@@ -137,12 +138,16 @@ export function CountryPicker() {
 
 ## API Summary
 
-| Export                                                       | Type                                         | Description                                          |
-| :----------------------------------------------------------- | :------------------------------------------- | :--------------------------------------------------- |
-| [`countries`](/locale/usage/country-lookup)                  | `Country[]`                                  | Array of all countries with name, ISO2, and dialCode |
-| [`getCountryByCode(iso)`](/locale/usage/country-lookup)      | `(iso: string) => Country \| undefined`      | Resolves country metadata by ISO-2 code              |
-| [`getCountryByDialCode(code)`](/locale/usage/country-lookup) | `(dialCode: string) => Country \| undefined` | Resolves country metadata by phone dial code         |
-| [`@nofinite/locale/style`](/locale/usage/flags)              | Stylesheet                                   | Optimized SVG flag sprites and utility classes       |
+| Export                                                       | Type                                         | Description                                                                                                                |
+| :----------------------------------------------------------- | :------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| [`countries`](/locale/usage/country-lookup)                  | `Country[]`                                  | Array of all countries with name, ISO2, and dialCode                                                                       |
+| [`getCountryByCode(iso)`](/locale/usage/country-lookup)      | `(iso: string) => Country \| undefined`      | Resolves country metadata by ISO-2 code                                                                                    |
+| [`getCountryByDialCode(code)`](/locale/usage/country-lookup) | `(dialCode: string) => Country \| undefined` | Resolves country metadata by phone dial code                                                                               |
+| [`@nofinite/locale/bcp47`](/locale/i18n-and-formatting)      | Module                                       | `parseLocale`, `getDirection`, `matchLocale`                                                                               |
+| [`@nofinite/locale/format`](/locale/i18n-and-formatting)     | Module                                       | `formatDate`, `formatDateRange`, `formatCurrency`, `formatRelativeTime`, `formatNumber`, `formatList`, `getPluralCategory` |
+| [`@nofinite/locale/i18n`](/locale/i18n-and-formatting)       | Module                                       | `createTranslator`, `Translator`                                                                                           |
+| [`@nofinite/locale/react`](/locale/i18n-and-formatting)      | Module                                       | `LocaleProvider`, `useLocale`, `useTranslation`                                                                            |
+| [`@nofinite/locale/style`](/locale/usage/flags)              | Stylesheet (`./dist/style.css`)              | Optimized SVG flag sprites and utility classes                                                                             |
 
 ---
 

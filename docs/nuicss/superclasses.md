@@ -1,4 +1,4 @@
-﻿# Component Superclasses
+# Component Superclasses
 
 A comprehensive guide and reference to all pre-compiled component superclasses, semantic modifiers, and slot classes in **NUICSS**.
 
@@ -9,14 +9,14 @@ A comprehensive guide and reference to all pre-compiled component superclasses, 
 In modern web development, styling components with dozens of raw utility classes creates maintenance friction, inconsistency, and code bloat:
 
 ```html
-<!-- âŒ Fragile Utility Cluster (14 classes to keep in sync everywhere) -->
+<!-- ❌ Fragile Utility Cluster (14 classes to keep in sync everywhere) -->
 <button
   class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:pointer-events-none shadow-sm"
 >
   Submit
 </button>
 
-<!-- âœ… NUICSS Component Superclass (Semantic, accessible, and token-driven) -->
+<!-- ✅ NUICSS Component Superclass (Semantic, accessible, and token-driven) -->
 <button class="btn btn-primary">Submit</button>
 ```
 
@@ -38,7 +38,7 @@ Interactive action elements with built-in active scaling, focus rings, and token
 
 | Superclass    | Description                                            | Token Accent                                 |
 | :------------ | :----------------------------------------------------- | :------------------------------------------- |
-| `btn`         | Base button structure, transitions, flex alignment     | â€”                                          |
+| `btn`         | Base button structure, transitions, flex alignment     | —                                            |
 | `btn-primary` | High-emphasis primary call-to-action                   | `var(--color-primary)`                       |
 | `btn-default` | Standard secondary action with surface fill and border | `var(--bg-surface)`, `var(--border-default)` |
 | `btn-outline` | Bordered button with transparent background            | `var(--border-default)`                      |
@@ -142,7 +142,7 @@ Keyboard shortcut key indicators with subtle bottom shadow and border:
 ```html
 <div class="flex items-center gap-1.5 text-sm text-muted">
   <span>Quick search:</span>
-  <kbd class="kbd">âŒ˜</kbd>
+  <kbd class="kbd">⌘</kbd>
   <kbd class="kbd">K</kbd>
 </div>
 ```
@@ -196,6 +196,26 @@ Selection controls built with accessible contrast and native interaction:
 - **Radio:** `radio`, `radio-group`, `radio-group-horizontal`, `radio-label`
 - **Switch:** `switch`, `switch-thumb`, `switch-label`
 
+### Alert Banners (`alert`)
+
+Feedback and contextual status callouts:
+
+- `alert`: Base container with rounded corners and border
+- Variants: `alert-success`, `alert-danger`, `alert-warning`, `alert-info`
+- Slots: `alert-icon`, `alert-title`, `alert-description`, `alert-close`
+
+```html
+<div class="alert alert-info">
+  <div class="alert-icon">ℹ</div>
+  <div>
+    <h4 class="alert-title">System Update</h4>
+    <p class="alert-description">
+      Scheduled maintenance will begin at 02:00 UTC.
+    </p>
+  </div>
+</div>
+```
+
 ---
 
 ## 3. Overlay Superclasses
@@ -204,7 +224,7 @@ Selection controls built with accessible contrast and native interaction:
 
 Backdrop overlays, centered boxes, and animated dialogs:
 
-- Modal Base: `modal` (backdrop overlay with blur)
+- Modal Base: `modal` (backdrop overlay with blur), `modal-backdrop`
 - Content Box: `modal-box`, `modal-sm`, `modal-md`, `modal-lg`, `modal-xl`, `modal-full`
 - Slots: `modal-header`, `modal-title`, `modal-description`, `modal-body`, `modal-footer`, `modal-close`
 - Dialog Variants: `dialog`, `dialog-box`, `dialog-icon`, `dialog-icon-danger`, `dialog-icon-warning`, `dialog-icon-success`
@@ -269,8 +289,23 @@ Responsive data table wrapper with zebra striping and sticky headers:
 
 ### Tabs & Stepper
 
+Accessible navigation tabs and multi-step indicators:
+
 - **Tabs:** `tabs`, `tab-list`, `tab-list-pills`, `tab`, `tab-pill`, `tab-panel`
 - **Stepper:** `stepper`, `step`, `step-indicator`, `step-content`, `step-title`, `step-connector`
+
+```html
+<div class="tabs">
+  <div class="tab-list" role="tablist">
+    <button class="tab" role="tab" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" aria-selected="false">Analytics</button>
+    <button class="tab" role="tab" aria-selected="false">Settings</button>
+  </div>
+  <div class="tab-panel" role="tabpanel">
+    <!-- Active tab content -->
+  </div>
+</div>
+```
 
 ---
 

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect, fn } from 'storybook/test';
-import { DateRangePicker, DateRange } from './DateRangePicker';
+import { DateRangePicker } from './DateRangePicker';
+import type { DateRange } from '../calendar/Calendar';
 import { useState } from 'react';
 
 const meta: Meta<typeof DateRangePicker> = {

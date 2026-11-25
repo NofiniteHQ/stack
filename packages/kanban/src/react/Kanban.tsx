@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  useId,
+} from 'react';
 import {
   draggable,
   dropTargetForElements,
@@ -23,6 +29,8 @@ import {
   hasActiveFilter,
   moveCardBetweenColumns,
   reorderColumns,
+  escapeCss,
+  isSafeAvatarUrl,
 } from '../core';
 
 export type KanbanHandle = KanbanBoardInstance;
@@ -83,6 +91,7 @@ interface CardProps {
   columnIndex: number;
   totalColumns: number;
   allColumns: KanbanColumnProps[];
+  boardId?: string;
   onCardMove: (event: CardMoveEvent) => void;
   onCardClick?: (cardId: string, columnId: string, item: KanbanItem) => void;
   renderCard?: (item: KanbanItem, columnId: string) => React.ReactNode;
@@ -100,6 +109,7 @@ function KanbanCardItem({
   columnIndex,
   totalColumns,
   allColumns,
+  boardId,
   onCardMove,
   onCardClick,
   renderCard,
@@ -122,6 +132,7 @@ function KanbanCardItem({
         !element.closest('button, a, input, select, textarea'),
       getInitialData: () => ({
         type: 'card',
+        boardId,
         cardId: item.id,
         columnId,
         index,
@@ -134,6 +145,9 @@ function KanbanCardItem({
       element: el,
       canDrop: ({ source }) => {
         if (source.data.type !== 'card') return false;
+        if (boardId && source.data.boardId && source.data.boardId !== boardId) {
+          return false;
+        }
         const sourceColId = source.data.columnId as string;
         if (sourceColId !== columnId) {
           if (enforceWipLimit) {
@@ -161,7 +175,13 @@ function KanbanCardItem({
         return true;
       },
       getData: ({ input, element }) => {
-        const data = { type: 'card', cardId: item.id, columnId, index };
+        const data = {
+          type: 'card',
+          boardId,
+          cardId: item.id,
+          columnId,
+          index,
+        };
         return attachClosestEdge(data, {
           input,
           element,
@@ -179,6 +199,9 @@ function KanbanCardItem({
       },
       onDrop: ({ source, location, self }) => {
         setClosestEdge(null);
+        if (boardId && source.data.boardId && source.data.boardId !== boardId) {
+          return;
+        }
         if (
           location.current.dropTargets[0]?.element === el &&
           source.data.type === 'card'
@@ -204,6 +227,7 @@ function KanbanCardItem({
     item.id,
     columnId,
     index,
+    boardId,
     onCardMove,
     enforceWipLimit,
     canMoveCard,
@@ -410,6 +434,7 @@ function KanbanCardItem({
       role="button"
       tabIndex={0}
       data-item-id={item.id}
+      data-card-id={item.id}
       data-column-id={columnId}
       aria-roledescription="Kanban card"
       aria-label={`${item.title || 'Kanban card'}, item ${
@@ -517,7 +542,8 @@ function KanbanCardItem({
                   className="kanban-card-assignee shrink-0"
                   title={item.assignee.name}
                 >
-                  {item.assignee.avatar ? (
+                  {item.assignee.avatar &&
+                  isSafeAvatarUrl(item.assignee.avatar) ? (
                     <img
                       src={item.assignee.avatar}
                       alt={item.assignee.name}
@@ -549,6 +575,7 @@ interface ColumnComponentProps {
   index: number;
   totalColumns: number;
   allColumns: KanbanColumnProps[];
+  boardId?: string;
   columnClassName?: string;
   allowAdd?: boolean;
   headerActions?: boolean;
@@ -572,6 +599,7 @@ function KanbanColumnComponent({
   index,
   totalColumns,
   allColumns,
+  boardId,
   columnClassName,
   allowAdd,
   headerActions,
@@ -647,6 +675,7 @@ function KanbanColumnComponent({
         !element.closest('button, a, input, select, textarea'),
       getInitialData: () => ({
         type: 'column',
+        boardId,
         columnId: column.id,
         columnIndex: index,
       }),
@@ -658,6 +687,9 @@ function KanbanColumnComponent({
     const cleanupDrop = dropTargetForElements({
       element: colEl,
       canDrop: ({ source }) => {
+        if (boardId && source.data.boardId && source.data.boardId !== boardId) {
+          return false;
+        }
         if (source.data.type === 'column') return true;
         if (source.data.type === 'card') {
           const sourceColId = source.data.columnId as string;
@@ -688,6 +720,7 @@ function KanbanColumnComponent({
       getData: ({ input, element }) => {
         const data = {
           type: 'column',
+          boardId,
           columnId: column.id,
           columnIndex: index,
         };
@@ -716,6 +749,9 @@ function KanbanColumnComponent({
       onDrop: ({ source, location, self }) => {
         setIsColOver(false);
         setClosestColEdge(null);
+        if (boardId && source.data.boardId && source.data.boardId !== boardId) {
+          return;
+        }
         const innerTarget = location.current.dropTargets[0];
 
         if (source.data.type === 'column') {
@@ -757,10 +793,12 @@ function KanbanColumnComponent({
     column.items.length,
     column.wipLimit,
     index,
+    boardId,
     onCardMove,
     onColumnMove,
     enforceWipLimit,
     canMoveCard,
+    allColumns,
   ]);
 
   return (
@@ -916,6 +954,7 @@ function KanbanColumnComponent({
               columnIndex={index}
               totalColumns={totalColumns}
               allColumns={allColumns}
+              boardId={boardId}
               onCardMove={onCardMove}
               onCardClick={onCardClick}
               renderCard={renderCard}
@@ -996,6 +1035,12 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
     const [announcement, setAnnouncement] = useState<string>('');
     const boardRef = useRef<HTMLDivElement | null>(null);
     const dataRef = useRef<KanbanColumnProps[]>(columns);
+    const defaultId = useId();
+    const boardId =
+      (props.id as string) ||
+      (props as any).boardId ||
+      `kanban-board-${defaultId.replace(/:/g, '')}`;
+
     const [filterState, setFilterState] = useState<KanbanFilterOptions>({
       filterQuery,
       filterAssignee,
@@ -1020,7 +1065,9 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
     const focusCard = (cardId: string) => {
       requestAnimationFrame(() => {
         const el = boardRef.current?.querySelector<HTMLElement>(
-          `[data-item-id="${cardId}"]`
+          `[data-item-id="${escapeCss(cardId)}"], [data-card-id="${escapeCss(
+            cardId
+          )}"]`
         );
         el?.focus();
       });
@@ -1039,11 +1086,30 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
     };
 
     const handleCardMove = (event: CardMoveEvent): boolean => {
-      if (canMoveCard && !canMoveCard(event)) {
+      const targetCol = (dataRef.current || data).find(
+        (c) => c.id === event.targetColumnId
+      );
+      const maxTargetIndex = targetCol
+        ? event.sourceColumnId === event.targetColumnId
+          ? Math.max(0, targetCol.items.length - 1)
+          : targetCol.items.length
+        : 0;
+      const clampedTargetIndex = Math.max(
+        0,
+        Math.min(event.targetIndex, maxTargetIndex)
+      );
+      const normalizedEvent: CardMoveEvent = {
+        ...event,
+        targetIndex: clampedTargetIndex,
+      };
+
+      if (canMoveCard && !canMoveCard(normalizedEvent)) {
         return false;
       }
-      if (enforceWipLimit && event.sourceColumnId !== event.targetColumnId) {
-        const targetCol = data.find((c) => c.id === event.targetColumnId);
+      if (
+        enforceWipLimit &&
+        normalizedEvent.sourceColumnId !== normalizedEvent.targetColumnId
+      ) {
         if (
           targetCol &&
           typeof targetCol.wipLimit === 'number' &&
@@ -1057,7 +1123,7 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
       setData((prev) => {
         const updated = moveCardBetweenColumns(
           prev as unknown as CoreColumn[],
-          event,
+          normalizedEvent,
           { enforceWipLimit, canMoveCard }
         ) as unknown as KanbanColumnProps[];
         if (updated === (prev as unknown as CoreColumn[])) {
@@ -1066,7 +1132,7 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
         moved = true;
         dataRef.current = updated;
         onChange?.(updated);
-        onCardMove?.(event);
+        onCardMove?.(normalizedEvent);
         return updated;
       });
       return moved;
@@ -1201,6 +1267,7 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
     return (
       <div
         ref={boardRef}
+        data-board-id={boardId}
         className={clsx(
           'kanban kanban-board flex gap-4 overflow-x-auto p-4 items-start select-none font-sans min-h-[400px]',
           className
@@ -1217,6 +1284,7 @@ export const Kanban = React.forwardRef<KanbanBoardInstance, KanbanProps>(
             index={idx}
             totalColumns={data.length}
             allColumns={data}
+            boardId={boardId}
             columnClassName={columnClassName}
             allowAdd={allowAdd}
             headerActions={headerActions}

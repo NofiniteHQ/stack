@@ -1,0 +1,22 @@
+{
+  "name": "nuicss-app",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "General Purpose Benchmark - NUICSS Edition",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "packageManager": "pnpm@10.24.0",
+  "devDependencies": {
+    "@nofinite/nuicss": "link:..\\..\\..\\packages\\nuicss",
+    "@vitejs/plugin-react": "^4.7.0",
+    "lucide-react": "^1.47.0",
+    "picomatch": "^4.0.7",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "vite": "^7.3.1"
+  }
+}

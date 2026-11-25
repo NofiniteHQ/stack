@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect, waitFor } from 'storybook/test';
 import { HoverCard } from './HoverCard';
@@ -19,13 +20,17 @@ const meta: Meta<typeof HoverCard> = {
 export default meta;
 type Story = StoryObj<typeof HoverCard>;
 
-export const Default: Story = {
-  render: (args) => (
+type DefaultStory = StoryObj<
+  React.ComponentProps<typeof HoverCard> & { hideArrow?: boolean }
+>;
+
+export const Default: DefaultStory = {
+  render: ({ hideArrow, ...args }) => (
     <HoverCard {...args}>
       <HoverCard.Trigger>
         <Button variant="outline">Hover me</Button>
       </HoverCard.Trigger>
-      <HoverCard.Content hideArrow={args.hideArrow}>
+      <HoverCard.Content hideArrow={hideArrow}>
         <p className="m-0 text-sm">Hover card content</p>
       </HoverCard.Content>
     </HoverCard>

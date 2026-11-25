@@ -294,8 +294,8 @@ Pure CSS zero-JS data visualization superclasses:
 ### Automated CLI Codemod
 Refactor legacy Tailwind / utility clusters to clean NUICSS superclasses:
 ```bash
-npx @nofinite/nuicss migrate
-npx @nofinite/nuicss migrate --dry-run
+npx nuicss migrate
+npx nuicss migrate --dry-run
 ```
 
 ### Programmatic API

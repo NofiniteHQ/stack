@@ -20,8 +20,18 @@
     "paths": {
       "@nofinite/nuicss": ["./packages/nuicss/src/plugin/index.ts"],
       "@nofinite/nui": ["./packages/nui/src/index.ts"],
-      "@nofinite/utils": ["./packages/utils/src/index.ts"],
-      "@nofinite/locale": ["./packages/locale/src/index.ts"],
+      "@nofinite/utils": ["./packages/utils/dist/types/index.d.ts"],
+      "@nofinite/utils/*": [
+        "./packages/utils/dist/types/*",
+        "./packages/utils/dist/types/*/index.d.ts",
+        "./packages/utils/dist/types/*.d.ts"
+      ],
+      "@nofinite/locale": ["./packages/locale/dist/index.d.ts"],
+      "@nofinite/locale/*": [
+        "./packages/locale/dist/*",
+        "./packages/locale/dist/*/index.d.ts",
+        "./packages/locale/dist/*.d.ts"
+      ],
       "@nofinite/markon": ["./packages/markon/src/index.ts"],
       "@nofinite/markon/react": ["./packages/markon/src/react/index.ts"],
       "@nofinite/charts": ["./packages/charts/src/index.ts"],

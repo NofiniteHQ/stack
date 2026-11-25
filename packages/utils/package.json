@@ -3,7 +3,14 @@
   "version": "2.0.1",
   "description": "A secure, lightweight, and production-ready utility library for modern Node.js and web applications.",
   "license": "Apache-2.0",
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
+  },
   "private": false,
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -11,65 +18,162 @@
     "url": "git+https://github.com/NofiniteHQ/stack.git",
     "directory": "packages/utils"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/types/index.d.ts",
+      "browser": {
+        "types": "./dist/types/browser.d.ts",
+        "import": "./dist/browser/index.js",
+        "require": "./dist/browser/index.cjs",
+        "default": "./dist/browser/index.js"
+      },
       "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
+    },
+    "./string": {
+      "types": "./dist/types/string/index.d.ts",
+      "import": "./dist/string/index.js",
+      "require": "./dist/string/index.cjs",
+      "default": "./dist/string/index.js"
+    },
+    "./object": {
+      "types": "./dist/types/object/index.d.ts",
+      "import": "./dist/object/index.js",
+      "require": "./dist/object/index.cjs",
+      "default": "./dist/object/index.js"
+    },
+    "./array": {
+      "types": "./dist/types/array/index.d.ts",
+      "import": "./dist/array/index.js",
+      "require": "./dist/array/index.cjs",
+      "default": "./dist/array/index.js"
+    },
+    "./math": {
+      "types": "./dist/types/math/index.d.ts",
+      "import": "./dist/math/index.js",
+      "require": "./dist/math/index.cjs",
+      "default": "./dist/math/index.js"
+    },
+    "./async": {
+      "types": "./dist/types/async/index.d.ts",
+      "import": "./dist/async/index.js",
+      "require": "./dist/async/index.cjs",
+      "default": "./dist/async/index.js"
+    },
+    "./validation": {
+      "types": "./dist/types/validation/index.d.ts",
+      "import": "./dist/validation/index.js",
+      "require": "./dist/validation/index.cjs",
+      "default": "./dist/validation/index.js"
+    },
+    "./date": {
+      "types": "./dist/types/date/index.d.ts",
+      "import": "./dist/date/index.js",
+      "require": "./dist/date/index.cjs",
+      "default": "./dist/date/index.js"
+    },
+    "./dom": {
+      "types": "./dist/types/dom/index.d.ts",
+      "import": "./dist/dom/index.js",
+      "require": "./dist/dom/index.cjs",
+      "default": "./dist/dom/index.js"
+    },
+    "./cn": {
+      "types": "./dist/types/cn/index.d.ts",
+      "import": "./dist/cn/index.js",
+      "require": "./dist/cn/index.cjs",
+      "default": "./dist/cn/index.js"
     },
     "./otp": {
       "types": "./dist/types/otp/index.d.ts",
       "import": "./dist/otp/index.js",
+      "require": "./dist/otp/index.cjs",
       "default": "./dist/otp/index.js"
+    },
+    "./server": {
+      "types": "./dist/types/server/index.d.ts",
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs",
+      "default": "./dist/server/index.js"
     },
     "./password": {
       "types": "./dist/types/password/index.d.ts",
       "import": "./dist/password/index.js",
+      "require": "./dist/password/index.cjs",
       "default": "./dist/password/index.js"
     },
     "./jwt": {
       "types": "./dist/types/jwt/index.d.ts",
       "import": "./dist/jwt/index.js",
+      "require": "./dist/jwt/index.cjs",
       "default": "./dist/jwt/index.js"
     },
     "./uuid": {
       "types": "./dist/types/uuid/index.d.ts",
       "import": "./dist/uuid/index.js",
+      "require": "./dist/uuid/index.cjs",
       "default": "./dist/uuid/index.js"
     },
     "./env": {
       "types": "./dist/types/env/index.d.ts",
       "import": "./dist/env/index.js",
+      "require": "./dist/env/index.cjs",
       "default": "./dist/env/index.js"
     },
     "./email": {
-      "types": "./dist/types/email/index.d.ts",
-      "import": "./dist/email/index.js",
-      "default": "./dist/email/index.js"
+      "types": "./dist/types/zeptomail/index.d.ts",
+      "import": "./dist/zeptomail/index.js",
+      "require": "./dist/zeptomail/index.cjs",
+      "default": "./dist/zeptomail/index.js"
+    },
+    "./zeptomail": {
+      "types": "./dist/types/zeptomail/index.d.ts",
+      "import": "./dist/zeptomail/index.js",
+      "require": "./dist/zeptomail/index.cjs",
+      "default": "./dist/zeptomail/index.js"
     },
     "./types/*": {
       "types": "./dist/types/*.d.ts",
       "default": "./dist/types/*.d.ts"
+    },
+    "./browser": {
+      "types": "./dist/types/browser.d.ts",
+      "import": "./dist/browser/index.js",
+      "require": "./dist/browser/index.cjs",
+      "default": "./dist/browser/index.js"
     }
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
   },
   "files": [
     "dist",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/package.json",
+    "!dist/node_modules",
     "README.md",
-    "LICENSE",
-    "package.json"
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public",
     "provenance": true
   },
+  "peerDependencies": {
+    "argon2": "^0.45.1"
+  },
+  "peerDependenciesMeta": {
+    "argon2": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "argon2": "^0.45.1",
-    "jose": "^6.2.12",
-    "uuid": "^14.0.2",
-    "zeptomail": "^8.0.1"
-  }
+    "jose": "^6.2.12"
+  },
+  "browser": "./dist/browser/index.js"
 }

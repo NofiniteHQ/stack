@@ -12,8 +12,10 @@ const {
 } = require('./dist/index.js');
 
 async function build() {
+  const { generateFlagsCss } = require('./scripts/generate-flags-css.js');
+
   console.log('Generating browser config and static stylesheets...');
-  const config = nuicssPreset();
+  const config = nuicssPreset({ preflights: false });
 
   // Read the compiled base CSS (Reset + Design Tokens)
   const baseCss = fs.readFileSync('dist/index.css', 'utf8');
@@ -46,7 +48,7 @@ async function build() {
     const tokens = shortcuts
       .map(([k]) => (typeof k === 'string' ? `${k} nui-${k}` : ''))
       .join(' ');
-    const { css } = await uno.generate(tokens);
+    const { css } = await uno.generate(tokens, { preflights: false });
     const layeredCss = `@layer components {\n${css}\n}`;
     fs.writeFileSync(`dist/${name}.css`, layeredCss, 'utf8');
     const minCss = minifyCss(`${name}.min.css`, layeredCss);
@@ -66,9 +68,28 @@ async function build() {
     rawShortcuts
   );
 
+  const compStylesDir = path.join(__dirname, 'src/styles/components');
+  const markonComponentCss = fs.readFileSync(
+    path.join(compStylesDir, 'markon.css'),
+    'utf8'
+  );
+  const chartsComponentCss = fs.readFileSync(
+    path.join(compStylesDir, 'charts.css'),
+    'utf8'
+  );
+  const kanbanComponentCss = fs.readFileSync(
+    path.join(compStylesDir, 'kanban.css'),
+    'utf8'
+  );
+  const mediaBridgeComponentCss = fs.readFileSync(
+    path.join(compStylesDir, 'media-bridge.css'),
+    'utf8'
+  );
+
   // 1b. Standalone All-In-One styles.css & styles.min.css (Base + Components)
   if (layeredAllCss) {
-    const combinedStyles = `@layer base, components, utilities;\n\n${baseCss}\n\n${layeredAllCss}`;
+    const domainCss = `${markonComponentCss}\n\n${chartsComponentCss}\n\n${kanbanComponentCss}\n\n${mediaBridgeComponentCss}`;
+    const combinedStyles = `@layer base, components, utilities;\n\n${baseCss}\n\n${layeredAllCss}\n\n${domainCss}`;
     fs.writeFileSync('dist/styles.css', combinedStyles, 'utf8');
     const minStyles = minifyCss('styles.min.css', combinedStyles);
     fs.writeFileSync('dist/styles.min.css', minStyles, 'utf8');
@@ -92,48 +113,68 @@ async function build() {
   // 1f. Widgets Only (widgets.css & widgets.min.css)
   await generateShortcutBundle('widgets', widgetShortcuts);
 
-  // 1g. Media Only (media.css & media.min.css)
-  await generateShortcutBundle('media', mediaShortcuts);
-
-  // 1h. Kanban Subpath (kanban.css & kanban.min.css)
-  const themeCss = fs.readFileSync('src/styles/theme.css', 'utf8');
-  const kanbanMatch = themeCss.match(
-    /\/\* -+\s*15\.c\. KANBAN TASK BOARD[\s\S]*?(?=\/\* -+\s*16\. WCAG|$)/
-  );
-  if (kanbanMatch) {
-    const rawContent = kanbanMatch[0]
-      .replace(/@layer components\s*\{/, '')
-      .replace(/\}\s*$/, '');
-    const kanbanCss = `@layer components {\n${rawContent}\n}`;
-    fs.writeFileSync('dist/kanban.css', kanbanCss, 'utf8');
-    const minKanban = minifyCss('kanban.min.css', kanbanCss);
-    fs.writeFileSync('dist/kanban.min.css', minKanban, 'utf8');
-    console.log(
-      `Generated dist/kanban.css (${Buffer.byteLength(
-        kanbanCss,
-        'utf8'
-      )} bytes, minified: ${Buffer.byteLength(minKanban, 'utf8')} bytes)`
-    );
+  // 1g. Media Only (media.css & media.min.css + Section 15.d Vidstack Token Bridge)
+  const layeredMediaCss = await generateShortcutBundle('media', mediaShortcuts);
+  if (layeredMediaCss) {
+    const combinedMediaCss = `${layeredMediaCss}\n\n${mediaBridgeComponentCss}`;
+    fs.writeFileSync('dist/media.css', combinedMediaCss, 'utf8');
+    const minMedia = minifyCss('media.min.css', combinedMediaCss);
+    fs.writeFileSync('dist/media.min.css', minMedia, 'utf8');
   }
 
-  // 1i. Markon Subpath (markon.css & markon.min.css)
-  const markonMatch = themeCss.match(
-    /\/\* -+\s*6\. TIPTAP EDITOR COMPONENT STYLES[\s\S]*?(?=@keyframes shimmer|\/\* -+\s*15\.b|$)/
+  // 1h. Kanban Subpath (kanban.css & kanban.min.css)
+  fs.writeFileSync('dist/kanban.css', kanbanComponentCss, 'utf8');
+  const minKanban = minifyCss('kanban.min.css', kanbanComponentCss);
+  fs.writeFileSync('dist/kanban.min.css', minKanban, 'utf8');
+  console.log(
+    `Generated dist/kanban.css (${Buffer.byteLength(
+      kanbanComponentCss,
+      'utf8'
+    )} bytes, minified: ${Buffer.byteLength(minKanban, 'utf8')} bytes)`
   );
-  if (markonMatch) {
-    const rawContent = markonMatch[0]
-      .replace(/@layer components\s*\{/, '')
-      .replace(/\}\s*$/, '');
-    const markonCss = `@layer components {\n${rawContent}\n}`;
-    fs.writeFileSync('dist/markon.css', markonCss, 'utf8');
-    const minMarkon = minifyCss('markon.min.css', markonCss);
-    fs.writeFileSync('dist/markon.min.css', minMarkon, 'utf8');
+
+  // 1i. Markon Subpath (markon.css & markon.min.css - Editor + Publication Styles)
+  fs.writeFileSync('dist/markon.css', markonComponentCss, 'utf8');
+  const minMarkon = minifyCss('markon.min.css', markonComponentCss);
+  fs.writeFileSync('dist/markon.min.css', minMarkon, 'utf8');
+  console.log(
+    `Generated dist/markon.css (${Buffer.byteLength(
+      markonComponentCss,
+      'utf8'
+    )} bytes, minified: ${Buffer.byteLength(minMarkon, 'utf8')} bytes)`
+  );
+
+  // 1j. Charts Subpath (charts.css & charts.min.css)
+  fs.writeFileSync('dist/charts.css', chartsComponentCss, 'utf8');
+  const minCharts = minifyCss('charts.min.css', chartsComponentCss);
+  fs.writeFileSync('dist/charts.min.css', minCharts, 'utf8');
+  console.log(
+    `Generated dist/charts.css (${Buffer.byteLength(
+      chartsComponentCss,
+      'utf8'
+    )} bytes, minified: ${Buffer.byteLength(minCharts, 'utf8')} bytes)`
+  );
+
+  // 1k. Flags Subpath (flags.css & flags.min.css - Optional country flags; generated strictly to dist/)
+  const generatedFlagsCss = generateFlagsCss({ writeSrc: false });
+  if (generatedFlagsCss) {
+    fs.writeFileSync('dist/flags.css', generatedFlagsCss, 'utf8');
+    const minFlags = minifyCss('flags.min.css', generatedFlagsCss);
+    fs.writeFileSync('dist/flags.min.css', minFlags, 'utf8');
     console.log(
-      `Generated dist/markon.css (${Buffer.byteLength(
-        markonCss,
+      `Generated dist/flags.css (${Buffer.byteLength(
+        generatedFlagsCss,
         'utf8'
-      )} bytes, minified: ${Buffer.byteLength(minMarkon, 'utf8')} bytes)`
+      )} bytes, minified: ${Buffer.byteLength(minFlags, 'utf8')} bytes)`
     );
+
+    // Copy SVG assets into dist/flags/
+    const flagsSrcDir = path.join(__dirname, 'src/flags');
+    const flagsDistDir = path.join(__dirname, 'dist/flags');
+    if (fs.existsSync(flagsSrcDir)) {
+      fs.cpSync(flagsSrcDir, flagsDistDir, { recursive: true });
+      console.log(`Copied flag assets to dist/flags/`);
+    }
   }
 
   // ========================================================

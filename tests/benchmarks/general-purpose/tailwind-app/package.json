@@ -1,0 +1,24 @@
+{
+  "name": "tailwind-app",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "General Purpose Benchmark - Tailwind CSS Edition",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "packageManager": "pnpm@10.24.0",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.6.1",
+    "lucide-react": "^1.47.0",
+    "postcss": "^8.5.28",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^7.3.1"
+  }
+}

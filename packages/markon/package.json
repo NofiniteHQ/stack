@@ -40,7 +40,10 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
+    "!dist/**/*.tsbuildinfo",
     "!dist/package.json",
+    "!dist/node_modules",
     "README.md",
     "LICENSE"
   ],
@@ -83,6 +86,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.6.13",
+    "@nofinite/utils": "workspace:*",
     "@tiptap/core": "^3.29.2",
     "@tiptap/extension-blockquote": "^3.29.2",
     "@tiptap/extension-character-count": "^3.29.2",
@@ -111,11 +115,13 @@
     "@tiptap/starter-kit": "^3.29.2",
     "@tiptap/suggestion": "^3.29.2",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.17",
     "katex": "^0.18.4",
     "lowlight": "^3.3.0",
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
-    "@nofinite/nuicss": "workspace:*"
+    "@nofinite/nuicss": "workspace:*",
+    "@types/dompurify": "^3.2.0"
   }
 }

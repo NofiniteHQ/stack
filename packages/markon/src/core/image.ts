@@ -5,7 +5,7 @@
  * 100% styled with @nofinite/nuicss tokens.
  */
 
-import Image, { type ImageOptions } from '@tiptap/extension-image';
+import { Image, type ImageOptions } from '@tiptap/extension-image';
 import { mergeAttributes } from '@tiptap/core';
 
 export interface MarkonImageOptions extends ImageOptions {

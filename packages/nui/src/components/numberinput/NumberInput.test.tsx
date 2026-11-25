@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { axe } from 'vitest-axe';
@@ -19,8 +19,10 @@ describe('NumberInput Component', () => {
 
   it('calls onChange and handles increments', async () => {
     const handleChange = vi.fn();
-    render(<NumberInput aria-label="Amount" value={5} onChange={handleChange} />);
-    
+    render(
+      <NumberInput aria-label="Amount" value={5} onChange={handleChange} />
+    );
+
     const incBtn = screen.getByLabelText('Increase value');
     await userEvent.click(incBtn);
     expect(handleChange).toHaveBeenCalledWith(6);
@@ -28,8 +30,10 @@ describe('NumberInput Component', () => {
 
   it('calls onChange and handles decrements', async () => {
     const handleChange = vi.fn();
-    render(<NumberInput aria-label="Amount" value={5} onChange={handleChange} />);
-    
+    render(
+      <NumberInput aria-label="Amount" value={5} onChange={handleChange} />
+    );
+
     const decBtn = screen.getByLabelText('Decrease value');
     await userEvent.click(decBtn);
     expect(handleChange).toHaveBeenCalledWith(4);
@@ -37,8 +41,15 @@ describe('NumberInput Component', () => {
 
   it('respects min and max bounds on increment', async () => {
     const handleChange = vi.fn();
-    render(<NumberInput aria-label="Amount" value={10} max={10} onChange={handleChange} />);
-    
+    render(
+      <NumberInput
+        aria-label="Amount"
+        value={10}
+        max={10}
+        onChange={handleChange}
+      />
+    );
+
     const incBtn = screen.getByLabelText('Increase value');
     await userEvent.click(incBtn);
     expect(handleChange).toHaveBeenCalledWith(10);
@@ -46,12 +57,19 @@ describe('NumberInput Component', () => {
 
   it('respects step sizes (decimal)', async () => {
     const handleChange = vi.fn();
-    render(<NumberInput aria-label="Price" value={10.5} step={0.5} onChange={handleChange} />);
-    
+    render(
+      <NumberInput
+        aria-label="Price"
+        value={10.5}
+        step={0.5}
+        onChange={handleChange}
+      />
+    );
+
     const incBtn = screen.getByLabelText('Increase value');
     await userEvent.click(incBtn);
     expect(handleChange).toHaveBeenCalledWith(11);
-    
+
     const decBtn = screen.getByLabelText('Decrease value');
     await userEvent.click(decBtn);
     expect(handleChange).toHaveBeenCalledWith(10.5); // since last state was not updated internally if controlled
@@ -59,26 +77,35 @@ describe('NumberInput Component', () => {
 
   it('handles keyboard navigation (ArrowUp, ArrowDown)', async () => {
     const handleChange = vi.fn();
-    render(<NumberInput aria-label="Amount" value={5} onChange={handleChange} />);
-    
+    render(
+      <NumberInput aria-label="Amount" value={5} onChange={handleChange} />
+    );
+
     const input = screen.getByRole('spinbutton');
     await userEvent.type(input, '{ArrowUp}');
     expect(handleChange).toHaveBeenCalledWith(6);
-    
+
     await userEvent.type(input, '{ArrowDown}');
     expect(handleChange).toHaveBeenCalledWith(4);
   });
 
   it('does not increment or decrement when disabled', async () => {
     const handleChange = vi.fn();
-    render(<NumberInput aria-label="Amount" value={5} disabled onChange={handleChange} />);
-    
+    render(
+      <NumberInput
+        aria-label="Amount"
+        value={5}
+        disabled
+        onChange={handleChange}
+      />
+    );
+
     const input = screen.getByRole('spinbutton');
     expect(input).toBeDisabled();
-    
+
     // Steppers shouldn't even be rendered when disabled
     expect(screen.queryByLabelText('Increase value')).not.toBeInTheDocument();
-    
+
     // Test keyboard when disabled
     await userEvent.type(input, '{ArrowUp}');
     expect(handleChange).not.toHaveBeenCalled();

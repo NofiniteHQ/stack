@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/markon/src",
   "projectType": "library",
+  "tags": ["scope:strings"],
   "targets": {
     "build": {
       "executor": "@nx/vite:build",

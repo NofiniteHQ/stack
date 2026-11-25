@@ -1,7 +1,106 @@
 import type { NuicssConfig } from './config';
 import * as presetWind4Module from '@unocss/preset-wind4';
-import processorLightningCSSRaw from '@unocss/processor-lightningcss';
 import { componentShortcuts } from '../shortcuts';
+import resetCssRaw from '../styles/reset.css?raw';
+import themeCssRaw from '../styles/theme.css?raw';
+import markonCssRaw from '../styles/components/markon.css?raw';
+import chartsCssRaw from '../styles/components/charts.css?raw';
+import kanbanCssRaw from '../styles/components/kanban.css?raw';
+import mediaBridgeCssRaw from '../styles/components/media-bridge.css?raw';
+import tableCssRaw from '../styles/components/table.css?raw';
+import flagsCssRaw from '../styles/components/flags.css?raw';
+import fs from 'node:fs';
+import path from 'node:path';
+let processorLightningCSSRaw: any = null;
+try {
+  const req = typeof require !== 'undefined' ? require : null;
+  if (req) {
+    processorLightningCSSRaw = req('@unocss/processor-lightningcss');
+  }
+} catch {
+  // Gracefully fallback when running in standalone binary or browser
+}
+
+let resetCss =
+  typeof resetCssRaw === 'string' && resetCssRaw.length > 0 ? resetCssRaw : '';
+let themeCss =
+  typeof themeCssRaw === 'string' && themeCssRaw.length > 0 ? themeCssRaw : '';
+let markonCss =
+  typeof markonCssRaw === 'string' && markonCssRaw.length > 0
+    ? markonCssRaw
+    : '';
+let chartsCss =
+  typeof chartsCssRaw === 'string' && chartsCssRaw.length > 0
+    ? chartsCssRaw
+    : '';
+let kanbanCss =
+  typeof kanbanCssRaw === 'string' && kanbanCssRaw.length > 0
+    ? kanbanCssRaw
+    : '';
+let mediaBridgeCss =
+  typeof mediaBridgeCssRaw === 'string' && mediaBridgeCssRaw.length > 0
+    ? mediaBridgeCssRaw
+    : '';
+let tableCss =
+  typeof tableCssRaw === 'string' && tableCssRaw.length > 0 ? tableCssRaw : '';
+let flagsCss =
+  typeof flagsCssRaw === 'string' && flagsCssRaw.length > 0 ? flagsCssRaw : '';
+
+if (
+  !resetCss ||
+  !themeCss ||
+  !markonCss ||
+  !chartsCss ||
+  !kanbanCss ||
+  !mediaBridgeCss ||
+  !tableCss ||
+  !flagsCss
+) {
+  try {
+    const stylesDir = path.resolve(__dirname, '../styles');
+    const compDir = path.join(stylesDir, 'components');
+    if (!resetCss && fs.existsSync(path.join(stylesDir, 'reset.css'))) {
+      resetCss = fs.readFileSync(path.join(stylesDir, 'reset.css'), 'utf8');
+    }
+    if (!themeCss && fs.existsSync(path.join(stylesDir, 'theme.css'))) {
+      themeCss = fs.readFileSync(path.join(stylesDir, 'theme.css'), 'utf8');
+    }
+    if (!markonCss && fs.existsSync(path.join(compDir, 'markon.css'))) {
+      markonCss = fs.readFileSync(path.join(compDir, 'markon.css'), 'utf8');
+    }
+    if (!chartsCss && fs.existsSync(path.join(compDir, 'charts.css'))) {
+      chartsCss = fs.readFileSync(path.join(compDir, 'charts.css'), 'utf8');
+    }
+    if (!kanbanCss && fs.existsSync(path.join(compDir, 'kanban.css'))) {
+      kanbanCss = fs.readFileSync(path.join(compDir, 'kanban.css'), 'utf8');
+    }
+    if (
+      !mediaBridgeCss &&
+      fs.existsSync(path.join(compDir, 'media-bridge.css'))
+    ) {
+      mediaBridgeCss = fs.readFileSync(
+        path.join(compDir, 'media-bridge.css'),
+        'utf8'
+      );
+    }
+    if (!tableCss && fs.existsSync(path.join(compDir, 'table.css'))) {
+      tableCss = fs.readFileSync(path.join(compDir, 'table.css'), 'utf8');
+    }
+    if (!flagsCss && fs.existsSync(path.join(compDir, 'flags.css'))) {
+      flagsCss = fs.readFileSync(path.join(compDir, 'flags.css'), 'utf8');
+    }
+  } catch {
+    // Browser or bundler environment
+  }
+}
+
+export interface NuicssPresetOptions {
+  /**
+   * Whether to inject base resets and design tokens as preflights.
+   * Defaults to true.
+   */
+  preflights?: boolean;
+}
 
 const resolveFunction = (mod: any, fallbackKey?: string) => {
   if (typeof mod === 'function') return mod;
@@ -34,7 +133,24 @@ const protectedShortcutPrefixes = [
   'file-item',
 ];
 
-export function nuicssPreset(): NuicssConfig {
+const DANGEROUS_CSS_PATTERNS = [
+  /expression\s*\(/i,
+  /javascript\s*:/i,
+  /vbscript\s*:/i,
+  /-moz-binding\s*:/i,
+  /behavior\s*:/i,
+  /;\s*}/,
+  /}\s*[^{;]+\s*\{/,
+];
+
+function isDangerousCss(value: unknown): boolean {
+  if (typeof value !== 'string') return false;
+  return DANGEROUS_CSS_PATTERNS.some((pat) => pat.test(value));
+}
+
+export type NuicssPreset = NuicssConfig & { name?: string };
+
+export function nuicssPreset(options: NuicssPresetOptions = {}): NuicssPreset {
   const wind = getPresetWind4();
   for (const v of (wind as any).variants || []) {
     if (v && (v as any).name === 'pseudo') {
@@ -48,9 +164,45 @@ export function nuicssPreset(): NuicssConfig {
     }
   }
 
+  const preflights =
+    options.preflights !== false
+      ? [
+          {
+            layer: 'base',
+            getCSS: () =>
+              `@layer base, components, utilities;\n\n${themeCss}\n\n${resetCss}`,
+          },
+        ]
+      : [];
+
+  let processor: any = null;
+  try {
+    if (typeof getProcessorLightningCSS === 'function') {
+      processor = getProcessorLightningCSS();
+    }
+  } catch {
+    // Graceful fallback when native addon is missing
+  }
+
   return {
+    name: 'nuicss-preset',
     presets: [wind],
-    processors: [getProcessorLightningCSS()],
+    processors: processor ? [processor] : [],
+    preflights,
+    postprocess: [
+      (util: any) => {
+        if (!util || !Array.isArray(util.entries)) return;
+        const hasDangerousEntry = util.entries.some(
+          ([prop, val]: [any, any]) =>
+            (typeof prop === 'string' &&
+              (/^behavior$/i.test(prop) || isDangerousCss(prop))) ||
+            isDangerousCss(val)
+        );
+        if (hasDangerousEntry) {
+          util.entries = [];
+        }
+      },
+    ],
     rules: [
       // Semantic background tokens with native opacity modifier support (e.g. bg-surface/80, bg-card, bg-selected)
       [
@@ -153,6 +305,37 @@ export function nuicssPreset(): NuicssConfig {
           return { stroke: `var(${varName})` };
         },
       ],
+      // On-demand Domain Component Rules (Emitted into layer: 'components' only when referenced)
+      [
+        /^__table-styles$|^(?:nui-)?table-container$/,
+        () => tableCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?kanban(?:-[a-z0-9-]+)?$/,
+        () => kanbanCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?markon(?:-[a-z0-9-]+)?$|^tiptap-wrapper$|^editor-content$|^prose-markon$/,
+        () => markonCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?chart(?:-[a-z0-9-]+)?$|^(?:nui-)?charts?$/,
+        () => chartsCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-)?(?:vidstack-player|vidstack-audio-player|media-container|media-player)$/,
+        () => mediaBridgeCss,
+        { layer: 'components' },
+      ],
+      [
+        /^(?:nui-|nf-)?flag(?:-[a-z0-9-]+)?$/,
+        () => flagsCss,
+        { layer: 'components' },
+      ],
     ],
     shortcuts: [
       ...(Array.isArray(componentShortcuts) ? componentShortcuts : []),
@@ -190,7 +373,7 @@ export function nuicssPreset(): NuicssConfig {
       pipeline: {
         include: [
           /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
-          'src/**/*.{js,ts,jsx,tsx}',
+          'src/**/*.{html,js,ts,jsx,tsx,vue,svelte}',
           '**/node_modules/@nofinite/nui/**/*.{js,mjs,cjs,jsx,tsx}',
         ],
       },

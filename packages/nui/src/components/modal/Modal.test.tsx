@@ -167,4 +167,42 @@ describe('Modal Component', () => {
     );
     expect(await axe(container)).toHaveNoViolations();
   });
+
+  it('renders compound modal hierarchy with proper aria-labelledby and docked header/footer', async () => {
+    const handleClose = vi.fn();
+    render(
+      <Modal open={true} onClose={handleClose}>
+        <Modal.Header>
+          <Modal.Title>Compound Title</Modal.Title>
+          <Modal.Description>Compound Description</Modal.Description>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Scrollable body content</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <button onClick={handleClose}>Confirm</button>
+        </Modal.Footer>
+      </Modal>
+    );
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveClass('p-0');
+
+    const titleEl = screen.getByText('Compound Title');
+    expect(titleEl).toHaveAttribute('id');
+    expect(dialog).toHaveAttribute(
+      'aria-labelledby',
+      titleEl.getAttribute('id')
+    );
+
+    const descEl = screen.getByText('Compound Description');
+    expect(descEl).toHaveAttribute('id');
+    expect(dialog).toHaveAttribute(
+      'aria-describedby',
+      descEl.getAttribute('id')
+    );
+
+    expect(screen.getByText('Scrollable body content')).toBeInTheDocument();
+  });
 });

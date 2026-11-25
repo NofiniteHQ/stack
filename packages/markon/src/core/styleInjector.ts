@@ -598,14 +598,10 @@ export const MARKON_CORE_CSS = `
 
 /**
  * Injects Markon core styles into the document head if not already present.
+ * In accordance with the Zero Downstream CSS Single-Engine invariant, styles
+ * are supplied canonically by @nofinite/nuicss (markon.css / theme.css).
+ * This function is maintained as a safe no-op for backwards compatibility.
  */
 export function ensureMarkonStyles(): void {
-  if (typeof document === 'undefined') return;
-  const STYLE_ID = 'markon-core-styles';
-  if (!document.getElementById(STYLE_ID)) {
-    const styleEl = document.createElement('style');
-    styleEl.id = STYLE_ID;
-    styleEl.textContent = MARKON_CORE_CSS;
-    document.head.appendChild(styleEl);
-  }
+  // No-op: Canonical styling is provided by @nofinite/nuicss
 }

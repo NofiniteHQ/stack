@@ -13,6 +13,7 @@ import {
 import type { NormalizedDataPoint } from './math';
 import { formatMetricNumber } from './axis';
 import { escapeHtml } from './a11y';
+import { parseSafeColor } from './color';
 
 export interface TooltipItem {
   color: string;
@@ -92,7 +93,9 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
         Boolean(item.label) &&
         (payload.items.length > 1 || item.label !== payload.title);
 
-      const safeColor = escapeHtml(item.color);
+      const safeColor = escapeHtml(
+        parseSafeColor(item.color, 'var(--color-primary)')
+      );
       const safeLabel = shouldRenderLabel
         ? `<span class="chart-tooltip-label">${escapeHtml(item.label)}</span>`
         : '';
@@ -103,7 +106,7 @@ export function renderTooltipHtml(payload: TooltipPayload | string): string {
       return `
     <div class="chart-tooltip-item">
       <div class="chart-tooltip-label-group">
-        <span class="chart-tooltip-swatch" style="background-color: ${safeColor}; box-shadow: 0 0 6px ${safeColor}55;"></span>
+        <span class="chart-tooltip-swatch" style="background-color: ${safeColor}; box-shadow: 0 0 6px color-mix(in srgb, ${safeColor} 35%, transparent);"></span>
         ${safeLabel}
       </div>
       ${safeValue}

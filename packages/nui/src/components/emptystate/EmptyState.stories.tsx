@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EmptyState } from './EmptyState';
-import { FolderSearch, Inbox, Search, Plus } from 'lucide-react';
+import { FolderSearch, Inbox, Search } from 'lucide-react';
 import { Button } from '../button/Button';
 
 const meta: Meta<typeof EmptyState> = {

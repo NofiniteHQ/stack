@@ -2,7 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils';
 
-export type KbdProps = React.HTMLAttributes<HTMLElement>;
+export type KbdSize = 'sm' | 'md' | 'lg';
+
+export interface KbdProps extends React.HTMLAttributes<HTMLElement> {
+  size?: KbdSize;
+}
+
+const sizeClasses: Record<KbdSize, string> = {
+  sm: 'px-1 py-0.5 text-[10px] min-w-[1.25rem] h-5',
+  md: 'px-1.5 py-0.5 text-xs min-w-[1.5rem] h-6',
+  lg: 'px-2 py-1 text-sm min-w-[1.75rem] h-7',
+};
 
 /**
  * Kbd Component
@@ -10,7 +20,7 @@ export type KbdProps = React.HTMLAttributes<HTMLElement>;
  * Automatically translates Mac symbols (⌘, ⌥, ⇧) to Windows equivalents (Ctrl, Alt, Shift) on non-Mac OS.
  */
 export const Kbd = React.forwardRef<HTMLElement, KbdProps>(
-  ({ className, children, ...props }, ref) => {
+  ({ className, children, size = 'md', ...props }, ref) => {
     const [isMac, setIsMac] = useState(true); // Default to true to prevent hydration mismatch on Mac
 
     useEffect(() => {
@@ -34,7 +44,8 @@ export const Kbd = React.forwardRef<HTMLElement, KbdProps>(
         ref={ref}
         suppressHydrationWarning
         className={cn(
-          'inline-flex items-center justify-center rounded-md border border-default bg-subtle px-1.5 py-0.5 text-xs font-medium font-mono text-default shadow-sm min-w-[1.5rem]',
+          'inline-flex items-center justify-center rounded-md border border-default bg-subtle font-medium font-mono text-default shadow-sm',
+          sizeClasses[size] || sizeClasses.md,
           className
         )}
         {...props}

@@ -113,6 +113,8 @@ nuicss -i input.css -o dist/output.css --watch --watch-files "templates/**/*.jin
 | Command              | Description                                           | Example                                             |
 | :------------------- | :---------------------------------------------------- | :-------------------------------------------------- |
 | `compile [patterns]` | Compile stylesheets into production CSS               | `nuicss compile -i input.css -o dist/output.css -m` |
+| `build [patterns]`   | Compile stylesheets (alias for `compile`)             | `nuicss build -i input.css -o dist/output.css -m`   |
+| `watch [patterns]`   | Compile and watch for changes (alias for `--watch`)   | `nuicss watch -i input.css -o dist/output.css`      |
 | `init`               | Initialize configuration and IDE schemas              | `nuicss init`                                       |
 | `add [component]`    | Scaffold UI component and view starter markup         | `nuicss add button`, `nuicss add dialog`            |
 | `check [path]`       | Lint codebase for hardcoded hex and legacy soup       | `nuicss check src/`                                 |

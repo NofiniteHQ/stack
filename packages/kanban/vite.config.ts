@@ -40,13 +40,22 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        '@nofinite/nuicss',
-        /^@atlaskit(\/.*)?$/,
-      ],
+      external: (id: string) => {
+        if (id.endsWith('.css')) return false;
+        if (
+          [
+            'react',
+            'react-dom',
+            'react/jsx-runtime',
+            '@nofinite/nuicss',
+            '@nofinite/utils',
+          ].includes(id) ||
+          id.startsWith('@nofinite/utils/')
+        ) {
+          return true;
+        }
+        return false;
+      },
       output: [
         {
           format: 'es',

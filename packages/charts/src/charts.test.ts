@@ -8,6 +8,8 @@ import {
   renderChart,
   Chart,
   defaultMargin,
+  exportToSVG,
+  renderTooltipHtml,
 } from './index';
 
 describe('@nofinite/charts math engine', () => {
@@ -47,14 +49,14 @@ describe('@nofinite/charts math engine', () => {
   it('calculates pie and donut segments with arc paths', () => {
     const segments = calculatePieSegments(sampleData, 100, 0);
     expect(segments.length).toBe(4);
-    segments.forEach((seg) => {
+    segments.forEach((seg: { path: string }) => {
       expect(seg.path).toBeTruthy();
       expect(seg.path.startsWith('M')).toBe(true);
     });
 
     const donutSegments = calculatePieSegments(sampleData, 100, 0.6);
     expect(donutSegments.length).toBe(4);
-    donutSegments.forEach((seg) => {
+    donutSegments.forEach((seg: { path: string }) => {
       expect(seg.path).toBeTruthy();
     });
   });
@@ -165,7 +167,7 @@ describe('@nofinite/charts LTTB downsampling algorithm', () => {
     expect(downsampled[downsampled.length - 1].x).toBe(999);
 
     // The extreme peak (y=9999) must be preserved!
-    const hasPeak = downsampled.some((p) => p.y === 9999);
+    const hasPeak = downsampled.some((p: { y: number }) => p.y === 9999);
     expect(hasPeak).toBe(true);
   });
 
@@ -210,5 +212,48 @@ describe('@nofinite/charts LTTB downsampling algorithm', () => {
     );
 
     expect(result.points.length).toBe(25);
+  });
+});
+
+describe('@nofinite/charts export & tooltip enhancements', () => {
+  it('generates valid color-mix box-shadow in tooltip swatches without invalid hex alpha concatenation', () => {
+    const html = renderTooltipHtml({
+      title: 'Metrics',
+      items: [
+        {
+          color: 'var(--chart-1, var(--color-primary))',
+          label: 'Revenue',
+          value: '$50k',
+        },
+      ],
+    });
+
+    expect(html).toContain(
+      'color-mix(in srgb, var(--chart-1, var(--color-primary)) 35%, transparent)'
+    );
+    expect(html).not.toContain('55;');
+  });
+
+  it('exportToSVG embeds xmlns, viewBox, and inlines computed presentation styles into SVG clone', () => {
+    const svg = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg'
+    ) as SVGElement;
+    const path = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'path'
+    ) as SVGElement;
+    path.style.fill = 'rgb(59, 130, 246)';
+    path.style.stroke = 'rgb(30, 64, 175)';
+    svg.appendChild(path);
+    document.body.appendChild(svg);
+
+    const serialized = exportToSVG(svg, '');
+    document.body.removeChild(svg);
+
+    expect(serialized).toContain('xmlns="http://www.w3.org/2000/svg"');
+    expect(serialized).toContain('viewBox=');
+    expect(serialized).toContain('fill: rgb(59, 130, 246)');
+    expect(serialized).toContain('stroke: rgb(30, 64, 175)');
   });
 });

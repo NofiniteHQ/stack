@@ -22,11 +22,15 @@ export function formatDisplayUrl(url: string): string {
 /**
  * Returns the semantic HTML markup for the link action popover card.
  */
+import { sanitizeUrl, escapeHtml } from './security';
+
 export function renderLinkPopoverHtml(href: string): string {
-  const displayUrl = formatDisplayUrl(href);
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  const rawDisplayUrl = formatDisplayUrl(href);
+  const displayUrl = escapeHtml(rawDisplayUrl || href);
   return `
-    <a href="${href}" target="_blank" rel="noopener noreferrer" class="link text-primary font-medium flex items-center gap-1.5 px-2 py-0.5 max-w-[240px] truncate hover:underline text-xs" title="${href}">
-      <span class="truncate">${displayUrl || href}</span>
+    <a href="${safeHref}" target="_blank" rel="noopener noreferrer" class="link text-primary font-medium flex items-center gap-1.5 px-2 py-0.5 max-w-[240px] truncate hover:underline text-xs" title="${safeHref}">
+      <span class="truncate">${displayUrl}</span>
       <svg width="12" height="12" class="w-3 h-3 shrink-0 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
         <polyline points="15 3 21 3 21 9"/>

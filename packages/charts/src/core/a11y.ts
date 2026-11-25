@@ -1,4 +1,21 @@
 /**
+ * @license
+ * Copyright (C) 2026 Nofinite
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * @nofinite/charts - Accessibility (a11y) Engine
  * Provides WCAG 2.1 AA screen-reader data tables and aria descriptions.
  */
@@ -6,15 +23,11 @@
 import type { ChartSeries } from './math';
 import { formatMetricNumber } from './axis';
 import { normalizeData } from './normalize';
+import { escapeHtml as utilsEscapeHtml } from '@nofinite/utils';
 
 export function escapeHtml(str: unknown): string {
   if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return utilsEscapeHtml(String(str));
 }
 
 export interface A11yOptions {

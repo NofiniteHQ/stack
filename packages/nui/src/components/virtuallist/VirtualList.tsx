@@ -1,6 +1,15 @@
-"use client";
+'use client';
 
-import React, { useRef, useState, useCallback, UIEvent, forwardRef, useImperativeHandle, useLayoutEffect } from 'react';
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  UIEvent,
+  forwardRef,
+  useImperativeHandle,
+  useLayoutEffect,
+} from 'react';
+import { clamp } from '@nofinite/utils';
 import { cn } from '../../utils';
 
 /* ============================================================
@@ -14,19 +23,20 @@ export interface VirtualListHandle {
   scrollToIndex: (index: number) => void;
 }
 
-export interface VirtualListProps<T> extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
- /** Array of data items to render */
- items: T[];
- /** Height of the scrollable viewport in pixels. If omitted, it will automatically size to its container. */
- height?: number;
- /** Fixed height for each row in pixels. Defaults to 40. */
- itemHeight?: number;
- /** Extra rows to render above and below the viewport to prevent white flashes during fast scrolling */
- overscan?: number;
- /** Extracts a unique React key for each item. Crucial for stable rendering during sorts/filters! */
- keyExtractor?: (item: T, index: number) => string | number;
- /** The render function for the row */
- renderItem: (item: T, index: number) => React.ReactNode;
+export interface VirtualListProps<T>
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
+  /** Array of data items to render */
+  items: T[];
+  /** Height of the scrollable viewport in pixels. If omitted, it will automatically size to its container. */
+  height?: number;
+  /** Fixed height for each row in pixels. Defaults to 40. */
+  itemHeight?: number;
+  /** Extra rows to render above and below the viewport to prevent white flashes during fast scrolling */
+  overscan?: number;
+  /** Extracts a unique React key for each item. Crucial for stable rendering during sorts/filters! */
+  keyExtractor?: (item: T, index: number) => string | number;
+  /** The render function for the row */
+  renderItem: (item: T, index: number) => React.ReactNode;
 }
 
 /* ============================================================
@@ -39,17 +49,17 @@ export interface VirtualListProps<T> extends Omit<React.HTMLAttributes<HTMLDivEl
  * * Uses GPU-accelerated transforms and strict mathematical windowing to only render visible DOM nodes.
  */
 function VirtualListInner<T>(
- {
- items,
- height,
- itemHeight = 40,
- overscan = 3,
- keyExtractor,
- renderItem,
- className,
- onScroll,
- ...props
- }: VirtualListProps<T>,
+  {
+    items,
+    height,
+    itemHeight = 40,
+    overscan = 3,
+    keyExtractor,
+    renderItem,
+    className,
+    onScroll,
+    ...props
+  }: VirtualListProps<T>,
   ref: React.ForwardedRef<VirtualListHandle>
 ) {
   const [scrollTop, setScrollTop] = useState(0);
@@ -89,33 +99,33 @@ function VirtualListInner<T>(
     scrollToIndex: (index: number) => {
       if (internalRef.current) {
         // Safely clamp the index to prevent scrolling out of bounds
-        const clampedIndex = Math.max(0, Math.min(index, items.length - 1));
+        const clampedIndex = clamp(index, 0, items.length - 1);
         internalRef.current.scrollTop = clampedIndex * itemHeight;
       }
-    }
+    },
   }));
 
- /* ----------------------------------------------------
+  /* ----------------------------------------------------
  Scroll Handling (React Synthetic Event)
  ---------------------------------------------------- */
- const handleScroll = useCallback(
- (e: UIEvent<HTMLDivElement>) => {
- // React's Synthetic events are perfectly batched in React 18+
- setScrollTop(e.currentTarget.scrollTop);
- // Preserve any consumer-provided onScroll handlers
- onScroll?.(e);
- },
- [onScroll]
- );
+  const handleScroll = useCallback(
+    (e: UIEvent<HTMLDivElement>) => {
+      // React's Synthetic events are perfectly batched in React 18+
+      setScrollTop(e.currentTarget.scrollTop);
+      // Preserve any consumer-provided onScroll handlers
+      onScroll?.(e);
+    },
+    [onScroll]
+  );
 
- /* ----------------------------------------------------
+  /* ----------------------------------------------------
  Virtualization Math
  ---------------------------------------------------- */
- const totalItems = items.length;
- const totalHeight = totalItems * itemHeight;
+  const totalItems = items.length;
+  const totalHeight = totalItems * itemHeight;
 
- // Calculate exactly which indices are currently visible in the viewport
- const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  // Calculate exactly which indices are currently visible in the viewport
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(
     totalItems - 1,
     Math.floor((scrollTop + containerHeight) / itemHeight) + overscan
@@ -130,19 +140,19 @@ function VirtualListInner<T>(
     <div
       ref={internalRef}
       className={cn(
-        "relative w-full overflow-y-auto overflow-x-hidden bg-surface border border-default rounded-md font-sans will-change-[scroll-position] focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]",
-        "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5",
-        "[&::-webkit-scrollbar-track]:bg-transparent",
-        "[&::-webkit-scrollbar-thumb]:bg-subtle [&::-webkit-scrollbar-thumb]:rounded-full",
-        "hover:[&::-webkit-scrollbar-thumb]:bg-muted",
+        'relative w-full overflow-y-auto overflow-x-hidden bg-surface border border-default rounded-md font-sans will-change-[scroll-position] focus-visible:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--nui-fg-default)]',
+        '[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5',
+        '[&::-webkit-scrollbar-track]:bg-transparent',
+        '[&::-webkit-scrollbar-thumb]:bg-subtle [&::-webkit-scrollbar-thumb]:rounded-full',
+        'hover:[&::-webkit-scrollbar-thumb]:bg-muted',
         className
       )}
       style={{ height: height !== undefined ? `${height}px` : '100%' }}
- onScroll={handleScroll}
- role="list"
- tabIndex={0}
- {...props}
- >
+      onScroll={handleScroll}
+      role="list"
+      tabIndex={0}
+      {...props}
+    >
       {/* 1. The Spacer: Forces the container to be the exact scrollable height of 10k+ rows */}
       <div
         className="w-full pointer-events-none"
@@ -153,7 +163,9 @@ function VirtualListInner<T>(
       {visibleItems.map((item, i) => {
         const actualIndex = startIndex + i;
         // Safely fall back to index if no keyExtractor is provided
-        const itemKey = keyExtractor ? keyExtractor(item, actualIndex) : actualIndex;
+        const itemKey = keyExtractor
+          ? keyExtractor(item, actualIndex)
+          : actualIndex;
 
         return (
           <div
@@ -162,12 +174,12 @@ function VirtualListInner<T>(
             aria-setsize={totalItems}
             aria-posinset={actualIndex + 1}
             className={cn(
-              "absolute top-0 left-0 w-full flex items-center px-4 text-default text-sm whitespace-nowrap overflow-hidden text-ellipsis border-default hover:bg-subtle",
-              actualIndex === totalItems - 1 ? "border-b-0" : "border-b"
+              'absolute top-0 left-0 w-full flex items-center px-4 text-default text-sm whitespace-nowrap overflow-hidden text-ellipsis border-default hover:bg-subtle',
+              actualIndex === totalItems - 1 ? 'border-b-0' : 'border-b'
             )}
-            style={{ 
+            style={{
               height: `${itemHeight}px`,
-              transform: `translateY(${actualIndex * itemHeight}px)` 
+              transform: `translateY(${actualIndex * itemHeight}px)`,
             }}
           >
             {renderItem(item, actualIndex)}
@@ -180,7 +192,7 @@ function VirtualListInner<T>(
 
 // Type assertion required to allow forwardRef to support generics <T>
 export const VirtualList = forwardRef(VirtualListInner) as <T>(
- props: VirtualListProps<T> & { ref?: React.ForwardedRef<VirtualListHandle> }
+  props: VirtualListProps<T> & { ref?: React.ForwardedRef<VirtualListHandle> }
 ) => React.ReactElement;
 
 (VirtualList as React.FC).displayName = 'VirtualList';

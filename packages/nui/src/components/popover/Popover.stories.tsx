@@ -20,7 +20,7 @@ const meta: Meta<typeof Popover> = {
 
 export default meta;
 
-export const Default: StoryObj<any> = {
+export const Default: StoryObj<{ showArrow?: boolean }> = {
   args: {
     showArrow: false,
   },

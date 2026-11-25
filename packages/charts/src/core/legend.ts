@@ -4,6 +4,7 @@
  */
 
 import { escapeHtml } from './a11y';
+import { parseSafeColor } from './color';
 
 export interface LegendItem {
   name: string;
@@ -24,7 +25,7 @@ export function renderLegendHtml(
       ${series
         .map((s) => {
           const safeName = escapeHtml(s.name);
-          const safeColor = escapeHtml(s.color);
+          const safeColor = escapeHtml(parseSafeColor(s.color));
           return `
         <button
           type="button"

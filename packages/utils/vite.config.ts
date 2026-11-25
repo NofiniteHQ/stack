@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
@@ -22,7 +23,26 @@ export default defineConfig({
     reportCompressedSize: true,
 
     lib: {
-      entry: 'src/index.ts',
+      entry: {
+        index: 'src/index.ts',
+        'browser/index': 'src/browser.ts',
+        'string/index': 'src/string/index.ts',
+        'object/index': 'src/object/index.ts',
+        'array/index': 'src/array/index.ts',
+        'math/index': 'src/math/index.ts',
+        'async/index': 'src/async/index.ts',
+        'validation/index': 'src/validation/index.ts',
+        'date/index': 'src/date/index.ts',
+        'dom/index': 'src/dom/index.ts',
+        'cn/index': 'src/cn/index.ts',
+        'env/index': 'src/env/index.ts',
+        'jwt/index': 'src/jwt/index.ts',
+        'otp/index': 'src/otp/index.ts',
+        'server/index': 'src/server/index.ts',
+        'password/index': 'src/password/index.ts',
+        'uuid/index': 'src/uuid/index.ts',
+        'zeptomail/index': 'src/zeptomail/index.ts',
+      },
       name: '@nofinite/utils',
     },
 
@@ -57,22 +77,19 @@ export default defineConfig({
         // Runtime deps
         'argon2',
         'jose',
-        'uuid',
-        'zeptomail',
-        'node-fetch',
       ],
 
       output: [
         {
           format: 'es',
-          dir: './packages/utils/dist',
+          dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].js',
         },
         {
           format: 'cjs',
-          dir: './packages/utils/dist',
+          dir: path.resolve(__dirname, 'dist'),
           preserveModules: true,
           preserveModulesRoot: 'src',
           entryFileNames: '[name].cjs',

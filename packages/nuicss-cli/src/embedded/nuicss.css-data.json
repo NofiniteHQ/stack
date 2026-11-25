@@ -23,6 +23,83 @@
       }
     },
     {
+      "name": "--color-neutral-50",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#f9fafb`"
+      }
+    },
+    {
+      "name": "--color-neutral-100",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#f2f3f5`"
+      }
+    },
+    {
+      "name": "--color-neutral-200",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#e5e6e9`"
+      }
+    },
+    {
+      "name": "--color-neutral-300",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#d2d4d7`"
+      }
+    },
+    {
+      "name": "--color-neutral-400",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#9da0a4`"
+      }
+    },
+    {
+      "name": "--color-neutral-500",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#6f7276`"
+      }
+    },
+    {
+      "name": "--color-neutral-600",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#505357`"
+      }
+    },
+    {
+      "name": "--color-neutral-700",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#3e4044`"
+      }
+    },
+    {
+      "name": "--color-neutral-800",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#252729`"
+      }
+    },
+    {
+      "name": "--color-neutral-900",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#16171a`"
+      }
+    },
+    {
+      "name": "--color-neutral-950",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `#07080a`"
+      }
+    },
+    {
       "name": "--slate-50",
       "description": {
         "kind": "markdown",
@@ -257,14 +334,14 @@
       "name": "--bg-page",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-50)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-50)`"
       }
     },
     {
       "name": "--bg-canvas",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-50)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-50)`"
       }
     },
     {
@@ -275,10 +352,17 @@
       }
     },
     {
+      "name": "--bg-surface-alt",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-100)`"
+      }
+    },
+    {
       "name": "--bg-surface-raised",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-50)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
       }
     },
     {
@@ -292,21 +376,21 @@
       "name": "--bg-subtle",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-100)`"
       }
     },
     {
       "name": "--bg-muted",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-200)`"
       }
     },
     {
       "name": "--bg-inset",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-100)`"
       }
     },
     {
@@ -320,21 +404,21 @@
       "name": "--bg-accent",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-100)`"
       }
     },
     {
       "name": "--bg-overlay",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `rgba(0, 0, 0, 0.4)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `rgba(0, 0, 0, 0.45)`"
       }
     },
     {
       "name": "--glass-bg",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `rgba(255, 255, 255, 0.7)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `rgba(255, 255, 255, 0.75)`"
       }
     },
     {
@@ -362,35 +446,35 @@
       "name": "--fg-default",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-900)`"
       }
     },
     {
       "name": "--fg-card",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-900)`"
       }
     },
     {
       "name": "--fg-subtle",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-600)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-600)`"
       }
     },
     {
       "name": "--fg-muted",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-500)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-500)`"
       }
     },
     {
       "name": "--fg-accent",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-900)`"
       }
     },
     {
@@ -404,7 +488,7 @@
       "name": "--fg-disabled",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-400)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-400)`"
       }
     },
     {
@@ -439,28 +523,28 @@
       "name": "--border-default",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-200)`"
       }
     },
     {
       "name": "--border-strong",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-300)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-300)`"
       }
     },
     {
       "name": "--border-subtle",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-100)`"
       }
     },
     {
       "name": "--border-hover",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-300)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-300)`"
       }
     },
     {
@@ -474,63 +558,63 @@
       "name": "--border-disabled",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-200)`"
       }
     },
     {
       "name": "--color-primary",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--brand-primary)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-900)`"
       }
     },
     {
       "name": "--color-primary-hover",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(in oklch, var(--color-primary) 88%, black)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-800)`"
       }
     },
     {
       "name": "--color-primary-active",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `color-mix(in oklch, var(--color-primary) 76%, black)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-700)`"
       }
     },
     {
       "name": "--color-primary-fg",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--brand-primary-fg)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
       }
     },
     {
       "name": "--color-secondary",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-100)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-100)`"
       }
     },
     {
       "name": "--color-secondary-hover",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-200)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-200)`"
       }
     },
     {
       "name": "--color-secondary-active",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-300)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-300)`"
       }
     },
     {
       "name": "--color-secondary-fg",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--slate-900)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-900)`"
       }
     },
     {
@@ -600,7 +684,7 @@
       "name": "--color-warning-fg",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--white)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-neutral-950)`"
       }
     },
     {
@@ -688,10 +772,17 @@
       }
     },
     {
+      "name": "--color-primary-ring",
+      "description": {
+        "kind": "markdown",
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary)`"
+      }
+    },
+    {
       "name": "--focus-ring",
       "description": {
         "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--fg-default)`"
+        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary-ring, var(--fg-default))`"
       }
     },
     {
@@ -1721,111 +1812,6 @@
       "description": {
         "kind": "markdown",
         "value": "**NUICSS Design Token**\n\nDefault value: `#0ea5e9`"
-      }
-    },
-    {
-      "name": "--media-brand",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
-      }
-    },
-    {
-      "name": "--media-focus-ring-color",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
-      }
-    },
-    {
-      "name": "--media-focus-ring",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `0 0 0 3px var(--media-focus-ring-color)`"
-      }
-    },
-    {
-      "name": "--media-font-family",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --font-sans,\n      system-ui,\n      -apple-system,\n      BlinkMacSystemFont,\n      'Segoe UI',\n      Roboto,\n      sans-serif\n    )`"
-      }
-    },
-    {
-      "name": "--media-border-radius",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--radius-lg, 0.75rem)`"
-      }
-    },
-    {
-      "name": "--media-slider-thumb-bg",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
-      }
-    },
-    {
-      "name": "--media-slider-track-fill-bg",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --color-primary,\n      oklch(0.546 0.245 262.881)\n    )`"
-      }
-    },
-    {
-      "name": "--media-buffering-color",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--color-primary, oklch(0.546 0.245 262.881))`"
-      }
-    },
-    {
-      "name": "--media-slider-track-bg",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --border-default,\n      oklch(0.929 0.013 255.508 / 0.8)\n    )`"
-      }
-    },
-    {
-      "name": "--media-menu-bg",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--bg-surface, oklch(1 0 0))`"
-      }
-    },
-    {
-      "name": "--media-menu-border",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--border-default, oklch(0.929 0.013 255.508))`"
-      }
-    },
-    {
-      "name": "--media-menu-color",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --fg-default,\n      var(--text-default, oklch(0.208 0.042 265.755))\n    )`"
-      }
-    },
-    {
-      "name": "--media-tooltip-bg",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(--bg-surface, oklch(1 0 0))`"
-      }
-    },
-    {
-      "name": "--media-tooltip-color",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --fg-default,\n      var(--text-default, oklch(0.208 0.042 265.755))\n    )`"
-      }
-    },
-    {
-      "name": "--media-controls-color",
-      "description": {
-        "kind": "markdown",
-        "value": "**NUICSS Design Token**\n\nDefault value: `var(\n      --fg-default,\n      var(--text-default, oklch(0.208 0.042 265.755))\n    )`"
       }
     }
   ],

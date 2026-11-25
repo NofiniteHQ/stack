@@ -1,7 +1,7 @@
 /**
  * Configuration options for password hashing.
  *
- * These defaults are tuned for server environments.
+ * These defaults are tuned for server environments (RFC 9106 recommended profile).
  * Increase costs only if you fully understand the impact.
  */
 export interface PasswordHashOptions {
@@ -19,7 +19,7 @@ export interface PasswordHashOptions {
 
   /**
    * Degree of parallelism.
-   * Default: 1
+   * Default: 4 (RFC 9106 multi-core recommended profile)
    */
   parallelism?: number;
 }

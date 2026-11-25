@@ -203,7 +203,7 @@ All engineering agents working in this ecosystem must adhere to these governing 
 
 ### 1. Root-Cause Upstream Fix Rule (Zero Downstream Monkey-Patching)
 
-- When a styling or component defect appears in downstream applications or documentation (`nuix`, `oss-docs`), **never** add quick-fix CSS classes or manual style monkey-patches in `globals.css` or component files.
+- When a styling or component defect appears in downstream applications or documentation (`oss-docs`), **never** add quick-fix CSS classes or manual style monkey-patches in `globals.css` or component files.
 - All fixes must be implemented upstream in `@nofinite/nuicss` or `@nofinite/nui`, verified, built, and cleanly consumed downstream.
 
 ### 2. The "Green Test" Fallacy & Compulsory Visual Validation
