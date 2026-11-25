@@ -1,5 +1,17 @@
 # @nofinite/nui
 
+## 3.3.0
+
+### Minor Changes
+
+- a0021b4: Enforced strict TypeScript & Nx module boundaries, isolated declaration (`out-tsc/lib`) builds, removed legacy duplicate `floating-arrow`, aligned `@nofinite/nuicss` peer dependency (`>=3.3.0`), and added npm provenance publishing metadata (`publishConfig.provenance`).
+
+### Patch Changes
+
+- Updated dependencies [a0021b4]
+  - @nofinite/nuicss@3.3.0
+  - @nofinite/utils@2.1.0
+
 ## 3.2.0
 
 ### Minor Changes

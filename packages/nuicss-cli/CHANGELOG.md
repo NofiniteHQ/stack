@@ -1,5 +1,20 @@
 # nuicss
 
+## 0.2.0
+
+### Minor Changes
+
+- a0021b4: Sole `npx nuicss` binary ownership, cross-platform Node build pipeline, and test-free packaging:
+
+  - Established `nuicss` as the sole `npx nuicss` binary owner (migrated out of `@nofinite/nuicss`).
+  - Replaced Windows-only CLI build script with a cross-platform Node pipeline (`scripts/build-cli.mjs`) with embedded assets.
+  - Excluded test files from published tarballs, hardened path containment, and added npm provenance publishing metadata (`publishConfig.provenance`).
+
+### Patch Changes
+
+- Updated dependencies [a0021b4]
+  - @nofinite/nuicss@3.3.0
+
 ## 0.1.0
 
 ### Minor Changes

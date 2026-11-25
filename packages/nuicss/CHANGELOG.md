@@ -1,5 +1,15 @@
 ﻿# @nofinite/nuicss
 
+## 3.3.0
+
+### Minor Changes
+
+- a0021b4: Binary ownership separation, clean `flags.css` build preservation, and provenance metadata:
+
+  - Migrated standalone CLI binary ownership (`npx nuicss`) out of `@nofinite/nuicss` into the dedicated `nuicss` package (`packages/nuicss-cli`).
+  - Preserved clean `flags.css` source state during CSS and CDN builds.
+  - Added npm provenance publishing metadata (`publishConfig.provenance`).
+
 ## 3.2.0
 
 ### Minor Changes

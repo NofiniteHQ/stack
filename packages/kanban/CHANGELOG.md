@@ -1,5 +1,16 @@
 # @nofinite/kanban
 
+## 1.1.0
+
+### Minor Changes
+
+- a0021b4: Enforced strict TypeScript & Nx module boundaries, isolated declaration (`out-tsc/lib`) builds, and npm provenance publishing metadata (`publishConfig.provenance`).
+
+### Patch Changes
+
+- Updated dependencies [a0021b4]
+  - @nofinite/utils@2.1.0
+
 ## 1.0.0
 
 ### Major Changes

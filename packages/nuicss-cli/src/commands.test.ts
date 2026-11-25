@@ -15,6 +15,11 @@ import { runCli } from './index.js';
 
 const cliBin = resolve(__dirname, '../bin/nuicss.js');
 const tempBase = resolve(__dirname, '../../../temp');
+const expectedVersion = (
+  JSON.parse(
+    fs.readFileSync(resolve(__dirname, '../package.json'), 'utf8')
+  ) as { version: string }
+).version;
 
 function runCliCmd(
   cmdArgs: string,
@@ -883,7 +888,7 @@ describe('NUICSS CLI Commands Integration Suite', () => {
 
       try {
         await runCli(['node', 'nuicss', 'version']);
-        expect(logs.join('\n')).toContain('NUICSS CLI v0.1.0');
+        expect(logs.join('\n')).toContain(`NUICSS CLI v${expectedVersion}`);
       } finally {
         console.log = origLog;
       }

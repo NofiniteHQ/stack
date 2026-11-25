@@ -1,5 +1,15 @@
 # @nofinite/utils
 
+## 2.1.0
+
+### Minor Changes
+
+- a0021b4: Client-safe browser entrypoints, server barrel, and tree-shakeable utility subpaths:
+
+  - Added client-safe `@nofinite/utils/browser` entrypoint and `"browser"` export condition (excluding native `argon2`).
+  - Added dedicated `@nofinite/utils/server` barrel and tree-shakeable subpaths (`cn`, `dom`, `math`, `date`, `async`, `array`, `object`, `string`, `validation`).
+  - Added npm provenance publishing metadata (`publishConfig.provenance`).
+
 ## 2.0.1
 
 ### Patch Changes
