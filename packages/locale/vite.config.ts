@@ -1,28 +1,18 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
-import type { PreRenderedAsset } from 'rollup'; 
+import type { PreRenderedAsset } from 'rollup';
 
-// Shared asset logic to perfectly recreate your folders and clear the CSS
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Shared asset logic to name the CSS shim cleanly
 const sharedAssetFileNames = (assetInfo: PreRenderedAsset) => {
   const name = assetInfo.names?.[0] ?? '';
-  
-  // Force the CSS file to be cleanly named
   if (name.endsWith('.css')) return 'style.css';
-
-  // Catch the SVGs before they get hashed
-  if (name.endsWith('.svg')) {
-    const originalPath = assetInfo.originalFileNames?.[0] || '';
-    
-    // Rollup 4 tracks the original path, allowing us to drop them
-    // perfectly back into their 1x1 and 4x3 folders!
-    if (originalPath.includes('1x1')) return 'flags/1x1/[name][extname]';
-    if (originalPath.includes('4x3')) return 'flags/4x3/[name][extname]';
-    
-    return 'flags/[name][extname]';
-  }
-  
-  return '[name]-[hash][extname]'; // Default fallback
+  return '[name]-[hash][extname]';
 };
 
 export default defineConfig({
@@ -35,6 +25,16 @@ export default defineConfig({
       outDir: './dist',
       insertTypesEntry: true,
     }),
+    {
+      name: 'locale-style-shim',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'style.css',
+          source: `/**\n * @nofinite/locale - Stylesheet Compatibility Shim\n * Canonical flag and component styling is provided by @nofinite/nuicss.\n */\n@import '@nofinite/nuicss/flags.css';\n`,
+        });
+      },
+    },
   ],
 
   build: {
@@ -42,32 +42,35 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     reportCompressedSize: true,
-
-    // Because build.lib is gone, Vite will actually respect this!
-    assetsInlineLimit: 0, 
+    lib: {
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        'countries/index': path.resolve(__dirname, 'src/countries/index.ts'),
+        'bcp47/index': path.resolve(__dirname, 'src/bcp47/index.ts'),
+        'format/index': path.resolve(__dirname, 'src/format/index.ts'),
+        'i18n/index': path.resolve(__dirname, 'src/i18n/index.ts'),
+        'react/index': path.resolve(__dirname, 'src/react/index.ts'),
+        'data/countries': path.resolve(__dirname, 'src/data/countries.ts'),
+      },
+      name: 'NofiniteLocale',
+    },
 
     rollupOptions: {
-      // Instead of build.lib, we explicitly tell Rollup what the entry point is
-      input: 'src/index.ts',
-      external: [], 
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
 
       output: [
         {
           format: 'es',
-          entryFileNames: 'index.js',
-          assetFileNames: sharedAssetFileNames, 
+          entryFileNames: '[name].js',
+          chunkFileNames: 'chunks/[name]-[hash].js',
+          assetFileNames: sharedAssetFileNames,
         },
         {
           format: 'cjs',
-          entryFileNames: 'index.cjs',
+          entryFileNames: '[name].cjs',
+          chunkFileNames: 'chunks/[name]-[hash].cjs',
           exports: 'named',
-          assetFileNames: sharedAssetFileNames, 
-        },
-        {
-          format: 'iife',
-          name: 'NofiniteLocale',
-          entryFileNames: 'index.global.js',
-          assetFileNames: sharedAssetFileNames, 
+          assetFileNames: sharedAssetFileNames,
         },
       ],
     },
@@ -77,6 +80,6 @@ export default defineConfig({
     watch: false,
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'tests/**/*.test.ts'],
   },
 });

@@ -34,5 +34,13 @@
     "**/*.stories.jsx",
     "**/*.stories.tsx"
   ],
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../utils/tsconfig.lib.json"
+    },
+    {
+      "path": "../nuicss/tsconfig.lib.json"
+    }
+  ]
 }

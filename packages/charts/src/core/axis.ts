@@ -12,6 +12,8 @@ export type ChartScale<TTick = number | Date> = ((
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+import { escapeHtml } from './a11y';
+
 export interface AxisOptions {
   width: number;
   height: number;
@@ -136,7 +138,7 @@ export function generateAxisSvg(options: AxisOptions): {
             <text x="-10" y="${cy}" text-anchor="end" dominant-baseline="central"
                   class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                   fill="var(--fg-muted, currentColor)" opacity="0.75">
-              ${cat.label}
+              ${escapeHtml(cat.label)}
             </text>
           `;
         })
@@ -161,7 +163,7 @@ export function generateAxisSvg(options: AxisOptions): {
             <text x="${x}" y="${innerHeight + 18}" text-anchor="middle"
                   class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                   fill="var(--fg-muted, currentColor)" opacity="0.75">
-              ${formatted}
+              ${escapeHtml(formatted)}
             </text>
           `;
         })
@@ -198,7 +200,7 @@ export function generateAxisSvg(options: AxisOptions): {
               <text x="-10" y="${y}" text-anchor="end" dominant-baseline="central"
                     class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                     fill="var(--fg-muted, currentColor)" opacity="0.75">
-                ${formatted}
+                ${escapeHtml(formatted)}
               </text>
             `;
           })
@@ -227,7 +229,7 @@ export function generateAxisSvg(options: AxisOptions): {
               <text x="${cx}" y="${innerHeight + 18}" text-anchor="middle"
                     class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                     fill="var(--fg-muted, currentColor)" opacity="0.75">
-                ${displayLabel}
+                ${escapeHtml(displayLabel)}
               </text>
             `;
           })
@@ -248,7 +250,7 @@ export function generateAxisSvg(options: AxisOptions): {
               <text x="${x}" y="${innerHeight + 18}" text-anchor="middle"
                     class="chart-axes text-[11px] fill-muted font-sans select-none pointer-events-none"
                     fill="var(--fg-muted, currentColor)" opacity="0.75">
-                ${formatted}
+                ${escapeHtml(formatted)}
               </text>
             `;
           })

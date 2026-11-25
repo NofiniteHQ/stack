@@ -11,12 +11,10 @@ import {
   createKanbanStore,
   renderKanbanHTML,
   type KanbanColumn,
-  Kanban,
-  type KanbanHandle,
   matchCardFilter,
   hasActiveFilter,
-  type KanbanFilterOptions,
 } from './index';
+import { Kanban, type KanbanHandle } from './react';
 
 describe('@nofinite/kanban reordering engine', () => {
   it('reorders array elements immutably', () => {
@@ -163,7 +161,6 @@ describe('@nofinite/kanban DOM renderer and binder', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
 
-    let cardMoved = false;
     let taskAdded = false;
 
     const board = createKanbanBoard({
@@ -181,7 +178,7 @@ describe('@nofinite/kanban DOM renderer and binder', () => {
         },
       ],
       onCardMove: () => {
-        cardMoved = true;
+        /* no-op for test */
       },
       onCardAdd: () => {
         taskAdded = true;
@@ -1221,5 +1218,24 @@ describe('@nofinite/kanban Phase 6: Search & Filter Suite', () => {
       root.unmount();
     });
     container.remove();
+  });
+
+  it('escapes raw HTML in fallback card content in renderKanbanHTML', () => {
+    const columns: KanbanColumn[] = [
+      {
+        id: 'col-sec',
+        title: 'Security',
+        items: [
+          {
+            id: 'xss-card',
+            content: '<img src=x onerror=alert(1)>Malicious Task',
+          },
+        ],
+      },
+    ];
+
+    const html = renderKanbanHTML({ columns });
+    expect(html).not.toContain('<img src=x onerror=alert(1)>');
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;Malicious Task');
   });
 });

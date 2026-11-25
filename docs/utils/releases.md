@@ -3,55 +3,28 @@ title: Releases
 sidebar_position: 999
 ---
 
-# @nofinite/utils — Initial Release (v0.1.0)
+# @nofinite/utils — v2.1.0
 
-**Release date:** 02 February 2026
+**Latest release:** `2.1.0` (Apache-2.0)
 
 ---
 
 ## Overview
 
-This is the first public release of Nofinite Utils.
-
-Nofinite Utils is a lightweight, framework-agnostic utility library providing
-**production-ready helpers** for common backend and full‑stack needs such as
-authentication, security, identifiers, and environment handling.
+`@nofinite/utils` `v2.1.0` pairs Nofinite's server-side cryptographic/messaging helpers with a full tree-shakeable standard utility suite (`cn`, `dom`, `math`, `date`, `async`, `array`, `object`, `string`, `validation`) and a client-safe **`@nofinite/utils/browser`** entrypoint.
 
 ---
 
-## Included
+## Included in `v2.1.0`
 
-- OTP generation and verification (secure, hash-based)
-- Password hashing and verification (Argon2id)
-- JWT helpers with configurable algorithms and expiration
-- UUID v7 utilities (string + binary helpers)
-- Environment helpers (`isProd`, `isDev`, safe env access)
-- Email helpers (ZeptoMail integration)
-- Fully typed APIs with TypeScript support
-
----
-
-## Design Goals
-
-- **Security-first** defaults
-- **Minimal API surface**
-- **Tree-shakable ES modules**
-- **Zero framework coupling**
-- **Explicit, readable utilities**
+- **Browser-Safe Entrypoint (`@nofinite/utils/browser` & `"browser"` export condition):** Safe for React, Vite, Next.js client components, and Edge bundles—automatically excludes native Node add-ons such as `argon2` and server-only email clients.
+- **Server Bundle (`@nofinite/utils/server`):** Dedicated Node.js server barrel re-exporting Argon2id password helpers and email primitives.
+- **General-Purpose Utility Subpaths:** `@nofinite/utils/cn`, `@nofinite/utils/dom`, `@nofinite/utils/math`, `@nofinite/utils/date`, `@nofinite/utils/async`, `@nofinite/utils/array`, `@nofinite/utils/object`, `@nofinite/utils/string`, and `@nofinite/utils/validation`.
+- **Auth, Crypto, Env & Mail Subpaths:** `@nofinite/utils/password` (Argon2id), `@nofinite/utils/jwt` (`jose`), `@nofinite/utils/otp`, `@nofinite/utils/uuid`, `@nofinite/utils/env`, and `@nofinite/utils/email` (`@nofinite/utils/zeptomail`).
 
 ---
 
 ## Notes
 
-- This release establishes the public API surface.
-- All utilities are designed to work in Node.js environments.
-- Sensible defaults are provided, but most helpers are configurable.
-- APIs may evolve until a stable `v1.0.0`.
-
----
-
-## Known Limitations
-
-- Email utilities rely on external providers (e.g. ZeptoMail).
-- JWT helpers currently focus on symmetric algorithms.
-- UUID utilities intentionally support **only UUID v7**.
+- Node.js `>= 18`, dual ESM + CJS outputs, `sideEffects: false`, and strict TypeScript declarations for every subpath.
+- Client applications importing `@nofinite/utils` resolve `"browser": "./dist/browser/index.js"` automatically in modern bundlers, or can import `@nofinite/utils/browser` explicitly.

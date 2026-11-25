@@ -55,7 +55,7 @@ export interface MarkonRenderProps {
 
   /**
    * Whether to include the self-contained publication stylesheet.
-   * @default true
+   * @default false
    */
   includeStyles?: boolean;
 
@@ -89,7 +89,7 @@ export const MarkonRender: React.FC<MarkonRenderProps> = ({
   layout = 'article',
   showTOC = true,
   tocTitle = 'On this page',
-  includeStyles = true,
+  includeStyles = false,
   highlightCode = true,
   renderMath = true,
   className = '',

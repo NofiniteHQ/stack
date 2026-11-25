@@ -20,7 +20,6 @@ import {
   CALLOUT_THEMES,
   formatDisplayUrl,
   renderLinkPopoverHtml,
-  UploadPlaceholder,
   MarkonDragHandle,
 } from './index';
 
@@ -471,8 +470,13 @@ describe('@nofinite/markon', () => {
       expect(labelEl).toBeTruthy();
       expect(labelEl?.textContent).toBe('Paragraph');
 
-      // Change format to Heading 1
-      editor.tiptap.commands.setHeading({ level: 1 });
+      type MarkonHeadingCommands = {
+        setHeading: (opts: { level: number }) => boolean;
+        toggleBlockquote: () => boolean;
+      };
+      (editor.tiptap.commands as unknown as MarkonHeadingCommands).setHeading({
+        level: 1,
+      });
       editor.updateToolbarState();
       expect(labelEl?.textContent).toBe('Heading 1');
       expect(
@@ -480,7 +484,9 @@ describe('@nofinite/markon', () => {
       ).toBe('H1');
 
       // Change format to Heading 2
-      editor.tiptap.commands.setHeading({ level: 2 });
+      (editor.tiptap.commands as unknown as MarkonHeadingCommands).setHeading({
+        level: 2,
+      });
       editor.updateToolbarState();
       expect(labelEl?.textContent).toBe('Heading 2');
       expect(
@@ -488,7 +494,9 @@ describe('@nofinite/markon', () => {
       ).toBe('H2');
 
       // Change format to Blockquote
-      editor.tiptap.commands.toggleBlockquote();
+      (
+        editor.tiptap.commands as unknown as MarkonHeadingCommands
+      ).toggleBlockquote();
       editor.updateToolbarState();
       expect(labelEl?.textContent).toBe('Quote');
 
@@ -1024,6 +1032,11 @@ describe('@nofinite/markon', () => {
             content: [{ type: 'text', text: 'Section Alpha' }],
           },
           {
+            type: 'heading',
+            attrs: { level: 2 },
+            content: [{ type: 'text', text: 'Section Beta' }],
+          },
+          {
             type: 'paragraph',
             content: [
               {
@@ -1068,8 +1081,9 @@ describe('@nofinite/markon', () => {
 
       // Verify onRendered callback
       expect(renderedResult).not.toBeNull();
-      expect(renderedResult.toc.length).toBe(1);
+      expect(renderedResult.toc.length).toBe(2);
       expect(renderedResult.toc[0].text).toBe('Section Alpha');
+      expect(renderedResult.toc[1].text).toBe('Section Beta');
       expect(renderedResult.readingTimeMinutes).toBeGreaterThanOrEqual(1);
 
       root.unmount();
@@ -1332,6 +1346,23 @@ describe('@nofinite/markon', () => {
       expect(newsResult.html).toContain('PRESS RELEASE');
       expect(newsResult.html).toContain('Nofinite Launches Markon 2.0');
       expect(newsResult.html).toContain('By Press Office');
+    });
+
+    it('omits inline <style> by default conforming to Zero Downstream CSS, but supports includeStyles', () => {
+      const doc = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Clean HTML.' }],
+          },
+        ],
+      };
+      const defaultResult = renderMarkon({ content: doc });
+      expect(defaultResult.html).not.toContain('<style data-markon-renderer');
+
+      const styledResult = renderMarkon({ content: doc, includeStyles: true });
+      expect(styledResult.html).toContain('<style data-markon-renderer=""');
     });
 
     it('extracts Table of Contents accurately from JSON, HTML, and Markdown', () => {

@@ -62,10 +62,12 @@ export function PopoverRoot({
   const triggerRef = useRef<HTMLElement | null>(null);
   const contentId = `popover-${useId()}`;
 
+  const prevOpenRef = useRef(open);
   useEffect(() => {
-    if (!open && triggerRef.current) {
+    if (prevOpenRef.current && !open && triggerRef.current) {
       restoreFocus(triggerRef.current);
     }
+    prevOpenRef.current = open;
   }, [open]);
 
   return (

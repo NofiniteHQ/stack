@@ -40,7 +40,7 @@
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
       },
-      "exclude": ["examples/**/*"]
+      "exclude": ["examples/**/*", "tests/**/*", "temp/**/*", "archive/**/*"]
     },
     {
       "plugin": "@nx/eslint/plugin",
@@ -53,7 +53,7 @@
       "options": {
         "testTargetName": "test"
       },
-      "exclude": ["examples/**/*"]
+      "exclude": ["examples/**/*", "tests/**/*", "temp/**/*", "archive/**/*"]
     },
     {
       "plugin": "@nx/storybook/plugin",

@@ -5,7 +5,8 @@
  * 100% styled with @nofinite/nuicss design tokens.
  */
 
-import CodeBlockLowlight, {
+import {
+  CodeBlockLowlight,
   type CodeBlockLowlightOptions,
 } from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';

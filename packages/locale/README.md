@@ -82,7 +82,7 @@ _(For HTML)_
 
 ```html
 <script>
-  const country = NofiniteLocale.getCountryByCode("IN");
+  const country = NofiniteLocale.getCountryByCode('IN');
   console.log(country.name); // India
   console.log(country.dialCode); // +91
 </script>
@@ -90,49 +90,79 @@ _(For HTML)_
 
 ---
 
-### Use Flags
+### Internationalized Formatting & Direction
 
-Flags are provided via CSS. Import the stylesheet once.
-
-_(For Javascript/Typescript)_
+Use lightweight, dependency-free ECMAScript `Intl` helpers with built-in defense against malformed locale tags and an LRU cache:
 
 ```ts
-import "@nofinite/locale/style";
+import {
+  formatDate,
+  formatCurrency,
+  formatRelativeTime,
+  formatNumber,
+  getDirection,
+} from '@nofinite/locale';
+
+// Date formatting with locale fallback
+formatDate(new Date(), { month: 'long', year: 'numeric' }, 'fr-FR'); // e.g. "novembre 2026"
+
+// Currency formatting with ISO 4217 validation
+formatCurrency(149.99, 'USD', undefined, 'en-US'); // "$149.99"
+formatCurrency(149.99, 'EUR', undefined, 'de-DE'); // "149,99 €"
+
+// Relative time formatting
+formatRelativeTime(-2, 'day', undefined, 'en-US'); // "2 days ago"
+
+// Number formatting
+formatNumber(1250000, { notation: 'compact' }, 'en-US'); // "1.3M"
+
+// Text direction detection (LTR vs. RTL)
+getDirection('ar-EG'); // 'rtl'
+getDirection('he'); // 'rtl'
+getDirection('en-US'); // 'ltr'
 ```
 
-_(For HTML)_
+---
 
-```html
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@nofinite/locale/dist/style.css"
-/>
+### React Integration
+
+Wrap your application in `<LocaleProvider>` to supply locale context and formatted helpers across your component tree:
+
+```tsx
+import { LocaleProvider, useLocale } from '@nofinite/locale/react';
+
+function UserGreeting() {
+  const { locale, formatCurrency, formatDate } = useLocale();
+  return (
+    <div>
+      <p>Locale: {locale}</p>
+      <p>Total: {formatCurrency(49.99, 'USD')}</p>
+    </div>
+  );
+}
+
+export function App() {
+  return (
+    <LocaleProvider locale="en-US">
+      <UserGreeting />
+    </LocaleProvider>
+  );
+}
 ```
 
-**Flag Classes**
+---
 
-| Class            | Purpose                        |
-| ---------------- | ------------------------------ |
-| `.nf-flag`       | Base flag class (required)     |
-| `.nf-flag-{iso}` | Country ISO-2 code (lowercase) |
-| `.square`        | Optional 1:1 ratio             |
+### Design Tokens & Styling Contract
 
-**Examples**
+Per Nofinite ecosystem standards, styling tokens and component classes are centralized in **NUICSS** (`@nofinite/nuicss`).
 
-- Standard (4:3)
-  `<span class="nf-flag nf-flag-us"></span>`
-  <br/>
-- Square (1:1)
-  `<span class="nf-flag nf-flag-jp square"></span>`
-  <br/>
-- Inside UI Elements
+Import the compatibility style shim:
 
-  ```html
-  <button>
-    <span class="nf-flag nf-flag-fr square"></span>
-    Select Language
-  </button>
-  ```
+```ts
+import '@nofinite/locale/style';
+```
+
+Or consume `@nofinite/nuicss` directly. Flag icons and country UI indicators consume NUICSS tokens (`var(--color-primary)`, `var(--bg-surface)`).
 
 ---
 

@@ -20,7 +20,8 @@ export const REGISTRY: Record<string, ComponentInfo> = {
     pkg: '@nofinite/nui',
     description:
       'Accessible modal dialog with glassmorphic backdrop-blur-sm and focus lock',
-    superclass: 'modal-dialog, modal-backdrop, bg-overlay',
+    superclass:
+      'modal, modal-box, modal-header, modal-title, modal-body, modal-footer',
   },
   card: {
     name: 'Card',
@@ -39,21 +40,21 @@ export const REGISTRY: Record<string, ComponentInfo> = {
     name: 'Table',
     pkg: '@nofinite/nui',
     description: 'Responsive data table with sticky headers and zebra striping',
-    superclass: 'table-container, table-row, table-cell',
+    superclass: 'table-container, table, table-head, table-row, table-cell',
   },
   tabs: {
     name: 'Tabs',
     pkg: '@nofinite/nui',
     description:
       'Keyboard-navigable accessible tabs with animated active indicators',
-    superclass: 'tabs-list, tabs-trigger, tabs-content',
+    superclass: 'tabs, tab-list, tab, tab-panel',
   },
   dropdown: {
     name: 'DropdownMenu',
     pkg: '@nofinite/nui',
     description:
       'Accessible popup menu with keyboard roving-tabindex and submenu support',
-    superclass: 'menu-dropdown, menu-item',
+    superclass: 'dropdown, dropdown-menu, dropdown-item, dropdown-divider',
   },
   chart: {
     name: 'Chart',

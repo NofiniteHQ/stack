@@ -6,6 +6,7 @@
  */
 
 import { mergeAttributes, Node } from '@tiptap/core';
+import { escapeHtml, sanitizeUrl } from './security';
 
 export interface UploadPlaceholderAttrs {
   uploadId: string;
@@ -157,10 +158,15 @@ export const UploadPlaceholder = Node.create({
         `;
 
         let visualThumbnail = '';
-        if (previewUrl && !isError) {
+        const safeName = escapeHtml(name || 'Uploading file…');
+        const safeSize = size ? escapeHtml(size) : '';
+        const safeErrorMessage = escapeHtml(errorMessage || 'Upload failed');
+        const safePreviewUrl = previewUrl ? sanitizeUrl(previewUrl) : '';
+
+        if (safePreviewUrl && safePreviewUrl !== '#' && !isError) {
           visualThumbnail = `
             <div class="relative w-12 h-12 rounded-lg overflow-hidden border border-default flex-shrink-0 bg-subtle" style="width: 48px; height: 48px;">
-              <img src="${previewUrl}" class="w-full h-full object-cover opacity-60" alt="" style="width: 100%; height: 100%; object-fit: cover;" />
+              <img src="${safePreviewUrl}" class="w-full h-full object-cover opacity-60" alt="" style="width: 100%; height: 100%; object-fit: cover;" />
               <div class="absolute inset-0 flex items-center justify-center bg-black/25" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.25);">
                 ${spinnerSvg}
               </div>
@@ -193,11 +199,9 @@ export const UploadPlaceholder = Node.create({
         }
 
         const subtitleHtml = isError
-          ? `<span class="text-xs text-danger font-medium flex items-center gap-1">${
-              errorMessage || 'Upload failed'
-            }</span>`
+          ? `<span class="text-xs text-danger font-medium flex items-center gap-1">${safeErrorMessage}</span>`
           : `<span class="text-xs text-muted flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style="width: 6px; height: 6px; border-radius: 9999px; background-color: var(--color-primary); display: inline-block;"></span>Uploading ${
-              size ? `(${size})` : ''
+              safeSize ? `(${safeSize})` : ''
             }…</span>`;
 
         const actionHtml = isError
@@ -208,7 +212,7 @@ export const UploadPlaceholder = Node.create({
           <div class="flex items-center gap-3 overflow-hidden min-w-0 flex-1" style="display: flex; align-items: center; gap: 0.75rem; min-width: 0; flex: 1;">
             ${visualThumbnail}
             <div class="flex flex-col min-w-0 flex-1" style="display: flex; flex-direction: column; min-width: 0; flex: 1;">
-              <span class="text-sm font-medium text-default truncate" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.875rem;" title="${name}">${name}</span>
+              <span class="text-sm font-medium text-default truncate" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.875rem;" title="${safeName}">${safeName}</span>
               <div class="mt-0.5" style="margin-top: 2px;">${subtitleHtml}</div>
             </div>
           </div>

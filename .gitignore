@@ -58,3 +58,12 @@ storybook-static
 /temp/
 .bun-cache/
 
+# Standalone prebuilt Bun CLI binaries (published via GitHub Releases, never tracked in Git)
+packages/nuicss-cli/bin/nuicss-*
+!packages/nuicss-cli/bin/nuicss.js
+
+
+# Benchmark Ephemeral Outputs
+/tests/benchmarks/**/reports/
+/tests/benchmarks/**/dist/
+/tests/benchmarks/**/.vite-temp/

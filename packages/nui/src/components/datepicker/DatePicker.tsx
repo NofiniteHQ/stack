@@ -122,11 +122,14 @@ export function DatePicker({
     return cleanup;
   }, [open, refs.floating]);
 
+  const prevOpenRef = useRef(open);
   useEffect(() => {
-    if (!open) {
+    if (prevOpenRef.current && !open) {
       restoreFocus(triggerRef.current);
-      return;
     }
+    prevOpenRef.current = open;
+
+    if (!open) return;
 
     // Auto-focus selected day button or first available day button when opened
     const timeoutId = setTimeout(() => {

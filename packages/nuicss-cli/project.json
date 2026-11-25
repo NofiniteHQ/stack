@@ -3,11 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/nuicss-cli/src",
   "projectType": "library",
+  "tags": ["scope:strings"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm run build:ts",
+        "command": "node scripts/build-cli.mjs",
         "cwd": "packages/nuicss-cli"
       }
     },
@@ -15,6 +16,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit",
+        "cwd": "packages/nuicss-cli"
+      }
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run",
         "cwd": "packages/nuicss-cli"
       }
     }

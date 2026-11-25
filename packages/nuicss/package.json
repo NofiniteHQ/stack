@@ -24,6 +24,30 @@
       },
       "default": "./dist/index.js"
     },
+    "./vite": {
+      "types": "./dist/plugin/vite.d.ts",
+      "import": {
+        "types": "./dist/plugin/vite.d.ts",
+        "default": "./dist/vite.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin/vite.d.ts",
+        "default": "./dist/vite.js"
+      },
+      "default": "./dist/vite.js"
+    },
+    "./postcss": {
+      "types": "./dist/plugin/postcss.d.ts",
+      "import": {
+        "types": "./dist/plugin/postcss.d.ts",
+        "default": "./dist/postcss.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin/postcss.d.ts",
+        "default": "./dist/postcss.js"
+      },
+      "default": "./dist/postcss.js"
+    },
     "./components": {
       "types": "./dist/shortcuts/index.d.ts",
       "import": {
@@ -84,34 +108,42 @@
     "./widgets.min.css": "./dist/widgets.min.css",
     "./media.css": "./dist/media.css",
     "./media.min.css": "./dist/media.min.css",
+    "./charts.css": "./dist/charts.css",
+    "./charts.min.css": "./dist/charts.min.css",
     "./kanban.css": "./dist/kanban.css",
     "./kanban.min.css": "./dist/kanban.min.css",
     "./markon.css": "./dist/markon.css",
     "./markon.min.css": "./dist/markon.min.css",
+    "./flags.css": "./dist/flags.css",
+    "./flags.min.css": "./dist/flags.min.css",
+    "./flags/*": "./dist/flags/*",
+    "./flags/4x3/*": "./dist/flags/4x3/*",
+    "./flags/1x1/*": "./dist/flags/1x1/*",
     "./dist/index.css": "./dist/index.css",
     "./styles.css": "./dist/styles.css",
     "./styles.min.css": "./dist/styles.min.css",
     "./cdn": "./dist/index.global.js",
     "./html-data.json": "./dist/nuicss.html-data.json",
     "./css-data.json": "./dist/nuicss.css-data.json",
-    "./package.json": "./package.json",
-    "./postcss": "./postcss.js"
-  },
-  "bin": {
-    "nuicss": "./bin/nuicss.js"
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "bin",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/package.json",
+    "!dist/node_modules",
     "postcss.js",
     "README.md",
     "LICENSE",
-    "AGENTS.md",
     "llms-full.txt",
     "llms-components.json"
   ],
   "engines": {
     "node": ">=18"
+  },
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
   },
   "repository": {
     "type": "git",
@@ -127,7 +159,8 @@
     "styling"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@unocss/config": "^66.10.5",
@@ -136,7 +169,7 @@
     "@unocss/preset-wind4": "^66.10.5",
     "@unocss/processor-lightningcss": "^66.10.5",
     "@unocss/vite": "^66.10.5",
-    "glob": "^13.0.6",
+    "glob": "^14.0.2",
     "unocss": "^66.10.5",
     "valibot": "^1.5.0"
   },
@@ -146,8 +179,9 @@
     "postcss": "^8.5.28"
   },
   "scripts": {
-    "build": "nx run nuicss:build && npm run build:cdn",
-    "build:cdn": "node build-cdn.js"
+    "build": "vite build --config vite.config.ts && tsc -p tsconfig.lib.json && node build-cdn.js",
+    "build:cdn": "node build-cdn.js",
+    "test": "vitest run"
   },
   "jsdelivr": "./dist/index.global.js",
   "unpkg": "./dist/index.global.js"

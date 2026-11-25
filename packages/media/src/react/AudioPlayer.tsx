@@ -12,7 +12,7 @@ import {
   DefaultAudioLayout,
 } from '@vidstack/react/player/layouts/default';
 import clsx from 'clsx';
-import type { MediaTrack, MediaTheme } from '../core';
+import { isValidMediaUrl, type MediaTrack, type MediaTheme } from '../core';
 
 export interface AudioPlayerProps {
   src?: string;
@@ -34,6 +34,8 @@ export interface AudioPlayerProps {
   load?: 'eager' | 'idle' | 'visible' | 'play' | 'custom';
   preload?: 'none' | 'metadata' | 'auto';
   slots?: any;
+  hlsEngine?: any;
+  dashEngine?: any;
   // Event Callbacks
   onPlay?: () => void;
   onPause?: () => void;
@@ -67,6 +69,8 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
       load,
       preload,
       slots,
+      hlsEngine,
+      dashEngine,
       onPlay,
       onPause,
       onEnded,
@@ -79,7 +83,11 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
     ref
   ) => {
     const mediaSrc = src || url;
-    if (!mediaSrc) return null;
+    if (!mediaSrc || !isValidMediaUrl(mediaSrc)) return null;
+
+    const safeArtwork =
+      artwork && isValidMediaUrl(artwork) ? artwork : undefined;
+    const safeTracks = tracks?.filter((t) => isValidMediaUrl(t.src));
 
     const colorScheme = theme === 'auto' ? undefined : theme;
     const resolvedCrossOrigin =
@@ -98,11 +106,11 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
         style={style}
         contentEditable={false}
       >
-        {(title || artist || artwork) && (
+        {(title || artist || safeArtwork) && (
           <div className="flex items-center gap-3 mb-2 px-1">
-            {artwork && (
+            {safeArtwork && (
               <img
-                src={artwork}
+                src={safeArtwork}
                 alt={title || 'Audio artwork'}
                 className="w-10 h-10 rounded-lg object-cover border border-default flex-shrink-0"
               />
@@ -193,12 +201,16 @@ export const AudioPlayer = forwardRef<MediaPlayerInstance, AudioPlayerProps>(
           }}
         >
           <MediaProvider>
-            {tracks?.map((track) => (
+            {safeTracks?.map((track) => (
               <Track
                 key={track.src}
                 src={track.src}
-                label={track.label}
-                lang={track.language}
+                label={
+                  track.label?.toLowerCase()
+                    ? track.label
+                    : track.label ?? 'unknown'
+                }
+                lang={track.language || 'en'}
                 kind={track.kind || 'subtitles'}
                 default={track.default}
               />

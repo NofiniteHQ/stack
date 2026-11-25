@@ -4,6 +4,8 @@
  * supporting headings, lists, tables, code blocks, math formulas, and details.
  */
 
+import { sanitizeUrl, escapeHtml } from './security';
+
 export function stripHtmlTags(input: string): string {
   if (!input) return '';
   let output = '';
@@ -364,6 +366,31 @@ export function markdownToHtml(md: string): string {
     }
   };
 
+  const parseLinkAndTitle = (
+    rawUrl: string
+  ): { urlPart: string; titleAttr: string } => {
+    const trimmedUrl = (rawUrl || '').trim();
+    if (!trimmedUrl) return { urlPart: '', titleAttr: '' };
+    const wsMatch = trimmedUrl.match(/\s+/);
+    if (!wsMatch || wsMatch.index === undefined) {
+      return { urlPart: trimmedUrl, titleAttr: '' };
+    }
+    const urlPart = trimmedUrl.slice(0, wsMatch.index);
+    const rest = trimmedUrl.slice(wsMatch.index + wsMatch[0].length).trim();
+    if (
+      rest.length >= 2 &&
+      ((rest.startsWith('"') && rest.endsWith('"')) ||
+        (rest.startsWith("'") && rest.endsWith("'")))
+    ) {
+      const titleText = rest.slice(1, -1);
+      return {
+        urlPart,
+        titleAttr: titleText ? ` title="${escapeHtml(titleText)}"` : '',
+      };
+    }
+    return { urlPart: trimmedUrl, titleAttr: '' };
+  };
+
   const inlineFormatting = (text: string): string => {
     return (
       text
@@ -388,13 +415,19 @@ export function markdownToHtml(md: string): string {
           /`([^`]+)`/g,
           '<code class="bg-subtle px-1 py-0.5 rounded font-mono text-xs">$1</code>'
         )
-        // Images
-        .replace(
-          /!\[(.*?)\]\((.*?)\)/g,
-          '<img src="$2" alt="$1" class="rounded-xl border border-default shadow-sm max-w-full my-2" />'
-        )
-        // Links
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="link">$1</a>')
+        // Images: ![alt](url) or ![alt](url "title") with bounded character classes to prevent polynomial ReDoS
+        .replace(/!\[([^\]\n]*)\]\(([^)\n]*)\)/g, (_match, rawAlt, rawUrl) => {
+          const { urlPart, titleAttr } = parseLinkAndTitle(rawUrl);
+          const safeSrc = escapeHtml(sanitizeUrl(urlPart));
+          const safeAlt = escapeHtml(rawAlt || '');
+          return `<img src="${safeSrc}" alt="${safeAlt}"${titleAttr} class="rounded-xl border border-default shadow-sm max-w-full my-2" />`;
+        })
+        // Links: [text](url) or [text](url "title") with bounded character classes to prevent polynomial ReDoS
+        .replace(/\[([^\]\n]*)\]\(([^)\n]*)\)/g, (_match, text, rawUrl) => {
+          const { urlPart, titleAttr } = parseLinkAndTitle(rawUrl);
+          const safeHref = escapeHtml(sanitizeUrl(urlPart));
+          return `<a href="${safeHref}"${titleAttr} class="link">${text}</a>`;
+        })
     );
   };
 
@@ -405,9 +438,9 @@ export function markdownToHtml(md: string): string {
     if (line.startsWith('```')) {
       if (inCodeBlock) {
         htmlParts.push(
-          `<pre><code class="language-${
+          `<pre><code class="language-${escapeHtml(
             codeLang || 'plaintext'
-          }">${codeBuffer.join('\n')}</code></pre>`
+          )}">${codeBuffer.join('\n')}</code></pre>`
         );
         codeBuffer = [];
         inCodeBlock = false;
@@ -453,7 +486,11 @@ export function markdownToHtml(md: string): string {
       flushList();
       const eq = singleLineMath[1].trim();
       htmlParts.push(
-        `<div data-math-block="" data-equation="${eq}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${eq}</div>`
+        `<div data-math-block="" data-equation="${escapeHtml(
+          eq
+        )}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${escapeHtml(
+          eq
+        )}</div>`
       );
       continue;
     }
@@ -467,8 +504,9 @@ export function markdownToHtml(md: string): string {
         eqBuffer += lines[i] + '\n';
         i++;
       }
+      const safeEq = escapeHtml(eqBuffer.trim());
       htmlParts.push(
-        `<div data-math-block="" data-equation="${eqBuffer.trim()}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${eqBuffer.trim()}</div>`
+        `<div data-math-block="" data-equation="${safeEq}" class="markon-math-block my-3 p-3 rounded-lg border border-default bg-subtle/50 text-center">${safeEq}</div>`
       );
       continue;
     }

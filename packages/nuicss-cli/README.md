@@ -19,7 +19,7 @@
     <img alt="Documentation" src="https://img.shields.io/badge/Docs-OpenSource-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
   <a href="./LICENSE">
-    <img alt="License" src="https://img.shields.io/badge/License-MIT-%23000133?style=for-the-badge&labelColor=slategray">
+    <img alt="License" src="https://img.shields.io/badge/License-Apache--2.0-%23000133?style=for-the-badge&labelColor=slategray">
   </a>
   <a href="https://www.npmjs.com/package/nuicss">
     <img alt="NPM Version" src="https://img.shields.io/npm/v/nuicss?style=for-the-badge&logo=npm&logoColor=white&labelColor=slategray&color=%23000133">
@@ -241,4 +241,4 @@ nuicss upgrade
 
 ## License
 
-Licensed under the [MIT License](./LICENSE). Copyright © 2026 NofiniteHQ.
+Licensed under the [Apache-2.0 License](./LICENSE). Copyright © 2026 NofiniteHQ.

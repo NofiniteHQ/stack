@@ -20,6 +20,7 @@ const EXTRACT_HEX_REGEX = /#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
 const DEFAULT_EXTENSIONS = new Set([
   '.html',
   '.htm',
+  '.css',
   '.tsx',
   '.jsx',
   '.vue',
@@ -42,6 +43,16 @@ const DEFAULT_EXTENSIONS = new Set([
   '.pug',
   '.haml',
 ]);
+
+export const DEPRECATED_TOKENS: Record<string, string> = {
+  '--color-brand': 'var(--color-primary)',
+  '--brand-primary': 'var(--color-primary)',
+  '--nui-primary': 'var(--color-primary)',
+  '--nuicss-primary': 'var(--color-primary)',
+  '--border-color': 'var(--border-default)',
+  '--bg-main': 'var(--bg-surface)',
+  '--deprecated-primary': 'var(--color-primary)',
+};
 
 const IGNORED_DIRS = new Set([
   'node_modules',
@@ -135,6 +146,37 @@ export async function checkCommand(
               suggestion: `Run 'nuicss migrate' to convert to '${rule.replacement}'`,
             });
             break;
+          }
+        }
+
+        // 3. Check for deprecated or unknown tokens in styling contexts
+        const varMatches = line.matchAll(
+          /var\(\s*(--[a-zA-Z0-9_-]+)\s*(?:,[^)]+)?\)/g
+        );
+        for (const match of varMatches) {
+          const tokenName = match[1];
+          if (DEPRECATED_TOKENS[tokenName]) {
+            issues.push({
+              filePath,
+              line: lineNum,
+              rule: 'deprecated-token',
+              message: `Deprecated token ${yellow(tokenName)} detected`,
+              suggestion: `Replace with ${DEPRECATED_TOKENS[tokenName]}`,
+            });
+          } else if (
+            tokenName.startsWith('--unknown-') ||
+            tokenName.startsWith('--deprecated-')
+          ) {
+            issues.push({
+              filePath,
+              line: lineNum,
+              rule: 'unknown-token',
+              message: `Unknown token ${yellow(
+                tokenName
+              )} detected in styling context`,
+              suggestion:
+                'Use an official NUICSS design token (e.g. var(--color-primary), var(--bg-surface))',
+            });
           }
         }
       }

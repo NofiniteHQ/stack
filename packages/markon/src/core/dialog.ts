@@ -1,8 +1,10 @@
 /**
  * @nofinite/markon - Custom Modal Box Utility
- * 100% aligned with @nofinite/nuix and @nofinite/nuicss native <dialog class="modal"> architecture.
+ * 100% aligned with @nofinite/nuicss native <dialog class="modal"> architecture.
  * Fully collision-proof and dead-center aligned with glassmorphic backdrop blur.
  */
+
+import { escapeHtml } from './security';
 
 export interface MarkonModalOptions {
   title: string;
@@ -88,7 +90,7 @@ export function openMarkonModal(options: MarkonModalOptions): void {
     options.onCancel?.();
   };
 
-  // Backdrop click dismissal (matching nuix delegation pattern)
+  // Backdrop click dismissal (matching native modal delegation pattern)
   dialog.addEventListener('click', (e) => {
     const box = dialog.querySelector('.modal-box');
     if (box && !box.contains(e.target as Node)) {
@@ -139,13 +141,4 @@ export function openMarkonModal(options: MarkonModalOptions): void {
       input.select();
     }
   });
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
 }

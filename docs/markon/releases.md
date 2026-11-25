@@ -3,41 +3,25 @@ title: Releases
 sidebar_position: 999
 ---
 
-# @nofinite/markon — v1.1.1
+# @nofinite/markon — v2.1.0
 
-**Release date:** 01 February 2024
+**Latest release:** `2.1.0` (Apache-2.0)
 
-This release of `@nofinite/markon` represents the most recent published version of the library.
-
----
-
-## Summary
-
-`@nofinite/markon` is a lightweight text formatting utility for both browser and React environments. It provides a simple, explicit syntax for enhancing text with formatting elements such as bold, underline, links, lists, emphasis, and line breaks.
+`@nofinite/markon` `2.1.0` is the universal, framework-agnostic rich text and content authoring engine powered by TipTap and ProseMirror.
 
 ---
 
-## Included
+## Summary of Capabilities (`v2.1.0`)
 
-- Core Markon text formatting syntax
-- `ReactMarkon` component for React usage
-- `JSMarkon` function for browser/vanilla JavaScript usage
-- Distribution builds for ESM and browser environments
-- Minimal, predictable parsing behavior
-- MIT licensed package
-
----
-
-## Notes
-
-- This version is the **latest published release** available on the repository.
-- The library is designed for deterministic parsing of Markon syntax into HTML.
-- No breaking changes were documented prior to this release.
+- **Core Content & Publication Engine (`@nofinite/markon`):** `jsonToHtml`, `renderMarkon`, `MarkonRenderer`, `extractTOC`, markdown conversion (`markdownToHtml`, `htmlToMarkdown`), callouts, syntax-highlighted code blocks (`lowlight`), and LaTeX math (`katex`).
+- **React 18/19 Wrapper (`@nofinite/markon/react`):** `MarkonEditor`, `MarkonRender`, bubble/table menus, slash commands, drag handle, and `MarkonColorPicker`.
+- **Dual-Environment HTML Security:** DOMPurify in browser runtimes and a zero-dependency deterministic allowlist HTML tokenizer/sanitizer (`sanitizeHtml`, `sanitizeUrl`, `escapeHtml`) for Node SSR and Edge workers.
+- **NUICSS Integration:** Native consumption of `@nofinite/nuicss` semantic superclasses (`@nofinite/markon/styles.css` compatibility shim).
 
 ---
 
 ## Release Metadata
 
-- Repository: [NofiniteHQ/markon on GitHub]
-- License: MIT
-- Latest tag: `v1.1.1` (as of Feb 1, 2024)
+- Package: `@nofinite/markon` (`2.1.0`)
+- License: Apache-2.0
+- Repository: [NofiniteHQ/stack (`packages/markon`)](https://github.com/NofiniteHQ/stack/tree/main/packages/markon)

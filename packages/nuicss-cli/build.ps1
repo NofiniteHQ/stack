@@ -21,8 +21,11 @@ if ($distDir -and (Test-Path $distDir)) {
 Write-Host "  -> Generating in-memory assets..." -ForegroundColor Yellow
 node --input-type=module -e "import fs from 'node:fs'; const html = fs.readFileSync('src/embedded/nuicss.html-data.json', 'utf8'); const css = fs.readFileSync('src/embedded/nuicss.css-data.json', 'utf8'); const styles = fs.readFileSync('src/embedded/styles.css', 'utf8'); const tsContent = 'export const HTML_DATA_STR = ' + JSON.stringify(html) + ';\nexport const CSS_DATA_STR = ' + JSON.stringify(css) + ';\nexport const BASE_STYLES_STR = ' + JSON.stringify(styles) + ';\n'; fs.writeFileSync('src/embedded/assets.ts', tsContent, 'utf8');"
 
-# 4. Compile TypeScript library
+# 4. Compile TypeScript library (clean dist first so excluded test artifacts are removed)
 Write-Host "  -> Compiling TypeScript distribution..." -ForegroundColor Yellow
+if (Test-Path "dist") {
+    Remove-Item "dist" -Recurse -Force
+}
 tsc
 node --input-type=module -e "import fs from 'node:fs'; for(const f of ['nuicss.html-data.json', 'nuicss.css-data.json', 'styles.css']) fs.copyFileSync('src/embedded/' + f, 'dist/embedded/' + f);"
 

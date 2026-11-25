@@ -1,6 +1,6 @@
 import { bold, cyan, dim } from 'colorette';
 
-interface TokenItem {
+export interface TokenItem {
   role: string;
   variable: string;
   colorCode: string;
@@ -8,20 +8,24 @@ interface TokenItem {
   desc: string;
 }
 
-const TOKENS: TokenItem[] = [
+export interface TokensOptions {
+  json?: boolean;
+}
+
+export const TOKENS: TokenItem[] = [
   {
     role: 'Primary',
     variable: '--color-primary',
     colorCode: '38;2;59;130;246',
     symbol: '●',
-    desc: 'Brand core / active actions',
+    desc: 'Brand Blue / active actions',
   },
   {
     role: 'Secondary',
     variable: '--color-secondary',
     colorCode: '38;2;100;116;139',
     symbol: '●',
-    desc: 'Subtle / secondary elements',
+    desc: 'Slate neutral / secondary elements',
   },
   {
     role: 'Success',
@@ -65,9 +69,48 @@ const TOKENS: TokenItem[] = [
     symbol: '─',
     desc: 'Semantic container and input boundary',
   },
+  {
+    role: 'Spacing',
+    variable: '--spacing',
+    colorCode: '38;2;148;163;184',
+    symbol: '↔',
+    desc: 'Base fluid spacing scale (0.25rem / 4px)',
+  },
 ];
 
-export async function tokensCommand(): Promise<void> {
+export async function tokensCommand(
+  options: TokensOptions = {}
+): Promise<void> {
+  if (options.json) {
+    const jsonOutput = {
+      tokens: TOKENS.map((t) => ({
+        role: t.role,
+        variable: t.variable,
+        description: t.desc,
+      })),
+      superclasses: [
+        'btn',
+        'btn-primary',
+        'btn-secondary',
+        'btn-ghost',
+        'btn-outline',
+        'card',
+        'card-responsive',
+        'metric-card',
+        'badge',
+        'badge-primary',
+        'badge-success',
+        'badge-danger',
+        'input',
+        'table-container',
+        'skeleton-shimmer',
+        'press-scale',
+        'hover-lift',
+      ],
+    };
+    console.log(JSON.stringify(jsonOutput, null, 2));
+    return;
+  }
   const supportsColor = Boolean(process.stdout.isTTY && !process.env.NO_COLOR);
 
   console.log(

@@ -65,7 +65,8 @@ export const Controlled: StoryObj<typeof TimeRangePicker> = {
 export const InteractiveTest: StoryObj<typeof TimeRangePicker> = {
   args: {
     clockType: 24,
-    defaultValue: { from: '09:00', to: undefined, onChange: fn() },
+    defaultValue: { from: '09:00', to: undefined },
+    onChange: fn(),
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

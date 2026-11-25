@@ -11,7 +11,7 @@ No third-party marketplace extensions are required. Once configured, your editor
 The easiest way to enable IntelliSense in any project is using the NUICSS CLI:
 
 ```bash
-npx @nofinite/nuicss init
+npx nuicss init
 ```
 
 This one command automatically:
@@ -75,9 +75,9 @@ In CSS, SCSS, or inline `style` attributes, typing `var(--` displays all NUICSS 
 
 ## 4. Why Native Custom Data?
 
-| Feature                     | NUICSS Native Custom Data                  | Traditional Extensions                  |
-| :-------------------------- | :----------------------------------------- | :-------------------------------------- |
-| **Marketplace Download**    | âŒ None (zero extension required)          | âš ï¸ Required from VS Code Marketplace |
-| **Editor Support**          | âœ… VS Code, Cursor, Windsurf, VSCodium    | âš ï¸ Often delayed or broken in forks  |
-| **Performance**             | âš¡ Instant (handled by native editor LSP) | âš ï¸ Background node process overhead  |
-| **Package Synchronization** | âœ… Instant on `npm update`                | âš ï¸ Wait for extension updates        |
+| Feature                     | NUICSS Native Custom Data                 | Traditional Extensions               |
+| :-------------------------- | :---------------------------------------- | :----------------------------------- |
+| **Marketplace Download**    | ❌ None (zero extension required)         | ⚠️ Required from VS Code Marketplace |
+| **Editor Support**          | ✅ VS Code, Cursor, Windsurf, VSCodium    | ⚠️ Often delayed or broken in forks  |
+| **Performance**             | ⚡ Instant (handled by native editor LSP) | ⚠️ Background node process overhead  |
+| **Package Synchronization** | ✅ Instant on `npm update`                | ⚠️ Wait for extension updates        |

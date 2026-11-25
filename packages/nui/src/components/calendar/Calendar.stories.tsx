@@ -17,9 +17,16 @@ type Story = StoryObj<typeof Calendar>;
 export const Default: Story = {
   render: (args) => {
     const [date, setDate] = useState<string>();
+    const {
+      mode: _m,
+      value: _v,
+      defaultValue: _dv,
+      onChange: _oc,
+      ...rest
+    } = args;
     return (
       <div className="flex flex-col gap-4 items-center">
-        <Calendar {...args} value={date} onChange={setDate} />
+        <Calendar {...rest} mode="single" value={date} onChange={setDate} />
         <div className="text-sm text-muted">Selected: {date || 'None'}</div>
       </div>
     );
@@ -44,13 +51,20 @@ export const WithMinMaxDate: Story = {
 export const RangeMode: Story = {
   render: (args) => {
     const [range, setRange] = useState<{ from?: string; to?: string }>({});
+    const {
+      mode: _m,
+      value: _v,
+      defaultValue: _dv,
+      onChange: _oc,
+      ...rest
+    } = args;
     return (
       <div className="flex flex-col gap-4 items-center">
         <Calendar
-          {...args}
+          {...rest}
           mode="range"
           value={range}
-          onChange={(r: any) => setRange(r)}
+          onChange={(r) => setRange(r)}
         />
         <div className="text-sm text-muted">
           Selected: {range.from || 'None'} → {range.to || 'None'}

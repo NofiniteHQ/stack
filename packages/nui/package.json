@@ -3,6 +3,10 @@
   "version": "3.2.0",
   "description": "A robust, accessible, and lightweight React component library designed for modern web applications.",
   "license": "Apache-2.0",
+  "homepage": "https://nofinite.design",
+  "bugs": {
+    "url": "https://github.com/NofiniteHQ/stack/issues"
+  },
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
@@ -20,10 +24,22 @@
     },
     "./styles.css": "./dist/styles.css",
     "./components/*": {
-      "types": "./dist/types/components/*.d.ts",
-      "import": "./dist/components/*.js",
-      "require": "./dist/components/*.cjs",
-      "default": "./dist/components/*.js"
+      "types": "./dist/types/components/*/index.d.ts",
+      "import": "./dist/components/*/index.js",
+      "require": "./dist/components/*/index.cjs",
+      "default": "./dist/components/*/index.js"
+    },
+    "./components/*/*": {
+      "types": "./dist/types/components/*/*.d.ts",
+      "import": "./dist/components/*/*.js",
+      "require": "./dist/components/*/*.cjs",
+      "default": "./dist/components/*/*.js"
+    },
+    "./utils": {
+      "types": "./dist/types/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs",
+      "default": "./dist/utils/index.js"
     },
     "./utils/*": {
       "types": "./dist/types/utils/*.d.ts",
@@ -31,14 +47,24 @@
       "require": "./dist/utils/*.cjs",
       "default": "./dist/utils/*.js"
     },
+    "./utils/*/*": {
+      "types": "./dist/types/utils/*/*.d.ts",
+      "import": "./dist/utils/*/*.js",
+      "require": "./dist/utils/*/*.cjs",
+      "default": "./dist/utils/*/*.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/package.json",
+    "!dist/node_modules",
     "README.md",
     "LICENSE"
   ],
   "peerDependencies": {
+    "@nofinite/nuicss": ">=3.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
@@ -60,14 +86,18 @@
     "component-library"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
+    "build": "nx run nui:build",
+    "test": "nx run nui:test",
     "test-storybook": "test-storybook -c ../../.storybook",
     "generate": "node scripts/generate.js"
   },
   "dependencies": {
     "@floating-ui/react-dom": "^2.1.9",
+    "@nofinite/utils": "workspace:*",
     "clsx": "^2.1.1",
     "framer-motion": "^13.4.0",
     "lowlight": "^3.3.0",

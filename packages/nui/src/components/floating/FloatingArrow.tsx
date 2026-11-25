@@ -57,19 +57,19 @@ export const FloatingArrow = React.forwardRef<
       transform,
       ...(side === 'top' && {
         bottom: '-7px',
-        left: x != null ? `${x}px` : undefined,
+        left: x != null ? `${Math.round(x)}px` : undefined,
       }),
       ...(side === 'bottom' && {
         top: '-7px',
-        left: x != null ? `${x}px` : undefined,
+        left: x != null ? `${Math.round(x)}px` : undefined,
       }),
       ...(side === 'left' && {
         right: '-7px',
-        top: y != null ? `${y}px` : undefined,
+        top: y != null ? `${Math.round(y)}px` : undefined,
       }),
       ...(side === 'right' && {
         left: '-7px',
-        top: y != null ? `${y}px` : undefined,
+        top: y != null ? `${Math.round(y)}px` : undefined,
       }),
       ...style,
     };

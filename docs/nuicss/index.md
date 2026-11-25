@@ -98,9 +98,10 @@ export function CardExample() {
 
 ## Core Sections
 
-- [**Installation & Setup**](/nuicss/installation) — Add NUICSS to Next.js (Turbopack), Vite, or PostCSS projects.
-- [**CLI & Standalone Compiler**](/nuicss/cli) — Standalone compilation, live file watching, codebase linting, and automated migrations.
-- [**Component Superclasses**](/nuicss/superclasses) — Complete guide to `btn`, `card`, `input`, `badge`, and layout superclasses.
+- [**Installation & Getting Started**](/nuicss/installation) — Add NUICSS to Next.js (App Router), Vite, PostCSS, Browser CDN, or standalone native environments.
+- [**Tailwind-to-NUICSS Migration Guide & Cheat Sheet**](/nuicss/guides/tailwind-migration) — Authoritative mapping from verbose Tailwind utility clusters to clean NUICSS superclasses and OKLCH tokens.
+- [**CLI & Standalone Compiler**](/nuicss/cli) — Standalone native binary execution, file watching, codebase linting, and automated migrations.
+- [**Component Superclasses**](/nuicss/superclasses) — Complete guide to `btn`, `card`, `input`, `badge`, `modal`, and layout superclasses.
 - [**Theming & Design Tokens**](/nuicss/theming) — Explore OKLCH tokens, semantic surfaces, and automatic dark mode.
 - [**Theme Studio**](/nuicss/theme-studio) — Interactive sandbox to customize color palettes and preview components live.
 - [**Configuration**](/nuicss/configuration) — Customize `nuicss.config.ts`, presets, and content scanning pipelines.

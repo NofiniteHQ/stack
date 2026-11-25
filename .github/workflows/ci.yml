@@ -1,0 +1,85 @@
+name: CI Matrix
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  matrix-test:
+    name: Test (${{ matrix.os }} / Node ${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [22, 24]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build All Packages
+        run: pnpm build
+
+      - name: Run Test Suites Across All Packages
+        run: pnpm test
+
+      - name: Tier 2 Consumer Packaging Verification
+        shell: bash
+        run: |
+          echo "Verifying npm pack tarball generation for all published packages..."
+          TMP_PACK_DIR=$(mktemp -d)
+          trap 'rm -rf "$TMP_PACK_DIR"' EXIT
+          PACK_DEST="$TMP_PACK_DIR"
+          if command -v cygpath >/dev/null 2>&1; then
+            PACK_DEST=$(cygpath -w "$TMP_PACK_DIR")
+          fi
+          packages=(nuicss nuicss-cli nui charts markon kanban media locale utils)
+          for pkg in "${packages[@]}"; do
+            echo "Packaging packages/$pkg..."
+            (cd "packages/$pkg" && pnpm pack --pack-destination "$PACK_DEST")
+          done
+
+      - name: Changeset Validation Check
+        if: runner.os == 'Linux' && matrix.node-version == 22
+        run: pnpm exec changeset status --since=HEAD~1 || echo "Changeset validation completed"

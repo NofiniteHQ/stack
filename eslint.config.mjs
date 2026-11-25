@@ -10,6 +10,8 @@ export default [
       '**/build/**',
       '**/vite.config.*.timestamp*',
       '**/vitest.config.*.timestamp*',
+      'tests/**',
+      'ai-docs/**',
     ],
   },
   {

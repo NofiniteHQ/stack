@@ -1,27 +1,23 @@
-﻿# Architecture & UnoCSS Engine
+# Architecture & Styling Engine
 
-Understand the inner workings of NUICSS and how its on-demand compilation engine delivers instant styling.
+Understand the inner workings of NUICSS and how its on-demand JIT compilation engine delivers instant styling.
 
 ---
 
-## Evolution to the UnoCSS Engine
+## The NUICSS Engine Architecture
 
-In previous iterations:
+**NUICSS** is architected as an autonomous, high-performance styling engine and design token compiler:
 
-- **v1** relied on static, monolithic utility stylesheets that bloated production bundles.
-- **v2** introduced a custom JIT engine, but had limited variant support, lacked modern CSS feature coverage, and suffered from edge cases.
-
-**NUICSS** is architected directly on top of **UnoCSS**, the industry standard instant atomic CSS engine:
-
-- **Instant Compilation**: Up to 5x faster than traditional CSS compilers.
+- **Instant JIT Compilation**: Generates CSS on demand based on source code scanning, compiling in milliseconds.
 - **Full Modern Syntax**: Supports arbitrary values (`w-[340px]`), variant groups (`hover:(text-primary font-bold)`), and media queries (`@screen md`).
-- **Clean CSS Output**: Only emits classes that are actually used in your source code.
+- **Clean CSS Output**: Only emits classes that are actually used in your source code, guaranteeing minimal bundle footprints.
+- **Universal Integration**: Integrates seamlessly with Vite, Next.js, PostCSS, or standalone via the native binary CLI.
 
 ---
 
 ## The `@nuicss` Directive
 
-When `@nuicss;` is placed in your stylesheet, the PostCSS/Vite plugin processes it into structured layers:
+When `@nuicss;` is placed in your stylesheet, the compiler processes it into structured cascade layers:
 
 ```css
 /* Input: */
@@ -29,14 +25,14 @@ When `@nuicss;` is placed in your stylesheet, the PostCSS/Vite plugin processes 
 
 /* Emitted Output: */
 /* Layer: preflights (resets & normalize) */
-/* Layer: default (design tokens & variables) */
-/* Layer: shortcuts (reusable component aliases) */
-/* Layer: utilities (atomic class rules) */
+/* Layer: default (design tokens & CSS variables) */
+/* Layer: shortcuts (reusable component superclasses) */
+/* Layer: utilities (atomic utility class rules) */
 ```
 
 ### Specific Layer Injection
 
-You can also inject specific layers if you need custom ordering:
+You can also inject specific layers if you need custom cascade ordering:
 
 ```css
 @nuicss preflights;
@@ -88,3 +84,14 @@ Extract values from your NUICSS theme directly in CSS:
   border-color: theme('colors.primary');
 }
 ```
+
+---
+
+## Layer Organization
+
+NUICSS automatically structures emitted CSS into distinct layers to guarantee predictable cascade priority:
+
+1. **Preflights**: Baseline element resets, box-sizing, and typography normalization.
+2. **Tokens**: Global CSS variables in OKLCH color space for light and dark themes.
+3. **Shortcuts**: Semantic component superclasses (`btn`, `card`, `input`, `badge`, `modal`).
+4. **Utilities**: Fine-grained atomic utility classes that override component base styles.

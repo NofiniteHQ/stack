@@ -4,7 +4,6 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import dts from 'vite-plugin-dts';
 import fs from 'node:fs';
 import path from 'node:path';
-import UnoCSS from 'unocss/vite';
 
 const packageJson = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8')
@@ -15,6 +14,17 @@ const externalDeps = [
   'react/jsx-runtime',
 ].map((dep) => new RegExp(`^${dep}(\\/.*)?$`));
 
+const componentsDir = path.resolve(__dirname, 'src/components');
+const componentEntries = Object.fromEntries(
+  fs
+    .readdirSync(componentsDir, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => [
+      `components/${dirent.name}/index`,
+      path.resolve(componentsDir, dirent.name, 'index.ts'),
+    ])
+);
+
 export default defineConfig({
   root: __dirname,
 
@@ -23,9 +33,6 @@ export default defineConfig({
   },
 
   plugins: [
-    UnoCSS({
-      configFile: path.resolve(__dirname, 'nuicss.config.ts'),
-    }),
     react(),
     nxViteTsPaths(),
 
@@ -55,32 +62,16 @@ export default defineConfig({
       },
     },
     {
-      name: 'wrap-styles-in-layer',
+      name: 'generate-styles-shim',
       closeBundle() {
         const cssPath = path.resolve(__dirname, 'dist/styles.css');
-        const themePath = path.resolve(
-          __dirname,
-          '../nuicss/src/styles/theme.css'
-        );
-        if (fs.existsSync(cssPath)) {
-          let raw = fs.readFileSync(cssPath, 'utf8');
-          const themeCss = fs.existsSync(themePath)
-            ? fs.readFileSync(themePath, 'utf8')
-            : '';
-          const baseBlock = `/* Design Tokens & Theme (Standalone NUI) */\n${themeCss}`;
-
-          // Ensure layer preamble and theme tokens are present
-          if (!raw.includes('@layer base, components, utilities;')) {
-            raw = `@layer base, components, utilities;\n\n${baseBlock}\n\n@layer components {\n${raw}\n}`;
-            fs.writeFileSync(cssPath, raw, 'utf8');
-          } else if (!raw.includes('--bg-surface:')) {
-            raw = raw.replace(
-              '@layer base, components, utilities;',
-              `@layer base, components, utilities;\n\n${baseBlock}`
-            );
-            fs.writeFileSync(cssPath, raw, 'utf8');
-          }
-        }
+        const shimContent = `/**
+ * @nofinite/nui styles shim
+ * Re-exports the canonical NUICSS styling engine per the Zero Downstream CSS Invariant.
+ */
+@import '@nofinite/nuicss/styles.css';
+`;
+        fs.writeFileSync(cssPath, shimContent, 'utf8');
       },
     },
   ],
@@ -96,7 +87,9 @@ export default defineConfig({
 
     lib: {
       entry: {
-        index: 'src/index.build.ts',
+        index: path.resolve(__dirname, 'src/index.build.ts'),
+        'utils/index': path.resolve(__dirname, 'src/utils/index.ts'),
+        ...componentEntries,
       },
       name: 'nui',
       cssFileName: 'styles',

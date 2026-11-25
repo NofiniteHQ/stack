@@ -6,7 +6,7 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'input',
-    'h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans',
+    'h-9 w-full rounded-md border border-solid border-default bg-surface px-3 py-1 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans',
   ],
   ['input-sm', 'h-8 px-2.5 text-xs'],
   ['input-md', 'h-9 px-3 text-sm'],
@@ -32,7 +32,7 @@ export const formShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   // ==========================================
   [
     'textarea',
-    'w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--fg-default,#0f172a)] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans min-h-[80px]',
+    'w-full rounded-md border border-solid border-default bg-surface px-3 py-2 text-sm text-default shadow-sm outline-none transition-all placeholder:text-muted focus-visible:outline-none focus-visible:border-focus focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,var(--fg-default,#0f172a))] disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:border-danger aria-[invalid=true]:focus-visible:outline-danger font-sans min-h-[80px]',
   ],
   [
     'textarea-error',

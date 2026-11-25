@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { clamp } from '@nofinite/utils';
 import { cn } from '../../utils';
 import { motion } from 'framer-motion';
 
@@ -59,7 +60,7 @@ export function Slider({
 
   // Safely clamp the initial/current value to prevent out-of-bounds rendering
   const rawVal = isControlled ? value : internalValue;
-  const val = Math.min(max, Math.max(min, rawVal as number));
+  const val = clamp(rawVal as number, min, max);
 
   const trackRef = useRef<HTMLDivElement | null>(null);
   const thumbRef = useRef<HTMLDivElement | null>(null);
@@ -70,7 +71,7 @@ export function Slider({
  ---------------------------------------------------- */
   const setVal = useCallback(
     (v: number) => {
-      const clamped = Math.min(max, Math.max(min, v));
+      const clamped = clamp(v, min, max);
       // Ensures the stepped value correctly aligns with the minimum bound
       let stepped = min + Math.round((clamped - min) / step) * step;
 
@@ -89,7 +90,7 @@ export function Slider({
       if (!track) return val;
 
       const rect = track.getBoundingClientRect();
-      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      const x = clamp(clientX - rect.left, 0, rect.width);
       const ratio = x / rect.width;
 
       return min + ratio * (max - min);

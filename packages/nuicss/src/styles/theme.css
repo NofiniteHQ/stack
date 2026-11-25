@@ -8,6 +8,30 @@
   --black: #000000;
   --transparent: transparent;
 
+  /* Neutral Scale (Zinc / Neutral) - Modern Achromatic Neutral Foundation */
+  --color-neutral-50: #f9fafb;
+  --color-neutral-50: oklch(0.985 0.002 260);
+  --color-neutral-100: #f2f3f5;
+  --color-neutral-100: oklch(0.965 0.003 260);
+  --color-neutral-200: #e5e6e9;
+  --color-neutral-200: oklch(0.925 0.004 260);
+  --color-neutral-300: #d2d4d7;
+  --color-neutral-300: oklch(0.87 0.005 260);
+  --color-neutral-400: #9da0a4;
+  --color-neutral-400: oklch(0.705 0.007 260);
+  --color-neutral-500: #6f7276;
+  --color-neutral-500: oklch(0.55 0.008 260);
+  --color-neutral-600: #505357;
+  --color-neutral-600: oklch(0.44 0.008 260);
+  --color-neutral-700: #3e4044;
+  --color-neutral-700: oklch(0.37 0.007 260);
+  --color-neutral-800: #252729;
+  --color-neutral-800: oklch(0.27 0.006 260);
+  --color-neutral-900: #16171a;
+  --color-neutral-900: oklch(0.205 0.006 260);
+  --color-neutral-950: #07080a;
+  --color-neutral-950: oklch(0.135 0.005 260);
+
   /* Neutral Scale (Slate) - Dual fallback & OKLCH */
   --slate-50: #f8fafc;
   --slate-50: oklch(0.984 0.006 247.858);
@@ -86,18 +110,19 @@
   ------------------------------------------------------------ */
 
   /* Backgrounds */
-  --bg-page: var(--slate-50);
-  --bg-canvas: var(--slate-50);
+  --bg-page: var(--color-neutral-50);
+  --bg-canvas: var(--color-neutral-50);
   --bg-surface: var(--white);
-  --bg-surface-raised: var(--slate-50);
+  --bg-surface-alt: var(--color-neutral-100);
+  --bg-surface-raised: var(--white);
   --bg-surface-overlay: var(--white);
-  --bg-subtle: var(--slate-100);
-  --bg-muted: var(--slate-200);
-  --bg-inset: var(--slate-100);
+  --bg-subtle: var(--color-neutral-100);
+  --bg-muted: var(--color-neutral-200);
+  --bg-inset: var(--color-neutral-100);
   --bg-card: var(--white);
-  --bg-accent: var(--slate-100);
-  --bg-overlay: rgba(0, 0, 0, 0.4);
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --bg-accent: var(--color-neutral-100);
+  --bg-overlay: rgba(0, 0, 0, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.75);
   --glass-border: rgba(0, 0, 0, 0.08);
 
   /* Selected */
@@ -109,13 +134,13 @@
   );
 
   /* Foreground */
-  --fg-default: var(--slate-900);
-  --fg-card: var(--slate-900);
-  --fg-subtle: var(--slate-600);
-  --fg-muted: var(--slate-500);
-  --fg-accent: var(--slate-900);
+  --fg-default: var(--color-neutral-900);
+  --fg-card: var(--color-neutral-900);
+  --fg-subtle: var(--color-neutral-600);
+  --fg-muted: var(--color-neutral-500);
+  --fg-accent: var(--color-neutral-900);
   --fg-inverse: var(--white);
-  --fg-disabled: var(--slate-400);
+  --fg-disabled: var(--color-neutral-400);
 
   /* NUI Focus & State Aliases */
   --nui-fg-default: var(--fg-default);
@@ -124,24 +149,24 @@
   --nui-color-danger: var(--color-danger);
 
   /* Borders */
-  --border-default: var(--slate-200);
-  --border-strong: var(--slate-300);
-  --border-subtle: var(--slate-100);
-  --border-hover: var(--slate-300);
+  --border-default: var(--color-neutral-200);
+  --border-strong: var(--color-neutral-300);
+  --border-subtle: var(--color-neutral-100);
+  --border-hover: var(--color-neutral-300);
   --border-focus: var(--color-primary);
-  --border-disabled: var(--slate-200);
+  --border-disabled: var(--color-neutral-200);
 
-  /* Primary Action */
-  --color-primary: var(--brand-primary);
-  --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, black);
-  --color-primary-active: color-mix(in oklch, var(--color-primary) 76%, black);
-  --color-primary-fg: var(--brand-primary-fg);
+  /* Primary Action (Universal High-Contrast Neutral Default) */
+  --color-primary: var(--color-neutral-900);
+  --color-primary-hover: var(--color-neutral-800);
+  --color-primary-active: var(--color-neutral-700);
+  --color-primary-fg: var(--white);
 
   /* Secondary Action (Minimalist / Subtle Action) */
-  --color-secondary: var(--slate-100);
-  --color-secondary-hover: var(--slate-200);
-  --color-secondary-active: var(--slate-300);
-  --color-secondary-fg: var(--slate-900);
+  --color-secondary: var(--color-neutral-100);
+  --color-secondary-hover: var(--color-neutral-200);
+  --color-secondary-active: var(--color-neutral-300);
+  --color-secondary-fg: var(--color-neutral-900);
   --color-secondary-subtle: color-mix(
     in oklch,
     var(--color-secondary) 15%,
@@ -169,7 +194,7 @@
     var(--color-warning) 10%,
     transparent
   );
-  --color-warning-fg: var(--white);
+  --color-warning-fg: var(--color-neutral-950);
   --color-info: var(--blue-500);
   --color-info-subtle: color-mix(in oklch, var(--color-info) 10%, transparent);
   --color-info-fg: var(--white);
@@ -190,7 +215,8 @@
   --chart-8: oklch(0.72 0.19 50);
 
   /* Focus */
-  --focus-ring: var(--fg-default);
+  --color-primary-ring: var(--color-primary);
+  --focus-ring: var(--color-primary-ring, var(--fg-default));
   --focus-ring-offset: var(--bg-page);
 
   /* ------------------------------------------------------------
@@ -407,19 +433,20 @@
 
 :where([data-theme='dark'], .dark) {
   /* Backgrounds */
-  --bg-page: var(--slate-950);
-  --bg-canvas: var(--slate-950);
-  --bg-surface: var(--slate-900);
-  --bg-surface-raised: var(--slate-800);
-  --bg-surface-overlay: var(--slate-900);
-  --bg-subtle: var(--slate-800);
-  --bg-muted: var(--slate-800);
-  --bg-inset: #090d16;
-  --bg-card: var(--slate-900);
-  --bg-accent: var(--slate-800);
-  --bg-overlay: rgba(0, 0, 0, 0.7);
-  --glass-bg: rgba(15, 23, 42, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --bg-page: var(--color-neutral-950);
+  --bg-canvas: var(--color-neutral-950);
+  --bg-surface: var(--color-neutral-900);
+  --bg-surface-alt: var(--color-neutral-800);
+  --bg-surface-raised: var(--color-neutral-800);
+  --bg-surface-overlay: var(--color-neutral-900);
+  --bg-subtle: var(--color-neutral-800);
+  --bg-muted: var(--color-neutral-800);
+  --bg-inset: oklch(0.105 0.004 260);
+  --bg-card: var(--color-neutral-900);
+  --bg-accent: var(--color-neutral-800);
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+  --glass-bg: rgba(22, 23, 26, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
   /* Selected */
   --bg-selected: color-mix(in oklch, var(--color-primary) 18%, transparent);
@@ -430,10 +457,10 @@
   );
 
   /* Secondary Action */
-  --color-secondary: var(--slate-800);
-  --color-secondary-hover: var(--slate-700);
-  --color-secondary-active: var(--slate-600);
-  --color-secondary-fg: var(--slate-50);
+  --color-secondary: var(--color-neutral-800);
+  --color-secondary-hover: var(--color-neutral-700);
+  --color-secondary-active: var(--color-neutral-600);
+  --color-secondary-fg: var(--color-neutral-50);
   --color-secondary-subtle: color-mix(
     in oklch,
     var(--color-secondary) 25%,
@@ -441,27 +468,31 @@
   );
 
   /* Foreground */
-  --fg-default: var(--slate-50);
-  --fg-card: var(--slate-50);
-  --fg-subtle: var(--slate-300);
-  --fg-muted: var(--slate-400);
-  --fg-accent: var(--slate-50);
-  --fg-inverse: var(--slate-900);
-  --fg-disabled: var(--slate-600);
+  --fg-default: var(--color-neutral-50);
+  --fg-card: var(--color-neutral-50);
+  --fg-subtle: var(--color-neutral-300);
+  --fg-muted: var(--color-neutral-400);
+  --fg-accent: var(--color-neutral-50);
+  --fg-inverse: var(--color-neutral-900);
+  --fg-disabled: var(--color-neutral-600);
 
   /* Borders */
-  --border-default: var(--slate-800);
-  --border-strong: var(--slate-700);
-  --border-subtle: var(--slate-900);
-  --border-hover: var(--slate-700);
-  --border-disabled: var(--slate-800);
+  --border-default: var(--color-neutral-800);
+  --border-strong: var(--color-neutral-700);
+  --border-subtle: var(--color-neutral-900);
+  --border-hover: var(--color-neutral-700);
+  --border-disabled: var(--color-neutral-800);
 
   /* Brand Adjustments for Dark Mode */
-  --brand-primary: var(--brand-500);
-  --brand-primary-hover: var(--brand-400);
-  --brand-primary-active: var(--brand-600);
-  --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, white);
-  --color-primary-active: color-mix(in oklch, var(--color-primary) 76%, white);
+  --brand-primary: var(--brand-600);
+  --brand-primary-hover: var(--brand-500);
+  --brand-primary-active: var(--brand-700);
+
+  /* Primary Action for Dark Mode (Inverted High-Contrast Neutral) */
+  --color-primary: var(--color-neutral-50);
+  --color-primary-hover: var(--color-neutral-200);
+  --color-primary-active: var(--color-neutral-300);
+  --color-primary-fg: var(--color-neutral-950);
   --color-primary-subtle: color-mix(
     in oklch,
     var(--color-primary) 18%,
@@ -490,6 +521,7 @@
     var(--color-warning) 18%,
     transparent
   );
+  --color-warning-fg: var(--color-neutral-950);
   --color-info: #38bdf8;
   --color-info-hover: #0ea5e9;
   --color-info-subtle: color-mix(in oklch, var(--color-info) 18%, transparent);
@@ -519,7 +551,7 @@
   }
 
   :where([data-theme='dark'], .dark) {
-    --brand-primary: oklch(0.623 0.255 259.815);
+    --brand-primary: oklch(0.546 0.285 262.881);
     --color-danger: oklch(0.704 0.22 22.216);
     --color-success: oklch(0.792 0.21 162.48);
     --color-warning: oklch(0.828 0.22 84.429);
@@ -620,1381 +652,6 @@ input[type='number']::-webkit-outer-spin-button {
 
 input[type='number'] {
   -moz-appearance: textfield;
-}
-
-/* ------------------------------------------------------------
-6. TIPTAP EDITOR COMPONENT STYLES
------------------------------------------------------------- */
-@layer components {
-  /* Reset default browser focus outlines on TipTap canvas */
-  .editor-content .tiptap,
-  .editor-content .ProseMirror,
-  .markon-editor .tiptap,
-  .markon-editor .ProseMirror,
-  .tiptap-wrapper .tiptap,
-  .nui-editor .tiptap {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  .editor-content .tiptap:focus,
-  .editor-content .tiptap:focus-visible,
-  .editor-content .ProseMirror:focus,
-  .editor-content .ProseMirror:focus-visible,
-  .markon-editor .tiptap:focus,
-  .markon-editor .tiptap:focus-visible,
-  .markon-editor .ProseMirror:focus,
-  .markon-editor .ProseMirror:focus-visible,
-  .tiptap-wrapper .tiptap:focus,
-  .tiptap-wrapper .tiptap:focus-visible {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  .editor-content ul[data-type='taskList'],
-  .editor .editor-content ul[data-type='taskList'],
-  .markon-editor ul[data-type='taskList'],
-  .tiptap-wrapper .tiptap ul[data-type='taskList'],
-  .tiptap-wrapper ul[data-type='taskList'],
-  .nui-editor ul[data-type='taskList'],
-  .editor-content ul.task-list,
-  .tiptap-wrapper ul.task-list,
-  .nui-editor ul.task-list,
-  ul.task-list {
-    list-style: none !important;
-    padding: 0 !important;
-  }
-
-  .editor-content ul[data-type='taskList'] li,
-  .editor .editor-content ul[data-type='taskList'] li,
-  .markon-editor ul[data-type='taskList'] li,
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li,
-  .tiptap-wrapper ul[data-type='taskList'] li,
-  .nui-editor ul[data-type='taskList'] li,
-  .editor-content ul.task-list li,
-  .tiptap-wrapper ul.task-list li,
-  .nui-editor ul.task-list li,
-  ul.task-list li {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: flex-start !important;
-    margin-bottom: 0.25rem !important;
-    margin-top: 0.25rem !important;
-  }
-
-  .editor-content ul[data-type='taskList'] li > label,
-  .editor .editor-content ul[data-type='taskList'] li > label,
-  .markon-editor ul[data-type='taskList'] li > label,
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > label,
-  .tiptap-wrapper ul[data-type='taskList'] li > label,
-  .nui-editor ul[data-type='taskList'] li > label,
-  .editor-content ul.task-list li > label,
-  .tiptap-wrapper ul.task-list li > label,
-  .nui-editor ul.task-list li > label,
-  ul.task-list li > label {
-    display: inline-flex !important;
-    align-items: center !important;
-    margin-right: 0.5rem !important;
-    user-select: none !important;
-    margin-top: 0.25rem !important;
-  }
-
-  .editor-content ul[data-type='taskList'] li > div,
-  .editor .editor-content ul[data-type='taskList'] li > div,
-  .markon-editor ul[data-type='taskList'] li > div,
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div,
-  .tiptap-wrapper ul[data-type='taskList'] li > div,
-  .nui-editor ul[data-type='taskList'] li > div,
-  .editor-content ul.task-list li > div,
-  .tiptap-wrapper ul.task-list li > div,
-  .nui-editor ul.task-list li > div,
-  ul.task-list li > div {
-    flex: 1 1 auto !important;
-    margin: 0 !important;
-  }
-
-  .editor-content ul[data-type='taskList'] li > div > p,
-  .editor .editor-content ul[data-type='taskList'] li > div > p,
-  .markon-editor ul[data-type='taskList'] li > div > p,
-  .tiptap-wrapper .tiptap ul[data-type='taskList'] li > div > p,
-  .tiptap-wrapper ul[data-type='taskList'] li > div > p,
-  .nui-editor ul[data-type='taskList'] li > div > p,
-  .editor-content ul.task-list li > div > p,
-  .tiptap-wrapper ul.task-list li > div > p,
-  .nui-editor ul.task-list li > div > p,
-  ul.task-list li > div > p {
-    margin: 0 !important;
-  }
-
-  .editor-content p,
-  .editor .editor-content p,
-  .markon-editor p,
-  .tiptap-wrapper .tiptap p {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    line-height: var(--leading-normal, 1.5);
-  }
-
-  .editor-content h1,
-  .editor-content h2,
-  .editor-content h3,
-  .editor-content h4,
-  .editor .editor-content h1,
-  .editor .editor-content h2,
-  .editor .editor-content h3,
-  .editor .editor-content h4,
-  .markon-editor h1,
-  .markon-editor h2,
-  .markon-editor h3,
-  .markon-editor h4,
-  .tiptap-wrapper .tiptap h1,
-  .tiptap-wrapper .tiptap h2,
-  .tiptap-wrapper .tiptap h3,
-  .tiptap-wrapper .tiptap h4 {
-    font-weight: var(--weight-bold, 700);
-    color: var(--fg-default);
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    line-height: var(--leading-tight, 1.25);
-  }
-
-  .editor-content h1,
-  .editor .editor-content h1,
-  .markon-editor h1,
-  .tiptap-wrapper .tiptap h1 {
-    font-size: var(--text-3xl, 1.875rem);
-  }
-  .editor-content h2,
-  .editor .editor-content h2,
-  .markon-editor h2,
-  .tiptap-wrapper .tiptap h2 {
-    font-size: var(--text-2xl, 1.5rem);
-  }
-  .editor-content h3,
-  .editor .editor-content h3,
-  .markon-editor h3,
-  .tiptap-wrapper .tiptap h3 {
-    font-size: var(--text-xl, 1.25rem);
-  }
-
-  .editor-content a,
-  .editor .editor-content a,
-  .markon-editor a,
-  .tiptap-wrapper .tiptap a {
-    color: var(--color-primary);
-    text-decoration: underline;
-    cursor: pointer;
-    text-underline-offset: 2px;
-  }
-
-  .editor-content ul,
-  .editor-content ol,
-  .editor .editor-content ul,
-  .editor .editor-content ol,
-  .markon-editor ul,
-  .markon-editor ol,
-  .tiptap-wrapper .tiptap ul,
-  .tiptap-wrapper .tiptap ol {
-    padding-left: 1.5rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .editor-content ul,
-  .editor .editor-content ul,
-  .markon-editor ul,
-  .tiptap-wrapper .tiptap ul {
-    list-style-type: disc;
-  }
-  .editor-content ol,
-  .editor .editor-content ol,
-  .markon-editor ol,
-  .tiptap-wrapper .tiptap ol {
-    list-style-type: decimal;
-  }
-
-  .editor-content li p,
-  .editor .editor-content li p,
-  .markon-editor li p,
-  .tiptap-wrapper .tiptap li p {
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .editor-content blockquote,
-  .editor .editor-content blockquote,
-  .markon-editor blockquote,
-  .tiptap-wrapper .tiptap blockquote {
-    border-left: 3px solid var(--color-primary, var(--border-strong));
-    padding-left: 1rem;
-    margin-left: 0;
-    margin-right: 0;
-    color: var(--fg-muted);
-    font-style: italic;
-  }
-
-  .editor-content pre,
-  .editor .editor-content pre,
-  .markon-editor pre,
-  .tiptap-wrapper .tiptap pre {
-    background-color: var(--slate-900);
-    color: var(--slate-50);
-    padding: 1rem;
-    border-radius: var(--radius-md);
-    overflow-x: auto;
-    font-family: var(--font-mono);
-    font-size: var(--text-sm, 0.875rem);
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .editor-content code,
-  .editor .editor-content code,
-  .markon-editor code,
-  .tiptap-wrapper .tiptap code {
-    background-color: var(--bg-subtle);
-    color: var(--color-primary);
-    padding: 0.2rem 0.4rem;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono);
-    font-size: 0.875em;
-  }
-
-  .editor-content pre code,
-  .editor .editor-content pre code,
-  .markon-editor pre code,
-  .tiptap-wrapper .tiptap pre code {
-    background-color: transparent;
-    color: inherit;
-    padding: 0;
-    border-radius: 0;
-    font-size: inherit;
-  }
-
-  .editor-content mark,
-  .editor .editor-content mark,
-  .markon-editor mark,
-  .tiptap-wrapper .tiptap mark {
-    background-color: var(
-      --color-warning-subtle,
-      color-mix(in oklch, var(--color-warning) 25%, transparent)
-    );
-    color: var(--fg-default);
-    padding: 0.125rem 0.25rem;
-    border-radius: var(--radius-xs, 0.25rem);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-  }
-
-  .editor-content mark[data-color],
-  .editor .editor-content mark[data-color],
-  .markon-editor mark[data-color],
-  .tiptap-wrapper .tiptap mark[data-color] {
-    background-color: var(
-      --highlight-color,
-      var(
-        --color-warning-subtle,
-        color-mix(in oklch, var(--color-warning) 25%, transparent)
-      )
-    );
-  }
-
-  .editor-content sub,
-  .editor .editor-content sub,
-  .markon-editor sub,
-  .tiptap-wrapper .tiptap sub {
-    vertical-align: sub;
-    font-size: 0.75em;
-    line-height: 0;
-  }
-
-  .editor-content sup,
-  .editor .editor-content sup,
-  .markon-editor sup,
-  .tiptap-wrapper .tiptap sup {
-    vertical-align: super;
-    font-size: 0.75em;
-    line-height: 0;
-  }
-
-  .editor-content p.is-editor-empty:first-child::before,
-  .editor .editor-content p.is-editor-empty:first-child::before,
-  .markon-editor p.is-editor-empty:first-child::before,
-  .tiptap-wrapper .tiptap p.is-editor-empty:first-child::before {
-    color: var(--fg-muted);
-    content: attr(data-placeholder);
-    float: left;
-    height: 0;
-    pointer-events: none;
-    font-style: italic;
-  }
-
-  .editor-content table,
-  .editor .editor-content table,
-  .markon-editor table,
-  .tiptap-wrapper .tiptap table {
-    border-collapse: collapse;
-    table-layout: fixed;
-    width: 100%;
-    margin: 1rem 0;
-    overflow: hidden;
-    border-radius: var(--radius-md);
-  }
-
-  .editor-content table td,
-  .editor-content table th,
-  .editor .editor-content table td,
-  .editor .editor-content table th,
-  .markon-editor table td,
-  .markon-editor table th,
-  .tiptap-wrapper .tiptap table td,
-  .tiptap-wrapper .tiptap table th {
-    min-width: 1em;
-    border: 1px solid var(--border-default);
-    padding: 0.5rem 0.75rem;
-    vertical-align: top;
-    box-sizing: border-box;
-    position: relative;
-  }
-
-  .editor-content table th,
-  .editor .editor-content table th,
-  .markon-editor table th,
-  .tiptap-wrapper .tiptap table th {
-    font-weight: var(--weight-bold, 700);
-    text-align: left;
-    background-color: var(--bg-subtle);
-  }
-
-  .editor-content table .selectedCell:after,
-  .editor .editor-content table .selectedCell:after,
-  .markon-editor table .selectedCell:after,
-  .tiptap-wrapper .tiptap table .selectedCell:after {
-    z-index: 2;
-    position: absolute;
-    content: '';
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background-color: var(--bg-selected, var(--color-primary-subtle));
-    pointer-events: none;
-  }
-
-  .editor-content table .column-resize-handle,
-  .editor .editor-content table .column-resize-handle,
-  .markon-editor table .column-resize-handle,
-  .tiptap-wrapper .tiptap table .column-resize-handle {
-    position: absolute;
-    right: -2px;
-    top: 0;
-    bottom: -2px;
-    width: 4px;
-    background-color: var(--color-primary);
-    pointer-events: none;
-  }
-
-  /* ------------------------------------------------------------
-     Markon Container, Toolbar & Footer Chrome
-     ------------------------------------------------------------ */
-  .markon-editor {
-    position: relative;
-    width: 100%;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl, 0.75rem);
-    box-shadow: var(--shadow-sm);
-    color: var(--fg-default);
-    font-family: var(
-      --font-sans,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      sans-serif
-    );
-    overflow: hidden;
-    transition: border-color var(--transition-fast, 0.15s) ease,
-      box-shadow var(--transition-fast, 0.15s) ease;
-  }
-
-  .markon-editor:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px
-      color-mix(in oklab, var(--color-primary) 15%, transparent);
-  }
-
-  .markon-editor .editor-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 12px;
-    background-color: var(--bg-subtle);
-    border-bottom: 1px solid var(--border-default);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    user-select: none;
-  }
-
-  .markon-editor .editor-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 16px;
-    font-size: var(--text-xs, 0.75rem);
-    color: var(--fg-muted);
-    border-top: 1px solid var(--border-default);
-    background-color: var(--bg-subtle);
-    user-select: none;
-  }
-
-  /* ------------------------------------------------------------
-     Markon Floating Bubble Menu (Unified Pill Container)
-     ------------------------------------------------------------ */
-  .markon-bubble-menu {
-    position: fixed;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 6px;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl, 0.75rem);
-    box-shadow: var(--shadow-xl);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    width: max-content;
-    white-space: nowrap;
-    user-select: none;
-    font-family: var(
-      --font-sans,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      sans-serif
-    );
-  }
-
-  .markon-bubble-menu .markon-bubble-block-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding-right: 4px;
-    margin-right: 4px;
-    border-right: 1px solid var(--border-default);
-  }
-
-  .markon-bubble-menu button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-md, 0.375rem);
-    color: var(--fg-default);
-    cursor: pointer;
-    padding: 4px 6px;
-    font-size: var(--text-xs, 0.75rem);
-    line-height: 1;
-    transition: background-color var(--transition-fast, 0.15s) ease,
-      color var(--transition-fast, 0.15s) ease;
-  }
-
-  .markon-bubble-menu button:hover {
-    background-color: var(--bg-subtle);
-  }
-
-  .markon-bubble-menu button.btn-active,
-  .markon-bubble-menu button.is-active,
-  .markon-bubble-menu button[data-active='true'] {
-    background-color: color-mix(
-      in oklab,
-      var(--color-primary) 15%,
-      transparent
-    );
-    color: var(--color-primary);
-    font-weight: var(--weight-bold, 700);
-  }
-
-  .markon-bubble-menu button:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 1px;
-  }
-
-  /* ------------------------------------------------------------
-     Markon Slash Menu Dropdown
-     ------------------------------------------------------------ */
-  .markon-slash-menu {
-    position: fixed;
-    z-index: 9999;
-    width: 280px;
-    max-height: 300px;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl, 0.75rem);
-    box-shadow: var(--shadow-xl);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 4px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    user-select: none;
-    font-family: var(
-      --font-sans,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      sans-serif
-    );
-  }
-
-  .markon-slash-menu::-webkit-scrollbar {
-    width: 5px;
-  }
-
-  .markon-slash-menu::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .markon-slash-menu::-webkit-scrollbar-thumb {
-    background: var(--border-default);
-    border-radius: var(--radius-full, 9999px);
-  }
-
-  .markon-slash-menu .dropdown-item {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    padding: 6px 10px;
-    border-radius: var(--radius-lg, 0.5rem);
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    text-align: left;
-    transition: background-color var(--transition-fast, 0.15s) ease;
-  }
-
-  .markon-slash-menu .dropdown-item:hover,
-  .markon-slash-menu .dropdown-item.btn-active {
-    background-color: var(--bg-subtle);
-  }
-
-  .markon-slash-menu .dropdown-item .item-title {
-    font-size: var(--text-xs, 0.75rem);
-    font-weight: var(--weight-semibold, 600);
-    color: var(--fg-default);
-    line-height: 1.25;
-  }
-
-  .markon-slash-menu .dropdown-item .item-desc {
-    font-size: 0.7rem;
-    color: var(--fg-muted);
-    line-height: 1.3;
-    margin-top: 2px;
-  }
-
-  /* ------------------------------------------------------------
-     Markon Popover Menus
-     ------------------------------------------------------------ */
-  .markon-popover-menu,
-  .markon-typography-menu,
-  .markon-font-family-menu,
-  .markon-font-size-menu,
-  .markon-color-menu,
-  .markon-table-menu {
-    position: fixed;
-    z-index: 9999;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl, 0.75rem);
-    box-shadow: var(--shadow-xl);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 4px;
-    font-family: var(
-      --font-sans,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      sans-serif
-    );
-  }
-
-  /* ------------------------------------------------------------
-     Markon Drag Handle & Drop Indicator
-     ------------------------------------------------------------ */
-  .markon-drag-handle {
-    position: absolute;
-    z-index: 20;
-    width: 20px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    color: var(--fg-muted);
-    border-radius: var(--radius-sm, 0.25rem);
-    user-select: none;
-    touch-action: manipulation;
-    transition: opacity var(--transition-fast, 0.15s) ease,
-      background-color var(--transition-fast, 0.15s) ease,
-      color var(--transition-fast, 0.15s) ease;
-  }
-
-  @media (pointer: coarse) {
-    .markon-drag-handle {
-      width: 28px;
-      height: 28px;
-    }
-  }
-
-  .markon-drag-handle:hover {
-    color: var(--fg-default);
-    background-color: var(--bg-subtle);
-  }
-
-  .markon-drop-indicator {
-    position: absolute;
-    left: 24px;
-    right: 12px;
-    height: 2px;
-    background-color: var(--color-primary);
-    border-radius: var(--radius-full, 9999px);
-    z-index: 30;
-    pointer-events: none;
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-50%);
-  }
-
-  /* ------------------------------------------------------------
-     Markon Block Actions Menu
-     ------------------------------------------------------------ */
-  .markon-block-actions-menu {
-    position: fixed;
-    z-index: 10001;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl, 0.75rem);
-    box-shadow: var(--shadow-xl);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 4px;
-    min-width: 140px;
-    font-family: var(
-      --font-sans,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      sans-serif
-    );
-  }
-
-  .markon-block-actions-menu .dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 6px 8px;
-    border-radius: var(--radius-md, 0.375rem);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--fg-default);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    user-select: none;
-    transition: background-color var(--transition-fast, 0.15s) ease,
-      color var(--transition-fast, 0.15s) ease;
-  }
-
-  .markon-block-actions-menu .dropdown-item:hover {
-    background-color: var(--bg-subtle);
-  }
-
-  .markon-block-actions-menu .dropdown-item.is-danger {
-    color: var(--color-danger);
-  }
-
-  .markon-block-actions-menu .dropdown-item.is-danger:hover {
-    background-color: var(
-      --bg-danger-subtle,
-      color-mix(in oklab, var(--color-danger) 10%, transparent)
-    );
-  }
-
-  .markon-block-actions-menu .menu-divider {
-    height: 1px;
-    background-color: var(--border-default);
-    margin: 4px 0;
-    opacity: 0.6;
-  }
-
-  /* ------------------------------------------------------------
-     Markon Optimistic Upload Card & Resizable Image
-     ------------------------------------------------------------ */
-  .markon-uploading-card {
-    position: relative;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 12px;
-    padding: 12px 16px;
-    margin: 12px 0;
-    border-radius: var(--radius-xl, 0.75rem);
-    border: 1px solid var(--border-default);
-    background-color: var(--bg-surface);
-    box-shadow: var(--shadow-sm);
-    user-select: none;
-    width: 100%;
-    box-sizing: border-box;
-    transition: border-color var(--transition-fast, 0.15s) ease,
-      box-shadow var(--transition-fast, 0.15s) ease;
-  }
-
-  .markon-uploading-card.is-uploading {
-    border-color: var(--color-primary);
-  }
-
-  .markon-uploading-card.is-error {
-    border-color: var(--color-danger);
-    background-color: var(
-      --bg-danger-subtle,
-      color-mix(in oklab, var(--color-danger) 6%, transparent)
-    );
-  }
-
-  .markon-image-container {
-    user-select: none;
-    margin: 0.75rem 0;
-    display: flex;
-  }
-
-  .markon-image-wrapper {
-    position: relative;
-    display: inline-block;
-    max-width: 100%;
-  }
-
-  .markon-image-resize-handle {
-    position: absolute;
-    bottom: 8px !important;
-    right: 8px !important;
-    left: auto !important;
-    top: auto !important;
-    width: 14px;
-    height: 14px;
-    border-radius: var(--radius-sm, 0.25rem);
-    background-color: var(--color-primary);
-    border: 1.5px solid var(--bg-surface);
-    box-shadow: var(--shadow-sm);
-    cursor: se-resize;
-    opacity: 0;
-    transition: opacity var(--transition-fast, 0.15s) ease;
-    z-index: 20;
-    touch-action: none;
-  }
-
-  .markon-image-wrapper:hover .markon-image-resize-handle {
-    opacity: 1;
-  }
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* ------------------------------------------------------------
-15.b. DATA VISUALIZATION & CHARTS INTEGRATION
------------------------------------------------------------- */
-
-.chart-container svg,
-.nui-chart-container svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.chart-point {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.chart-segment {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-@keyframes chartLineDraw {
-  from {
-    stroke-dashoffset: 2000;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes chartFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes chartBarGrowY {
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes chartBarGrowX {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-.chart-animate-line {
-  stroke-dasharray: 2000;
-  stroke-dashoffset: 0;
-  animation: chartLineDraw 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.chart-animate-fade {
-  animation: chartFadeIn 0.5s ease-out forwards;
-}
-
-.chart-animate-bar-y {
-  transform-box: fill-box;
-  transform-origin: bottom;
-  animation: chartBarGrowY 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.chart-animate-bar-x {
-  transform-box: fill-box;
-  transform-origin: left;
-  animation: chartBarGrowX 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.chart-tooltip,
-.nui-chart-tooltip {
-  box-shadow: 0 16px 36px -6px oklch(0 0 0 / 0.35),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.15);
-}
-
-[data-theme='light'] .chart-tooltip,
-[data-theme='light'] .nui-chart-tooltip,
-.light .chart-tooltip,
-.light .nui-chart-tooltip {
-  box-shadow: 0 12px 30px -4px oklch(0 0 0 / 0.12),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
-}
-
-/* ------------------------------------------------------------
-15.c. KANBAN TASK BOARD & DND LAYOUT
------------------------------------------------------------- */
-
-@layer components {
-  .kanban,
-  .kanban-board {
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
-    align-items: flex-start;
-    user-select: none;
-    min-height: 400px;
-    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-    box-sizing: border-box;
-  }
-
-  .kanban-column {
-    width: 20rem;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--radius-2xl, 1rem);
-    border: 1px solid var(--border-default);
-    background-color: var(--bg-surface);
-    color: var(--text-default, var(--fg-default));
-    box-shadow: var(--shadow-xs, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
-    max-height: 85vh;
-    position: relative;
-    transition: all 0.15s ease-in-out;
-    box-sizing: border-box;
-  }
-
-  .kanban-column-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 0.875rem;
-    border-bottom: 1px solid var(--border-default);
-    user-select: none;
-    cursor: grab;
-    font-size: 0.875rem;
-    font-weight: 600;
-  }
-
-  .kanban-column-header > div:first-child {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 0;
-  }
-
-  .kanban-column-header:active {
-    cursor: grabbing;
-  }
-
-  .kanban-card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-    padding: 0.75rem;
-    overflow-y: auto;
-    flex: 1 1 0%;
-    min-height: 140px;
-    box-sizing: border-box;
-  }
-
-  .kanban-card {
-    position: relative;
-    padding: 0.875rem;
-    border-radius: var(--radius-xl, 0.75rem);
-    border: 1px solid var(--border-default);
-    background-color: var(--bg-surface);
-    color: var(--text-default, var(--fg-default));
-    box-shadow: var(--shadow-xs, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
-    cursor: grab;
-    user-select: none;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    box-sizing: border-box;
-  }
-
-  .kanban-card:active {
-    cursor: grabbing;
-  }
-
-  .kanban-card:hover {
-    border-color: color-mix(
-      in oklch,
-      var(--color-primary) 50%,
-      var(--border-default)
-    );
-    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
-  }
-
-  .kanban-card:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
-  .kanban-card svg,
-  .kanban-meta-icon {
-    width: 0.875rem !important;
-    height: 0.875rem !important;
-    max-width: 0.875rem !important;
-    max-height: 0.875rem !important;
-    flex-shrink: 0;
-    display: inline-block;
-    vertical-align: middle;
-  }
-
-  .kanban-add-btn svg {
-    width: 0.875rem !important;
-    height: 0.875rem !important;
-    flex-shrink: 0;
-  }
-
-  .kanban-column-options svg {
-    width: 1rem !important;
-    height: 1rem !important;
-    flex-shrink: 0;
-  }
-
-  .kanban-card-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.35;
-    color: var(--text-default, var(--fg-default));
-    word-break: break-word;
-  }
-
-  .kanban-card:hover .kanban-card-title {
-    color: var(--color-primary);
-  }
-
-  .kanban-card-desc {
-    font-size: 0.75rem;
-    color: var(--text-muted, var(--fg-muted));
-    margin-top: 0.25rem;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .kanban-card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    padding-top: 0.625rem;
-    border-top: 1px solid
-      color-mix(in oklch, var(--border-default) 50%, transparent);
-    font-size: 0.75rem;
-    color: var(--text-muted, var(--fg-muted));
-  }
-
-  .kanban-card-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-  }
-
-  .kanban-meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.6875rem;
-    font-weight: 500;
-  }
-
-  .kanban-meta-overdue {
-    color: var(--color-danger);
-    font-weight: 600;
-  }
-
-  .kanban-empty-placeholder {
-    height: 6rem;
-    border: 1px dashed
-      color-mix(in oklch, var(--border-default) 60%, transparent);
-    border-radius: var(--radius-xl, 0.75rem);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    color: var(--text-muted, var(--fg-muted));
-    opacity: 0.7;
-    user-select: none;
-    pointer-events: none;
-  }
-
-  .kanban-add-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    width: 100%;
-    padding: 0.375rem 0.625rem;
-    border-radius: var(--radius-lg, 0.5rem);
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted, var(--fg-muted));
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .kanban-add-btn:hover {
-    color: var(--text-default, var(--fg-default));
-    background-color: var(--bg-subtle);
-  }
-
-  .kanban-add-btn:hover svg {
-    color: var(--color-primary);
-  }
-
-  .kanban-drop-indicator-top,
-  .kanban-card-drop-top::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 0.25rem;
-    right: 0.25rem;
-    height: 3px;
-    background-color: var(--color-primary);
-    border-radius: 9999px;
-    box-shadow: 0 0 6px var(--color-primary);
-    z-index: 20;
-    pointer-events: none;
-  }
-
-  .kanban-drop-indicator-bottom,
-  .kanban-card-drop-bottom::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0.25rem;
-    right: 0.25rem;
-    height: 3px;
-    background-color: var(--color-primary);
-    border-radius: 9999px;
-    box-shadow: 0 0 6px var(--color-primary);
-    z-index: 20;
-    pointer-events: none;
-  }
-
-  .kanban-drop-indicator-left,
-  .kanban-col-drop-left::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -3px;
-    width: 3px;
-    background-color: var(--color-primary);
-    border-radius: 9999px;
-    box-shadow: 0 0 6px var(--color-primary);
-    z-index: 20;
-    pointer-events: none;
-  }
-
-  .kanban-drop-indicator-right,
-  .kanban-col-drop-right::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: -3px;
-    width: 3px;
-    background-color: var(--color-primary);
-    border-radius: 9999px;
-    box-shadow: 0 0 6px var(--color-primary);
-    z-index: 20;
-    pointer-events: none;
-  }
-
-  .kanban-add-column-container {
-    width: 20rem;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    box-sizing: border-box;
-  }
-
-  .kanban-add-column-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    padding: 1rem;
-    border-radius: var(--radius-2xl, 1rem);
-    border: 2px dashed var(--border-default);
-    background-color: color-mix(in oklch, var(--bg-surface) 60%, transparent);
-    color: var(--text-muted, var(--fg-muted));
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-sizing: border-box;
-  }
-
-  .kanban-add-column-btn:hover {
-    border-color: var(--color-primary);
-    background-color: var(--bg-surface);
-    color: var(--text-default, var(--fg-default));
-  }
-
-  .kanban-add-column-btn:hover .kanban-icon {
-    color: var(--color-primary);
-  }
-
-  .kanban-add-column-btn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
-  .kanban-column-menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 0.25rem);
-    width: 10rem;
-    border-radius: var(--radius-xl, 0.75rem);
-    border: 1px solid var(--border-default);
-    background-color: var(--bg-surface);
-    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
-    padding: 0.25rem 0;
-    z-index: 50;
-    box-sizing: border-box;
-  }
-
-  .kanban-column-menu button {
-    width: 100%;
-    text-align: left;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    color: var(--text-default, var(--fg-default));
-    transition: background-color 0.15s ease;
-    box-sizing: border-box;
-  }
-
-  .kanban-column-menu button svg,
-  .kanban-column-menu button .kanban-icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-
-  .kanban-column-menu button:hover {
-    background-color: var(--bg-subtle);
-  }
-
-  .kanban-column-menu button.text-danger {
-    color: var(--color-danger);
-  }
-
-  .kanban-column-menu button.text-danger:hover {
-    background-color: color-mix(in oklch, var(--color-danger) 12%, transparent);
-  }
-}
-
-/* ------------------------------------------------------------
-15.d. MEDIA PLAYER DESIGN SYSTEM TOKEN BRIDGE
------------------------------------------------------------- */
-
-@layer components {
-  .nui-vidstack-player,
-  .nui-vidstack-audio-player,
-  .nui-media-container media-player {
-    --media-brand: var(--color-primary, oklch(0.546 0.245 262.881));
-    --media-focus-ring-color: var(--color-primary, oklch(0.546 0.245 262.881));
-    --media-focus-ring: 0 0 0 3px var(--media-focus-ring-color);
-    --media-font-family: var(
-      --font-sans,
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      Roboto,
-      sans-serif
-    );
-    --media-border-radius: var(--radius-lg, 0.75rem);
-    --media-slider-thumb-bg: var(--color-primary, oklch(0.546 0.245 262.881));
-    --media-slider-track-fill-bg: var(
-      --color-primary,
-      oklch(0.546 0.245 262.881)
-    );
-    --media-buffering-color: var(--color-primary, oklch(0.546 0.245 262.881));
-    display: block;
-    width: 100%;
-    font-family: var(--media-font-family);
-  }
-
-  :where(:root:not(.dark):not([data-theme='dark'])) .nui-vidstack-player,
-  .light .nui-vidstack-player,
-  [data-theme='light'] .nui-vidstack-player,
-  .nui-vidstack-player[data-color-scheme='light'],
-  :where(:root:not(.dark):not([data-theme='dark'])) .nui-vidstack-audio-player,
-  .light .nui-vidstack-audio-player,
-  [data-theme='light'] .nui-vidstack-audio-player,
-  .nui-vidstack-audio-player[data-color-scheme='light'],
-  :where(:root:not(.dark):not([data-theme='dark']))
-    .nui-media-container
-    media-player,
-  .light .nui-media-container media-player,
-  [data-theme='light'] .nui-media-container media-player {
-    --media-brand: var(--color-primary, oklch(0.546 0.245 262.881));
-    --media-focus-ring-color: var(--color-primary, oklch(0.546 0.245 262.881));
-    --media-focus-ring: 0 0 0 3px var(--media-focus-ring-color);
-    --media-slider-track-bg: var(
-      --border-default,
-      oklch(0.929 0.013 255.508 / 0.8)
-    );
-    --media-slider-track-fill-bg: var(
-      --color-primary,
-      oklch(0.546 0.245 262.881)
-    );
-    --media-menu-bg: var(--bg-surface, oklch(1 0 0));
-    --media-menu-border: var(--border-default, oklch(0.929 0.013 255.508));
-    --media-menu-color: var(
-      --fg-default,
-      var(--text-default, oklch(0.208 0.042 265.755))
-    );
-    --media-tooltip-bg: var(--bg-surface, oklch(1 0 0));
-    --media-tooltip-color: var(
-      --fg-default,
-      var(--text-default, oklch(0.208 0.042 265.755))
-    );
-    --media-controls-color: var(
-      --fg-default,
-      var(--text-default, oklch(0.208 0.042 265.755))
-    );
-    color-scheme: light;
-  }
-
-  .dark .nui-vidstack-player,
-  [data-theme='dark'] .nui-vidstack-player,
-  .nui-vidstack-player[data-color-scheme='dark'],
-  .dark .nui-vidstack-audio-player,
-  [data-theme='dark'] .nui-vidstack-audio-player,
-  .nui-vidstack-audio-player[data-color-scheme='dark'],
-  .dark .nui-media-container media-player,
-  [data-theme='dark'] .nui-media-container media-player,
-  .nui-media-container media-player[data-color-scheme='dark'] {
-    --media-brand: var(--color-primary, oklch(0.623 0.214 259.815));
-    --media-focus-ring-color: var(--color-primary, oklch(0.623 0.214 259.815));
-    --media-focus-ring: 0 0 0 3px var(--media-focus-ring-color);
-    --media-slider-track-bg: var(
-      --border-default,
-      oklch(0.279 0.041 260.031 / 0.8)
-    );
-    --media-slider-track-fill-bg: var(
-      --color-primary,
-      oklch(0.623 0.214 259.815)
-    );
-    --media-menu-bg: var(--bg-surface, oklch(0.208 0.042 265.755));
-    --media-menu-border: var(--border-default, oklch(0.279 0.041 260.031));
-    --media-menu-color: var(
-      --fg-default,
-      var(--text-default, oklch(0.984 0.006 247.858))
-    );
-    --media-tooltip-bg: var(
-      --bg-surface-raised,
-      var(--bg-surface, oklch(0.208 0.042 265.755))
-    );
-    --media-tooltip-color: var(
-      --fg-default,
-      var(--text-default, oklch(0.984 0.006 247.858))
-    );
-    --media-controls-color: var(
-      --fg-default,
-      var(--text-default, oklch(0.984 0.006 247.858))
-    );
-    color-scheme: dark;
-  }
-
-  .nui-media-container {
-    display: block;
-    position: relative;
-    width: 100%;
-  }
 }
 
 /* ------------------------------------------------------------

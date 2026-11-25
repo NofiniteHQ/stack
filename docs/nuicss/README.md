@@ -1,4 +1,4 @@
-# NUICSS
+# NUICSS Documentation Hub
 
 > The unified OKLCH design token engine, component superclasses, and standalone CSS compiler for the Nofinite ecosystem.
 
@@ -9,88 +9,36 @@
 **NUICSS** (`@nofinite/nuicss`) is the foundational styling engine and single source of truth for the entire Nofinite ecosystem. It provides:
 
 - **Perceptually Uniform OKLCH Tokens:** Ultra-vibrant color palettes with mathematically consistent contrast ratios across light and dark modes.
-- **Component Superclasses:** Pre-engineered, high-performance semantic classes (`btn`, `card`, `input`, `badge`, `table-container`, `kanban-board`, `markon-editor`) that eliminate verbose utility clusters.
+- **Component Superclasses:** Pre-engineered, high-performance semantic classes (`btn`, `card`, `input`, `badge`, `modal`, `alert`, `table-container`, `kanban-board`, `markon-editor`) that eliminate verbose utility clusters.
 - **Unified Ecosystem Styling:** A single stylesheet import powers **NUI**, **Nofinite Kanban**, **Nofinite Markon**, **Nofinite Charts**, and **Nofinite Media**.
 - **Zero-Node Standalone CLI:** Native standalone binary and npm package (`nuicss`) for instant CSS compilation, codebase linting, and Tailwind migrations without Node.js overhead.
 
 ---
 
-## Quickstart
+## Documentation Index
 
-### 1. Package Installation
+### Getting Started
 
-```bash
-npm install @nofinite/nuicss
-# or
-pnpm add @nofinite/nuicss
-```
+- [**Installation & Setup**](./installation.md) — Quickstart across Vite (zero-config), Next.js, PostCSS, Standalone CLI, and CDN.
+- [**Standalone CLI Compiler**](./cli.md) — Command reference: `nuicss build`, `nuicss watch`, `nuicss check`, `nuicss migrate`.
+- [**Configuration Reference**](./configuration.md) — Customizing `nuicss.config.ts`, themes, and scanning pipelines.
+- [**IDE Setup (VS Code & Cursor)**](./ide-setup.md) — Pure native LSP autocomplete with zero marketplace plugins.
 
-### 2. Single Stylesheet Import
+### Core Concepts & System Architecture
 
-Import the unified stylesheet in your application's entrypoint (`app/layout.tsx`, `main.tsx`, or `globals.css`):
+- [**Engine Architecture**](./architecture.md) — High-throughput JIT compiler, modular `@nuicss` layers, and `@apply`.
+- [**Theming & Design Tokens**](./theming.md) — OKLCH perceptual colors, neutral-default foundations, semantic surfaces, and automatic dark mode.
+- [**Component Superclasses**](./superclasses.md) — Comprehensive catalog: `btn`, `card`, `input`, `badge`, `modal`, `tabs`, `alert`.
 
-```tsx
-import '@nofinite/nuicss/styles.css';
-```
+### Migration & Guides
 
-### 3. Quickstart CDN
-
-For rapid prototyping or HTML pages without build steps:
-
-```html
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@nofinite/nuicss@latest/dist/styles.css"
-/>
-```
+- [**Automated Migration Codemod**](./migration.md) — Automated codebase migration from Tailwind to NUICSS.
+- [**Tailwind-to-NUICSS Migration Cheat Sheet**](./guides/tailwind-migration.md) — Side-by-side Rosetta Stone mappings.
 
 ---
 
-## Modular Subpaths
+## Architectural Invariants
 
-For fine-grained bundle optimization, NUICSS emits modular CSS subpaths:
-
-```tsx
-// Only core tokens, reset, and base UI components
-import '@nofinite/nuicss/dist/theme.css';
-
-// Dedicated domain component stylesheets
-import '@nofinite/nuicss/dist/kanban.css'; // Kanban board & DND geometry
-import '@nofinite/nuicss/dist/markon.css'; // Markon editor & TipTap styles
-import '@nofinite/nuicss/dist/widgets.css'; // Combined domain widget styles
-```
-
----
-
-## Core Semantic Superclasses
-
-| Superclass      | Purpose                                                | Example Usage                                         |
-| :-------------- | :----------------------------------------------------- | :---------------------------------------------------- |
-| `btn`           | Base interactive button with OKLCH hover/active states | `<button className="btn btn-primary">Save</button>`   |
-| `card`          | Elevated surface with border and subtle shadow         | `<div className="card">Content</div>`                 |
-| `input`         | Accessible text input field with focus ring            | `<input className="input" placeholder="Search..." />` |
-| `badge`         | Status and label indicator pill                        | `<span className="badge badge-success">Active</span>` |
-| `kanban-board`  | Flex column layout and drag-and-drop drop indicators   | `<div className="kanban-board">...</div>`             |
-| `markon-editor` | Markdown editor canvas, toolbar, and bubble menu       | `<div className="markon-editor">...</div>`            |
-
----
-
-## The Standalone CLI & Compiler (`nuicss`)
-
-`nuicss` is the official standalone command-line compiler and developer toolkit for NUICSS. Available as a single native binary (zero Node.js required) or on-demand via `npx nuicss`:
-
-```bash
-# 1. Initialize configuration and IDE autocomplete
-nuicss init
-
-# 2. Compile CSS with live watching and minification
-nuicss -i input.css -o output.css -w -m
-
-# 3. Lint codebase for hardcoded hex and legacy utility clusters
-nuicss check src/
-
-# 4. Migrate existing Tailwind classes to NUICSS superclasses
-nuicss migrate src/ --dry-run
-```
-
-For full documentation on flags, custom watch patterns, component scaffolding, and configuration, see the [**NUICSS CLI Documentation**](./cli.md).
+1. **Single Source of Truth for Design Tokens & Styles:** `@nofinite/nuicss` is the sole source of truth for design tokens, OKLCH palettes, and component superclasses across the entire ecosystem.
+2. **The Zero Downstream CSS Invariant:** Downstream packages (`NUI`, `Nofinite Kanban`, `Nofinite Markon`, `Nofinite Charts`, `Nofinite Media`, `Nofinite Locale`, `Nofinite Utils`) never compile or bundle independent `.css` files.
+3. **Dual Syntax Support:** Every superclass supports both concise syntax (`btn`, `card`, `alert`) and namespace-isolated syntax (`nui-btn`, `nui-card`, `nui-alert`).

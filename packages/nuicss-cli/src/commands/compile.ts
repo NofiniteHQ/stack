@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createGenerator } from '@unocss/core';
-// eslint-disable-next-line @nx/enforce-module-boundaries
+
 import { nuicssPreset } from '@nofinite/nuicss';
 import { watch } from 'chokidar';
 import { cyan, green, dim } from 'colorette';
@@ -19,6 +19,106 @@ export interface CompileOptions {
   config?: string;
   patterns?: string[];
   cwd?: string;
+}
+
+/**
+ * Normalizes Windows-style backslashes in CLI paths to POSIX separators before
+ * resolution and containment checks so mixed separators work consistently across
+ * both Windows and POSIX platforms.
+ */
+export function normalizeCliPath(targetPath: string): string {
+  return targetPath.replace(/\\/g, '/');
+}
+
+/**
+ * Verifies that a target path resides strictly within the allowed root directory.
+ * Enforces both lexical boundary checks and canonical (realpath) symlink checks.
+ * Handles Windows drive letters, cross-drive traversal, POSIX separators, and
+ * non-existent output paths by verifying the closest existing ancestor directory.
+ */
+export function isPathInside(root: string, targetPath: string): boolean {
+  if (!root || !targetPath) return false;
+
+  const resolvedRoot = path.resolve(normalizeCliPath(root));
+  const resolvedTarget = path.resolve(
+    resolvedRoot,
+    normalizeCliPath(targetPath)
+  );
+
+  const isWindows = process.platform === 'win32';
+  const normRoot = isWindows ? resolvedRoot.toLowerCase() : resolvedRoot;
+  const normTarget = isWindows ? resolvedTarget.toLowerCase() : resolvedTarget;
+
+  // 1. Lexical boundary check
+  const rel = path.relative(normRoot, normTarget);
+  if (
+    rel === '..' ||
+    rel.startsWith('..' + path.sep) ||
+    rel.startsWith('../') ||
+    path.isAbsolute(rel)
+  ) {
+    return false;
+  }
+
+  // 2. Canonical realpath / symlink resolution check
+  if (fs.existsSync(resolvedRoot)) {
+    let realRoot: string;
+    try {
+      realRoot = fs.realpathSync(resolvedRoot);
+    } catch {
+      // Fail-closed: reject access if canonical root cannot be resolved
+      return false;
+    }
+    const normRealRoot = isWindows ? realRoot.toLowerCase() : realRoot;
+
+    if (fs.existsSync(resolvedTarget)) {
+      try {
+        const realTarget = fs.realpathSync(resolvedTarget);
+        const normRealTarget = isWindows
+          ? realTarget.toLowerCase()
+          : realTarget;
+        const relReal = path.relative(normRealRoot, normRealTarget);
+        if (
+          relReal === '..' ||
+          relReal.startsWith('..' + path.sep) ||
+          relReal.startsWith('../') ||
+          path.isAbsolute(relReal)
+        ) {
+          return false;
+        }
+      } catch {
+        return false;
+      }
+    } else {
+      // Target does not exist yet. Verify closest existing ancestor directory
+      let curr = path.dirname(resolvedTarget);
+      while (curr && !fs.existsSync(curr)) {
+        const parent = path.dirname(curr);
+        if (parent === curr) break;
+        curr = parent;
+      }
+
+      if (fs.existsSync(curr)) {
+        try {
+          const realCurr = fs.realpathSync(curr);
+          const normRealCurr = isWindows ? realCurr.toLowerCase() : realCurr;
+          const relReal = path.relative(normRealRoot, normRealCurr);
+          if (
+            relReal === '..' ||
+            relReal.startsWith('..' + path.sep) ||
+            relReal.startsWith('../') ||
+            path.isAbsolute(relReal)
+          ) {
+            return false;
+          }
+        } catch {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 function getDirectiveRegex(): RegExp {
@@ -65,21 +165,30 @@ export function resolveBaseStyles(cwd: string): string {
 }
 
 export function globToRegExp(glob: string): RegExp {
-  const normalized = glob.replace(/\\/g, '/');
+  // Collapse redundant consecutive globstars/wildcards before compiling to avoid backtracking
+  const normalized = glob
+    .replace(/\\/g, '/')
+    .replace(/\*{3,}/g, '**')
+    .replace(/(\*\*\/)+/g, '**/');
   let re = '';
   let inGroup = false;
   for (let i = 0; i < normalized.length; i++) {
     const c = normalized[i];
     if (c === '*' && normalized[i + 1] === '*') {
       if (normalized[i + 2] === '/') {
-        re += '(?:.*/)?';
+        // Atomic directory-prefix group prevents polynomial ReDoS on deep paths
+        re += '(?:[^/]+/)*';
         i += 2;
       } else {
-        re += '.*';
+        if (!re.endsWith('.*')) {
+          re += '.*';
+        }
         i++;
       }
     } else if (c === '*') {
-      re += '[^/]*';
+      if (!re.endsWith('[^/]*') && !re.endsWith('.*')) {
+        re += '[^/]*';
+      }
     } else if (c === '?') {
       re += '[^/]';
     } else if (c === '{') {
@@ -264,7 +373,17 @@ export async function compileCommand(
 
   let inputPath: string | null = null;
   if (options.input && !isStdin) {
-    inputPath = path.resolve(cwd, options.input);
+    const normalizedInput = normalizeCliPath(options.input);
+    if (!isPathInside(cwd, normalizedInput)) {
+      logger.error(
+        `Path traversal detected: unsafe input path rejected (${cyan(
+          options.input
+        )})`
+      );
+      process.exitCode = 1;
+      return;
+    }
+    inputPath = path.resolve(cwd, normalizedInput);
     if (!fs.existsSync(inputPath)) {
       logger.error(`Input file not found: ${cyan(options.input)}`);
       process.exitCode = 1;
@@ -277,10 +396,22 @@ export async function compileCommand(
     }
   }
 
-  const outputPath =
-    options.output && !isStdout
-      ? path.resolve(cwd, options.output || 'dist/output.css')
-      : null;
+  let outputPath: string | null = null;
+  if (options.output && !isStdout) {
+    const normalizedOutput = normalizeCliPath(options.output);
+    if (!isPathInside(cwd, normalizedOutput)) {
+      logger.error(
+        `Path traversal detected: unsafe output path rejected (${cyan(
+          options.output
+        )})`
+      );
+      process.exitCode = 1;
+      return;
+    }
+    outputPath = path.resolve(cwd, normalizedOutput);
+  } else if (!isStdout) {
+    outputPath = path.resolve(cwd, 'dist/output.css');
+  }
 
   // Load configuration
   const config = await loadConfig(cwd, options.config);
@@ -420,6 +551,11 @@ export async function compileCommand(
     if (isStdout) {
       process.stdout.write(finalCss);
     } else if (outputPath) {
+      if (!isPathInside(cwd, outputPath)) {
+        throw new Error(
+          `Path traversal detected: unsafe output path rejected (${outputPath})`
+        );
+      }
       const outDir = path.dirname(outputPath);
       if (!fs.existsSync(outDir)) {
         fs.mkdirSync(outDir, { recursive: true });

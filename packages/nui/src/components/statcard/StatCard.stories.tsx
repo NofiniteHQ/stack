@@ -5,7 +5,6 @@ import {
   Users,
   DollarSign,
   Activity,
-  Pointer,
   HardDrive,
   Target,
   AlertTriangle,

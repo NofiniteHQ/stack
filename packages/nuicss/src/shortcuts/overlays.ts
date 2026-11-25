@@ -8,6 +8,10 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'modal',
     'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-lg w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden',
   ],
+  [
+    'modal-backdrop',
+    'fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity',
+  ],
   ['modal-sm', 'max-w-sm'],
   ['modal-md', 'max-w-lg'],
   ['modal-lg', 'max-w-2xl'],
@@ -18,7 +22,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ],
   [
     'modal-box',
-    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto',
+    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col max-h-[90vh] overflow-y-auto box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10',
   ],
   [
     'modal-header',
@@ -42,8 +46,12 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
     'fixed inset-0 m-auto p-0 bg-transparent border-none max-w-md w-[calc(100%-2rem)] backdrop:bg-overlay backdrop:backdrop-blur-sm outline-none overflow-visible z-50 aria-hidden:hidden',
   ],
   [
+    'dialog-backdrop',
+    'fixed inset-0 z-50 bg-overlay backdrop-blur-sm transition-opacity',
+  ],
+  [
     'dialog-box',
-    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col',
+    'relative bg-surface text-default border border-default rounded-xl shadow-2xl p-6 font-sans flex flex-col box-border bg-clip-padding ring-1 ring-black/5 dark:ring-white/10',
   ],
   [
     'dialog-icon',
@@ -160,7 +168,7 @@ export const overlayShortcuts: (StaticShortcut | DynamicShortcut)[] = [
   ['tooltip-right', 'left-full top-1/2 -translate-y-1/2 ml-2'],
   [
     'tooltip-arrow',
-    'absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45',
+    'absolute w-2 h-2 bg-[var(--fg-default,#0f172a)] rotate-45 pointer-events-none transform-gpu',
   ],
 
   // ==========================================

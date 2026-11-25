@@ -4,6 +4,8 @@ NUICSS includes an automated migration codemod that scans your HTML, JSX, TSX, V
 
 ---
 
+> 💡 **Looking for the complete cheat sheet?** Check out the exhaustive [**Tailwind-to-NUICSS Migration Guide & Cheat Sheet**](/nuicss/guides/tailwind-migration) with component before-and-after comparisons, OKLCH design token mapping, and phased zero-downtime adoption strategies.
+
 ## Why Migrate to NUICSS Superclasses?
 
 In standard utility-first CSS frameworks like Tailwind, components often suffer from **class name soup**:
@@ -32,10 +34,10 @@ Run the NUICSS migration codemod directly in any project root using `npx`:
 
 ```bash
 # Run interactive migration across your project
-npx @nofinite/nuicss migrate
+npx nuicss migrate
 
 # Or run in dry-run mode to inspect changes without writing files
-npx @nofinite/nuicss migrate --dry-run
+npx nuicss migrate --dry-run
 ```
 
 The codemod scans your files (`src/**/*.{tsx,jsx,vue,svelte,astro,html}`) and performs pattern-matching replacements:

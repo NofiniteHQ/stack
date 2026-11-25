@@ -1,5 +1,6 @@
 export * from './math';
 export * from './normalize';
+export * from './color';
 export * from './axis';
 export * from './tooltip';
 export * from './legend';

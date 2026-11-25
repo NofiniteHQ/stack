@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2025 Nofinite
+ * Copyright (C) 2026 Nofinite
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,6 @@
  * limitations under the License.
  */
 
-import {type Country, countries } from "./data/countries";
-
-/**
- * Finds a country by its ISO2 code (e.g., 'IN', 'US').
- * Case-insensitive.
- */
-export const getCountryByCode = (iso: string): Country | undefined => {
-  if (!iso) return undefined;
-  return countries.find(c => c.iso2.toUpperCase() === iso.toUpperCase());
-};
-
-/**
- * Finds a country by its dial code (e.g., '+91', '91').
- * Handles inputs with or without the '+' prefix.
- */
-export const getCountryByDialCode = (dialCode: string): Country | undefined => {
-  if (!dialCode) return undefined;
-  
-  // Normalize input: remove spaces and '+' to ensure matching works
-  const cleanCode = dialCode.replace(/[\s+]/g, '');
-  
-  return countries.find(c => {
-    const cleanCountryCode = c.dialCode.replace(/[\s+]/g, '');
-    return cleanCountryCode === cleanCode;
-  });
-};
+export * from './countries';
+export * from './bcp47';
+export * from './format';

@@ -29,31 +29,23 @@ pnpm add @nofinite/locale
 
 ```tsx
 import React from 'react';
-import {
-  LocaleProvider,
-  useLocale,
-  formatCurrency,
-  formatDate,
-} from '@nofinite/locale';
+import { LocaleProvider, useLocale } from '@nofinite/locale/react';
 
 function PriceTag({ amount }: { amount: number }) {
-  const { locale, currency } = useLocale();
+  const { locale, formatCurrency, formatDate } = useLocale();
 
   return (
-    <div className="badge badge-primary">
-      {formatCurrency(amount, { locale, currency })}
+    <div className="badge badge-primary" data-locale={locale}>
+      {formatCurrency(amount, 'USD')} • {formatDate(new Date())}
     </div>
   );
 }
 
 export function App() {
   return (
-    <LocaleProvider defaultLocale="en-US" defaultCurrency="USD">
+    <LocaleProvider defaultLocale="en-US" supportedLocales={['en-US', 'ar-AE']}>
       <div className="card p-6">
         <h2 className="text-xl font-bold mb-2">Order Summary</h2>
-        <p className="text-muted text-sm mb-4">
-          Date: {formatDate(new Date(), { dateStyle: 'full' })}
-        </p>
         <PriceTag amount={149.99} />
       </div>
     </LocaleProvider>
@@ -65,7 +57,9 @@ export function App() {
 
 ## Core API Utilities
 
-- `formatCurrency(amount, options)` — Localized currency formatting using native `Intl.NumberFormat`.
-- `formatDate(date, options)` — Localized date, time, and timestamp formatting.
-- `formatRelativeTime(date, options)` — Relative time strings (e.g., "5 minutes ago", "in 2 days").
-- `getDirection(locale)` — Determines whether a locale requires `'rtl'` (Right-to-Left) or `'ltr'` (Left-to-Right) layout.
+- **`@nofinite/locale/countries` / `@nofinite/locale`**: `countries`, `getCountryByCode`, `getCountryByDialCode`.
+- **`@nofinite/locale/bcp47`**: `parseLocale(locale)`, `getDirection(locale)`, `matchLocale(requested, supported, defaultLocale)`.
+- **`@nofinite/locale/format`**: `formatDate`, `formatDateRange`, `formatCurrency`, `formatRelativeTime` (`formatRelative`), `formatNumber`, `formatList`, `getPluralCategory`.
+- **`@nofinite/locale/i18n`**: `createTranslator(config)` returning a `Translator`.
+- **`@nofinite/locale/react`**: `LocaleProvider`, `useLocale`, `useTranslation`.
+- **`@nofinite/locale/style`** (`@nofinite/locale/dist/style.css`): CSS SVG flag stylesheet.

@@ -36,7 +36,8 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 if (typeof global.PointerEvent === 'undefined') {
-  global.PointerEvent = class PointerEvent extends MouseEvent {};
+  global.PointerEvent =
+    class PointerEvent extends MouseEvent {} as unknown as typeof PointerEvent;
 }
 
 global.HTMLElement.prototype.scrollIntoView = vi.fn();

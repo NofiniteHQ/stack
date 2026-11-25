@@ -8,6 +8,7 @@ import { JwtPayload, JwtVerifyOptions } from './jwt.types';
  * Notes:
  * - Returns `null` on failure instead of throwing
  * - Validates signature, expiration, and optional claims
+ * - Pins verification algorithms to HMAC family ['HS256', 'HS384', 'HS512'] (UTILS-SEC-03)
  *
  * @param token   - JWT string
  * @param options - Verification constraints
@@ -15,14 +16,13 @@ import { JwtPayload, JwtVerifyOptions } from './jwt.types';
  */
 export async function verifyToken(
   token: string,
-  options: JwtVerifyOptions = {},
+  options: JwtVerifyOptions = {}
 ): Promise<JwtPayload | null> {
   try {
-    const { payload } = await jwtVerify(
-      token,
-      getJwtSecret(),
-      options,
-    );
+    const { payload } = await jwtVerify(token, getJwtSecret(), {
+      algorithms: ['HS256', 'HS384', 'HS512'],
+      ...options,
+    });
 
     return payload;
   } catch {

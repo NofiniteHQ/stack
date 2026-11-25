@@ -26,12 +26,14 @@ bun add @nofinite/locale
 
 ---
 
-## 2. Flag Stylesheet (Optional)
+## 2. Flag Stylesheet & Subpaths (`v2.1.0`)
 
-If your application renders SVG country flags, import the lightweight flag stylesheet:
+If your application renders SVG country flags, import the exact flag stylesheet subpath exported by `@nofinite/locale`:
 
 ```ts
 import '@nofinite/locale/style';
+// Or direct dist CSS path:
+// import '@nofinite/locale/dist/style.css';
 ```
 
 Or in your HTML via CDN:
@@ -39,9 +41,19 @@ Or in your HTML via CDN:
 ```html
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@nofinite/locale/dist/style.css"
+  href="https://cdn.jsdelivr.net/npm/@nofinite/locale@2.1.0/dist/style.css"
 />
 ```
+
+Available tree-shakeable entrypoints in `v2.1.0`:
+
+- `@nofinite/locale` — Country data, core helpers, and `i18n`
+- `@nofinite/locale/countries` — Country dataset (`countries`)
+- `@nofinite/locale/bcp47` — `parseLocale`, `getDirection`, `matchLocale`
+- `@nofinite/locale/format` — `Intl` formatters (`formatDate`, `formatDateRange`, `formatCurrency`, `formatRelativeTime`, `formatNumber`, `formatList`, `getPluralCategory`)
+- `@nofinite/locale/i18n` — `createTranslator`, `Translator`
+- `@nofinite/locale/react` — `LocaleProvider`, `useLocale`, `useTranslation`
+- `@nofinite/locale/style` / `@nofinite/locale/dist/style.css` — Flag CSS stylesheet
 
 ---
 
