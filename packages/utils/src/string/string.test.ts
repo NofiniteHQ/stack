@@ -105,6 +105,7 @@ describe('String Utilities', () => {
       );
       expect(stripTags('<a href="https://example.com">Link</a>')).toBe('Link');
       expect(stripTags('No tags here')).toBe('No tags here');
+      expect(stripTags('<scr<script>ipt>alert(1)</script>')).toBe('alert(1)');
       expect(stripTags('')).toBe('');
     });
   });

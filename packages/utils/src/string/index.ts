@@ -105,14 +105,16 @@ export function slugify(str: string, options: SlugifyOptions = {}): string {
     slug = slug.toLowerCase();
   }
 
-  // Replace non-alphanumeric characters with replacement
-  const escapedReplacement = replacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  slug = slug
-    .replace(/[^a-zA-Z0-9]+/g, replacement)
-    .replace(
-      new RegExp(`^${escapedReplacement}+|${escapedReplacement}+$`, 'g'),
-      ''
-    );
+  // Replace non-alphanumeric characters with replacement and trim boundary delimiters
+  slug = slug.replace(/[^a-zA-Z0-9]+/g, replacement);
+  if (replacement.length > 0) {
+    while (slug.startsWith(replacement)) {
+      slug = slug.slice(replacement.length);
+    }
+    while (slug.endsWith(replacement)) {
+      slug = slug.slice(0, -replacement.length);
+    }
+  }
 
   return slug;
 }
@@ -164,11 +166,17 @@ export function unescapeHtml(str: string): string {
 }
 
 /**
- * Strips all HTML tags from a string.
+ * Strips all HTML tags from a string cleanly via fixed-point multi-pass sanitization.
  */
 export function stripTags(html: string): string {
   if (!html) return '';
-  return html.replace(/<[^>]*>/g, '');
+  let result = html;
+  let prev: string;
+  do {
+    prev = result;
+    result = result.replace(/<[^<>]*>/g, '');
+  } while (result !== prev);
+  return result;
 }
 
 /**

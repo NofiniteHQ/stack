@@ -592,6 +592,43 @@ describe('NUICSS CLI Commands Integration Suite', () => {
       expect(fs.existsSync(path.join(testDir, 'dist/nested/output.css'))).toBe(
         true
       );
+
+      // Verify direct mixed-separator relative path resolves to nested POSIX/Windows path
+      await compileCommand([], {
+        cwd: testDir,
+        output: 'dist/nested\\output2.css',
+      });
+
+      expect(process.exitCode).toBeUndefined();
+      expect(
+        fs.existsSync(path.join(testDir, 'dist', 'nested', 'output2.css'))
+      ).toBe(true);
+      expect(
+        fs.existsSync(path.join(testDir, 'dist/nested\\output.css')) &&
+          process.platform !== 'win32'
+      ).toBe(false);
+    });
+
+    it('rejects mixed-separator traversal attempts for input and output paths', async () => {
+      expect(isPathInside(testDir, 'dist/..\\nested\\output.css')).toBe(true);
+      expect(isPathInside(testDir, '..\\..\\outside.css')).toBe(false);
+      expect(isPathInside(testDir, 'dist/..\\..\\outside.css')).toBe(false);
+
+      await compileCommand([], {
+        cwd: testDir,
+        output: 'dist/..\\..\\outside.css',
+      });
+      expect(process.exitCode).toBe(1);
+      expect(fs.existsSync(path.resolve(testDir, '../../outside.css'))).toBe(
+        false
+      );
+
+      process.exitCode = undefined;
+      await compileCommand([], {
+        cwd: testDir,
+        input: '..\\..\\outside.css',
+      });
+      expect(process.exitCode).toBe(1);
     });
 
     it('rejects input and output paths escaping through symlinks/junctions', () => {

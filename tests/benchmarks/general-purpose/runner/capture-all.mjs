@@ -67,14 +67,29 @@ function startStaticServer(baseDir) {
   };
 
   return new Promise((resolve, reject) => {
+    const resolvedBase = fs.realpathSync(path.resolve(baseDir));
     const server = http.createServer((req, res) => {
-      const parsedUrl = new URL(req.url, 'http://localhost');
-      let reqPath = decodeURIComponent(parsedUrl.pathname);
+      const parsedUrl = new URL(req.url || '/', 'http://localhost');
+      let reqPath;
+      try {
+        reqPath = decodeURIComponent(parsedUrl.pathname);
+      } catch {
+        res.writeHead(400);
+        res.end('Bad Request');
+        return;
+      }
       if (reqPath === '/') reqPath = '/index.html';
 
-      const filePath = path.join(baseDir, reqPath);
+      const relRequest = reqPath.replace(/^[/\\]+/, '');
+      const filePath = path.resolve(resolvedBase, relRequest);
+      const rel = path.relative(resolvedBase, filePath);
 
-      if (!filePath.startsWith(baseDir)) {
+      if (
+        rel === '..' ||
+        rel.startsWith('..' + path.sep) ||
+        rel.startsWith('../') ||
+        path.isAbsolute(rel)
+      ) {
         res.writeHead(403);
         res.end('Forbidden');
         return;
@@ -83,17 +98,36 @@ function startStaticServer(baseDir) {
       fs.stat(filePath, (err, stats) => {
         if (err || !stats.isFile()) {
           res.writeHead(404, { 'Content-Type': 'text/plain' });
-          res.end(`File Not Found: ${reqPath}`);
+          res.end('Not Found');
+          return;
+        }
+        let realTarget;
+        try {
+          realTarget = fs.realpathSync(filePath);
+        } catch {
+          res.writeHead(403);
+          res.end('Forbidden');
+          return;
+        }
+        const realRel = path.relative(resolvedBase, realTarget);
+        if (
+          realRel === '..' ||
+          realRel.startsWith('..' + path.sep) ||
+          realRel.startsWith('../') ||
+          path.isAbsolute(realRel)
+        ) {
+          res.writeHead(403);
+          res.end('Forbidden');
           return;
         }
 
-        const ext = path.extname(filePath).toLowerCase();
+        const ext = path.extname(realTarget).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'application/octet-stream';
         res.writeHead(200, {
           'Content-Type': contentType,
           'Access-Control-Allow-Origin': '*',
         });
-        fs.createReadStream(filePath).pipe(res);
+        fs.createReadStream(realTarget).pipe(res);
       });
     });
 

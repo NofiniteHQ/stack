@@ -71,8 +71,68 @@ export async function getNuicssGenerator(
 }
 
 const CLASS_ATTR_REGEX = /(?:class|className)\s*=\s*["']([^"']+)["']/g;
-const SCRIPT_BLOCK_REGEX = /<script\b[\s\S]*?(?:<\/script>|$)/gi;
-const STYLE_BLOCK_REGEX = /<style\b[\s\S]*?(?:<\/style>|$)/gi;
+
+function stripHtmlBlockTag(html: string, tagName: 'script' | 'style'): string {
+  const lower = html.toLowerCase();
+  const openToken = `<${tagName}`;
+  const closeToken = `</${tagName}`;
+  let out = '';
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const openIdx = lower.indexOf(openToken, cursor);
+    if (openIdx === -1) {
+      out += html.slice(cursor);
+      break;
+    }
+
+    const afterName = openIdx + openToken.length;
+    const nextChar = lower[afterName];
+    if (
+      nextChar !== undefined &&
+      nextChar !== '>' &&
+      nextChar !== '/' &&
+      !/\s/.test(nextChar)
+    ) {
+      out += html.slice(cursor, afterName);
+      cursor = afterName;
+      continue;
+    }
+
+    out += html.slice(cursor, openIdx);
+
+    const openEnd = html.indexOf('>', afterName);
+    if (openEnd === -1) {
+      break;
+    }
+
+    // Find matching closing tag allowing optional whitespace/garbage before '>'
+    let closeSearch = openEnd + 1;
+    let nextCursor = html.length;
+    while (closeSearch < html.length) {
+      const closeIdx = lower.indexOf(closeToken, closeSearch);
+      if (closeIdx === -1) {
+        break;
+      }
+      let endPos = closeIdx + closeToken.length;
+      const closeNext = lower[endPos];
+      if (
+        closeNext === '>' ||
+        (closeNext !== undefined && /\s/.test(closeNext))
+      ) {
+        while (endPos < html.length && html[endPos] !== '>') {
+          endPos++;
+        }
+        nextCursor = endPos < html.length ? endPos + 1 : html.length;
+        break;
+      }
+      closeSearch = closeIdx + closeToken.length;
+    }
+    cursor = nextCursor;
+  }
+
+  return out;
+}
 
 /**
  * Extracts class names and tokens from an HTML markup string.
@@ -84,10 +144,11 @@ export function extractClassTokens(html: string): string[] {
   const tokens = new Set<string>();
   let match: RegExpExecArray | null;
 
-  // Strip script and style blocks non-destructively for token scanning
-  const cleanHtml = html
-    .replace(SCRIPT_BLOCK_REGEX, '')
-    .replace(STYLE_BLOCK_REGEX, '');
+  // Strip script and style blocks deterministically in linear time
+  const cleanHtml = stripHtmlBlockTag(
+    stripHtmlBlockTag(html, 'script'),
+    'style'
+  );
 
   // Reset regex state
   CLASS_ATTR_REGEX.lastIndex = 0;

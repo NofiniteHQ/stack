@@ -267,6 +267,83 @@ export function sanitizeSVGElement(svg: SVGElement): void {
   }
 }
 
+const DANGEROUS_SVG_TAGS = [
+  'script',
+  'foreignobject',
+  'iframe',
+  'object',
+  'embed',
+  'audio',
+  'video',
+  'animate',
+  'set',
+  'animatetransform',
+  'animatemotion',
+] as const;
+
+function stripSvgElementBlocks(source: string, tagName: string): string {
+  const lower = source.toLowerCase();
+  const openToken = `<${tagName}`;
+  const closeToken = `</${tagName}`;
+  let out = '';
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const openIdx = lower.indexOf(openToken, cursor);
+    if (openIdx === -1) {
+      out += source.slice(cursor);
+      break;
+    }
+
+    const afterName = openIdx + openToken.length;
+    const nextChar = lower[afterName];
+    if (
+      nextChar !== undefined &&
+      nextChar !== '>' &&
+      nextChar !== '/' &&
+      !/\s/.test(nextChar)
+    ) {
+      out += source.slice(cursor, afterName);
+      cursor = afterName;
+      continue;
+    }
+
+    out += source.slice(cursor, openIdx);
+
+    const openEnd = source.indexOf('>', afterName);
+    if (openEnd === -1) {
+      break;
+    }
+    if (source[openEnd - 1] === '/') {
+      cursor = openEnd + 1;
+      continue;
+    }
+
+    let closeSearch = openEnd + 1;
+    let nextCursor = source.length;
+    while (closeSearch < source.length) {
+      const closeIdx = lower.indexOf(closeToken, closeSearch);
+      if (closeIdx === -1) break;
+      let endPos = closeIdx + closeToken.length;
+      const closeNext = lower[endPos];
+      if (
+        closeNext === '>' ||
+        (closeNext !== undefined && /\s/.test(closeNext))
+      ) {
+        while (endPos < source.length && source[endPos] !== '>') {
+          endPos++;
+        }
+        nextCursor = endPos < source.length ? endPos + 1 : source.length;
+        break;
+      }
+      closeSearch = closeIdx + closeToken.length;
+    }
+    cursor = nextCursor;
+  }
+
+  return out;
+}
+
 /**
  * Isomorphic string-level SVG sanitizer for SSR / headless mode (CHARTS-M3-06).
  */
@@ -274,43 +351,54 @@ export function sanitizeSVGString(source: string): string {
   if (!source || typeof source !== 'string') return '';
   let result = source;
 
-  // 1. Remove dangerous active elements
-  result = result.replace(
-    /<(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)\b[^<]*(?:(?!<\/(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)>)<[^<]*)*<\/(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)>/gi,
-    ''
-  );
-  result = result.replace(
-    /<(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)\b[^>]*\/?>/gi,
-    ''
-  );
-
-  // 2. Strip event handlers (onload=, onclick=, etc.)
-  result = result.replace(
-    /\s+on[a-zA-Z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi,
-    ''
-  );
+  // 1. Remove dangerous active container blocks deterministically and repeat tag strip until fixed point
+  for (const tag of DANGEROUS_SVG_TAGS) {
+    result = stripSvgElementBlocks(result, tag);
+  }
+  let prev: string;
+  do {
+    prev = result;
+    result = result.replace(
+      /<\/?(?:script|foreignObject|iframe|object|embed|audio|video|animate|set|animateTransform|animateMotion)\b[^>]*>/gi,
+      ''
+    );
+    // 2. Strip event handlers (onload=, onclick=, etc.)
+    result = result.replace(
+      /(?:^|(?<=[\s"'/]))on[a-zA-Z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi,
+      ''
+    );
+  } while (result !== prev);
 
   // 3. For <use> elements, restrict href to local fragment references (#id)
-  result = result.replace(
-    /(<use\b[^>]*?\s(?:xlink:)?href\s*=\s*["'])(?!#)[^"']*(["'])/gi,
-    '$1#sanitized$2'
-  );
+  result = result.replace(/<use\b([^>]*)>/gi, (_match, attrs: string) => {
+    const cleanAttrs = attrs.replace(
+      /(\s(?:xlink:)?href\s*=\s*["'])(?!#)[^"']*(["'])/gi,
+      '$1#sanitized$2'
+    );
+    return `<use${cleanAttrs}>`;
+  });
 
   // 4. For <a> elements, strip dangerous or foreign resource hrefs
-  result = result.replace(
-    /(<a\b[^>]*?\s)(?:xlink:)?href\s*=\s*["']\s*(?:javascript:|vbscript:|data:|https?:|\/\/)[^"']*["']/gi,
-    '$1'
-  );
+  result = result.replace(/<a\b([^>]*)>/gi, (_match, attrs: string) => {
+    const cleanAttrs = attrs.replace(
+      /\s(?:xlink:)?href\s*=\s*["']\s*(?:javascript:|vbscript:|data:|https?:|\/\/)[^"']*["']/gi,
+      ''
+    );
+    return `<a${cleanAttrs}>`;
+  });
 
   // 5. For <image> elements, strip dangerous data URIs or javascript
-  result = result.replace(
-    /(<image\b[^>]*?\s)(?:xlink:)?href\s*=\s*["']\s*(?:javascript:|vbscript:|data:\s*image\/svg\+xml)[^"']*["']/gi,
-    '$1'
-  );
+  result = result.replace(/<image\b([^>]*)>/gi, (_match, attrs: string) => {
+    const cleanAttrs = attrs.replace(
+      /\s(?:xlink:)?href\s*=\s*["']\s*(?:javascript:|vbscript:|data:\s*image\/svg\+xml)[^"']*["']/gi,
+      ''
+    );
+    return `<image${cleanAttrs}>`;
+  });
 
   // 6. Neutralize dangerous <style> blocks
   result = result.replace(
-    /<style\b[^>]*>([\s\S]*?)<\/style>/gi,
+    /<style\b[^>]*>([^<]*(?:<(?!\/style)[^<]*)*)<\/style[^>]*>/gi,
     (match, css) => {
       if (
         /@import\b/i.test(css) ||
@@ -325,10 +413,13 @@ export function sanitizeSVGString(source: string): string {
   );
 
   // 7. Neutralize inline style attributes containing external url(), expression(), or @import
-  result = result.replace(
-    /\sstyle\s*=\s*["'][^"']*(?:url\s*\(\s*['"]?(?!#)(?:https?:|\/\/|data:)|expression\s*\(|@import|-moz-binding)[^"']*["']/gi,
-    ''
-  );
+  do {
+    prev = result;
+    result = result.replace(
+      /\sstyle\s*=\s*(?:"[^"]*(?:url\s*\(\s*['"]?(?!#)(?:https?:|\/\/|data:)|expression\s*\(|@import|-moz-binding)[^"]*"|'[^']*(?:url\s*\(\s*['"]?(?!#)(?:https?:|\/\/|data:)|expression\s*\(|@import|-moz-binding)[^']*')/gi,
+      ''
+    );
+  } while (result !== prev);
 
   return result;
 }

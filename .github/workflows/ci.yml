@@ -68,10 +68,16 @@ jobs:
         shell: bash
         run: |
           echo "Verifying npm pack tarball generation for all published packages..."
+          TMP_PACK_DIR=$(mktemp -d)
+          trap 'rm -rf "$TMP_PACK_DIR"' EXIT
+          PACK_DEST="$TMP_PACK_DIR"
+          if command -v cygpath >/dev/null 2>&1; then
+            PACK_DEST=$(cygpath -w "$TMP_PACK_DIR")
+          fi
           packages=(nuicss nuicss-cli nui charts markon kanban media locale utils)
           for pkg in "${packages[@]}"; do
             echo "Packaging packages/$pkg..."
-            (cd "packages/$pkg" && pnpm pack --dry-run)
+            (cd "packages/$pkg" && pnpm pack --pack-destination "$PACK_DEST")
           done
 
       - name: Changeset Validation Check

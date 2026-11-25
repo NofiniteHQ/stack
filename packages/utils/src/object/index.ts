@@ -57,9 +57,14 @@ export function deepClone<T>(value: T): T {
 
   const copy = Object.create(Object.getPrototypeOf(value));
   for (const key of Object.keys(value as object)) {
+    if (isUnsafePropertyKey(key)) continue;
     copy[key] = deepClone((value as Record<string, unknown>)[key]);
   }
   return copy as T;
+}
+
+function isUnsafePropertyKey(key: string | number): boolean {
+  return key === '__proto__' || key === 'constructor' || key === 'prototype';
 }
 
 /**
@@ -88,7 +93,12 @@ export function deepMerge<T extends object, U extends object>(
   }
 
   for (const [key, sourceValue] of Object.entries(source)) {
-    const targetValue = result[key];
+    if (isUnsafePropertyKey(key)) {
+      continue;
+    }
+    const targetValue = Object.prototype.hasOwnProperty.call(result, key)
+      ? result[key]
+      : undefined;
 
     if (isPlainObject(targetValue) && isPlainObject(sourceValue)) {
       result[key] = deepMerge(targetValue, sourceValue);
@@ -193,6 +203,9 @@ export function set<T extends object>(
 
   const segments = parsePath(path);
   if (segments.length === 0) return obj;
+  if (segments.some(isUnsafePropertyKey)) {
+    return obj;
+  }
 
   let current: Record<string | number, unknown> = obj as Record<
     string | number,
@@ -204,7 +217,7 @@ export function set<T extends object>(
     const nextKey = segments[i + 1];
 
     if (
-      !(key in current) ||
+      !Object.prototype.hasOwnProperty.call(current, key) ||
       current[key] === null ||
       typeof current[key] !== 'object'
     ) {

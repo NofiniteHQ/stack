@@ -257,22 +257,38 @@ export function loadStreamingCdnScript(
   });
 }
 
+function stripUntilFixedPoint(input: string, pattern: RegExp): string {
+  let current = input;
+  let prev: string;
+  do {
+    prev = current;
+    current = current.replace(pattern, '');
+  } while (current !== prev);
+  return current;
+}
+
 export function sanitizeVttCue(rawCue: string): string {
   if (!rawCue) return '';
   let text = rawCue.replace(/<v(?:\.[a-z0-9_-]+)*\s+([^>]+)>/gi, '[$1]: ');
-  text = text.replace(/<\/v>/gi, '');
+  text = stripUntilFixedPoint(text, /<\/v\s*>/gi);
   text = text.replace(/<\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?>/g, '');
-  text = text.replace(
-    /<\/?(?:script|img|iframe|object|embed|style|svg)[^>]*>/gi,
-    ''
+  text = stripUntilFixedPoint(
+    text,
+    /<\/?(?:script|img|iframe|object|embed|style|svg)\b[^>]*>/gi
   );
-  text = text.replace(/\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  text = stripUntilFixedPoint(
+    text,
+    /\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi
+  );
   let decoded = decodeHtmlEntities(text);
-  decoded = decoded.replace(
-    /<\/?(?:script|img|iframe|object|embed|style|svg)[^>]*>/gi,
-    ''
+  decoded = stripUntilFixedPoint(
+    decoded,
+    /<\/?(?:script|img|iframe|object|embed|style|svg)\b[^>]*>/gi
   );
-  decoded = decoded.replace(/\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  decoded = stripUntilFixedPoint(
+    decoded,
+    /\bon[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi
+  );
   return decoded
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -294,8 +310,8 @@ export function renderVttCue(
     el.className = 'nui-vtt-cue-text';
   }
   let plain = cueText.replace(/<v(?:\.[a-z0-9_-]+)*\s+([^>]+)>/gi, '$1: ');
-  plain = plain.replace(/<\/v>/gi, '');
-  plain = plain.replace(/<[^>]+>/g, '');
+  plain = stripUntilFixedPoint(plain, /<\/v\s*>/gi);
+  plain = stripUntilFixedPoint(plain, /<[^>]+>/g);
   plain = decodeHtmlEntities(plain);
   el.textContent = plain;
   return el;

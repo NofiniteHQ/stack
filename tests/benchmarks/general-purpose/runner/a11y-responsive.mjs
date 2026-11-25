@@ -165,22 +165,48 @@ function createStaticSpaServer(rootDir, port) {
   };
 
   return new Promise((resolve, reject) => {
+    const resolvedRoot = fs.realpathSync(path.resolve(rootDir));
     const server = http.createServer((req, res) => {
-      const parsedUrl = new URL(req.url, `http://localhost:${port}`);
-      let reqPath = decodeURIComponent(parsedUrl.pathname);
-      let filePath = path.join(rootDir, reqPath);
-
-      if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-        filePath = path.join(rootDir, 'index.html');
+      const parsedUrl = new URL(req.url || '/', 'http://localhost:' + port);
+      let reqPath;
+      try {
+        reqPath = decodeURIComponent(parsedUrl.pathname);
+      } catch {
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.end('Bad Request');
+        return;
       }
-
-      const ext = path.extname(filePath).toLowerCase();
+      const relRequest = reqPath.replace(/^[/\\]+/, '') || 'index.html';
+      let filePath = path.resolve(resolvedRoot, relRequest);
+      const rel = path.relative(resolvedRoot, filePath);
+      if (rel === '..' || rel.startsWith('..' + path.sep) || rel.startsWith('../') || path.isAbsolute(rel)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
+      if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+        filePath = path.join(resolvedRoot, 'index.html');
+      }
+      let realTarget;
+      try {
+        realTarget = fs.realpathSync(filePath);
+      } catch {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found');
+        return;
+      }
+      const realRel = path.relative(resolvedRoot, realTarget);
+      if (realRel === '..' || realRel.startsWith('..' + path.sep) || realRel.startsWith('../') || path.isAbsolute(realRel)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
+      const ext = path.extname(realTarget).toLowerCase();
       const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-
-      fs.readFile(filePath, (err, data) => {
+      fs.readFile(realTarget, (err, data) => {
         if (err) {
           res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end(`Internal Server Error: ${err.message}`);
+          res.end('Internal Server Error');
           return;
         }
         res.writeHead(200, {
@@ -1147,9 +1173,9 @@ function generateReports(results) {
   - **WCAG 2.5.8 (Target Size - Minimum):** Desktop pointer control threshold \`>= 24x24px\` with 28–36px density reporting
   - **Interactive Lifecycle Verification:** Light/dark theme toggling, hash navigation, dialogs/drawers, and form filters
 - **Primary Artifacts:**
-  - Report: `reports/MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md`
-  - Multi-Browser Raw Metrics: `reports/metrics/multi-browser-calibrated-a11y.json`
-  - Test Runner: `runner/a11y-responsive.mjs`
+  - Report: \`reports/MULTI_BROWSER_AND_CALIBRATED_A11Y_REPORT.md\`
+  - Multi-Browser Raw Metrics: \`reports/metrics/multi-browser-calibrated-a11y.json\`
+  - Test Runner: \`runner/a11y-responsive.mjs\`
 
 ---
 

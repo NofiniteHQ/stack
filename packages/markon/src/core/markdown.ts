@@ -366,6 +366,31 @@ export function markdownToHtml(md: string): string {
     }
   };
 
+  const parseLinkAndTitle = (
+    rawUrl: string
+  ): { urlPart: string; titleAttr: string } => {
+    const trimmedUrl = (rawUrl || '').trim();
+    if (!trimmedUrl) return { urlPart: '', titleAttr: '' };
+    const wsMatch = trimmedUrl.match(/\s+/);
+    if (!wsMatch || wsMatch.index === undefined) {
+      return { urlPart: trimmedUrl, titleAttr: '' };
+    }
+    const urlPart = trimmedUrl.slice(0, wsMatch.index);
+    const rest = trimmedUrl.slice(wsMatch.index + wsMatch[0].length).trim();
+    if (
+      rest.length >= 2 &&
+      ((rest.startsWith('"') && rest.endsWith('"')) ||
+        (rest.startsWith("'") && rest.endsWith("'")))
+    ) {
+      const titleText = rest.slice(1, -1);
+      return {
+        urlPart,
+        titleAttr: titleText ? ` title="${escapeHtml(titleText)}"` : '',
+      };
+    }
+    return { urlPart: trimmedUrl, titleAttr: '' };
+  };
+
   const inlineFormatting = (text: string): string => {
     return (
       text
@@ -390,30 +415,18 @@ export function markdownToHtml(md: string): string {
           /`([^`]+)`/g,
           '<code class="bg-subtle px-1 py-0.5 rounded font-mono text-xs">$1</code>'
         )
-        // Images: ![alt](url) or ![alt](url "title")
-        .replace(/!\[(.*?)\]\((.*?)\)/g, (_match, rawAlt, rawUrl) => {
-          const trimmedUrl = (rawUrl || '').trim();
-          const titleMatch = trimmedUrl.match(/^([^\s]+)(?:\s+["'](.*)["'])?$/);
-          const urlPart = titleMatch ? titleMatch[1] : trimmedUrl;
-          const titlePart =
-            titleMatch && titleMatch[2]
-              ? ` title="${escapeHtml(titleMatch[2])}"`
-              : '';
+        // Images: ![alt](url) or ![alt](url "title") with bounded character classes to prevent polynomial ReDoS
+        .replace(/!\[([^\]\n]*)\]\(([^)\n]*)\)/g, (_match, rawAlt, rawUrl) => {
+          const { urlPart, titleAttr } = parseLinkAndTitle(rawUrl);
           const safeSrc = escapeHtml(sanitizeUrl(urlPart));
           const safeAlt = escapeHtml(rawAlt || '');
-          return `<img src="${safeSrc}" alt="${safeAlt}"${titlePart} class="rounded-xl border border-default shadow-sm max-w-full my-2" />`;
+          return `<img src="${safeSrc}" alt="${safeAlt}"${titleAttr} class="rounded-xl border border-default shadow-sm max-w-full my-2" />`;
         })
-        // Links: [text](url) or [text](url "title")
-        .replace(/\[(.*?)\]\((.*?)\)/g, (_match, text, rawUrl) => {
-          const trimmedUrl = (rawUrl || '').trim();
-          const titleMatch = trimmedUrl.match(/^([^\s]+)(?:\s+["'](.*)["'])?$/);
-          const urlPart = titleMatch ? titleMatch[1] : trimmedUrl;
-          const titlePart =
-            titleMatch && titleMatch[2]
-              ? ` title="${escapeHtml(titleMatch[2])}"`
-              : '';
+        // Links: [text](url) or [text](url "title") with bounded character classes to prevent polynomial ReDoS
+        .replace(/\[([^\]\n]*)\]\(([^)\n]*)\)/g, (_match, text, rawUrl) => {
+          const { urlPart, titleAttr } = parseLinkAndTitle(rawUrl);
           const safeHref = escapeHtml(sanitizeUrl(urlPart));
-          return `<a href="${safeHref}"${titlePart} class="link">${text}</a>`;
+          return `<a href="${safeHref}"${titleAttr} class="link">${text}</a>`;
         })
     );
   };

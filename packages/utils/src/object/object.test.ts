@@ -76,4 +76,16 @@ describe('Object Utilities', () => {
     expect(isEqual(/abc/g, /abc/g)).toBe(true);
     expect(isEqual(/abc/g, /abc/i)).toBe(false);
   });
+
+  it('blocks prototype pollution keys in set() and deepMerge()', () => {
+    const target: Record<string, unknown> = {};
+    set(target, '__proto__.polluted', true);
+    set(target, 'constructor.prototype.polluted', true);
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+
+    const payload = JSON.parse('{"__proto__":{"polluted2":true},"safe":1}');
+    const merged = deepMerge({ safe: 0 }, payload) as Record<string, unknown>;
+    expect(merged.safe).toBe(1);
+    expect(({} as Record<string, unknown>).polluted2).toBeUndefined();
+  });
 });

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createGenerator } from '@unocss/core';
-// eslint-disable-next-line @nx/enforce-module-boundaries
+
 import { nuicssPreset } from '@nofinite/nuicss';
 import { watch } from 'chokidar';
 import { cyan, green, dim } from 'colorette';
@@ -22,6 +22,15 @@ export interface CompileOptions {
 }
 
 /**
+ * Normalizes Windows-style backslashes in CLI paths to POSIX separators before
+ * resolution and containment checks so mixed separators work consistently across
+ * both Windows and POSIX platforms.
+ */
+export function normalizeCliPath(targetPath: string): string {
+  return targetPath.replace(/\\/g, '/');
+}
+
+/**
  * Verifies that a target path resides strictly within the allowed root directory.
  * Enforces both lexical boundary checks and canonical (realpath) symlink checks.
  * Handles Windows drive letters, cross-drive traversal, POSIX separators, and
@@ -30,8 +39,11 @@ export interface CompileOptions {
 export function isPathInside(root: string, targetPath: string): boolean {
   if (!root || !targetPath) return false;
 
-  const resolvedRoot = path.resolve(root);
-  const resolvedTarget = path.resolve(resolvedRoot, targetPath);
+  const resolvedRoot = path.resolve(normalizeCliPath(root));
+  const resolvedTarget = path.resolve(
+    resolvedRoot,
+    normalizeCliPath(targetPath)
+  );
 
   const isWindows = process.platform === 'win32';
   const normRoot = isWindows ? resolvedRoot.toLowerCase() : resolvedRoot;
@@ -153,21 +165,30 @@ export function resolveBaseStyles(cwd: string): string {
 }
 
 export function globToRegExp(glob: string): RegExp {
-  const normalized = glob.replace(/\\/g, '/');
+  // Collapse redundant consecutive globstars/wildcards before compiling to avoid backtracking
+  const normalized = glob
+    .replace(/\\/g, '/')
+    .replace(/\*{3,}/g, '**')
+    .replace(/(\*\*\/)+/g, '**/');
   let re = '';
   let inGroup = false;
   for (let i = 0; i < normalized.length; i++) {
     const c = normalized[i];
     if (c === '*' && normalized[i + 1] === '*') {
       if (normalized[i + 2] === '/') {
-        re += '(?:.*/)?';
+        // Atomic directory-prefix group prevents polynomial ReDoS on deep paths
+        re += '(?:[^/]+/)*';
         i += 2;
       } else {
-        re += '.*';
+        if (!re.endsWith('.*')) {
+          re += '.*';
+        }
         i++;
       }
     } else if (c === '*') {
-      re += '[^/]*';
+      if (!re.endsWith('[^/]*') && !re.endsWith('.*')) {
+        re += '[^/]*';
+      }
     } else if (c === '?') {
       re += '[^/]';
     } else if (c === '{') {
@@ -352,7 +373,8 @@ export async function compileCommand(
 
   let inputPath: string | null = null;
   if (options.input && !isStdin) {
-    if (!isPathInside(cwd, options.input)) {
+    const normalizedInput = normalizeCliPath(options.input);
+    if (!isPathInside(cwd, normalizedInput)) {
       logger.error(
         `Path traversal detected: unsafe input path rejected (${cyan(
           options.input
@@ -361,7 +383,7 @@ export async function compileCommand(
       process.exitCode = 1;
       return;
     }
-    inputPath = path.resolve(cwd, options.input);
+    inputPath = path.resolve(cwd, normalizedInput);
     if (!fs.existsSync(inputPath)) {
       logger.error(`Input file not found: ${cyan(options.input)}`);
       process.exitCode = 1;
@@ -376,7 +398,8 @@ export async function compileCommand(
 
   let outputPath: string | null = null;
   if (options.output && !isStdout) {
-    if (!isPathInside(cwd, options.output)) {
+    const normalizedOutput = normalizeCliPath(options.output);
+    if (!isPathInside(cwd, normalizedOutput)) {
       logger.error(
         `Path traversal detected: unsafe output path rejected (${cyan(
           options.output
@@ -385,7 +408,7 @@ export async function compileCommand(
       process.exitCode = 1;
       return;
     }
-    outputPath = path.resolve(cwd, options.output);
+    outputPath = path.resolve(cwd, normalizedOutput);
   } else if (!isStdout) {
     outputPath = path.resolve(cwd, 'dist/output.css');
   }
