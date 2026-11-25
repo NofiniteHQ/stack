@@ -266,6 +266,11 @@ function stripDangerousVttTags(input: string): string {
         break;
       }
 
+      if (current.indexOf('>', lt) === -1) {
+        out += current.slice(cursor);
+        break;
+      }
+
       if (lt > cursor) {
         out += current.slice(cursor, lt);
       }
@@ -326,7 +331,7 @@ function stripAllVttTags(input: string): string {
         break;
       }
 
-      const gt = current.indexOf('>', lt + 1);
+      const gt = current.indexOf('>', lt);
       if (gt === -1) {
         out += current.slice(cursor);
         break;
@@ -371,6 +376,11 @@ function formatVttVoiceTags(input: string, bracketed: boolean): string {
   while (cursor < input.length) {
     const start = lower.indexOf('<v', cursor);
     if (start === -1) {
+      out += input.slice(cursor);
+      break;
+    }
+
+    if (input.indexOf('>', start) === -1) {
       out += input.slice(cursor);
       break;
     }
